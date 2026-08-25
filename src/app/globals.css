@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#0D0705] text-[#F7EFE1] antialiased selection:bg-[#D4AF37] selection:text-[#0D0705];
+    background-color: #0D0705;
+    color: #F7EFE1;
+  }
+}
+
+/* Gold Foil Typography Gradient */
+.gold-foil-text {
+  background: linear-gradient(135deg, #FFF0BD 0%, #F4C542 30%, #D4AF37 50%, #996515 80%, #F4C542 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 10px rgba(212, 175, 55, 0.2);
+  animation: goldShimmer 6s linear infinite;
+}
+
+.gold-foil-light {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFF0BD 40%, #F4C542 70%, #D4AF37 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes goldShimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Ornate Gold Border & Card Styling */
+.temple-card {
+  background: linear-gradient(180deg, rgba(22, 11, 8, 0.95) 0%, rgba(13, 7, 5, 0.98) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(212, 175, 55, 0.1);
+  backdrop-filter: blur(12px);
+}
+
+.temple-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.temple-card-hover:hover {
+  border-color: rgba(244, 197, 66, 0.8);
+  box-shadow: 0 15px 40px -10px rgba(122, 22, 32, 0.5), 0 0 30px rgba(212, 175, 55, 0.3);
+  transform: translateY(-4px);
+}
+
+.gold-button {
+  background: linear-gradient(135deg, #F4C542 0%, #D4AF37 50%, #996515 100%);
+  color: #0D0705;
+  font-weight: 800;
+  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+  transition: all 0.3s ease;
+}
+.gold-button:hover {
+  background: linear-gradient(135deg, #FFF0BD 0%, #F4C542 50%, #D4AF37 100%);
+  box-shadow: 0 6px 30px rgba(244, 197, 66, 0.6);
+  transform: translateY(-2px);
+}
+
+.maroon-button {
+  background: linear-gradient(135deg, #9C1F2E 0%, #7A1620 50%, #5a0000 100%);
+  color: #F7EFE1;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  box-shadow: 0 4px 15px rgba(122, 22, 32, 0.5);
+  transition: all 0.3s ease;
+}
+.maroon-button:hover {
+  background: linear-gradient(135deg, #B52637 0%, #9C1F2E 50%, #7A1620 100%);
+  border-color: rgba(244, 197, 66, 0.8);
+  box-shadow: 0 6px 25px rgba(156, 31, 46, 0.7);
+  transform: translateY(-2px);
+}
+
+/* Flame & Diya flickering */
+@keyframes flameFlicker {
+  0%, 100% { transform: scale(1) rotate(-1deg); opacity: 1; filter: drop-shadow(0 0 8px #F7941D); }
+  25% { transform: scale(1.08) rotate(1deg); opacity: 0.9; filter: drop-shadow(0 0 14px #F4C542); }
+  50% { transform: scale(0.96) rotate(-2deg); opacity: 1; filter: drop-shadow(0 0 10px #EC1E79); }
+  75% { transform: scale(1.04) rotate(1.5deg); opacity: 0.95; filter: drop-shadow(0 0 16px #F7941D); }
+}
+
+.animate-flame {
+  animation: flameFlicker 1.8s ease-in-out infinite;
+}
+
+/* Mandala Border Ornament */
+.mandala-bg {
+  background-image: radial-gradient(circle at center, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
+}
+
+/* Custom Scrollbar for Devotional Experience */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #0D0705;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #7A1620, #D4AF37);
+  border-radius: 5px;
+  border: 2px solid #0D0705;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #9C1F2E, #F4C542);
+}
+

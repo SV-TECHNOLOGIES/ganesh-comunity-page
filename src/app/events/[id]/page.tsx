@@ -1,0 +1,212 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { DataStore } from '@/lib/data-store';
+import { EventItem } from '@/lib/types';
+import { trackRSVP } from '@/lib/analytics';
+import { generateEventJsonLd } from '@/lib/seo-config';
+import { 
+  Calendar, 
+  Clock, 
+  MapPin, 
+  Users, 
+  CheckCircle2, 
+  Share2, 
+  Download, 
+  ArrowLeft,
+  DollarSign
+} from 'lucide-react';
+
+export default function EventDetailPage() {
+  const params = useParams();
+  const id = params?.id as string;
+  const [event, setEvent] = useState<EventItem | null>(null);
+  const [rsvped, setRsvped] = useState(false);
+  const [rsvpCount, setRsvpCount] = useState(0);
+
+  useEffect(() => {
+    DataStore.init();
+    const found = DataStore.getEvents().find(e => e.id === id);
+    if (found) {
+      setEvent(found);
+      setRsvpCount(found.rsvpCount);
+    }
+  }, [id]);
+
+  if (!event) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-20 text-center space-y-4">
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Event Not Found</h1>
+        <Link href="/events" className="text-ukta-red font-bold underline text-sm">Return to Events Hub</Link>
+      </div>
+    );
+  }
+
+  const jsonLd = generateEventJsonLd(event);
+
+  const handleRSVP = () => {
+    if (rsvped) return;
+    const updated = DataStore.rsvpEvent(event.id);
+    setRsvpCount(updated);
+    setRsvped(true);
+    trackRSVP(event.id, event.title);
+  };
+
+  const handleICSDownload = () => {
+    const icsData = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//UKTA Events//EN
+BEGIN:VEVENT
+SUMMARY:${event.title}
+DESCRIPTION:${event.description}
+LOCATION:${event.venue}, ${event.address}
+DTSTART:${event.date.replace(/-/g, '')}T160000Z
+END:VEVENT
+END:VCALENDAR`;
+    const blob = new Blob([icsData], { type: 'text/calendar' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${event.title.replace(/\s+/g, '_')}.ics`;
+    link.click();
+  };
+
+  return (
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      <Link href="/events" className="inline-flex items-center gap-1 text-xs font-bold text-ukta-red dark:text-ukta-gold hover:underline">
+        <ArrowLeft className="w-4 h-4" />
+        <span>Back to Events Calendar</span>
+      </Link>
+
+      {/* Hero Banner */}
+      <div className="relative h-80 sm:h-96 rounded-3xl overflow-hidden shadow-2xl border-4 border-ukta-gold/30">
+        <Image src={event.bannerUrl} alt={event.title} fill className="object-cover" priority />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+        <div className="absolute top-4 left-4 flex gap-2">
+          <span className="bg-ukta-red text-white text-xs font-bold px-3 py-1 rounded-full uppercase shadow">
+            {event.category}
+          </span>
+          <span className="bg-ukta-gold text-ukta-navy text-xs font-black px-3 py-1 rounded-full uppercase shadow">
+            {event.ticketPrice === 0 ? 'FREE EVENT' : `£${event.ticketPrice}`}
+          </span>
+        </div>
+        <div className="absolute bottom-6 left-6 right-6 text-white space-y-2">
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
+            {event.title}
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-300">
+            Hosted by UK Telugu Association (UKTA)
+          </p>
+        </div>
+      </div>
+
+      {/* Main Content & RSVP Sidebar */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Left Col: Event Details */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+              About This Event
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              {event.description}
+            </p>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+              Venue Location & Map
+            </h2>
+            <div className="text-xs text-slate-600 dark:text-slate-300 space-y-1">
+              <p className="font-bold text-slate-800 dark:text-slate-200">{event.venue}</p>
+              <p>{event.address}</p>
+            </div>
+            
+            {/* Interactive Map Placeholder */}
+            <div className="h-48 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 text-xs font-semibold">
+              <MapPin className="w-5 h-5 text-ukta-red mr-2" />
+              <span>Interactive Google Map Location Pin ({event.venue})</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Col: RSVP Card & ICS Export */}
+        <div className="space-y-6">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border-2 border-ukta-gold/50 shadow-xl space-y-4 sticky top-28">
+            <div className="border-b border-slate-100 dark:border-slate-800 pb-3">
+              <span className="text-[10px] font-bold text-ukta-red uppercase tracking-wider block">Registration Status</span>
+              <span className="text-xl font-black text-slate-900 dark:text-white">
+                {event.ticketPrice === 0 ? 'Free RSVP' : `£${event.ticketPrice} per Ticket`}
+              </span>
+            </div>
+
+            <div className="space-y-3 text-xs text-slate-700 dark:text-slate-200">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-ukta-gold shrink-0" />
+                <span>{new Date(event.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-ukta-gold shrink-0" />
+                <span>{event.time}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-ukta-gold shrink-0" />
+                <span>{rsvpCount} / {event.capacity} Confirmed Attendees</span>
+              </div>
+            </div>
+
+            {/* Capacity Progress Bar */}
+            <div className="space-y-1">
+              <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+                <div 
+                  className="bg-ukta-red h-2 rounded-full" 
+                  style={{ width: `${Math.min(100, (rsvpCount / event.capacity) * 100)}%` }} 
+                />
+              </div>
+              <span className="text-[10px] text-slate-400 block text-right">
+                {Math.round((rsvpCount / event.capacity) * 100)}% Seats Reserved
+              </span>
+            </div>
+
+            <button
+              onClick={handleRSVP}
+              disabled={rsvped}
+              className={`w-full py-3 rounded-xl font-extrabold text-xs shadow-md transition-all flex items-center justify-center gap-2 ${
+                rsvped
+                  ? 'bg-emerald-600 text-white cursor-default'
+                  : 'bg-ukta-red hover:bg-ukta-red-dark text-white'
+              }`}
+            >
+              {rsvped ? (
+                <>
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>RSVP Confirmed & Ticket Issued</span>
+                </>
+              ) : (
+                <span>Confirm RSVP Registration</span>
+              )}
+            </button>
+
+            <button
+              onClick={handleICSDownload}
+              className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs rounded-xl transition-colors flex items-center justify-center gap-2"
+            >
+              <Download className="w-3.5 h-3.5 text-ukta-gold" />
+              <span>Add to iCal / Outlook (.ICS)</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
