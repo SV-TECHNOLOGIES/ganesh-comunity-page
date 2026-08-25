@@ -1,0 +1,148 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Event {
+  id          String      @id @default(cuid())
+  title       String
+  category    String
+  date        String
+  time        String      @default("09:00 AM")
+  venue       String
+  address     String      @default("Langley, Slough, United Kingdom")
+  ticketPrice Int         @default(0)
+  status      String      @default("Upcoming")
+  description String
+  bannerUrl   String
+  capacity    Int         @default(300)
+  rsvpCount   Int         @default(0)
+  featured    Boolean     @default(false)
+  rsvps       EventRSVP[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model EventRSVP {
+  id            String   @id @default(cuid())
+  eventId       String
+  event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  attendeeName  String
+  attendeeEmail String
+  attendeePhone String
+  ticketsCount  Int      @default(1)
+  createdAt     DateTime @default(now())
+}
+
+model Sponsor {
+  id         String   @id @default(cuid())
+  name       String
+  tier       String   @default("Partner")
+  logoUrl    String
+  websiteUrl String?
+  order      Int      @default(0)
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Member {
+  id           String   @id @default(cuid())
+  fullName     String
+  email        String   @unique
+  phone        String
+  tier         String   @default("Annual Member")
+  role         String   @default("Member")
+  status       String   @default("Active")
+  profession   String?
+  address      String?
+  passwordHash String?
+  startDate    String?
+  expiryDate   String?
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model CharityCase {
+  id            String   @id @default(cuid())
+  applicantName String
+  category      String   @default("Student Care")
+  urgency       String   @default("Medium")
+  status        String   @default("Open")
+  description   String
+  contactPhone  String
+  contactEmail  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Subscriber {
+  id        String   @id @default(cuid())
+  fullName  String
+  email     String   @unique
+  phone     String?
+  source    String   @default("Live Reveal")
+  createdAt DateTime @default(now())
+}
+
+model MediaItem {
+  id          String   @id @default(cuid())
+  title       String
+  category    String   @default("Photo")
+  coverImage  String
+  url         String?
+  description String?
+  createdAt   DateTime @default(now())
+}
+
+model BlogPost {
+  id         String   @id @default(cuid())
+  slug       String   @unique
+  title      String
+  excerpt    String
+  content    String
+  category   String
+  author     String   @default("UKTA Editorial")
+  date       String
+  coverImage String
+  tags       String[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Payment {
+  id                   String   @id @default(cuid())
+  amount               Float
+  currency             String   @default("GBP")
+  status               String   @default("Completed") // "Completed", "Pending", "Failed"
+  customerName         String
+  customerEmail        String
+  customerPhone        String?
+  description          String   // "Donation to Student Fund", "Mahotsav VIP Ticket", etc.
+  paymentMethod        String   @default("Stripe Card")
+  stripePaymentIntentId String?
+  createdAt            DateTime @default(now())
+}
+
+model PaymentSettings {
+  id                    String   @id @default("default")
+  stripePublishableKey  String
+  stripeSecretKey       String
+  currency              String   @default("GBP")
+  activeAccountName     String   @default("UKTA Main Account")
+  updatedAt             DateTime @updatedAt
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  email        String   @unique
+  passwordHash String
+  role         String   @default("Admin")
+  createdAt    DateTime @default(now())
+}

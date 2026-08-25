@@ -18,31 +18,49 @@ export default function DonationModal({ isOpen, onClose }: { isOpen: boolean; on
 
   if (!isOpen) return null;
 
-  const handleDonate = (e: React.FormEvent) => {
+  const handleDonate = async (e: React.FormEvent) => {
     e.preventDefault();
     const finalAmount = customAmount ? parseFloat(customAmount) : amount;
     if (!finalAmount || finalAmount <= 0) return;
 
-    const newDonation = DataStore.addDonation({
-      donorName: donorName || 'Generous Supporter',
-      donorEmail,
-      amount: finalAmount,
-      currency: 'GBP',
-      cause,
-      paymentMethod
-    });
-
-    trackDonation(finalAmount, cause);
-    setReceipt(newDonation);
-
     try {
-      confetti({
-        particleCount: 80,
-        spread: 70,
-        origin: { y: 0.6 }
+      const res = await fetch('/api/payments/create-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: finalAmount,
+          customerName: donorName || 'Generous Supporter',
+          customerEmail: donorEmail,
+          description: `Donation: ${cause}`,
+          paymentMethod: `Stripe ${paymentMethod}`,
+        }),
       });
-    } catch (e) {
-      // fallback
+
+      const data = await res.json();
+
+      const newDonation = DataStore.addDonation({
+        donorName: donorName || 'Generous Supporter',
+        donorEmail,
+        amount: finalAmount,
+        currency: 'GBP',
+        cause,
+        paymentMethod: paymentMethod,
+      });
+
+      trackDonation(finalAmount, cause);
+      setReceipt(newDonation);
+
+      try {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      } catch (e) {
+        // fallback
+      }
+    } catch {
+      alert('Failed to process donation transaction.');
     }
   };
 

@@ -51,6 +51,13 @@ export default function AdminDashboardPage() {
 
         <div className="flex gap-2">
           <Link
+            href="/admin/payments"
+            className="bg-[#7A1620] hover:bg-[#9C1F2E] text-[#F4C542] border border-[#D4AF37]/50 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow"
+          >
+            <Sparkles className="w-4 h-4 text-[#F4C542]" />
+            <span>Stripe Payments & Keys</span>
+          </Link>
+          <Link
             href="/admin/events"
             className="bg-ukta-red hover:bg-ukta-red-dark text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow"
           >

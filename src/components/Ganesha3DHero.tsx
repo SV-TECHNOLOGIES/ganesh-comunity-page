@@ -11,21 +11,19 @@ interface Ganesha3DHeroProps {
 
 export default function Ganesha3DHero({ onNotifyClick }: Ganesha3DHeroProps) {
   const mountRef = useRef<HTMLDivElement>(null);
-  const [loaded, setLoaded] = useState(false);
-  const [diyasLit, setDiyasLit] = useState(0);
+  const [modelLoaded, setModelLoaded] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(15);
+  const [isLowPower, setIsLowPower] = useState(false);
 
   useEffect(() => {
-    // Diya ignition sequence timer
-    const interval = setInterval(() => {
-      setDiyasLit((prev) => {
-        if (prev < 8) return prev + 1;
-        clearInterval(interval);
-        setLoaded(true);
-        return 8;
-      });
-    }, 250);
+    // Low power / mobile hardware detection
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const lowConcurrency = typeof navigator !== 'undefined' && navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4;
+    const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    return () => clearInterval(interval);
+    if (isMobile || lowConcurrency || reducedMotion) {
+      setIsLowPower(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -42,11 +40,14 @@ export default function Ganesha3DHero({ onNotifyClick }: Ganesha3DHeroProps) {
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
     camera.position.set(0, 1.2, 5.5);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    // Renderer with memory & device performance guardrails
+    const renderer = new THREE.WebGLRenderer({ antialias: !isLowPower, alpha: true, powerPreference: 'high-performance' });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isLowPower ? 1 : 1.75));
+    renderer.shadowMap.enabled = !isLowPower;
+    if (!isLowPower) {
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    }
     currentMount.appendChild(renderer.domElement);
 
     // Group for idol assembly
@@ -57,8 +58,19 @@ export default function Ganesha3DHero({ onNotifyClick }: Ganesha3DHeroProps) {
     const proceduralMurtiGroup = new THREE.Group();
     idolGroup.add(proceduralMurtiGroup);
 
+    // Loading Manager for 3D GLTF Asset
+    const loadingManager = new THREE.LoadingManager();
+    loadingManager.onProgress = (_url, itemsLoaded, itemsTotal) => {
+      const percent = Math.round((itemsLoaded / itemsTotal) * 100);
+      setLoadingProgress(Math.max(percent, 25));
+    };
+    loadingManager.onLoad = () => {
+      setLoadingProgress(100);
+      setTimeout(() => setModelLoaded(true), 300);
+    };
+
     // Custom 3D Model GLTF Loader for Lord Ganesh.glb
-    const gltfLoader = new GLTFLoader();
+    const gltfLoader = new GLTFLoader(loadingManager);
     const modelPath = '/assets/idols/Lord Ganesh.glb';
 
     gltfLoader.load(
@@ -89,19 +101,26 @@ export default function Ganesha3DHero({ onNotifyClick }: Ganesha3DHeroProps) {
 
         customModel.traverse((child) => {
           if (child instanceof THREE.Mesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-            if (child.material) {
+            child.castShadow = !isLowPower;
+            child.receiveShadow = !isLowPower;
+            if (child.material && 'envMapIntensity' in child.material) {
               child.material.envMapIntensity = 1.5;
             }
           }
         });
 
         idolGroup.add(customModel);
+        setModelLoaded(true);
       },
-      undefined,
+      (xhr) => {
+        if (xhr.lengthComputable) {
+          const percent = Math.round((xhr.loaded / xhr.total) * 100);
+          setLoadingProgress(percent);
+        }
+      },
       (err) => {
         console.warn('Fallback to procedural murti as model load error:', err);
+        setModelLoaded(true);
       }
     );
 
@@ -356,6 +375,31 @@ export default function Ganesha3DHero({ onNotifyClick }: Ganesha3DHeroProps) {
 
       {/* 3D Canvas Mounting Area */}
       <div className="relative z-10 w-full h-[520px] sm:h-[600px] flex items-center justify-center">
+        {/* Temple 3D Loading Screen Overlay */}
+        {!modelLoaded && (
+          <div className="absolute inset-0 z-30 bg-[#0D0705]/95 backdrop-blur-md flex flex-col items-center justify-center space-y-4 animate-in fade-in duration-300">
+            <div className="relative w-20 h-20 rounded-full border-2 border-[#D4AF37]/40 flex items-center justify-center bg-[#160B08] p-2">
+              <div className="absolute inset-0 rounded-full border-2 border-dashed border-[#F4C542] animate-spin" style={{ animationDuration: '6s' }} />
+              <img src="/assets/poster-dark.jpeg" alt="Loading Bappa" className="w-full h-full object-cover rounded-full filter brightness-110" />
+            </div>
+            
+            <div className="text-center space-y-2">
+              <span className="text-xs font-black font-cinzel text-[#F4C542] tracking-widest uppercase block">
+                ENTERING SANCTUM... {loadingProgress}%
+              </span>
+              
+              {/* Gold Progress Bar */}
+              <div className="w-48 h-2 bg-[#160B08] rounded-full border border-[#D4AF37]/30 overflow-hidden mx-auto">
+                <div 
+                  className="h-full bg-gradient-to-r from-[#7A1620] via-[#D4AF37] to-[#F4C542] transition-all duration-300" 
+                  style={{ width: `${loadingProgress}%` }}
+                />
+              </div>
+              <p className="text-[10px] text-[#C9B79C]">Streaming 3D Bappa Murti & Devotional Rays</p>
+            </div>
+          </div>
+        )}
+
         <div ref={mountRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
       </div>
 

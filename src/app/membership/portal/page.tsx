@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { DataStore } from '@/lib/data-store';
 import { Member } from '@/lib/types';
 import MembershipCardModal from '@/components/MembershipCardModal';
-import { ShieldCheck, User, QrCode, Search, Award, Download } from 'lucide-react';
+import { ShieldCheck, User, QrCode, Search, Award, Download, ArrowLeft, Sparkles, CheckCircle2, Ticket } from 'lucide-react';
 
 export default function MemberPortalPage() {
   const [members, setMembers] = useState<Member[]>([]);
@@ -16,6 +17,22 @@ export default function MemberPortalPage() {
     DataStore.init();
     const list = DataStore.getMembers();
     setMembers(list);
+
+    // Check if session cookie exists or default to first member
+    if (typeof document !== 'undefined') {
+      const match = document.cookie.match(/ukta_member_session=([^;]+)/);
+      if (match) {
+        try {
+          const session = JSON.parse(decodeURIComponent(match[1]));
+          const found = list.find(m => m.email === session.email || m.id === session.id);
+          if (found) {
+            setSelectedMember(found);
+            return;
+          }
+        } catch {}
+      }
+    }
+
     if (list.length > 0) {
       setSelectedMember(list[0]);
     }
@@ -32,86 +49,122 @@ export default function MemberPortalPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
+    <div className="min-h-screen bg-[#0D0705] text-[#F7EFE1] py-12 px-4 sm:px-6 lg:px-8 space-y-10">
       
       {/* Portal Header */}
-      <div className="text-center max-w-2xl mx-auto space-y-3">
-        <span className="bg-ukta-navy text-ukta-gold border border-ukta-gold/30 text-xs font-black px-3 py-1 rounded-full uppercase">
-          Member Self-Service Portal
+      <div className="max-w-4xl mx-auto text-center space-y-3">
+        <Link href="/" className="inline-flex items-center gap-1 text-xs font-bold text-[#F4C542] hover:underline mb-2">
+          <ArrowLeft className="w-4 h-4" />
+          <span>Return to Live Mahotsav</span>
+        </Link>
+        <span className="bg-[#7A1620] text-[#F4C542] border border-[#D4AF37]/40 text-xs font-black px-4 py-1.5 rounded-full uppercase block max-w-fit mx-auto shadow-md">
+          UKTA MEMBER SELF-SERVICE PORTAL
         </span>
-        <h1 className="text-4xl font-black text-slate-900 dark:text-white">
-          My UKTA Membership Dashboard
+        <h1 className="text-3xl sm:text-4xl font-black font-cinzel gold-foil-text">
+          MY DIGITAL MEMBERSHIP DASHBOARD
         </h1>
-        <p className="text-sm text-slate-600 dark:text-slate-300">
-          View your membership status, download digital passes for events, and manage renewals.
+        <p className="text-xs text-[#C9B79C] max-w-xl mx-auto">
+          Manage your UKTA digital pass, event discounts, volunteer credentials, and annual renewal details.
         </p>
       </div>
 
       {/* Member Lookup Bar */}
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-md max-w-xl mx-auto">
+      <div className="temple-card p-6 rounded-3xl border-2 border-[#D4AF37]/50 max-w-xl mx-auto shadow-xl">
         <form onSubmit={handleSearch} className="space-y-3">
-          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-            Sign In / Lookup Membership ID or Email
+          <label className="block text-xs font-bold text-[#F4C542] uppercase tracking-wider">
+            Lookup Membership ID or Email
           </label>
           <div className="flex gap-2">
             <input
               type="text"
               required
-              placeholder="e.g. UKTA-MEM-5001 or email..."
+              placeholder="e.g. UKTA-MEM-5001 or member@ukta.org.uk"
               value={searchEmail}
               onChange={(e) => setSearchEmail(e.target.value)}
-              className="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-900 dark:text-white"
+              className="flex-1 bg-[#0D0705] border border-[#D4AF37]/40 rounded-xl px-4 py-2.5 text-xs text-[#F7EFE1] focus:border-[#F4C542] focus:outline-none"
             />
             <button
               type="submit"
-              className="bg-ukta-red hover:bg-ukta-red-dark text-white font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-1 shadow"
+              className="gold-button font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-1 shadow"
             >
-              <Search className="w-4 h-4" />
+              <Search className="w-4 h-4 text-[#0D0705]" />
               <span>Lookup</span>
             </button>
           </div>
         </form>
       </div>
 
-      {/* Active Member Display */}
+      {/* Active Member Digital Card */}
       {selectedMember && (
-        <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+        <div className="max-w-4xl mx-auto temple-card p-8 rounded-3xl border-2 border-[#D4AF37] shadow-[0_0_40px_rgba(212,175,55,0.2)] grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
           
-          <div className="md:col-span-2 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-ukta-gold/20 text-ukta-gold-dark font-black flex items-center justify-center text-lg">
-                <User className="w-6 h-6" />
+          <div className="md:col-span-2 space-y-6">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-full border-2 border-[#D4AF37] bg-[#160B08] p-0.5 shadow-md shrink-0 overflow-hidden">
+                <img src="/assets/poster-dark.jpeg" alt="Member Avatar" className="w-full h-full object-cover rounded-full" />
               </div>
               <div>
-                <span className="text-xs font-mono font-bold text-ukta-red dark:text-ukta-gold">{selectedMember.id}</span>
-                <h2 className="text-2xl font-black text-slate-900 dark:text-white">{selectedMember.name}</h2>
+                <span className="text-xs font-mono font-bold text-[#F4C542] tracking-wider block">{selectedMember.id}</span>
+                <h2 className="text-2xl font-black font-cinzel text-[#F7EFE1]">{selectedMember.name}</h2>
+                <span className="bg-[#7A1620] text-[#FFD87A] text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border border-[#D4AF37]/30 inline-block mt-1">
+                  {selectedMember.tier}
+                </span>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs pt-4 border-t border-slate-100 dark:border-slate-800">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs pt-4 border-t border-[#D4AF37]/20">
               <div>
-                <span className="text-slate-400 block">Tier</span>
-                <span className="font-extrabold text-ukta-red dark:text-ukta-gold">{selectedMember.tier}</span>
+                <span className="text-[#C9B79C] block text-[10px] uppercase font-bold">Membership Tier</span>
+                <span className="font-extrabold text-[#F4C542] text-sm">{selectedMember.tier}</span>
               </div>
               <div>
-                <span className="text-slate-400 block">Status</span>
-                <span className="font-extrabold text-emerald-500">{selectedMember.status}</span>
+                <span className="text-[#C9B79C] block text-[10px] uppercase font-bold">Status</span>
+                <span className="font-extrabold text-emerald-400 text-sm flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>{selectedMember.status}</span>
+                </span>
               </div>
               <div>
-                <span className="text-slate-400 block">Expiry Date</span>
-                <span className="font-bold text-slate-800 dark:text-slate-200">{selectedMember.expiryDate}</span>
+                <span className="text-[#C9B79C] block text-[10px] uppercase font-bold">Valid Until</span>
+                <span className="font-bold text-[#F7EFE1] text-sm">{selectedMember.expiryDate}</span>
               </div>
             </div>
+
+            {/* Exclusive Member Benefits List */}
+            <div className="space-y-2 pt-2 border-t border-[#D4AF37]/20 text-xs">
+              <span className="text-xs font-black font-cinzel text-[#F4C542] uppercase tracking-wider block">YOUR ACTIVE MEMBER BENEFITS</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[#C9B79C] text-[11px]">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 text-[#F4C542]" />
+                  <span>Priority VIP Seating at Slough Mahotsav</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 text-[#F4C542]" />
+                  <span>Free Admission to Ugadi Cultural Fest</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 text-[#F4C542]" />
+                  <span>Voting Rights at UKTA AGM Meetings</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 text-[#F4C542]" />
+                  <span>Student & Welfare Mentorship Helpline</span>
+                </div>
+              </div>
+            </div>
+
           </div>
 
-          <div className="flex flex-col items-center justify-center p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
-            <QrCode className="w-12 h-12 text-ukta-navy dark:text-ukta-gold" />
+          <div className="flex flex-col items-center justify-center p-6 bg-[#160B08] rounded-2xl border border-[#D4AF37]/40 space-y-4 text-center">
+            <div className="p-3 bg-white rounded-xl shadow-lg border-2 border-[#D4AF37]">
+              <QrCode className="w-20 h-20 text-[#0D0705]" />
+            </div>
             <button
               onClick={() => setPassModal(selectedMember)}
-              className="w-full bg-ukta-navy text-ukta-gold hover:bg-slate-900 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow"
+              className="gold-button w-full py-3 rounded-full font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg"
             >
-              <Download className="w-4 h-4" />
-              <span>View Digital Pass</span>
+              <Download className="w-4 h-4 text-[#0D0705]" />
+              <span>Download Digital Pass</span>
             </button>
           </div>
 

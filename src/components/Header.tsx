@@ -39,7 +39,7 @@ export default function Header() {
             </span>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3.5">
             <a
               href="https://chat.whatsapp.com/IVqirWWzM96IBNRfhSWGEd"
               target="_blank"
@@ -50,7 +50,12 @@ export default function Header() {
               <span>WhatsApp Group</span>
             </a>
             <span className="text-[#D4AF37]/40">|</span>
-            <Link href="/admin" className="hover:text-[#F4C542] transition-colors flex items-center gap-1 text-[11px]">
+            <Link href="/login" className="hover:text-[#F4C542] transition-colors flex items-center gap-1 text-[11px] font-semibold">
+              <UserCheck className="w-3.5 h-3.5 text-[#F4C542]" />
+              <span>Member Login</span>
+            </Link>
+            <span className="text-[#D4AF37]/40">|</span>
+            <Link href="/admin" className="hover:text-[#F4C542] transition-colors flex items-center gap-1 text-[11px] font-semibold">
               <ShieldAlert className="w-3.5 h-3.5 text-[#F4C542]" />
               <span className="hidden sm:inline">Admin CMS</span>
             </Link>
@@ -82,12 +87,12 @@ export default function Header() {
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center space-x-6 text-xs font-bold uppercase tracking-wider">
+          <nav className="hidden lg:flex items-center space-x-3 xl:space-x-5 text-[11px] xl:text-xs font-bold uppercase tracking-wider whitespace-nowrap pl-4">
             <Link 
               href="/" 
-              className={`transition-colors hover:text-[#F4C542] ${isCurrent('/') ? 'text-[#F4C542] font-black border-b-2 border-[#F4C542] pb-1' : 'text-[#F7EFE1]'}`}
+              className={`transition-colors whitespace-nowrap hover:text-[#F4C542] ${isCurrent('/') ? 'text-[#F4C542] font-black border-b-2 border-[#F4C542] pb-1' : 'text-[#F7EFE1]'}`}
             >
-              Mahotsav Reveal
+              Home
             </Link>
 
             {/* About Dropdown */}
@@ -96,29 +101,29 @@ export default function Header() {
               onMouseEnter={() => setAboutDropdown(true)}
               onMouseLeave={() => setAboutDropdown(false)}
             >
-              <button className="flex items-center gap-1 text-[#F7EFE1] hover:text-[#F4C542] py-2">
+              <button className="flex items-center gap-1 text-[#F7EFE1] hover:text-[#F4C542] py-2 whitespace-nowrap">
                 <span>About & Organizers</span>
                 <ChevronDown className="w-3.5 h-3.5" />
               </button>
               {aboutDropdown && (
-                <div className="absolute top-full left-0 w-56 bg-[#160B08] shadow-2xl rounded-2xl py-2 border border-[#D4AF37]/40">
-                  <Link href="/about" className="block px-4 py-2 text-xs text-[#F7EFE1] hover:bg-[#7A1620] hover:text-[#F4C542]">MITRA UK & UKTA Mission</Link>
-                  <Link href="/history" className="block px-4 py-2 text-xs text-[#F7EFE1] hover:bg-[#7A1620] hover:text-[#F4C542]">Guinness World Record</Link>
-                  <Link href="/chairman-message" className="block px-4 py-2 text-xs text-[#F7EFE1] hover:bg-[#7A1620] hover:text-[#F4C542]">Chairman's Address</Link>
+                <div className="absolute top-full left-0 w-56 bg-[#160B08] shadow-2xl rounded-2xl py-2 border border-[#D4AF37]/40 z-50">
+                  <Link href="/about" className="block px-4 py-2 text-xs text-[#F7EFE1] hover:bg-[#7A1620] hover:text-[#F4C542] whitespace-nowrap">MITRA UK & UKTA Mission</Link>
+                  <Link href="/history" className="block px-4 py-2 text-xs text-[#F7EFE1] hover:bg-[#7A1620] hover:text-[#F4C542] whitespace-nowrap">Guinness World Record</Link>
+                  <Link href="/chairman-message" className="block px-4 py-2 text-xs text-[#F7EFE1] hover:bg-[#7A1620] hover:text-[#F4C542] whitespace-nowrap">Chairman's Address</Link>
                 </div>
               )}
             </div>
 
             <Link 
               href="/leadership" 
-              className={`transition-colors hover:text-[#F4C542] ${isCurrent('/leadership') ? 'text-[#F4C542] font-black' : 'text-[#F7EFE1]'}`}
+              className={`transition-colors whitespace-nowrap hover:text-[#F4C542] ${isCurrent('/leadership') ? 'text-[#F4C542] font-black' : 'text-[#F7EFE1]'}`}
             >
               Leadership
             </Link>
 
             <Link 
               href="/events" 
-              className={`transition-colors hover:text-[#F4C542] ${isCurrent('/events') ? 'text-[#F4C542] font-black' : 'text-[#F7EFE1]'}`}
+              className={`transition-colors whitespace-nowrap hover:text-[#F4C542] ${isCurrent('/events') ? 'text-[#F4C542] font-black' : 'text-[#F7EFE1]'}`}
             >
               Events Calendar
             </Link>
@@ -129,43 +134,43 @@ export default function Header() {
               onMouseEnter={() => setMediaDropdown(true)}
               onMouseLeave={() => setMediaDropdown(false)}
             >
-              <button className="flex items-center gap-1 text-[#F7EFE1] hover:text-[#F4C542] py-2">
+              <button className="flex items-center gap-1 text-[#F7EFE1] hover:text-[#F4C542] py-2 whitespace-nowrap">
                 <span>Media & Teaser</span>
                 <ChevronDown className="w-3.5 h-3.5" />
               </button>
               {mediaDropdown && (
-                <div className="absolute top-full left-0 w-56 bg-[#160B08] shadow-2xl rounded-2xl py-2 border border-[#D4AF37]/40">
-                  <Link href="/media?tab=photos" className="block px-4 py-2 text-xs text-[#F7EFE1] hover:bg-[#7A1620] hover:text-[#F4C542]">Photo Gallery</Link>
-                  <Link href="/media?tab=videos" className="block px-4 py-2 text-xs text-[#F7EFE1] hover:bg-[#7A1620] hover:text-[#F4C542]">Teaser Reel & Videos</Link>
-                  <Link href="/media?tab=patrika" className="block px-4 py-2 text-xs text-[#F7EFE1] hover:bg-[#7A1620] hover:text-[#F4C542]">Souvenir & Patrika</Link>
+                <div className="absolute top-full left-0 w-56 bg-[#160B08] shadow-2xl rounded-2xl py-2 border border-[#D4AF37]/40 z-50">
+                  <Link href="/media?tab=photos" className="block px-4 py-2 text-xs text-[#F7EFE1] hover:bg-[#7A1620] hover:text-[#F4C542] whitespace-nowrap">Photo Gallery</Link>
+                  <Link href="/media?tab=videos" className="block px-4 py-2 text-xs text-[#F7EFE1] hover:bg-[#7A1620] hover:text-[#F4C542] whitespace-nowrap">Teaser Reel & Videos</Link>
+                  <Link href="/media?tab=patrika" className="block px-4 py-2 text-xs text-[#F7EFE1] hover:bg-[#7A1620] hover:text-[#F4C542] whitespace-nowrap">Souvenir & Patrika</Link>
                 </div>
               )}
             </div>
 
             <Link 
               href="/membership" 
-              className={`transition-colors hover:text-[#F4C542] ${isCurrent('/membership') ? 'text-[#F4C542] font-black' : 'text-[#F7EFE1]'}`}
+              className={`transition-colors whitespace-nowrap hover:text-[#F4C542] ${isCurrent('/membership') ? 'text-[#F4C542] font-black' : 'text-[#F7EFE1]'}`}
             >
               Membership
             </Link>
 
             <Link 
               href="/sponsors" 
-              className={`transition-colors hover:text-[#F4C542] ${isCurrent('/sponsors') ? 'text-[#F4C542] font-black' : 'text-[#F7EFE1]'}`}
+              className={`transition-colors whitespace-nowrap hover:text-[#F4C542] ${isCurrent('/sponsors') ? 'text-[#F4C542] font-black' : 'text-[#F7EFE1]'}`}
             >
               Sponsors
             </Link>
 
             <Link 
               href="/contact" 
-              className={`transition-colors hover:text-[#F4C542] ${isCurrent('/contact') ? 'text-[#F4C542] font-black' : 'text-[#F7EFE1]'}`}
+              className={`transition-colors whitespace-nowrap hover:text-[#F4C542] ${isCurrent('/contact') ? 'text-[#F4C542] font-black' : 'text-[#F7EFE1]'}`}
             >
               Contact
             </Link>
           </nav>
 
           {/* Action CTAs */}
-          <div className="hidden lg:flex items-center space-x-3">
+          <div className="hidden lg:flex items-center space-x-2 xl:space-x-3 shrink-0">
             <Link 
               href="/search" 
               aria-label="Search Website"
@@ -178,9 +183,9 @@ export default function Header() {
               href="https://chat.whatsapp.com/IVqirWWzM96IBNRfhSWGEd"
               target="_blank"
               rel="noopener noreferrer"
-              className="gold-button px-5 py-2.5 rounded-full text-xs font-black flex items-center gap-1.5 shadow-lg hover:scale-105 transition-transform"
+              className="gold-button px-4 xl:px-5 py-2.5 rounded-full text-[11px] xl:text-xs font-black flex items-center gap-1.5 shadow-lg hover:scale-105 transition-transform whitespace-nowrap shrink-0"
             >
-              <MessageCircle className="w-4 h-4 fill-current" />
+              <MessageCircle className="w-3.5 h-3.5 fill-current" />
               <span>Join WhatsApp</span>
             </a>
           </div>
@@ -206,7 +211,7 @@ export default function Header() {
             onClick={() => setMobileMenuOpen(false)}
             className="block py-2 text-[#F4C542]"
           >
-            Mahotsav Reveal Experience
+            Home (Maha Mahotsav 2026)
           </Link>
           <Link 
             href="/about" 
