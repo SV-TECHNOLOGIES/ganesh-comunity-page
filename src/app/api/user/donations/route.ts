@@ -4,31 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { generateTicketToken } from '@/lib/ticket-token';
 
-// Demo payments for the demo member (member@ukta.org.uk)
-const DEMO_MY_PAYMENTS = [
-  {
-    id: 'pay-201',
-    amount: 51.0,
-    currency: 'GBP',
-    status: 'Completed',
-    customerName: 'Mahesh Babu G',
-    customerEmail: 'member@ukta.org.uk',
-    description: 'Donation — Ganesh Mahotsav 2026 Seva Fund',
-    paymentMethod: 'Stripe Card',
-    createdAt: new Date(Date.now() - 3600000 * 10).toISOString(),
-  },
-  {
-    id: 'pay-202',
-    amount: 25.0,
-    currency: 'GBP',
-    status: 'Completed',
-    customerName: 'Mahesh Babu G',
-    customerEmail: 'member@ukta.org.uk',
-    description: 'Pooja Booking — Ganesh Chaturthi Morning Slot',
-    paymentMethod: 'Stripe ApplePay',
-    createdAt: new Date(Date.now() - 3600000 * 72).toISOString(),
-  },
-];
+
 
 export async function GET() {
   try {
@@ -101,14 +77,6 @@ export async function GET() {
       // DB unavailable — fall through to demo
     }
 
-    // For the demo member, return seeded demo payments with ticketToken
-    if (userEmail === 'member@ukta.org.uk') {
-      const enriched = DEMO_MY_PAYMENTS.map((p) => ({
-        ...p,
-        ticketToken: generateTicketToken(p.id),
-      }));
-      return NextResponse.json({ success: true, source: 'demo', data: enriched });
-    }
 
     // No payments found for this user
     return NextResponse.json({ success: true, source: 'empty', data: [] });

@@ -79,6 +79,7 @@ export interface DonationRecord {
   date: string;
   paymentMethod: 'Card' | 'PayPal' | 'Bank Transfer';
   receiptNo: string;
+  status?: 'Completed' | 'Pending' | 'Failed';
 }
 
 export interface BlogPost {
