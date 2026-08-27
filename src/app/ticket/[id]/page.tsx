@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import QRCode from 'qrcode';
 import { prisma } from '@/lib/prisma';
 import TicketClient from './TicketClient';
+import TicketBlocked from './TicketBlocked';
 import { resolveTicketId, generateTicketToken } from '@/lib/ticket-token';
 
 // Demo payments for SSR fallback
@@ -48,6 +49,20 @@ export default async function TicketPage({ params }: PageProps) {
 
   if (!payment) {
     notFound();
+  }
+
+  // Block ticket access for non-Completed payments
+  if (payment.status !== 'Completed') {
+    return (
+      <TicketBlocked
+        status={payment.status}
+        customerName={payment.customerName}
+        description={payment.description}
+        amount={payment.amount}
+        currency={payment.currency}
+        paymentId={payment.id}
+      />
+    );
   }
 
   // Generate canonical secure hash token for this ticket

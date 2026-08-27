@@ -18,33 +18,21 @@ export async function GET() {
 
     // Verify & decode token
     const payload = verifyToken(token);
-    if (!payload || !payload.email) {
+    if (!payload || !payload.id) {
       return NextResponse.json({ success: false, error: 'Invalid session.' }, { status: 401 });
     }
 
-    const userEmail = payload.email as string;
-    const userId = payload.id as string | undefined;
+    const userId = payload.id as string;
+    const userEmail = payload.email as string | undefined;
 
-    // Try DB first — link and query via Member relation
+    // Query payments linked to this member by auth token id (primary)
+    // Also include payments matched by email for guest payments already in the DB
     try {
-      // 1. Locate the Member in the database
-      const member = await prisma.member.findFirst({
-        where: {
-          OR: [
-            ...(userId ? [{ id: userId }] : []),
-            { email: userEmail },
-          ],
-        },
-      });
-
-      const memberId = member?.id || userId;
-
-      // 2. Query payments linked by memberId or customerEmail
       const payments = await prisma.payment.findMany({
         where: {
           OR: [
-            ...(memberId ? [{ memberId }] : []),
-            { customerEmail: userEmail },
+            { memberId: userId },
+            ...(userEmail ? [{ customerEmail: userEmail }] : []),
           ],
         },
         include: {

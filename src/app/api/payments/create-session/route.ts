@@ -28,6 +28,25 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+    const cookieStore = await cookies();
+    const token = cookieStore.get('ukta_token')?.value;
+
+    if (!token) {
+      return NextResponse.json({ success: false, error: 'Not authenticated.' }, { status: 401 });
+    }
+
+        const payload = verifyToken(token);
+    if (!payload || !payload.id) {
+      return NextResponse.json({ success: false, error: 'Invalid session.' }, { status: 401 });
+    }
+
+    const userId = payload.id as string;
+    const userEmail = payload.email as string | undefined;
+    const userRole = payload.role as string | undefined;
+    if(userRole === 'Admin') {
+      return NextResponse.json({ success: false, error: 'Admin cannot make Donation themselves.' }, { status: 401 });
+    }
+    
 
     const numAmount = Number(amount);
     if (isNaN(numAmount) || numAmount < 0.5) {
@@ -71,36 +90,18 @@ export async function POST(request: Request) {
     });
 
 
-    // ── Resolve memberId from auth cookie ─────────────────────────────────────
-    let memberId: string | null = null;
-    try {
-      const cookieStore = await cookies();
-      const token = cookieStore.get('ukta_token')?.value;
-
-      if (token) {
-        const payload = verifyToken(token);
-        if (payload?.id && payload.role === 'Member') {
-          const memberById = await prisma.member.findUnique({ where: { id: payload.id } });
-          if (memberById) {
-            memberId = memberById.id;
-          } else if (payload.email) {
-            const memberByEmail = await prisma.member.findUnique({ where: { email: payload.email } });
-            if (memberByEmail) memberId = memberByEmail.id;
-          }
-        } else if (payload?.email) {
-          const memberByEmail = await prisma.member.findUnique({ where: { email: payload.email } });
-          if (memberByEmail) memberId = memberByEmail.id;
-        }
-      }
-
-      // Fallback: match by email for registered members paying as guests
-      if (!memberId && customerEmail) {
-        const existingMember = await prisma.member.findUnique({ where: { email: customerEmail } });
-        if (existingMember) memberId = existingMember.id;
-      }
-    } catch (e) {
-      console.error('Error resolving memberId in create-session:', e);
+    // ── Resolve memberId from auth token (primary source) ───────────────────
+    // Strategy: use the JWT auth token id directly — this is the authoritative
+    // identity. Email lookup is NOT used here to avoid mismatches.
+    // If the user is not logged in (guest payment), memberId stays null.
+    let memberId = userId;
+    if (!memberId) {
+      return NextResponse.json(
+        { success: false, error: 'Not authenticated.' },
+        { status: 401 }
+      );
     }
+
 
     // ── Create Stripe PaymentIntent ───────────────────────────────────────────
     const paymentIntent = await stripe.paymentIntents.create({

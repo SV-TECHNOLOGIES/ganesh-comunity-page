@@ -86,25 +86,49 @@ export async function POST(req: NextRequest) {
           });
 
           if (existing) {
+            // memberId on the existing record was set from the auth token at create-session time.
+            // Only fall back to email lookup for legacy records where memberId was never set.
+            let resolvedMemberId = existing.memberId;
+            if (!resolvedMemberId && existing.customerEmail) {
+              const member = await prisma.member.findUnique({
+                where: { email: existing.customerEmail },
+              });
+              if (member) {
+                resolvedMemberId = member.id;
+                console.log(`[Webhook] Resolved memberId by email for payment ${existing.id}: ${member.fullName}`);
+              }
+            }
+
             await prisma.payment.update({
               where: { id: existing.id },
-              data: { status: 'Completed' },
+              data: { status: 'Completed', memberId: resolvedMemberId },
             });
           } else {
             // Fallback: create from PaymentIntent metadata (edge case if DB write failed earlier)
+            // memberId in metadata was set from the auth token at create-session time.
+            // Email-based member lookup is only used when memberId is absent (guest payments).
             const meta = pi.metadata || {};
+            const metaEmail = meta.customerEmail || '';
+
+            // Try to resolve memberId from email
+            let resolvedMemberId = meta.memberId || null;
+            if (!resolvedMemberId && metaEmail) {
+              const member = await prisma.member.findUnique({ where: { email: metaEmail } });
+              if (member) resolvedMemberId = member.id;
+            }
+
             await prisma.payment.create({
               data: {
                 amount: pi.amount / 100,
                 currency: pi.currency.toUpperCase(),
                 status: 'Completed',
                 customerName: meta.customerName || 'Unknown',
-                customerEmail: meta.customerEmail || '',
+                customerEmail: metaEmail,
                 customerPhone: meta.customerPhone || null,
                 description: pi.description || 'UKTA Community Contribution',
                 paymentMethod: meta.paymentMethod || 'Stripe',
                 stripePaymentIntentId: pi.id,
-                memberId: meta.memberId || null,
+                memberId: resolvedMemberId,
               },
             });
           }
@@ -113,6 +137,7 @@ export async function POST(req: NextRequest) {
         }
         break;
       }
+
 
       case 'payment_intent.payment_failed': {
         const pi = event.data.object as Stripe.PaymentIntent;

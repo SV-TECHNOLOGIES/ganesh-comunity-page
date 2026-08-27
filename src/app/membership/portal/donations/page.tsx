@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/auth-context';
 import AuthGuard from '@/components/AuthGuard';
 import {
   ArrowLeft, Heart, CheckCircle, CreditCard, Calendar, RefreshCw, Inbox,
-  ExternalLink, Download, Copy,
+  ExternalLink, Download, Copy, XCircle, Clock,
 } from 'lucide-react';
 
 interface DonationItem {
@@ -119,7 +119,9 @@ function MyDonationsContent() {
           <span className="text-3xl font-black font-cinzel text-[#F7EFE1]">
             {donations.length}
           </span>
-          <span className="text-[10px] text-emerald-400 block">All payments successful</span>
+          <span className="text-[10px] text-emerald-400 block">
+            {donations.filter(d => d.status === 'Completed').length} completed
+          </span>
         </div>
       </div>
 
@@ -183,13 +185,23 @@ function MyDonationsContent() {
                         <span className="text-[10px] text-[#C9B79C] font-mono bg-[#0D0705] px-2 py-0.5 rounded-full border border-[#D4AF37]/20">
                           {d.id}
                         </span>
-                        <span className="bg-[#0D0705] text-[#C9B79C] border border-[#D4AF37]/20 px-2 py-0.5 rounded-full text-[10px]">
-                          {d.paymentMethod}
-                        </span>
-                        <span className="bg-emerald-950 text-emerald-400 font-bold px-2 py-0.5 rounded-full text-[10px] border border-emerald-500/30 flex items-center gap-1">
-                          <CheckCircle className="w-3 h-3" />
-                          {d.status}
-                        </span>
+                        {/* Status badge — colour-coded */}
+                        {d.status === 'Completed' ? (
+                          <span className="bg-emerald-950 text-emerald-400 font-bold px-2 py-0.5 rounded-full text-[10px] border border-emerald-500/30 flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3" />
+                            Completed
+                          </span>
+                        ) : d.status === 'Failed' ? (
+                          <span className="bg-rose-950 text-rose-400 font-bold px-2 py-0.5 rounded-full text-[10px] border border-rose-500/30 flex items-center gap-1">
+                            <XCircle className="w-3 h-3" />
+                            Failed
+                          </span>
+                        ) : (
+                          <span className="bg-amber-950 text-amber-400 font-bold px-2 py-0.5 rounded-full text-[10px] border border-amber-500/30 flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {d.status}
+                          </span>
+                        )}
                         <span className="flex items-center gap-1 text-[10px] text-[#C9B79C]">
                           <Calendar className="w-3 h-3 text-[#D4AF37]" />
                           {new Date(d.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -197,25 +209,39 @@ function MyDonationsContent() {
                       </div>
                     </div>
 
-                    {/* Right — ticket actions */}
+                    {/* Right — ticket actions (only for Completed) */}
                     <div className="flex items-center gap-2 shrink-0">
-                      <CopyButton text={ticketUrl} />
-                      <Link
-                        href={`/ticket/${ticketToken}`}
-                        target="_blank"
-                        className="flex items-center gap-1.5 text-[11px] font-bold text-[#F4C542] border border-[#D4AF37]/40 hover:bg-[#D4AF37]/10 px-3 py-1.5 rounded-full transition-colors"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                        <span>View Ticket</span>
-                      </Link>
-                      <Link
-                        href={`/ticket/${ticketToken}`}
-                        target="_blank"
-                        className="flex items-center gap-1.5 text-[11px] font-bold text-[#0D0705] bg-[#D4AF37] hover:bg-[#F4C542] px-3 py-1.5 rounded-full transition-colors"
-                      >
-                        <Download className="w-3.5 h-3.5" />
-                        <span>Download</span>
-                      </Link>
+                      {d.status === 'Completed' ? (
+                        <>
+                          <CopyButton text={ticketUrl} />
+                          <Link
+                            href={`/ticket/${ticketToken}`}
+                            target="_blank"
+                            className="flex items-center gap-1.5 text-[11px] font-bold text-[#F4C542] border border-[#D4AF37]/40 hover:bg-[#D4AF37]/10 px-3 py-1.5 rounded-full transition-colors"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            <span>View Ticket</span>
+                          </Link>
+                          <Link
+                            href={`/ticket/${ticketToken}`}
+                            target="_blank"
+                            className="flex items-center gap-1.5 text-[11px] font-bold text-[#0D0705] bg-[#D4AF37] hover:bg-[#F4C542] px-3 py-1.5 rounded-full transition-colors"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                            <span>Download</span>
+                          </Link>
+                        </>
+                      ) : d.status === 'Failed' ? (
+                        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-rose-400 bg-rose-950 border border-rose-500/30 px-3 py-1.5 rounded-full">
+                          <XCircle className="w-3.5 h-3.5" />
+                          Payment Failed
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-400 bg-amber-950 border border-amber-500/30 px-3 py-1.5 rounded-full">
+                          <Clock className="w-3.5 h-3.5" />
+                          Pending
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>

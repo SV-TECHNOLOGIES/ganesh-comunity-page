@@ -76,16 +76,19 @@ export async function POST(request: Request) {
       memberMatched = bcryptMatch || legacyMatch;
     }
 
-    // Fallback demo member
+    // Fallback demo member — look up real DB record first
     if (!memberMatched && email === 'member@ukta.org.uk' && password === 'pass123') {
+      // Try to get the real member from DB so the id is correct
+      const demoMember = await prisma.member.findUnique({ where: { email: 'member@ukta.org.uk' } }).catch(() => null);
+
       const userPayload = {
-        id: 'UKTA-MEM-5001',
+        id: demoMember?.id || 'UKTA-MEM-DEMO',
         email: 'member@ukta.org.uk',
         role: 'Member' as const,
-        fullName: 'Mahesh Babu G',
-        tier: 'Life Member',
-        phone: '+44 7890 123456',
-        status: 'Active',
+        fullName: demoMember?.fullName || 'Mahesh Babu G',
+        tier: demoMember?.tier || 'Life Member',
+        phone: demoMember?.phone || '+44 7890 123456',
+        status: demoMember?.status || 'Active',
         expiryDate: 'Lifetime',
       };
 
@@ -101,6 +104,7 @@ export async function POST(request: Request) {
 
       return response;
     }
+
 
     if (!memberMatched || !member) {
       return NextResponse.json(

@@ -67,6 +67,7 @@ function CheckoutForm({
     setProcessing(true);
     setPaymentError(null);
 
+    // please include the logged in member id as well hear 
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
@@ -79,6 +80,8 @@ function CheckoutForm({
             email: donorEmail,
           },
         },
+       
+        
       },
       redirect: 'if_required', // Avoid page redirect for card payments
     });
