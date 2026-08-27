@@ -10,6 +10,22 @@ async function main() {
   await prisma.event.createMany({
     data: [
       {
+        id: 'evt-ganesh-chaturthi',
+        title: 'Ganesh Chaturthi — Maha Ganapathi Mahotsav 2026',
+        category: 'Mahotsav & Darshan',
+        date: '2026-09-14',
+        time: '09:00 AM - 09:00 PM BST',
+        venue: 'Langley Community Mandap',
+        address: 'Langley, Slough, Berkshire, United Kingdom',
+        description: 'London’s largest Maha Ganapathi Mahotsav featuring the historic 6ft eco-friendly murti, 3D WebGL Darshan, Sthapana puja, Kuchipudi cultural showcase, £116 Pooja Booking, grand evening Aarti, and daily Mahaprasadam.',
+        bannerUrl: '/assets/poster.jpg',
+        status: 'Upcoming',
+        capacity: 5000,
+        rsvpCount: 1420,
+        ticketPrice: 0,
+        featured: true,
+      },
+      {
         id: 'evt-101',
         title: 'Maha Ganapathi — London Ganesh Mahotsav 2026',
         category: 'Mahotsav & Darshan',
@@ -299,7 +315,64 @@ async function main() {
       role: 'SuperAdmin',
     },
   });
-  console.log('✅ Admin User seeded');
+  // 8. Seed Payments linked to Members
+  await prisma.payment.deleteMany({});
+  await prisma.payment.createMany({
+    data: [
+      {
+        id: 'pay-201',
+        amount: 51.0,
+        currency: 'GBP',
+        status: 'Completed',
+        customerName: 'Mahesh Babu G',
+        customerEmail: 'member@ukta.org.uk',
+        customerPhone: '+44 7890 123456',
+        description: 'Donation — Ganesh Mahotsav 2026 Seva Fund',
+        paymentMethod: 'Stripe Card',
+        memberId: 'UKTA-MEM-5001',
+        stripePaymentIntentId: 'pi_3Mxt5k2eZvKYlo2C01a2b3c4',
+      },
+      {
+        id: 'pay-202',
+        amount: 25.0,
+        currency: 'GBP',
+        status: 'Completed',
+        customerName: 'Mahesh Babu G',
+        customerEmail: 'member@ukta.org.uk',
+        customerPhone: '+44 7890 123456',
+        description: 'Pooja Booking — Ganesh Chaturthi Morning Slot',
+        paymentMethod: 'Stripe ApplePay',
+        memberId: 'UKTA-MEM-5001',
+        stripePaymentIntentId: 'pi_3Mxt9x2eZvKYlo2C05d6e7f8',
+      },
+      {
+        id: 'pay-103',
+        amount: 100.0,
+        currency: 'GBP',
+        status: 'Completed',
+        customerName: 'Priyanka Reddy',
+        customerEmail: 'priyanka.reddy@example.co.uk',
+        customerPhone: '+44 7700 987654',
+        description: 'Life Membership Plan Registration',
+        paymentMethod: 'Stripe Card',
+        memberId: 'UKTA-MEM-5002',
+        stripePaymentIntentId: 'pi_3Myu122eZvKYlo2C09g0h1i2',
+      },
+      {
+        id: 'pay-101',
+        amount: 250.0,
+        currency: 'GBP',
+        status: 'Completed',
+        customerName: 'Srinivas & Lakshmi Prasad',
+        customerEmail: 'sl.prasad@example.co.uk',
+        customerPhone: '+44 7890 123456',
+        description: 'Slough Mahotsav Patron Sponsorship & Diya Seva',
+        paymentMethod: 'Stripe Card',
+        stripePaymentIntentId: 'pi_3Mxt5k2eZvKYlo2C01a2b3c9',
+      },
+    ],
+  });
+  console.log('✅ Payments seeded with Member links');
 
   console.log('🚀 Seeding completed successfully!');
 }

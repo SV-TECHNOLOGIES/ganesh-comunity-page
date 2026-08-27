@@ -2,6 +2,22 @@ import { EventItem, LeadershipMember, MediaAlbum, CharityCase, Member, DonationR
 
 const INITIAL_EVENTS: EventItem[] = [
   {
+    id: 'evt-ganesh-chaturthi',
+    title: 'Ganesh Chaturthi — Maha Ganapathi Mahotsav 2026',
+    category: 'Cultural Events',
+    date: '2026-09-14',
+    time: '09:00 - 21:00 BST',
+    venue: 'Langley Community Mandap, Slough',
+    address: 'Langley, Slough SL3 8BY, United Kingdom',
+    description: 'London’s largest Maha Ganapathi Mahotsav in Langley, Slough. Featuring 6ft eco-friendly murti unveiling, 3D WebGL Darshan, Puja Sankalpam, £116 Pooja Booking, Annadanam food distribution, and Kuchipudi recitals.',
+    bannerUrl: '/assets/poster-dark.jpeg',
+    status: 'Upcoming',
+    capacity: 5000,
+    rsvpCount: 1420,
+    ticketPrice: 0,
+    featured: true
+  },
+  {
     id: 'evt-101',
     title: 'UKTA Ugadi Celebrations & Cultural Fest 2026',
     category: 'Cultural Events',

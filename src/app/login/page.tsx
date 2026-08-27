@@ -1,17 +1,40 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { UserCheck, ShieldAlert, Lock, Mail, KeyRound, ArrowLeft, CheckCircle, Sparkles } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { UserCheck, ShieldAlert, Lock, Mail, KeyRound, ArrowLeft, Sparkles } from 'lucide-react';
+import { SITE_CONFIG } from '@/config/site-config';
+import { useAuth } from '@/lib/auth-context';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '';
+  const { login, isLoggedIn } = useAuth();
+
   const [activeTab, setActiveTab] = useState<'member' | 'admin'>('member');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // If already logged in, redirect
+  useEffect(() => {
+    if (isLoggedIn) {
+      router.replace(redirectTo || '/membership/portal');
+    }
+  }, [isLoggedIn, redirectTo, router]);
+
+  const fillDemo = () => {
+    if (activeTab === 'member') {
+      setEmail(SITE_CONFIG.DEMO_MEMBER_EMAIL);
+      setPassword(SITE_CONFIG.DEMO_MEMBER_PASSWORD);
+    } else {
+      setEmail(SITE_CONFIG.DEMO_ADMIN_EMAIL);
+      setPassword(SITE_CONFIG.DEMO_ADMIN_PASSWORD);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,10 +50,11 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (data.success) {
+        login(data.user);
         if (activeTab === 'admin') {
           router.push('/admin');
         } else {
-          router.push('/membership/portal');
+          router.push(redirectTo || '/membership/portal');
         }
       } else {
         setError(data.error || 'Invalid credentials');
@@ -89,9 +113,9 @@ export default function LoginPage() {
 
         {/* Title */}
         <div className="text-center space-y-1">
-          <h2 className="text-2xl font-black font-cinzel gold-foil-text">
+          <h1 className="text-2xl font-black font-cinzel gold-foil-text">
             {activeTab === 'member' ? 'MEMBER PORTAL LOGIN' : 'ADMIN CMS LOGIN'}
-          </h2>
+          </h1>
           <p className="text-xs text-[#C9B79C]">
             {activeTab === 'member'
               ? 'Access your digital membership card & event benefits.'
@@ -100,20 +124,31 @@ export default function LoginPage() {
         </div>
 
         {/* Demo Credentials Quick Fill */}
-        <div className="bg-[#160B08] p-3 rounded-2xl border border-[#D4AF37]/20 text-[11px] space-y-1 text-center">
-          <span className="text-[#F4C542] font-bold block">Quick Demo Credentials:</span>
-          {activeTab === 'member' ? (
-            <div className="flex justify-center gap-3 text-[#C9B79C]">
-              <span>Email: <code className="text-[#F7EFE1]">member@ukta.org.uk</code></span>
-              <span>Pass: <code className="text-[#F7EFE1]">pass123</code></span>
+        {SITE_CONFIG.SHOW_DEMO_CREDENTIALS && (
+          <div className="bg-[#160B08] p-3 rounded-2xl border border-[#D4AF37]/20 text-[11px] space-y-2 text-center">
+            <div className="flex justify-between items-center px-1">
+              <span className="text-[#F4C542] font-bold">Quick Demo Credentials:</span>
+              <button
+                type="button"
+                onClick={fillDemo}
+                className="text-[10px] bg-[#7A1620] text-[#F4C542] px-2 py-0.5 rounded-full font-extrabold hover:bg-[#D4AF37] hover:text-[#0D0705] transition-colors"
+              >
+                Auto-Fill Demo
+              </button>
             </div>
-          ) : (
-            <div className="flex justify-center gap-3 text-[#C9B79C]">
-              <span>Email: <code className="text-[#F7EFE1]">admin@ukta.org.uk</code></span>
-              <span>Pass: <code className="text-[#F7EFE1]">admin123</code></span>
-            </div>
-          )}
-        </div>
+            {activeTab === 'member' ? (
+              <div className="flex justify-center gap-3 text-[#C9B79C]">
+                <span>Email: <code className="text-[#F7EFE1]">{SITE_CONFIG.DEMO_MEMBER_EMAIL}</code></span>
+                <span>Pass: <code className="text-[#F7EFE1]">{SITE_CONFIG.DEMO_MEMBER_PASSWORD}</code></span>
+              </div>
+            ) : (
+              <div className="flex justify-center gap-3 text-[#C9B79C]">
+                <span>Email: <code className="text-[#F7EFE1]">{SITE_CONFIG.DEMO_ADMIN_EMAIL}</code></span>
+                <span>Pass: <code className="text-[#F7EFE1]">{SITE_CONFIG.DEMO_ADMIN_PASSWORD}</code></span>
+              </div>
+            )}
+          </div>
+        )}
 
         {error && (
           <div className="bg-[#7A1620]/60 border border-rose-500/50 text-rose-200 text-xs p-3 rounded-xl text-center">
@@ -163,14 +198,28 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="text-center pt-2 border-t border-[#D4AF37]/20 text-[11px] text-[#C9B79C]">
-          <span>Not a member yet? </span>
-          <Link href="/membership" className="text-[#F4C542] font-bold hover:underline">
-            Choose a Membership Plan & Register
-          </Link>
+        <div className="text-center pt-2 border-t border-[#D4AF37]/20 text-[11px] text-[#C9B79C] space-y-1">
+          <div>
+            <span>Not a member yet? </span>
+            <Link href="/membership" className="text-[#F4C542] font-bold hover:underline">
+              Register for Membership →
+            </Link>
+          </div>
         </div>
 
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#0D0705] flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

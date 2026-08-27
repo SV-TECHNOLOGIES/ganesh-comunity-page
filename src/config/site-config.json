@@ -1,0 +1,20 @@
+{
+  "ENABLE_VOLUNTEER": false,
+  "ENABLE_TOP_RIBBON": false,
+  "ENABLE_ABOUT_DROPDOWN": false,
+  "ENABLE_LEADERSHIP": false,
+  "ENABLE_MEMBERSHIP": false,
+  "ENABLE_MEMBERSHIP_REGISTRATION": false,
+  "ENABLE_MEMBER_PORTAL": true,
+  "ENABLE_LOGIN": true,
+  "ENABLE_SEARCH": false,
+  "ENABLE_CHARITY_HELP": true,
+  "ENABLE_DONATIONS": true,
+  "ENABLE_POOJA_BOOKING": true,
+  "SHOW_DEMO_CREDENTIALS": false,
+  "DEMO_MEMBER_EMAIL": "member@ukta.org.uk",
+  "DEMO_MEMBER_PASSWORD": "pass123",
+  "DEMO_ADMIN_EMAIL": "admin@ukta.org.uk",
+  "DEMO_ADMIN_PASSWORD": "admin123"
+  
+}

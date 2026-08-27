@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Ganesha3DHero from '@/components/Ganesha3DHero';
 import RitualCountdown from '@/components/RitualCountdown';
+import MitraCommunitySection from '@/components/MitraCommunitySection';
 import StorySection from '@/components/StorySection';
 import IdolSpecsCard from '@/components/IdolSpecsCard';
 import EventDetailsSection from '@/components/EventDetailsSection';
@@ -25,7 +26,10 @@ export default function HomePage() {
       {/* 2. RITUAL COUNTDOWN CLOCK */}
       <RitualCountdown />
 
-      {/* 3. THE DEVOTIONAL STORY */}
+      {/* 3. MITRA UK COMMUNITY SHOWCASE & PILLARS */}
+      <MitraCommunitySection />
+
+      {/* 4. THE DEVOTIONAL STORY */}
       <StorySection />
 
       {/* 4. THE IDOL SPECS PLAQUE */}
@@ -44,7 +48,7 @@ export default function HomePage() {
       <SponsorRibbonBand />
 
       {/* OPT-IN TEMPLE SOUND MANAGER */}
-      <SoundManager />
+      {/* <SoundManager /> */}
 
       {/* MODAL FORMS */}
       <NotifyMeModal isOpen={notifyModalOpen} onClose={() => setNotifyModalOpen(false)} />

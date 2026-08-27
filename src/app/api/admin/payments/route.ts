@@ -46,6 +46,11 @@ const DEMO_PAYMENTS = [
 export async function GET() {
   try {
     const payments = await prisma.payment.findMany({
+      include: {
+        member: {
+          select: { id: true, fullName: true, email: true, phone: true },
+        },
+      },
       orderBy: { createdAt: 'desc' },
     });
     return NextResponse.json({

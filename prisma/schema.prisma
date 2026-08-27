@@ -51,21 +51,22 @@ model Sponsor {
 }
 
 model Member {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   fullName     String
-  email        String   @unique
+  email        String    @unique
   phone        String
-  tier         String   @default("Annual Member")
-  role         String   @default("Member")
-  status       String   @default("Active")
+  tier         String    @default("Annual Member")
+  role         String    @default("Member")
+  status       String    @default("Active")
   profession   String?
   address      String?
   passwordHash String?
   startDate    String?
   expiryDate   String?
   notes        String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  payments     Payment[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 model CharityCase {
@@ -116,17 +117,19 @@ model BlogPost {
 }
 
 model Payment {
-  id                   String   @id @default(cuid())
-  amount               Float
-  currency             String   @default("GBP")
-  status               String   @default("Completed") // "Completed", "Pending", "Failed"
-  customerName         String
-  customerEmail        String
-  customerPhone        String?
-  description          String   // "Donation to Student Fund", "Mahotsav VIP Ticket", etc.
-  paymentMethod        String   @default("Stripe Card")
+  id                    String   @id @default(cuid())
+  amount                Float
+  currency              String   @default("GBP")
+  status                String   @default("Completed") // "Completed", "Pending", "Failed"
+  customerName          String
+  customerEmail         String
+  customerPhone         String?
+  description           String   // "Donation to Student Fund", "Mahotsav VIP Ticket", etc.
+  paymentMethod         String   @default("Stripe Card")
   stripePaymentIntentId String?
-  createdAt            DateTime @default(now())
+  memberId              String?
+  member                Member?  @relation(fields: [memberId], references: [id], onDelete: SetNull)
+  createdAt             DateTime @default(now())
 }
 
 model PaymentSettings {

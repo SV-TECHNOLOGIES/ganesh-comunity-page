@@ -4,6 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Role } from '@/lib/types';
+import AuthGuard from '@/components/AuthGuard';
+import { useAuth } from '@/lib/auth-context';
 import { 
   LayoutDashboard, 
   Calendar, 
@@ -16,12 +18,15 @@ import {
   Settings,
   ChevronRight,
   Sparkles,
-  ArrowLeft
+  ArrowLeft,
+  CreditCard,
 } from 'lucide-react';
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
   const [currentRole, setCurrentRole] = useState<Role>('Super Admin');
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const roles: Role[] = [
     'Super Admin',
@@ -37,10 +42,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: 'Membership Database', href: '/admin/members', icon: Users, roleAccess: ['Super Admin', 'Membership Officer'] },
     { label: 'Charity Case Queue', href: '/admin/charity-cases', icon: ShieldAlert, roleAccess: ['Super Admin', 'Charity Officer'] },
     { label: 'Media & Patrika', href: '/admin/media', icon: ImageIcon, roleAccess: ['Super Admin', 'Media Secretary'] },
+    { label: 'Payments & Donations', href: '/admin/payments', icon: CreditCard, roleAccess: ['Super Admin'] },
     { label: 'SEO & Analytics Stream', href: '/admin/seo-analytics', icon: TrendingUp, roleAccess: ['Super Admin'] },
   ];
 
   const isCurrent = (href: string) => pathname === href;
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    await logout();
+  };
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col md:flex-row">
@@ -65,7 +76,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           </div>
 
-          {/* Role Switcher */}
+          {/* Logged-in admin user badge */}
+          {user && (
+            <div className="bg-slate-900 p-3 rounded-2xl border border-emerald-500/30 space-y-1">
+              <p className="text-[10px] font-bold uppercase text-emerald-400 block">Authenticated As</p>
+              <p className="text-xs font-black text-white truncate">{user.email}</p>
+              <span className="text-[10px] bg-ukta-red/80 text-ukta-gold px-2 py-0.5 rounded-full font-bold inline-block border border-ukta-gold/30">
+                {user.role}
+              </span>
+            </div>
+          )}
+
+          {/* Role Switcher (RBAC simulation) */}
           <div className="bg-slate-900 p-3 rounded-2xl border border-ukta-gold/30 space-y-1">
             <label className="text-[10px] font-bold uppercase text-ukta-gold block">
               Simulate Active RBAC Role:
@@ -116,13 +138,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         </div>
 
-        {/* Footer info */}
-        <div className="pt-6 border-t border-slate-800 text-[10px] text-slate-500 space-y-1">
-          <div className="flex items-center gap-1 text-emerald-400">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>SEO & Analytics Engine Online</span>
+        {/* Footer info + Logout */}
+        <div className="pt-6 border-t border-slate-800 space-y-3">
+          <div className="text-[10px] text-slate-500 space-y-1">
+            <div className="flex items-center gap-1 text-emerald-400">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>SEO & Analytics Engine Online</span>
+            </div>
+            <div>Audit Logging: ACTIVE</div>
           </div>
-          <div>Audit Logging: ACTIVE</div>
+          <button
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="w-full flex items-center gap-2 text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 px-3 py-2.5 rounded-xl transition-colors disabled:opacity-60"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>{loggingOut ? 'Signing out…' : 'Sign Out of Admin'}</span>
+          </button>
         </div>
 
       </aside>
@@ -133,5 +165,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </main>
 
     </div>
+  );
+}
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <AuthGuard requiredRole="Admin">
+      <AdminLayoutContent>{children}</AdminLayoutContent>
+    </AuthGuard>
   );
 }

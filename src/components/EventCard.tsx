@@ -54,7 +54,9 @@ export default function EventCard({ event, onRSVP }: { event: EventItem; onRSVP?
         <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
           <div>
             <h3 className="text-lg font-bold text-[#F7EFE1] group-hover:text-[#F4C542] transition-colors line-clamp-2 font-cinzel">
-              <Link href={`/events/${event.id}`}>{event.title}</Link>
+              <Link href={event.id === 'evt-ganesh-chaturthi' || event.title.toLowerCase().includes('ganesh') ? '/ganesh-event-2026' : `/events/${event.id}`}>
+                {event.title}
+              </Link>
             </h3>
             <p className="text-xs text-[#C9B79C] mt-2 line-clamp-2 leading-relaxed">
               {event.description}

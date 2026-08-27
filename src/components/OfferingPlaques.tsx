@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { MessageCircle, Heart, HandHeart, Sparkles, X, CheckCircle } from 'lucide-react';
 
+import { SITE_CONFIG } from '@/config/site-config';
+
 interface OfferingPlaquesProps {
   onSponsorClick?: () => void;
 }
@@ -41,8 +43,8 @@ export default function OfferingPlaques({ onSponsorClick }: OfferingPlaquesProps
             </p>
           </div>
 
-          {/* 3 Temple Offering Plaques */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Temple Offering Plaques Grid */}
+          <div className={`grid grid-cols-1 ${SITE_CONFIG.ENABLE_VOLUNTEER ? 'md:grid-cols-3' : 'md:grid-cols-2 max-w-4xl mx-auto'} gap-8`}>
             
             {/* Plaque 1: WhatsApp Community */}
             <div className="temple-card temple-card-hover rounded-3xl p-8 border-2 border-[#D4AF37]/40 flex flex-col justify-between space-y-6 text-center group">
@@ -70,29 +72,31 @@ export default function OfferingPlaques({ onSponsorClick }: OfferingPlaquesProps
               </a>
             </div>
 
-            {/* Plaque 2: Volunteer Seva */}
-            <div className="temple-card temple-card-hover rounded-3xl p-8 border-2 border-[#D4AF37]/40 flex flex-col justify-between space-y-6 text-center group">
-              <div className="space-y-4">
-                <div className="w-16 h-16 mx-auto rounded-full bg-[#160B08] border-2 border-[#D4AF37] flex items-center justify-center text-[#F4C542] shadow-[0_0_20px_rgba(212,175,55,0.3)] group-hover:scale-110 transition-transform">
-                  <HandHeart className="w-8 h-8" />
+            {/* Plaque 2: Volunteer Seva (Toggle Controlled) */}
+            {SITE_CONFIG.ENABLE_VOLUNTEER && (
+              <div className="temple-card temple-card-hover rounded-3xl p-8 border-2 border-[#D4AF37]/40 flex flex-col justify-between space-y-6 text-center group">
+                <div className="space-y-4">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-[#160B08] border-2 border-[#D4AF37] flex items-center justify-center text-[#F4C542] shadow-[0_0_20px_rgba(212,175,55,0.3)] group-hover:scale-110 transition-transform">
+                    <HandHeart className="w-8 h-8" />
+                  </div>
+
+                  <h3 className="text-xl font-bold font-cinzel text-[#F7EFE1] uppercase">
+                    VOLUNTEER FOR SEVA
+                  </h3>
+
+                  <p className="text-xs text-[#C9B79C] leading-relaxed">
+                    Offer your time and service for Prasad distribution, venue management, crowd coordination, and cultural programs.
+                  </p>
                 </div>
 
-                <h3 className="text-xl font-bold font-cinzel text-[#F7EFE1] uppercase">
-                  VOLUNTEER FOR SEVA
-                </h3>
-
-                <p className="text-xs text-[#C9B79C] leading-relaxed">
-                  Offer your time and service for Prasad distribution, venue management, crowd coordination, and cultural programs.
-                </p>
+                <button
+                  onClick={() => setVolunteerModalOpen(true)}
+                  className="maroon-button w-full py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2"
+                >
+                  <span>Register as Volunteer</span>
+                </button>
               </div>
-
-              <button
-                onClick={() => setVolunteerModalOpen(true)}
-                className="maroon-button w-full py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2"
-              >
-                <span>Register as Volunteer</span>
-              </button>
-            </div>
+            )}
 
             {/* Plaque 3: Sponsor & Support */}
             <div className="temple-card temple-card-hover rounded-3xl p-8 border-2 border-[#D4AF37]/40 flex flex-col justify-between space-y-6 text-center group">

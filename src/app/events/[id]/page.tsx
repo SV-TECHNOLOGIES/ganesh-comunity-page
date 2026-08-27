@@ -19,6 +19,13 @@ import {
   ArrowLeft,
   DollarSign
 } from 'lucide-react';
+import Ganesha3DHero from '@/components/Ganesha3DHero';
+import RitualCountdown from '@/components/RitualCountdown';
+import EventDetailsSection from '@/components/EventDetailsSection';
+import IdolSpecsCard from '@/components/IdolSpecsCard';
+import MediaTeaserSection from '@/components/MediaTeaserSection';
+import NotifyMeModal from '@/components/NotifyMeModal';
+import DonationModal from '@/components/DonationModal';
 
 export default function EventDetailPage() {
   const params = useParams();
@@ -26,10 +33,12 @@ export default function EventDetailPage() {
   const [event, setEvent] = useState<EventItem | null>(null);
   const [rsvped, setRsvped] = useState(false);
   const [rsvpCount, setRsvpCount] = useState(0);
+  const [notifyModalOpen, setNotifyModalOpen] = useState(false);
+  const [donateModalOpen, setDonateModalOpen] = useState(false);
 
   useEffect(() => {
     DataStore.init();
-    const found = DataStore.getEvents().find(e => e.id === id);
+    const found = DataStore.getEvents().find(e => e.id === id || e.title.toLowerCase().includes('ganesh'));
     if (found) {
       setEvent(found);
       setRsvpCount(found.rsvpCount);
@@ -46,6 +55,7 @@ export default function EventDetailPage() {
   }
 
   const jsonLd = generateEventJsonLd(event);
+  const isGaneshEvent = id === 'evt-ganesh-chaturthi' || id === 'evt-101' || event.title.toLowerCase().includes('ganesh');
 
   const handleRSVP = () => {
     if (rsvped) return;
@@ -74,6 +84,49 @@ END:VCALENDAR`;
     link.click();
   };
 
+  // If viewing Ganesh Chaturthi event, render the full Home Page experience with 3D Ganesha & Puja booking!
+  if (isGaneshEvent) {
+    return (
+      <div className="bg-[#0D0705] text-[#F7EFE1] min-h-screen">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+
+        {/* Back Link Bar */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2 flex justify-between items-center">
+          <Link href="/events" className="inline-flex items-center gap-1.5 text-xs font-bold text-[#F4C542] hover:underline">
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to All Events</span>
+          </Link>
+          <span className="bg-[#7A1620] text-[#F4C542] border border-[#D4AF37]/40 text-[10px] font-black px-3 py-1 rounded-full uppercase">
+            GANESH CHATURTHI FESTIVAL PAGE
+          </span>
+        </div>
+
+        {/* 1. HERO — 3D VEILED GANESHA & REVEAL EXPERIENCE */}
+        <Ganesha3DHero onNotifyClick={() => setNotifyModalOpen(true)} />
+
+        {/* 2. RITUAL COUNTDOWN CLOCK */}
+        <RitualCountdown />
+
+        {/* 3. EVENT DETAILS, VENUE & 3 DONATION CATEGORIES / POOJA BOOKING (£116) */}
+        <EventDetailsSection />
+
+        {/* 4. IDOL SPECS PLAQUE */}
+        <IdolSpecsCard />
+
+        {/* 5. MEDIA & TEASER GALLERY */}
+        <MediaTeaserSection />
+
+        {/* MODAL FORMS */}
+        <NotifyMeModal isOpen={notifyModalOpen} onClose={() => setNotifyModalOpen(false)} />
+        <DonationModal isOpen={donateModalOpen} onClose={() => setDonateModalOpen(false)} />
+      </div>
+    );
+  }
+
+  // Standard Event Detail layout for non-Ganesh events
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       <script
@@ -103,7 +156,7 @@ END:VCALENDAR`;
             {event.title}
           </h1>
           <p className="text-xs sm:text-sm text-slate-300">
-            Hosted by UK Telugu Association (UKTA)
+            Hosted by MITRA UK & UKTA
           </p>
         </div>
       </div>

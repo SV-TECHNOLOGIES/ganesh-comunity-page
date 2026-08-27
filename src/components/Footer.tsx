@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { MessageCircle, Heart, Instagram, Facebook, Youtube, Mail, MapPin, Phone, Sparkles } from 'lucide-react';
+import { SITE_CONFIG } from '@/config/site-config';
 
 export default function Footer() {
   return (
@@ -30,7 +31,7 @@ export default function Footer() {
               rel="noopener noreferrer"
               className="gold-button px-6 py-3 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl hover:scale-105 transition-transform"
             >
-              <MessageCircle className="w-4 h-4 fill-current" />
+              <img src="/assets/whatsapp.png" alt="WhatsApp" className="w-5 h-5 object-contain" />
               <span>Join WhatsApp Group</span>
             </a>
           </div>
@@ -89,7 +90,9 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-[#C9B79C]">
               <li><a href="https://chat.whatsapp.com/IVqirWWzM96IBNRfhSWGEd" target="_blank" rel="noopener noreferrer" className="hover:text-[#F4C542] transition-colors">Official WhatsApp Community</a></li>
-              <li><Link href="/membership" className="hover:text-[#F4C542] transition-colors">Volunteer Seva Registration</Link></li>
+              {SITE_CONFIG.ENABLE_VOLUNTEER && (
+                <li><Link href="/membership" className="hover:text-[#F4C542] transition-colors">Volunteer Seva Registration</Link></li>
+              )}
               <li><Link href="/sponsors" className="hover:text-[#F4C542] transition-colors">Sponsorship & Offerings</Link></li>
               <li><Link href="/charity" className="hover:text-[#F4C542] transition-colors">Student & Community Welfare</Link></li>
             </ul>

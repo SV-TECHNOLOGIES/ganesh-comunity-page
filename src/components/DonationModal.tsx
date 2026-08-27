@@ -1,27 +1,66 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DataStore } from '@/lib/data-store';
 import { trackDonation } from '@/lib/analytics';
-import { Heart, CheckCircle2, DollarSign, Download, Lock, X } from 'lucide-react';
+import Link from 'next/link';
+import { Heart, CheckCircle2, DollarSign, Download, Lock, X, Sparkles, Flame, Utensils, Calendar, UserCheck } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { DonationRecord } from '@/lib/types';
+import { SITE_CONFIG } from '@/config/site-config';
+import { useAuth } from '@/lib/auth-context';
 
-export default function DonationModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+export default function DonationModal({ 
+  isOpen, 
+  onClose, 
+  initialCategory = 'Annadanam' 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void;
+  initialCategory?: 'Annadanam' | 'Pooja Booking' | 'Event Donations';
+}) {
+  const { user, isLoggedIn } = useAuth();
+  const [category, setCategory] = useState<'Annadanam' | 'Pooja Booking' | 'Event Donations'>(initialCategory);
   const [amount, setAmount] = useState<number>(50);
   const [customAmount, setCustomAmount] = useState<string>('');
   const [donorName, setDonorName] = useState('');
   const [donorEmail, setDonorEmail] = useState('');
-  const [cause, setCause] = useState('Student Emergency Welfare Fund');
   const [paymentMethod, setPaymentMethod] = useState<'Card' | 'PayPal' | 'Bank Transfer'>('Card');
   const [receipt, setReceipt] = useState<DonationRecord | null>(null);
 
+  useEffect(() => {
+    if (isOpen && user) {
+      if (user.fullName && !donorName) setDonorName(user.fullName);
+      if (user.email && !donorEmail) setDonorEmail(user.email);
+    }
+  }, [isOpen, user]);
+
+  useEffect(() => {
+    if (category === 'Pooja Booking') {
+      setAmount(116);
+      setCustomAmount('');
+    } else if (amount === 116 && !customAmount) {
+      setAmount(50);
+    }
+  }, [category]);
+
   if (!isOpen) return null;
+
+  const getFinalAmount = () => {
+    if (category === 'Pooja Booking') return 116;
+    return customAmount ? parseFloat(customAmount) : amount;
+  };
 
   const handleDonate = async (e: React.FormEvent) => {
     e.preventDefault();
-    const finalAmount = customAmount ? parseFloat(customAmount) : amount;
-    if (!finalAmount || finalAmount <= 0) return;
+    const finalAmount = getFinalAmount();
+    if (!finalAmount || finalAmount < 1) return;
+
+    const causeName = category === 'Pooja Booking' 
+      ? 'Sacred Mahotsav Pooja Booking (£116 Fixed)' 
+      : category === 'Annadanam'
+      ? 'Annadanam Community Prasadam Fund'
+      : 'Slough Mahotsav Event & Cultural Support Fund';
 
     try {
       const res = await fetch('/api/payments/create-session', {
@@ -29,25 +68,25 @@ export default function DonationModal({ isOpen, onClose }: { isOpen: boolean; on
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: finalAmount,
-          customerName: donorName || 'Generous Supporter',
+          customerName: donorName || 'Devotee Supporter',
           customerEmail: donorEmail,
-          description: `Donation: ${cause}`,
+          description: causeName,
           paymentMethod: `Stripe ${paymentMethod}`,
         }),
       });
 
-      const data = await res.json();
+      await res.json();
 
       const newDonation = DataStore.addDonation({
-        donorName: donorName || 'Generous Supporter',
+        donorName: donorName || 'Devotee Supporter',
         donorEmail,
         amount: finalAmount,
         currency: 'GBP',
-        cause,
+        cause: causeName,
         paymentMethod: paymentMethod,
       });
 
-      trackDonation(finalAmount, cause);
+      trackDonation(finalAmount, causeName);
       setReceipt(newDonation);
 
       try {
@@ -56,11 +95,9 @@ export default function DonationModal({ isOpen, onClose }: { isOpen: boolean; on
           spread: 70,
           origin: { y: 0.6 }
         });
-      } catch (e) {
-        // fallback
-      }
+      } catch (e) {}
     } catch {
-      alert('Failed to process donation transaction.');
+      alert('Failed to process transaction. Please try again.');
     }
   };
 
@@ -119,105 +156,186 @@ export default function DonationModal({ isOpen, onClose }: { isOpen: boolean; on
               Done / Return to Portal
             </button>
           </div>
+        ) : !isLoggedIn ? (
+          <div className="text-center py-6 space-y-6">
+            <div className="w-16 h-16 bg-[#7A1620] text-[#F4C542] rounded-full flex items-center justify-center mx-auto border-2 border-[#D4AF37] shadow-xl">
+              <Lock className="w-8 h-8" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-black font-cinzel gold-foil-text">
+                LOGIN REQUIRED FOR POOJA & DONATIONS
+              </h2>
+              <p className="text-xs text-[#C9B79C] max-w-sm mx-auto leading-relaxed">
+                Please sign in to your MITRA UK Member account to complete your sacred Pooja Booking (£116) or Annadanam donation.
+              </p>
+            </div>
+
+            {/* Quick Demo Credentials Box */}
+            {SITE_CONFIG.SHOW_DEMO_CREDENTIALS && (
+              <div className="bg-[#160B08] p-4 rounded-2xl border border-[#D4AF37]/30 text-xs space-y-1 text-center">
+                <span className="text-[#F4C542] font-bold block">Quick Demo Member Credentials:</span>
+                <div className="text-[#C9B79C] text-[11px]">
+                  Email: <code className="text-[#F7EFE1]">{SITE_CONFIG.DEMO_MEMBER_EMAIL}</code> | Password: <code className="text-[#F7EFE1]">{SITE_CONFIG.DEMO_MEMBER_PASSWORD}</code>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-3">
+              <Link
+                href="/login"
+                onClick={onClose}
+                className="gold-button w-full py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl"
+              >
+                <UserCheck className="w-4 h-4 text-[#0D0705]" />
+                <span>Go to Member Login &rarr;</span>
+              </Link>
+            </div>
+          </div>
         ) : (
           <form onSubmit={handleDonate} className="space-y-5">
-            <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div className="p-3 bg-ukta-red text-white rounded-2xl shadow">
-                <Heart className="w-6 h-6 fill-white" />
+            <div className="flex items-center gap-3 border-b border-[#D4AF37]/30 pb-3">
+              <div className="p-3 bg-[#7A1620] text-[#F4C542] rounded-2xl shadow border border-[#D4AF37]/40">
+                <Heart className="w-6 h-6 fill-current" />
               </div>
               <div>
-                <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">
-                  Support UKTA Programs
+                <h2 className="text-xl font-black font-cinzel gold-foil-text">
+                  DONATION & POOJA SEVA
                 </h2>
-                <p className="text-xs text-slate-500">
-                  Tax-exempt non-profit community donations.
+                <p className="text-xs text-[#C9B79C]">
+                  MITRA UK & Mahotsav Seva Contributions
                 </p>
               </div>
             </div>
 
-            {/* Presets */}
+            {/* 3 Categories Selection Tabs */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
-                Select Amount (GBP £)
+              <label className="block text-xs font-bold text-[#F4C542] uppercase tracking-wider mb-2">
+                Select Donation / Seva Category
               </label>
-              <div className="grid grid-cols-4 gap-2 mb-3">
-                {[25, 50, 100, 250].map((amt) => (
-                  <button
-                    key={amt}
-                    type="button"
-                    onClick={() => {
-                      setAmount(amt);
-                      setCustomAmount('');
-                    }}
-                    className={`py-2.5 rounded-xl text-xs font-black transition-all border ${
-                      amount === amt && !customAmount
-                        ? 'bg-ukta-red text-white border-ukta-red shadow'
-                        : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-ukta-gold'
-                    }`}
-                  >
-                    £{amt}
-                  </button>
-                ))}
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCategory('Annadanam')}
+                  className={`py-2.5 px-2 rounded-xl text-xs font-bold transition-all border flex flex-col items-center gap-1 ${
+                    category === 'Annadanam'
+                      ? 'bg-[#7A1620] text-[#F4C542] border-[#D4AF37] shadow-lg'
+                      : 'bg-[#160B08] text-[#C9B79C] border-[#D4AF37]/20 hover:border-[#F4C542]'
+                  }`}
+                >
+                  <Utensils className="w-4 h-4 text-[#F4C542]" />
+                  <span>Annadanam</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setCategory('Pooja Booking')}
+                  className={`py-2.5 px-2 rounded-xl text-xs font-bold transition-all border flex flex-col items-center gap-1 relative ${
+                    category === 'Pooja Booking'
+                      ? 'bg-[#7A1620] text-[#F4C542] border-[#D4AF37] shadow-lg'
+                      : 'bg-[#160B08] text-[#C9B79C] border-[#D4AF37]/20 hover:border-[#F4C542]'
+                  }`}
+                >
+                  <span className="absolute -top-2 bg-[#D4AF37] text-[#0D0705] text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase">
+                    £116 FIXED
+                  </span>
+                  <Flame className="w-4 h-4 text-[#F4C542]" />
+                  <span>Pooja Booking</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setCategory('Event Donations')}
+                  className={`py-2.5 px-2 rounded-xl text-xs font-bold transition-all border flex flex-col items-center gap-1 ${
+                    category === 'Event Donations'
+                      ? 'bg-[#7A1620] text-[#F4C542] border-[#D4AF37] shadow-lg'
+                      : 'bg-[#160B08] text-[#C9B79C] border-[#D4AF37]/20 hover:border-[#F4C542]'
+                  }`}
+                >
+                  <Calendar className="w-4 h-4 text-[#F4C542]" />
+                  <span>Event Donations</span>
+                </button>
               </div>
-
-              <input
-                type="number"
-                placeholder="Or enter custom amount in £"
-                value={customAmount}
-                onChange={(e) => setCustomAmount(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
-              />
             </div>
 
-            {/* Cause selection */}
-            <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Allocate Contribution To
-              </label>
-              <select
-                value={cause}
-                onChange={(e) => setCause(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
-              >
-                <option value="Student Emergency Welfare Fund">Student Emergency Welfare Fund</option>
-                <option value="Telugu Cultural Preservation & Kuchipudi Academy">Telugu Cultural Preservation & Kuchipudi Academy</option>
-                <option value="Women Empowerment & Helpline">Women Empowerment & Helpline</option>
-                <option value="General Community Support Fund">General Community Support Fund</option>
-              </select>
-            </div>
+            {/* Amount Selection */}
+            {category === 'Pooja Booking' ? (
+              <div className="bg-[#160B08] p-4 rounded-2xl border-2 border-[#D4AF37]/60 space-y-1">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-bold text-[#C9B79C]">Pooja Booking Sankalpam:</span>
+                  <span className="text-xl font-black font-cinzel text-[#F4C542]">£116.00 GBP</span>
+                </div>
+                <p className="text-[11px] text-[#C9B79C] italic">
+                  Fixed Pooja Seva includes Special Archana, Name in Priest Sankalpam registry, and Mahaprasadam box.
+                </p>
+              </div>
+            ) : (
+              <div>
+                <label className="block text-xs font-bold text-[#C9B79C] mb-2">
+                  Select Amount (GBP £ &bull; Min £1)
+                </label>
+                <div className="grid grid-cols-4 gap-2 mb-3">
+                  {[21, 51, 108, 251].map((amt) => (
+                    <button
+                      key={amt}
+                      type="button"
+                      onClick={() => {
+                        setAmount(amt);
+                        setCustomAmount('');
+                      }}
+                      className={`py-2.5 rounded-xl text-xs font-black transition-all border ${
+                        amount === amt && !customAmount
+                          ? 'bg-[#7A1620] text-[#F4C542] border-[#D4AF37]'
+                          : 'bg-[#160B08] text-[#C9B79C] border-[#D4AF37]/20 hover:border-[#F4C542]'
+                      }`}
+                    >
+                      £{amt}
+                    </button>
+                  ))}
+                </div>
+
+                <input
+                  type="number"
+                  min="1"
+                  placeholder="Or enter any amount above £1"
+                  value={customAmount}
+                  onChange={(e) => setCustomAmount(e.target.value)}
+                  className="w-full bg-[#0D0705] border border-[#D4AF37]/40 rounded-xl p-2.5 text-xs text-[#F7EFE1] focus:border-[#F4C542] focus:outline-none"
+                />
+              </div>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Your Full Name
+                <label className="block text-xs font-bold text-[#C9B79C] mb-1">
+                  Full Name / Gotram
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Radhika Sharma"
+                  placeholder="e.g. Radhika & Family"
                   value={donorName}
                   onChange={(e) => setDonorName(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                  className="w-full bg-[#0D0705] border border-[#D4AF37]/40 rounded-xl p-2.5 text-xs text-[#F7EFE1] focus:border-[#F4C542] focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-[#C9B79C] mb-1">
                   Email Address for Receipt
                 </label>
                 <input
                   type="email"
                   required
-                  placeholder="name@example.com"
+                  placeholder="devotee@example.com"
                   value={donorEmail}
                   onChange={(e) => setDonorEmail(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white"
+                  className="w-full bg-[#0D0705] border border-[#D4AF37]/40 rounded-xl p-2.5 text-xs text-[#F7EFE1] focus:border-[#F4C542] focus:outline-none"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Payment Option (Simulated Gateway)
+              <label className="block text-xs font-bold text-[#C9B79C] mb-1">
+                Payment Option (Stripe Encrypted)
               </label>
               <div className="grid grid-cols-3 gap-2">
                 {(['Card', 'PayPal', 'Bank Transfer'] as const).map((method) => (
@@ -227,8 +345,8 @@ export default function DonationModal({ isOpen, onClose }: { isOpen: boolean; on
                     onClick={() => setPaymentMethod(method)}
                     className={`py-2 rounded-xl text-xs font-semibold border ${
                       paymentMethod === method
-                        ? 'bg-ukta-navy text-white border-ukta-gold'
-                        : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                        ? 'bg-[#7A1620] text-[#F4C542] border-[#D4AF37]'
+                        : 'bg-[#160B08] text-[#C9B79C] border-[#D4AF37]/20'
                     }`}
                   >
                     {method}
@@ -237,17 +355,21 @@ export default function DonationModal({ isOpen, onClose }: { isOpen: boolean; on
               </div>
             </div>
 
-            <div className="text-[11px] text-slate-500 flex items-center justify-center gap-1.5 pt-1">
-              <Lock className="w-3.5 h-3.5 text-emerald-600" />
-              <span>PCI-DSS Compliant Secure Encrypted Transaction</span>
+            <div className="text-[11px] text-[#C9B79C] flex items-center justify-center gap-1.5 pt-1">
+              <Lock className="w-3.5 h-3.5 text-emerald-400" />
+              <span>PCI-DSS Encrypted & Managed via Stripe Gateway</span>
             </div>
 
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-ukta-red to-ukta-red-light hover:from-ukta-red-dark hover:to-ukta-red text-white font-bold py-3.5 rounded-xl text-sm shadow-lg transition-all flex items-center justify-center gap-2"
+              className="gold-button w-full py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl"
             >
-              <Heart className="w-4 h-4 fill-white" />
-              <span>Complete Donation of £{customAmount || amount}.00</span>
+              <Heart className="w-4 h-4 fill-current text-[#0D0705]" />
+              <span>
+                {category === 'Pooja Booking'
+                  ? 'Confirm & Pay £116 Pooja Seva'
+                  : `Complete ${category} of £${getFinalAmount()}.00`}
+              </span>
             </button>
           </form>
         )}

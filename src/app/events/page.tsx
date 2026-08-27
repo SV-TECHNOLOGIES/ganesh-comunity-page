@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { DataStore } from '@/lib/data-store';
 import { EventItem } from '@/lib/types';
 import EventCard from '@/components/EventCard';
-import { Calendar as CalendarIcon, List, Filter, Search, Plus } from 'lucide-react';
+import DonationModal from '@/components/DonationModal';
+import { Calendar as CalendarIcon, List, Filter, Search, Plus, Heart, Flame, Utensils, Sparkles } from 'lucide-react';
 
 export default function EventsPage() {
   const [events, setEvents] = useState<EventItem[]>([]);
@@ -12,11 +13,18 @@ export default function EventsPage() {
   const [statusFilter, setStatusFilter] = useState<'Upcoming' | 'Past'>('Upcoming');
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [donateModalOpen, setDonateModalOpen] = useState(false);
+  const [selectedDonationCategory, setSelectedDonationCategory] = useState<'Annadanam' | 'Pooja Booking' | 'Event Donations'>('Annadanam');
 
   useEffect(() => {
     DataStore.init();
     setEvents(DataStore.getEvents());
   }, []);
+
+  const openDonation = (cat: 'Annadanam' | 'Pooja Booking' | 'Event Donations') => {
+    setSelectedDonationCategory(cat);
+    setDonateModalOpen(true);
+  };
 
   const categories = ['All', 'Cultural Events', 'Business Networking', 'Sports', 'Women Empowerment', 'World Conferences'];
 
@@ -31,19 +39,92 @@ export default function EventsPage() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
       
       {/* Title */}
-      <div className="text-center max-w-2xl mx-auto space-y-3">
-        <span className="bg-ukta-red/10 text-ukta-red dark:bg-ukta-gold/10 dark:text-ukta-gold text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
-          Official UKTA Events Hub
+      <div className="text-center max-w-3xl mx-auto space-y-3">
+        <span className="bg-[#7A1620] text-[#F4C542] border border-[#D4AF37]/40 text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-wider inline-block">
+          MITRA UK COMMUNITY EVENTS & FESTIVALS
         </span>
-        <h1 className="text-4xl font-black text-slate-900 dark:text-white">
-          Events & Festivals Calendar
+        <h1 className="text-4xl sm:text-5xl font-black font-cinzel gold-foil-text">
+          EVENTS, POOJA & MAHOTSAV CALENDAR
         </h1>
-        <p className="text-sm text-slate-600 dark:text-slate-300">
-          Discover upcoming Ugadi celebrations, business forums, sports tournaments, and historical archives.
+        <p className="text-xs sm:text-sm text-[#C9B79C] max-w-2xl mx-auto">
+          Discover upcoming Slough Mahotsav schedules, Ugadi cultural celebrations, business leadership summits, and book sacred Poojas or Annadanam.
         </p>
+      </div>
+
+      {/* 3 Donation Categories Action Banner */}
+      <div className="temple-card p-6 sm:p-8 rounded-3xl border-2 border-[#D4AF37] space-y-6 shadow-[0_0_30px_rgba(212,175,55,0.2)]">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#D4AF37]/30 pb-4">
+          <div className="space-y-1">
+            <span className="text-xs font-black font-cinzel text-[#F4C542] uppercase tracking-widest block">
+              COMMUNITY SEVA & POOJA REGISTRY
+            </span>
+            <h2 className="text-xl sm:text-2xl font-black font-cinzel text-[#F7EFE1]">
+              MAKE A DONATION OR BOOK A POOJA
+            </h2>
+            <p className="text-xs text-[#C9B79C]">
+              Support Annadanam community feasts, book sacred Mahotsav Poojas (£116 fixed), or contribute to MITRA UK events.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Annadanam */}
+          <button
+            onClick={() => openDonation('Annadanam')}
+            className="bg-[#160B08] border border-[#D4AF37]/40 hover:border-[#F4C542] p-5 rounded-2xl text-left space-y-2 hover:scale-[1.02] transition-transform group"
+          >
+            <div className="flex items-center gap-2 text-[#F4C542] font-black text-sm font-cinzel">
+              <Utensils className="w-5 h-5 text-[#F4C542]" />
+              <span>ANNADANAM DONATION</span>
+            </div>
+            <p className="text-xs text-[#C9B79C]">
+              Sponsor Mahaprasadam feasts for thousands of devotees during Slough Mahotsav. (Any amount above £1)
+            </p>
+            <span className="gold-button px-4 py-1.5 rounded-full text-[10px] font-black uppercase inline-block mt-2">
+              Donate Annadanam &rarr;
+            </span>
+          </button>
+
+          {/* Pooja Booking */}
+          <button
+            onClick={() => openDonation('Pooja Booking')}
+            className="bg-gradient-to-r from-[#7A1620] to-[#9C1F2E] border-2 border-[#D4AF37] p-5 rounded-2xl text-left space-y-2 hover:scale-[1.02] transition-transform shadow-xl relative"
+          >
+            <span className="absolute -top-3 right-4 bg-[#D4AF37] text-[#0D0705] text-[10px] font-black px-2 py-0.5 rounded-full uppercase shadow">
+              £116 FIXED SEVA
+            </span>
+            <div className="flex items-center gap-2 text-[#F4C542] font-black text-sm font-cinzel">
+              <Flame className="w-5 h-5 text-[#F4C542]" />
+              <span>POOJA BOOKING</span>
+            </div>
+            <p className="text-xs text-[#F7EFE1]">
+              Sacred Maha Ganapathi Pooja Sankalpam with Priest recitation, special Archana, and Prasadam box.
+            </p>
+            <span className="gold-button px-4 py-1.5 rounded-full text-[10px] font-black uppercase inline-block mt-2">
+              Book Pooja (£116) &rarr;
+            </span>
+          </button>
+
+          {/* Event Donations */}
+          <button
+            onClick={() => openDonation('Event Donations')}
+            className="bg-[#160B08] border border-[#D4AF37]/40 hover:border-[#F4C542] p-5 rounded-2xl text-left space-y-2 hover:scale-[1.02] transition-transform group"
+          >
+            <div className="flex items-center gap-2 text-[#F4C542] font-black text-sm font-cinzel">
+              <Heart className="w-5 h-5 text-[#F4C542]" />
+              <span>EVENT DONATIONS</span>
+            </div>
+            <p className="text-xs text-[#C9B79C]">
+              Contribute to UKTA Ugadi Cultural Fests, youth sports, student helplines, and stage productions.
+            </p>
+            <span className="gold-button px-4 py-1.5 rounded-full text-[10px] font-black uppercase inline-block mt-2">
+              Donate to Events &rarr;
+            </span>
+          </button>
+        </div>
       </div>
 
       {/* Control Bar */}
@@ -170,6 +251,12 @@ export default function EventsPage() {
         </div>
       )}
 
+      {/* DONATION & POOJA MODAL */}
+      <DonationModal
+        isOpen={donateModalOpen}
+        onClose={() => setDonateModalOpen(false)}
+        initialCategory={selectedDonationCategory}
+      />
     </div>
   );
 }
