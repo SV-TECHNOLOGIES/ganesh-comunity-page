@@ -16,12 +16,43 @@ export default function SponsorsPage() {
   };
 
   const sponsors = [
-    { tier: 'Platinum Partners', name: 'TechMahindra UK', logo: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=300' },
-    { tier: 'Platinum Partners', name: 'Apollo Hospitals International', logo: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=300' },
-    { tier: 'Gold Partners', name: 'ICICI Bank UK PLC', logo: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&q=80&w=300' },
-    { tier: 'Gold Partners', name: 'Sitaram Restaurant Chiswick', logo: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=300' },
-    { tier: 'Silver Partners', name: 'Reddy Legal Solicitors London', logo: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&q=80&w=300' },
+    { tier: 'Presented By', name: 'Biryanis', logo: '/assets/sponsers/Biryanies.jpeg' },
+    { tier: 'In Association With', name: 'ELE Entertainments', logo: '/assets/sponsers/ELE%20Enteratinments.jpeg' },
+    { tier: 'Partner', name: 'FT Light', logo: '/assets/sponsers/FT%20Light%20logo%20.png', blackLogoBg: true },
+    { tier: 'Community Partner', name: 'Langley Telugu Association', logo: '/assets/sponsers/Langley%20Telugu%20Association.jpeg' },
+    { tier: 'Partner', name: 'United Core', logo: '/assets/sponsers/United%20Core.jpeg' },
+    { tier: 'Partner', name: 'Willow Pharmacy', logo: '/assets/sponsers/Willow%20Pharmacy.jpeg' },
+    { tier: 'Partner', name: 'Wealthmax', logo: '/assets/sponsers/wealthmax%20logo%20High%20Resolution.%20(1).pdf' },
   ];
+
+  const renderLogo = (logo: string, name: string, blackLogoBg = false) => {
+    const isPdf = logo.toLowerCase().endsWith('.pdf');
+
+    if (isPdf) {
+      return (
+        <div className="w-full h-full flex items-center justify-center bg-white text-[#0F172A] font-black tracking-[0.18em] uppercase text-[10px]">
+          <div className="text-center leading-tight">
+            <div className="text-[9px] text-slate-500 tracking-[0.28em]">PDF</div>
+            <div className="mt-1 text-[11px]">{name}</div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className={blackLogoBg ? 'w-full h-full bg-black flex items-center justify-center' : 'w-full h-full bg-white flex items-center justify-center'}>
+        <div className="relative w-full h-full">
+          <Image
+            src={logo}
+            alt={name}
+            fill
+            className="object-contain p-2"
+            sizes="(max-width: 768px) 100vw, 240px"
+          />
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
@@ -42,11 +73,11 @@ export default function SponsorsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {sponsors.map((sp, idx) => (
           <div key={idx} className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center text-center space-y-3">
-            {/* <span className="bg-mitra-navy text-mitra-gold text-[10px] font-black px-3 py-1 rounded-full uppercase">
+            <span className="bg-mitra-gold/15 text-mitra-gold-dark text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-[0.2em]">
               {sp.tier}
-            </span> */}
-            <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">
-              <Image src={sp.logo} alt={sp.name} fill className="object-cover" />
+            </span>
+            <div className="relative w-32 h-24 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+              {renderLogo(sp.logo, sp.name, sp.blackLogoBg)}
             </div>
             <h3 className="text-sm font-bold text-slate-900 dark:text-white">{sp.name}</h3>
           </div>
