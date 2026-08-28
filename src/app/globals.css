@@ -4,39 +4,46 @@
 
 @layer base {
   body {
-    @apply bg-[#0D0705] text-[#F7EFE1] antialiased selection:bg-[#D4AF37] selection:text-[#0D0705];
-    background-color: #0D0705;
-    color: #F7EFE1;
+    @apply antialiased;
+    background-color: #FFF8F0;
+    color: #3D1A00;
+    selection-color: #FFFFFF;
+    -webkit-user-select: auto;
+  }
+  ::selection {
+    background-color: #E65C00;
+    color: #FFFFFF;
   }
 }
 
-/* Gold Foil Typography Gradient */
+/* ─── Saffron Shimmer Title Text ─── */
 .gold-foil-text {
-  background: linear-gradient(135deg, #FFF0BD 0%, #F4C542 30%, #D4AF37 50%, #996515 80%, #F4C542 100%);
+  background: linear-gradient(135deg, #FF9A3C 0%, #E65C00 30%, #CC4000 50%, #8B2500 80%, #E65C00 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 2px 10px rgba(212, 175, 55, 0.2);
-  animation: goldShimmer 6s linear infinite;
+  background-clip: text;
+  animation: saffronShimmer 6s linear infinite;
 }
 
 .gold-foil-light {
-  background: linear-gradient(135deg, #FFFFFF 0%, #FFF0BD 40%, #F4C542 70%, #D4AF37 100%);
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFE5CC 40%, #FF7A00 70%, #E65C00 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-@keyframes goldShimmer {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+@keyframes saffronShimmer {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 
-/* Ornate Gold Border & Card Styling */
+/* ─── Warm Ivory Card ─── */
 .temple-card {
-  background: linear-gradient(180deg, rgba(22, 11, 8, 0.95) 0%, rgba(13, 7, 5, 0.98) 100%);
-  border: 1px solid rgba(212, 175, 55, 0.35);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(212, 175, 55, 0.1);
+  background: linear-gradient(180deg, rgba(255,250,245,0.97) 0%, rgba(255,248,240,0.99) 100%);
+  border: 1px solid rgba(230, 92, 0, 0.25);
+  box-shadow: 0 8px 30px -8px rgba(61, 26, 0, 0.12), 0 0 20px rgba(230, 92, 0, 0.06);
   backdrop-filter: blur(12px);
 }
 
@@ -44,43 +51,45 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .temple-card-hover:hover {
-  border-color: rgba(244, 197, 66, 0.8);
-  box-shadow: 0 15px 40px -10px rgba(122, 22, 32, 0.5), 0 0 30px rgba(212, 175, 55, 0.3);
+  border-color: rgba(230, 92, 0, 0.7);
+  box-shadow: 0 15px 40px -10px rgba(122, 22, 32, 0.2), 0 0 30px rgba(230, 92, 0, 0.2);
   transform: translateY(-4px);
 }
 
+/* ─── Saffron Primary Button ─── */
 .gold-button {
-  background: linear-gradient(135deg, #F4C542 0%, #D4AF37 50%, #996515 100%);
-  color: #0D0705;
+  background: linear-gradient(135deg, #FF7A00 0%, #E65C00 50%, #CC4000 100%);
+  color: #FFFFFF;
   font-weight: 800;
-  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+  box-shadow: 0 4px 20px rgba(230, 92, 0, 0.4);
   transition: all 0.3s ease;
 }
 .gold-button:hover {
-  background: linear-gradient(135deg, #FFF0BD 0%, #F4C542 50%, #D4AF37 100%);
-  box-shadow: 0 6px 30px rgba(244, 197, 66, 0.6);
+  background: linear-gradient(135deg, #FF9A3C 0%, #FF6A00 50%, #E65C00 100%);
+  box-shadow: 0 6px 30px rgba(230, 92, 0, 0.6);
   transform: translateY(-2px);
 }
 
+/* ─── Maroon Secondary Button ─── */
 .maroon-button {
   background: linear-gradient(135deg, #9C1F2E 0%, #7A1620 50%, #5a0000 100%);
-  color: #F7EFE1;
-  border: 1px solid rgba(212, 175, 55, 0.4);
-  box-shadow: 0 4px 15px rgba(122, 22, 32, 0.5);
+  color: #FFF8F0;
+  border: 1px solid rgba(230, 92, 0, 0.3);
+  box-shadow: 0 4px 15px rgba(122, 22, 32, 0.3);
   transition: all 0.3s ease;
 }
 .maroon-button:hover {
   background: linear-gradient(135deg, #B52637 0%, #9C1F2E 50%, #7A1620 100%);
-  border-color: rgba(244, 197, 66, 0.8);
-  box-shadow: 0 6px 25px rgba(156, 31, 46, 0.7);
+  border-color: rgba(230, 92, 0, 0.7);
+  box-shadow: 0 6px 25px rgba(156, 31, 46, 0.5);
   transform: translateY(-2px);
 }
 
-/* Flame & Diya flickering */
+/* ─── Flame / Diya flickering ─── */
 @keyframes flameFlicker {
   0%, 100% { transform: scale(1) rotate(-1deg); opacity: 1; filter: drop-shadow(0 0 8px #F7941D); }
-  25% { transform: scale(1.08) rotate(1deg); opacity: 0.9; filter: drop-shadow(0 0 14px #F4C542); }
-  50% { transform: scale(0.96) rotate(-2deg); opacity: 1; filter: drop-shadow(0 0 10px #EC1E79); }
+  25% { transform: scale(1.08) rotate(1deg); opacity: 0.9; filter: drop-shadow(0 0 14px #FF7A00); }
+  50% { transform: scale(0.96) rotate(-2deg); opacity: 1; filter: drop-shadow(0 0 10px #E65C00); }
   75% { transform: scale(1.04) rotate(1.5deg); opacity: 0.95; filter: drop-shadow(0 0 16px #F7941D); }
 }
 
@@ -88,24 +97,33 @@
   animation: flameFlicker 1.8s ease-in-out infinite;
 }
 
-/* Mandala Border Ornament */
+/* ─── Mandala background ─── */
 .mandala-bg {
-  background-image: radial-gradient(circle at center, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
+  background-image: radial-gradient(circle at center, rgba(230, 92, 0, 0.07) 0%, transparent 70%);
 }
 
-/* Custom Scrollbar for Devotional Experience */
+/* ─── Lotus petal float animation ─── */
+@keyframes floatPetal {
+  0%   { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+  50%  { transform: translateY(-18px) rotate(8deg); opacity: 1; }
+  100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+}
+.animate-petal {
+  animation: floatPetal 4s ease-in-out infinite;
+}
+
+/* ─── Custom Scrollbar ─── */
 ::-webkit-scrollbar {
   width: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #0D0705;
+  background: #FFF3E0;
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #7A1620, #D4AF37);
+  background: linear-gradient(180deg, #E65C00, #CC4000);
   border-radius: 5px;
-  border: 2px solid #0D0705;
+  border: 2px solid #FFF3E0;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #9C1F2E, #F4C542);
+  background: linear-gradient(180deg, #FF7A00, #E65C00);
 }
-

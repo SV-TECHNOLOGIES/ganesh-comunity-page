@@ -31,35 +31,35 @@ export default function GaneshEvent2026Page() {
   };
 
   return (
-    <div className="bg-[#0D0705] text-[#F7EFE1] min-h-screen">
+    <div className="bg-[#FFF8F0] text-[#3D1A00] min-h-screen">
       
       {/* Top Banner Navigation Bar */}
-      <div className="bg-[#160B08] border-b border-[#D4AF37]/30 py-3 px-4 sm:px-8">
+      <div className="bg-[#FFF3E0] border-b border-[#E65C00]/20 py-3 px-4 sm:px-8 shadow-sm">
         <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-3 text-xs">
           <Link 
             href="/" 
-            className="inline-flex items-center gap-1.5 text-[#F4C542] hover:text-white font-bold transition-colors"
+            className="inline-flex items-center gap-1.5 text-[#E65C00] hover:text-[#CC4000] font-bold transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Return to MITRA UK Home</span>
           </Link>
 
           <div className="flex items-center gap-3">
-            <span className="bg-[#7A1620] text-[#F4C542] border border-[#D4AF37]/40 font-black px-3 py-1 rounded-full text-[10px] uppercase tracking-wider hidden sm:inline-block">
+            <span className="bg-[#FFF0E0] text-[#E65C00] border border-[#E65C00]/30 font-black px-3 py-1 rounded-full text-[10px] uppercase tracking-wider hidden sm:inline-block">
               LONDON GANESH MAHOTSAV 2026
             </span>
             <button
               onClick={() => openPoojaBooking()}
               className="gold-button px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md"
             >
-              <Flame className="w-3.5 h-3.5 fill-current text-[#0D0705]" />
+              <Flame className="w-3.5 h-3.5 fill-current text-white" />
               <span>Book Pooja (£116)</span>
             </button>
             <button
               onClick={() => openDonation('Event Donations')}
-              className="maroon-button px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md border border-[#D4AF37]/40"
+              className="maroon-button px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md border border-[#E65C00]/30"
             >
-              <Heart className="w-3.5 h-3.5 fill-current text-[#F4C542]" />
+              <Heart className="w-3.5 h-3.5 fill-current text-[#FF9A3C]" />
               <span>Make Donation</span>
             </button>
           </div>

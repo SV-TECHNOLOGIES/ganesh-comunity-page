@@ -57,7 +57,7 @@ export default function RitualCountdown() {
       particleCount: 80,
       spread: 70,
       origin: { y: 0.6 },
-      colors: ['#D4AF37', '#F4C542', '#FFD87A', '#7A1620'],
+      colors: ['#E65C00', '#FF7A00', '#FF9A3C', '#7A1620'],
     });
   };
 
@@ -65,14 +65,14 @@ export default function RitualCountdown() {
     <>
       {/* Sticky Mini Countdown Chip */}
       {showSticky && (
-        <div className="fixed top-30 right-6 z-40 bg-[#160B08]/95 border border-[#D4AF37]/50 px-4 py-2 rounded-full shadow-2xl backdrop-blur flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
-          <Flame className="w-4 h-4 text-[#F4C542] animate-flame" />
-          <span className="text-xs font-bold text-[#F7EFE1]">
+        <div className="fixed top-30 right-6 z-40 bg-white/95 border border-[#E65C00]/40 px-4 py-2 rounded-full shadow-xl backdrop-blur flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
+          <Flame className="w-4 h-4 text-[#E65C00] animate-flame" />
+          <span className="text-xs font-bold text-[#3D1A00]">
             <span className="gold-foil-text font-black">{timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s</span> until London Mahotsav
           </span>
           <a
             href="#ritual-clock"
-            className="text-[10px] bg-[#7A1620] hover:bg-[#9C1F2E] text-[#F4C542] px-2.5 py-1 rounded-full font-extrabold uppercase transition-colors"
+            className="text-[10px] bg-[#E65C00] hover:bg-[#CC4000] text-white px-2.5 py-1 rounded-full font-extrabold uppercase transition-colors"
           >
             Clock
           </a>
@@ -80,34 +80,34 @@ export default function RitualCountdown() {
       )}
 
       {/* Main Ritual Clock Section */}
-      <section id="ritual-clock" className="relative py-20 bg-[#160B08] text-[#F7EFE1] border-y border-[#D4AF37]/30 overflow-hidden">
-        {/* Background Mandala Watermark */}
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_#D4AF37_1px,_transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+      <section id="ritual-clock" className="relative py-20 bg-[#FFF0E0] text-[#3D1A00] border-y border-[#E65C00]/20 overflow-hidden">
+        {/* Background dot pattern */}
+        <div className="absolute inset-0 opacity-8 bg-[radial-gradient(circle_at_center,_#E65C00_1px,_transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
 
         <div className="max-w-5xl mx-auto px-4 relative z-10 text-center space-y-12">
           {/* Header */}
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 bg-[#7A1620]/60 border border-[#D4AF37]/40 px-4 py-1 rounded-full">
-              <Sparkles className="w-4 h-4 text-[#F4C542]" />
-              <span className="text-xs font-extrabold uppercase tracking-widest text-[#F4C542]">
+            <div className="inline-flex items-center gap-2 bg-[#FFF8F0] border border-[#E65C00]/30 px-4 py-1 rounded-full">
+              <Sparkles className="w-4 h-4 text-[#E65C00]" />
+              <span className="text-xs font-extrabold uppercase tracking-widest text-[#E65C00]">
                 THE RITUAL COUNTDOWN CLOCK
               </span>
             </div>
 
-            <h2 className="text-3xl sm:text-5xl font-black font-cinzel tracking-wider text-[#F7EFE1]">
+            <h2 className="text-3xl sm:text-5xl font-black font-cinzel tracking-wider text-[#3D1A00]">
               {arrived ? 'HE HAS ARRIVED IN LONDON!' : 'UNTIL THE MAHA GANAPATHI ARRIVES IN LONDON'}
             </h2>
 
-            <div className="flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold text-[#C9B79C]">
-              <Calendar className="w-4 h-4 text-[#D4AF37]" />
+            <div className="flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold text-[#6B3A2A]">
+              <Calendar className="w-4 h-4 text-[#E65C00]" />
               <span>14th September 2026 (Ganesh Chaturthi)</span>
-              <span className="text-[#D4AF37]">•</span>
-              <MapPin className="w-4 h-4 text-[#D4AF37]" />
+              <span className="text-[#E65C00]">•</span>
+              <MapPin className="w-4 h-4 text-[#E65C00]" />
               <span>Langley, Slough, United Kingdom</span>
             </div>
           </div>
 
-          {/* 4 Carved Diya Mandala Dials */}
+          {/* 4 Countdown Dials */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-4xl mx-auto">
             {[
               { label: 'DAYS', value: timeLeft.days },
@@ -117,21 +117,22 @@ export default function RitualCountdown() {
             ].map((unit, idx) => (
               <div
                 key={idx}
-                className="temple-card temple-card-hover p-6 rounded-3xl flex flex-col items-center justify-center relative group"
+                className="temple-card temple-card-hover p-6 rounded-3xl flex flex-col items-center justify-center relative group border border-[#E65C00]/25"
+                onClick={triggerSparks}
               >
                 {/* Flame Flicker Element */}
-                <div className="absolute -top-3 w-6 h-6 rounded-full bg-gradient-to-t from-[#F7941D] to-[#F4C542] flex items-center justify-center animate-flame shadow-[0_0_12px_#F4C542]">
-                  <Flame className="w-3.5 h-3.5 text-[#0D0705]" />
+                <div className="absolute -top-3 w-6 h-6 rounded-full bg-gradient-to-t from-[#E65C00] to-[#FF9A3C] flex items-center justify-center animate-flame shadow-[0_0_12px_rgba(230,92,0,0.6)]">
+                  <Flame className="w-3.5 h-3.5 text-white" />
                 </div>
 
-                {/* Circular Carved Mandala Frame */}
-                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-2 border-[#D4AF37]/50 flex flex-col items-center justify-center bg-[#0D0705]/80 shadow-inner group-hover:border-[#F4C542] transition-colors relative">
+                {/* Circular Frame */}
+                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-2 border-[#E65C00]/40 flex flex-col items-center justify-center bg-[#FFF8F0] shadow-inner group-hover:border-[#E65C00] transition-colors relative">
                   <span className="text-3xl sm:text-4xl font-black font-cinzel gold-foil-text tracking-tighter">
                     {String(unit.value).padStart(2, '0')}
                   </span>
                 </div>
 
-                <span className="mt-4 text-xs font-black tracking-widest text-[#C9B79C] group-hover:text-[#F4C542] transition-colors uppercase">
+                <span className="mt-4 text-xs font-black tracking-widest text-[#6B3A2A] group-hover:text-[#E65C00] transition-colors uppercase">
                   {unit.label}
                 </span>
               </div>

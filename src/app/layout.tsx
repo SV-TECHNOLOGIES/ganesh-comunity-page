@@ -16,7 +16,7 @@ export default function RootLayout({
   const orgJsonLd = generateOrganizationJsonLd();
 
   return (
-    <html lang="en-GB" className="scroll-smooth dark">
+    <html lang="en-GB" className="scroll-smooth">
       <head>
         <script
           type="application/ld+json"
@@ -26,7 +26,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@500;700;900&family=Great+Vibes&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
-      <body className="bg-[#0D0705] text-[#F7EFE1] font-['Plus_Jakarta_Sans',sans-serif] min-h-screen flex flex-col justify-between selection:bg-[#D4AF37] selection:text-[#0D0705]">
+      <body className="bg-[#FFF8F0] text-[#3D1A00] font-['Plus_Jakarta_Sans',sans-serif] min-h-screen flex flex-col justify-between selection:bg-[#E65C00] selection:text-[#FFFFFF]">
         <AuthProvider>
           <AnalyticsTracker />
           <Header />

@@ -111,16 +111,16 @@ export default function MembershipPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-[#0D0705] text-[#F7EFE1] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#FFF8F0] text-[#3D1A00] flex items-center justify-center p-4">
         <div className="text-center space-y-6 max-w-md">
-          <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-500">
-            <ShieldCheck className="w-10 h-10 text-emerald-400" />
+          <div className="w-20 h-20 bg-emerald-50/20 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-500">
+            <ShieldCheck className="w-10 h-10 text-emerald-600" />
           </div>
           <h2 className="text-3xl font-black font-cinzel gold-foil-text">Welcome to MITRA!</h2>
-          <p className="text-[#C9B79C] text-sm">
-            Your <strong className="text-[#F4C542]">{selectedTier}</strong> membership has been created. Redirecting you to your Member Dashboard…
+          <p className="text-[#6B3A2A] text-sm">
+            Your <strong className="text-[#E65C00]">{selectedTier}</strong> membership has been created. Redirecting you to your Member Dashboard…
           </p>
-          <div className="w-8 h-8 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="w-8 h-8 border-4 border-[#E65C00] border-t-transparent rounded-full animate-spin mx-auto" />
         </div>
       </div>
     );
@@ -395,17 +395,17 @@ export default function MembershipPage() {
         </div>
       ) : (
         /* Registration coming soon notice */
-        <div className="max-w-2xl mx-auto bg-[#0D0705] border-2 border-[#D4AF37]/50 rounded-3xl p-10 text-center space-y-5 shadow-[0_0_40px_rgba(212,175,55,0.15)]">
-          <div className="w-16 h-16 bg-[#7A1620]/30 rounded-full flex items-center justify-center mx-auto border-2 border-[#D4AF37]/50">
-            <ShieldCheck className="w-8 h-8 text-[#D4AF37]" />
+        <div className="max-w-2xl mx-auto bg-[#FFF0E0] border-2 border-[#E65C00]/30 rounded-3xl p-10 text-center space-y-5 shadow-md">
+          <div className="w-16 h-16 bg-[#FFF8F0] rounded-full flex items-center justify-center mx-auto border-2 border-[#E65C00]/40">
+            <ShieldCheck className="w-8 h-8 text-[#E65C00]" />
           </div>
-          <h2 className="text-2xl font-black font-cinzel text-[#F4C542]">Membership Registration</h2>
-          <p className="text-sm text-[#C9B79C] leading-relaxed">
-            Online membership registration is <strong className="text-[#F4C542]">coming soon</strong>. Please contact us directly to join the MITRA family.
+          <h2 className="text-2xl font-black font-cinzel text-[#E65C00]">Membership Registration</h2>
+          <p className="text-sm text-[#6B3A2A] leading-relaxed">
+            Online membership registration is <strong className="text-[#E65C00]">coming soon</strong>. Please contact us directly to join the MITRA family.
           </p>
-          <p className="text-xs text-[#C9B79C]">
+          <p className="text-xs text-[#6B3A2A]">
             Already a member?{' '}
-            <a href="/login" className="text-[#F4C542] font-bold hover:underline">Login to your portal →</a>
+            <a href="/login" className="text-[#E65C00] font-bold hover:underline">Login to your portal →</a>
           </p>
         </div>
       )}

@@ -368,23 +368,23 @@ export default function DonationModal({
     [donorName, donorEmail, getFinalAmount, getCauseName]
   );
 
-  // Stripe Elements appearance — matches the dark temple theme
+  // Stripe Elements appearance — matches the ivory saffron theme
   const stripeAppearance = {
-    theme: 'night' as const,
+    theme: 'flat' as const,
     variables: {
-      colorPrimary: '#F4C542',
-      colorBackground: '#0D0705',
-      colorText: '#F7EFE1',
+      colorPrimary: '#E65C00',
+      colorBackground: '#FFFFFF',
+      colorText: '#3D1A00',
       colorDanger: '#ef4444',
       fontFamily: 'ui-sans-serif, system-ui, sans-serif',
       borderRadius: '12px',
     },
     rules: {
-      '.Input': { border: '1px solid rgba(212,175,55,0.4)', padding: '10px 14px' },
-      '.Input:focus': { border: '1px solid #F4C542', boxShadow: '0 0 0 2px rgba(244,197,66,0.2)' },
-      '.Tab': { border: '1px solid rgba(212,175,55,0.3)', backgroundColor: '#160B08' },
-      '.Tab--selected': { border: '1px solid #D4AF37', backgroundColor: '#7A1620' },
-      '.Label': { color: '#C9B79C', fontWeight: '600', fontSize: '11px' },
+      '.Input': { border: '1px solid rgba(230,92,0,0.3)', padding: '10px 14px' },
+      '.Input:focus': { border: '1px solid #E65C00', boxShadow: '0 0 0 2px rgba(230,92,0,0.15)' },
+      '.Tab': { border: '1px solid rgba(230,92,0,0.2)', backgroundColor: '#FFF0E0' },
+      '.Tab--selected': { border: '1px solid #E65C00', backgroundColor: '#FFF0E0' },
+      '.Label': { color: '#6B3A2A', fontWeight: '600', fontSize: '11px' },
     },
   };
 
@@ -392,12 +392,12 @@ export default function DonationModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-mitra-gold/40 relative max-h-[90vh] overflow-y-auto"
-           style={{ background: '#0D0705' }}>
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+      <div className="temple-card rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-xl border border-[#E65C00]/30 relative max-h-[90vh] overflow-y-auto"
+           style={{ background: '#FFF8F0' }}>
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-200 p-1 transition-colors"
+          className="absolute top-4 right-4 text-[#6B3A2A] hover:text-[#E65C00] p-1 transition-colors"
         >
           <X className="w-6 h-6" />
         </button>
@@ -405,46 +405,46 @@ export default function DonationModal({
         {/* ── SUCCESS ───────────────────────────────────────────────────── */}
         {step === 'success' && receipt ? (
           <div className="text-center py-4 space-y-4">
-            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-md">
+            <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-sm">
               <CheckCircle2 className="w-10 h-10" />
             </div>
-            <h2 className="text-2xl font-black text-[#F7EFE1]">
+            <h2 className="text-2xl font-black text-[#3D1A00] font-cinzel">
               Thank You For Your Generosity!
             </h2>
-            <p className="text-xs text-[#C9B79C]">
+            <p className="text-xs text-[#6B3A2A]">
               Your contribution directly empowers the Telugu community across the United Kingdom.
             </p>
 
-            <div className="bg-[#160B08] p-5 rounded-2xl border border-[#D4AF37]/30 text-left space-y-2 text-xs">
-              <div className="flex justify-between border-b border-[#D4AF37]/20 pb-2">
-                <span className="text-[#C9B79C]">Official Receipt No:</span>
-                <span className="font-mono font-bold text-[#F4C542]">{receipt.receiptNo}</span>
+            <div className="bg-[#FFF0E0] p-5 rounded-2xl border border-[#E65C00]/25 text-left space-y-2 text-xs">
+              <div className="flex justify-between border-b border-[#E65C00]/15 pb-2">
+                <span className="text-[#6B3A2A]">Official Receipt No:</span>
+                <span className="font-mono font-bold text-[#E65C00]">{receipt.receiptNo}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#C9B79C]">Donor Name:</span>
-                <span className="font-semibold text-[#F7EFE1]">{receipt.donorName}</span>
+                <span className="text-[#6B3A2A]">Donor Name:</span>
+                <span className="font-semibold text-[#3D1A00]">{receipt.donorName}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#C9B79C]">Donation Amount:</span>
-                <span className="font-black text-base text-emerald-400">£{receipt.amount}.00 GBP</span>
+                <span className="text-[#6B3A2A]">Donation Amount:</span>
+                <span className="font-black text-base text-emerald-600">£{receipt.amount}.00 GBP</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#C9B79C]">Selected Cause:</span>
-                <span className="font-semibold text-[#F7EFE1] text-right max-w-[200px]">{receipt.cause}</span>
+                <span className="text-[#6B3A2A]">Selected Cause:</span>
+                <span className="font-semibold text-[#3D1A00] text-right max-w-[200px]">{receipt.cause}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#C9B79C]">Transaction Date:</span>
-                <span className="text-[#F7EFE1]">{receipt.date}</span>
+                <span className="text-[#6B3A2A]">Transaction Date:</span>
+                <span className="text-[#3D1A00]">{receipt.date}</span>
               </div>
             </div>
 
-            <p className="text-[11px] text-[#C9B79C]">
-              A Stripe receipt has been emailed to <strong className="text-[#F4C542]">{receipt.donorEmail}</strong>
+            <p className="text-[11px] text-[#6B3A2A]">
+              A Stripe receipt has been emailed to <strong className="text-[#E65C00]">{receipt.donorEmail}</strong>
             </p>
 
             <button
               onClick={() => { setReceipt(null); setStep('details'); onClose(); }}
-              className="w-full bg-[#7A1620] hover:bg-[#8f1c25] text-[#F4C542] font-bold py-3 rounded-xl text-sm border border-[#D4AF37]/40 shadow transition-all"
+              className="w-full bg-[#E65C00] hover:bg-[#FF7A00] text-white font-bold py-3 rounded-xl text-sm transition-all shadow"
             >
               Done / Return to Portal
             </button>
@@ -454,45 +454,45 @@ export default function DonationModal({
         ) : step === 'guest-details' ? (
           <form onSubmit={handleGuestSubmit} className="space-y-5">
             {/* Header */}
-            <div className="flex items-center gap-3 border-b border-[#D4AF37]/30 pb-3">
-              <div className="p-3 bg-[#7A1620] text-[#F4C542] rounded-2xl shadow border border-[#D4AF37]/40">
+            <div className="flex items-center gap-3 border-b border-[#E65C00]/25 pb-3">
+              <div className="p-3 bg-[#FFF0E0] text-[#E65C00] rounded-2xl shadow-sm border border-[#E65C00]/30">
                 <Heart className="w-6 h-6 fill-current" />
               </div>
               <div>
                 <h2 className="text-xl font-black font-cinzel gold-foil-text">MAKE A DONATION</h2>
-                <p className="text-xs text-[#C9B79C]">Quick details — no account needed</p>
+                <p className="text-xs text-[#6B3A2A]">Quick details — no account needed</p>
               </div>
             </div>
 
             {/* Info banner */}
-            <div className="bg-[#160B08] border border-[#D4AF37]/30 rounded-xl p-3 flex items-start gap-2.5">
-              <Sparkles className="w-4 h-4 text-[#F4C542] shrink-0 mt-0.5" />
-              <p className="text-[11px] text-[#C9B79C] leading-relaxed">
+            <div className="bg-[#FFF0E0] border border-[#E65C00]/25 rounded-xl p-3 flex items-start gap-2.5">
+              <Sparkles className="w-4 h-4 text-[#E65C00] shrink-0 mt-0.5" />
+              <p className="text-[11px] text-[#6B3A2A] leading-relaxed">
                 Enter your details below. We'll create your free MITRA account instantly and email your login credentials — then take you straight to payment.
               </p>
             </div>
 
             {/* Name */}
             <div>
-              <label className="flex items-center gap-1.5 text-xs font-bold text-[#C9B79C] mb-1.5">
-                <User className="w-3.5 h-3.5 text-[#F4C542]" />
+              <label className="flex items-center gap-1.5 text-xs font-bold text-[#6B3A2A] mb-1.5">
+                <User className="w-3.5 h-3.5 text-[#E65C00]" />
                 <span>Full Name *</span>
               </label>
               <input
                 type="text"
                 required
-                placeholder="e.g. Radhika & Family"
+                placeholder="e.g. Radhika &amp; Family"
                 value={guestName}
                 onChange={(e) => setGuestName(e.target.value)}
-                className="w-full bg-[#0D0705] border border-[#D4AF37]/40 rounded-xl p-2.5 text-xs text-[#F7EFE1] focus:border-[#F4C542] focus:outline-none"
+                className="w-full bg-white border border-[#E65C00]/30 rounded-xl p-2.5 text-xs text-[#3D1A00] focus:border-[#E65C00] focus:outline-none placeholder:text-[#6B3A2A]/40"
               />
             </div>
 
             {/* Email + Phone */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="flex items-center gap-1.5 text-xs font-bold text-[#C9B79C] mb-1.5">
-                  <Mail className="w-3.5 h-3.5 text-[#F4C542]" />
+                <label className="flex items-center gap-1.5 text-xs font-bold text-[#6B3A2A] mb-1.5">
+                  <Mail className="w-3.5 h-3.5 text-[#E65C00]" />
                   <span>Email Address *</span>
                 </label>
                 <input
@@ -501,12 +501,12 @@ export default function DonationModal({
                   placeholder="devotee@example.com"
                   value={guestEmail}
                   onChange={(e) => setGuestEmail(e.target.value)}
-                  className="w-full bg-[#0D0705] border border-[#D4AF37]/40 rounded-xl p-2.5 text-xs text-[#F7EFE1] focus:border-[#F4C542] focus:outline-none"
+                  className="w-full bg-white border border-[#E65C00]/30 rounded-xl p-2.5 text-xs text-[#3D1A00] focus:border-[#E65C00] focus:outline-none placeholder:text-[#6B3A2A]/40"
                 />
               </div>
               <div>
-                <label className="flex items-center gap-1.5 text-xs font-bold text-[#C9B79C] mb-1.5">
-                  <Phone className="w-3.5 h-3.5 text-[#F4C542]" />
+                <label className="flex items-center gap-1.5 text-xs font-bold text-[#6B3A2A] mb-1.5">
+                  <Phone className="w-3.5 h-3.5 text-[#E65C00]" />
                   <span>Phone / WhatsApp *</span>
                 </label>
                 <input
@@ -515,21 +515,21 @@ export default function DonationModal({
                   placeholder="+44 7000 000000"
                   value={guestPhone}
                   onChange={(e) => setGuestPhone(e.target.value)}
-                  className="w-full bg-[#0D0705] border border-[#D4AF37]/40 rounded-xl p-2.5 text-xs text-[#F7EFE1] focus:border-[#F4C542] focus:outline-none"
+                  className="w-full bg-white border border-[#E65C00]/30 rounded-xl p-2.5 text-xs text-[#3D1A00] focus:border-[#E65C00] focus:outline-none placeholder:text-[#6B3A2A]/40"
                 />
               </div>
             </div>
 
             {/* Guest error */}
             {guestError && (
-              <div className="bg-red-950/80 border border-red-500/50 text-red-200 text-xs p-3 rounded-xl flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+              <div className="bg-red-50 border border-red-300 text-red-700 text-xs p-3 rounded-xl flex items-start gap-2 font-semibold">
+                <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
                 <span>{guestError}</span>
               </div>
             )}
 
-            <div className="text-[11px] text-[#C9B79C] flex items-center justify-center gap-1.5">
-              <Lock className="w-3.5 h-3.5 text-emerald-400" />
+            <div className="text-[11px] text-[#6B3A2A] flex items-center justify-center gap-1.5">
+              <Lock className="w-3.5 h-3.5 text-emerald-600" />
               <span>Your details are kept private · PCI-DSS Encrypted</span>
             </div>
 
@@ -540,12 +540,12 @@ export default function DonationModal({
             >
               {guestSubmitting ? (
                 <>
-                  <Loader2 className="w-4 h-4 text-[#0D0705] animate-spin" />
+                  <Loader2 className="w-4 h-4 text-white animate-spin" />
                   <span>Setting up your account...</span>
                 </>
               ) : (
                 <>
-                  <Heart className="w-4 h-4 fill-current text-[#0D0705]" />
+                  <Heart className="w-4 h-4 fill-current text-white" />
                   <span>Continue to Donate →</span>
                 </>
               )}
@@ -556,30 +556,30 @@ export default function DonationModal({
         ) : step === 'details' ? (
           <form onSubmit={handleDetailsSubmit} className="space-y-5">
             {/* Header */}
-            <div className="flex items-center gap-3 border-b border-[#D4AF37]/30 pb-3">
-              <div className="p-3 bg-[#7A1620] text-[#F4C542] rounded-2xl shadow border border-[#D4AF37]/40">
+            <div className="flex items-center gap-3 border-b border-[#E65C00]/25 pb-3">
+              <div className="p-3 bg-[#FFF0E0] text-[#E65C00] rounded-2xl shadow-sm border border-[#E65C00]/30">
                 <Heart className="w-6 h-6 fill-current" />
               </div>
               <div>
                 <h2 className="text-xl font-black font-cinzel gold-foil-text">
                   MAKE A DONATION
                 </h2>
-                <p className="text-xs text-[#C9B79C]">
-                  MITRA UK & Mahotsav Seva Contributions
+                <p className="text-xs text-[#6B3A2A]">
+                  MITRA UK &amp; Mahotsav Seva Contributions
                 </p>
               </div>
             </div>
 
             {/* Category Selection */}
             <div>
-              <label className="block text-xs font-bold text-[#F4C542] uppercase tracking-wider mb-2">
+              <label className="block text-xs font-bold text-[#E65C00] uppercase tracking-wider mb-2">
                 Select Donation Category
               </label>
               <div className="grid grid-cols-2 gap-3">
                 {(
                   [
-                    { key: 'Annadanam' as Category, label: 'Annadanam Seva', icon: <Utensils className="w-4 h-4 text-[#F4C542]" />, desc: 'Sponsor Mahaprasadam food distribution' },
-                    { key: 'Event Donations' as Category, label: 'Event Support Fund', icon: <Calendar className="w-4 h-4 text-[#F4C542]" />, desc: 'Support 6ft idol, mandap & stage setup' },
+                    { key: 'Annadanam' as Category, label: 'Annadanam Seva', icon: <Utensils className="w-4 h-4 text-[#E65C00]" />, desc: 'Sponsor Mahaprasadam food distribution' },
+                    { key: 'Event Donations' as Category, label: 'Event Support Fund', icon: <Calendar className="w-4 h-4 text-[#E65C00]" />, desc: 'Support 6ft idol, mandap &amp; stage setup' },
                   ] as Array<{ key: Category; label: string; icon: React.ReactNode; desc: string }>
                 ).map(({ key, label, icon, desc }) => (
                   <button
@@ -588,15 +588,15 @@ export default function DonationModal({
                     onClick={() => setCategory(key)}
                     className={`py-3 px-3 rounded-2xl text-xs font-bold transition-all border flex flex-col items-start gap-1 relative text-left ${
                       category === key
-                        ? 'bg-[#7A1620] text-[#F4C542] border-[#D4AF37] shadow-lg ring-1 ring-[#F4C542]'
-                        : 'bg-[#160B08] text-[#C9B79C] border-[#D4AF37]/20 hover:border-[#F4C542]'
+                        ? 'bg-[#FFF0E0] text-[#E65C00] border-[#E65C00] shadow-md ring-1 ring-[#E65C00]'
+                        : 'bg-white text-[#6B3A2A] border-[#E65C00]/20 hover:border-[#E65C00]'
                     }`}
                   >
                     <div className="flex items-center gap-1.5 font-cinzel font-black">
                       {icon}
-                      <span className={category === key ? 'text-[#F4C542]' : 'text-[#F7EFE1]'}>{label}</span>
+                      <span className={category === key ? 'text-[#E65C00]' : 'text-[#3D1A00]'}>{label}</span>
                     </div>
-                    <p className="text-[10px] text-[#C9B79C] leading-snug">{desc}</p>
+                    <p className="text-[10px] text-[#6B3A2A] leading-snug">{desc}</p>
                   </button>
                 ))}
               </div>
@@ -604,7 +604,7 @@ export default function DonationModal({
 
             {/* Amount Selection */}
             <div>
-              <label className="block text-xs font-bold text-[#C9B79C] mb-2">
+              <label className="block text-xs font-bold text-[#6B3A2A] mb-2">
                 Select Donation Amount (GBP £ · Min £1)
               </label>
               <div className="grid grid-cols-4 gap-2 mb-3">
@@ -615,8 +615,8 @@ export default function DonationModal({
                     onClick={() => { setAmount(amt); setCustomAmount(''); }}
                     className={`py-2.5 rounded-xl text-xs font-black transition-all border ${
                       amount === amt && !customAmount
-                        ? 'bg-[#7A1620] text-[#F4C542] border-[#D4AF37]'
-                        : 'bg-[#160B08] text-[#C9B79C] border-[#D4AF37]/20 hover:border-[#F4C542]'
+                        ? 'bg-[#FFF0E0] text-[#E65C00] border-[#E65C00]'
+                        : 'bg-white text-[#6B3A2A] border-[#E65C00]/20 hover:border-[#E65C00]'
                     }`}
                   >
                     £{amt}
@@ -629,27 +629,27 @@ export default function DonationModal({
                 placeholder="Or enter any custom amount above £1"
                 value={customAmount}
                 onChange={(e) => setCustomAmount(e.target.value)}
-                className="w-full bg-[#0D0705] border border-[#D4AF37]/40 rounded-xl p-2.5 text-xs text-[#F7EFE1] focus:border-[#F4C542] focus:outline-none"
+                className="w-full bg-white border border-[#E65C00]/30 rounded-xl p-2.5 text-xs text-[#3D1A00] focus:border-[#E65C00] focus:outline-none placeholder:text-[#6B3A2A]/40"
               />
             </div>
 
             {/* Donor Details */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-[#C9B79C] mb-1">
+                <label className="block text-xs font-bold text-[#6B3A2A] mb-1">
                   Full Name / Gotram
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Radhika & Family"
+                  placeholder="e.g. Radhika &amp; Family"
                   value={donorName}
                   onChange={(e) => setDonorName(e.target.value)}
-                  className="w-full bg-[#0D0705] border border-[#D4AF37]/40 rounded-xl p-2.5 text-xs text-[#F7EFE1] focus:border-[#F4C542] focus:outline-none"
+                  className="w-full bg-white border border-[#E65C00]/30 rounded-xl p-2.5 text-xs text-[#3D1A00] focus:border-[#E65C00] focus:outline-none placeholder:text-[#6B3A2A]/40"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-[#C9B79C] mb-1">
+                <label className="block text-xs font-bold text-[#6B3A2A] mb-1">
                   Email Address for Receipt
                 </label>
                 <input
@@ -658,21 +658,21 @@ export default function DonationModal({
                   placeholder="devotee@example.com"
                   value={donorEmail}
                   onChange={(e) => setDonorEmail(e.target.value)}
-                  className="w-full bg-[#0D0705] border border-[#D4AF37]/40 rounded-xl p-2.5 text-xs text-[#F7EFE1] focus:border-[#F4C542] focus:outline-none"
+                  className="w-full bg-white border border-[#E65C00]/30 rounded-xl p-2.5 text-xs text-[#3D1A00] focus:border-[#E65C00] focus:outline-none placeholder:text-[#6B3A2A]/40"
                 />
               </div>
             </div>
 
             {/* Session error */}
             {sessionError && (
-              <div className="bg-red-950/80 border border-red-500/50 text-red-200 text-xs p-3 rounded-xl flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+              <div className="bg-red-50 border border-red-300 text-red-700 text-xs p-3 rounded-xl flex items-start gap-2 font-semibold">
+                <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
                 <span>{sessionError}</span>
               </div>
             )}
 
-            <div className="text-[11px] text-[#C9B79C] flex items-center justify-center gap-1.5">
-              <Lock className="w-3.5 h-3.5 text-emerald-400" />
+            <div className="text-[11px] text-[#6B3A2A] flex items-center justify-center gap-1.5">
+              <Lock className="w-3.5 h-3.5 text-emerald-600" />
               <span>PCI-DSS Encrypted · Powered by Stripe</span>
             </div>
 
@@ -683,12 +683,12 @@ export default function DonationModal({
             >
               {submitting ? (
                 <>
-                  <Loader2 className="w-4 h-4 text-[#0D0705] animate-spin" />
+                  <Loader2 className="w-4 h-4 text-white animate-spin" />
                   <span>Preparing Secure Payment...</span>
                 </>
               ) : (
                 <>
-                  <Heart className="w-4 h-4 fill-current text-[#0D0705]" />
+                  <Heart className="w-4 h-4 fill-current text-white" />
                   <span>
                     Proceed to Pay £{getFinalAmount()}.00
                   </span>
@@ -719,15 +719,15 @@ export default function DonationModal({
         ) : (
           /* Fallback: Stripe not configured */
           <div className="text-center py-8 space-y-4">
-            <AlertCircle className="w-12 h-12 text-amber-400 mx-auto" />
-            <h3 className="text-lg font-black text-[#F4C542]">Stripe Not Configured</h3>
-            <p className="text-xs text-[#C9B79C]">
+            <AlertCircle className="w-12 h-12 text-amber-500 mx-auto" />
+            <h3 className="text-lg font-black text-[#E65C00]">Stripe Not Configured</h3>
+            <p className="text-xs text-[#6B3A2A]">
               Please add your Stripe API keys in{' '}
-              <strong className="text-[#F4C542]">Admin → Payments → Stripe Account Config</strong>, then restart the server.
+              <strong className="text-[#E65C00]">Admin → Payments → Stripe Account Config</strong>, then restart the server.
             </p>
             <button
               onClick={onClose}
-              className="text-xs text-[#C9B79C] hover:text-[#F4C542] underline"
+              className="text-xs text-[#6B3A2A] hover:text-[#E65C00] underline"
             >
               Close
             </button>

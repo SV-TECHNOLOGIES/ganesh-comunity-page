@@ -87,7 +87,7 @@ END:VCALENDAR`;
   // If viewing Ganesh Chaturthi event, render the full Home Page experience with 3D Ganesha & Puja booking!
   if (isGaneshEvent) {
     return (
-      <div className="bg-[#0D0705] text-[#F7EFE1] min-h-screen">
+      <div className="bg-[#FFF8F0] text-[#3D1A00] min-h-screen">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -95,11 +95,11 @@ END:VCALENDAR`;
 
         {/* Back Link Bar */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2 flex justify-between items-center">
-          <Link href="/events" className="inline-flex items-center gap-1.5 text-xs font-bold text-[#F4C542] hover:underline">
+          <Link href="/events" className="inline-flex items-center gap-1.5 text-xs font-bold text-[#E65C00] hover:underline">
             <ArrowLeft className="w-4 h-4" />
             <span>Back to All Events</span>
           </Link>
-          <span className="bg-[#7A1620] text-[#F4C542] border border-[#D4AF37]/40 text-[10px] font-black px-3 py-1 rounded-full uppercase">
+          <span className="bg-[#FFF0E0] text-[#E65C00] border border-[#E65C00]/25 text-[10px] font-black px-3 py-1 rounded-full uppercase">
             GANESH CHATURTHI FESTIVAL PAGE
           </span>
         </div>

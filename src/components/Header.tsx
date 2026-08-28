@@ -46,17 +46,17 @@ export default function Header() {
   const isCurrent = (path: string) => pathname === path;
 
   return (
-    <header className="sticky top-0 z-50 bg-[#0D0705]/95 backdrop-blur-md border-b border-[#D4AF37]/30 shadow-2xl transition-all">
+    <header className="sticky top-0 z-50 bg-[#FFF8F0]/96 backdrop-blur-md border-b border-[#E65C00]/20 shadow-[0_2px_20px_rgba(61,26,0,0.08)] transition-all">
       
-      {/* Optional Top Ribbon Bar */}
+      {/* Optional Top Ribbon Bar — Saffron */}
       {NAV_CONFIG.SHOW_TOP_RIBBON && (
-        <div className="bg-gradient-to-r from-[#7A1620] via-[#9C1F2E] to-[#7A1620] text-[#F7EFE1] py-1.5 px-4 text-xs font-semibold">
+        <div className="bg-gradient-to-r from-[#E65C00] via-[#FF7A00] to-[#E65C00] text-white py-1.5 px-4 text-xs font-semibold">
           <div className="max-w-7xl mx-auto flex justify-between items-center">
             <div className="flex items-center space-x-2">
-              <span className="bg-[#D4AF37] text-[#0D0705] font-black px-2 py-0.5 rounded text-[10px] uppercase">
+              <span className="bg-white text-[#E65C00] font-black px-2 py-0.5 rounded text-[10px] uppercase">
                 LONDON GANESH MAHOTSAV 2026
               </span>
-              <span className="hidden sm:inline text-[#FFD87A]">
+              <span className="hidden sm:inline text-[#FFF0DD]">
                 14th September 2026 · Langley, Slough
               </span>
             </div>
@@ -66,23 +66,23 @@ export default function Header() {
                 href="https://chat.whatsapp.com/IVqirWWzM96IBNRfhSWGEd"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#F4C542] hover:text-white transition-colors flex items-center gap-1.5 font-bold text-[11px]"
+                className="text-white hover:text-[#FFF0DD] transition-colors flex items-center gap-1.5 font-bold text-[11px]"
               >
                 <img src="/assets/whatsapp.png" alt="WhatsApp" className="w-3.5 h-3.5 object-contain" />
                 <span>WhatsApp Group</span>
               </a>
               {NAV_CONFIG.SHOW_LOGIN && !isLoggedIn && (
                 <>
-                  <span className="text-[#D4AF37]/40">|</span>
-                  <Link href="/login" className="hover:text-[#F4C542] transition-colors flex items-center gap-1 text-[11px] font-semibold">
-                    <UserCheck className="w-3.5 h-3.5 text-[#F4C542]" />
+                  <span className="text-white/40">|</span>
+                  <Link href="/login" className="hover:text-[#FFF0DD] transition-colors flex items-center gap-1 text-[11px] font-semibold">
+                    <UserCheck className="w-3.5 h-3.5" />
                     <span>Member Login</span>
                   </Link>
                 </>
               )}
-              <span className="text-[#D4AF37]/40">|</span>
-              <Link href="/admin" className="hover:text-[#F4C542] transition-colors flex items-center gap-1 text-[11px] font-semibold">
-                <ShieldAlert className="w-3.5 h-3.5 text-[#F4C542]" />
+              <span className="text-white/40">|</span>
+              <Link href="/admin" className="hover:text-[#FFF0DD] transition-colors flex items-center gap-1 text-[11px] font-semibold">
+                <ShieldAlert className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Admin CMS</span>
               </Link>
             </div>
@@ -96,7 +96,7 @@ export default function Header() {
           
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-16 h-16 rounded-full overflow-hidden shrink-0">
+            <div className="w-16 h-16 rounded-full overflow-hidden shrink-0 ring-2 ring-[#E65C00]/30 group-hover:ring-[#E65C00] transition-all">
               <img
                 src="/assets/poster.jpg"
                 alt="MITRA UK Logo"
@@ -104,10 +104,10 @@ export default function Header() {
               />
             </div>
             <div>
-              <span className="font-black text-xl text-[#F4C542] font-cinzel tracking-wider block leading-none">
+              <span className="font-black text-xl text-[#E65C00] font-cinzel tracking-wider block leading-none">
                 MITRA UK
               </span>
-              <span className="text-[10px] font-extrabold text-[#C9B79C] tracking-widest uppercase block mt-1">
+              <span className="text-[10px] font-extrabold text-[#6B3A2A] tracking-widest uppercase block mt-1">
                 Mana Indian Telugu Roots Abroad
               </span>
             </div>
@@ -117,7 +117,7 @@ export default function Header() {
           <nav className="hidden lg:flex items-center space-x-3 xl:space-x-5 text-[11px] xl:text-xs font-bold uppercase tracking-wider whitespace-nowrap pl-4">
             <Link 
               href="/" 
-              className={`transition-colors whitespace-nowrap hover:text-[#F4C542] ${isCurrent('/') ? 'text-[#F4C542] font-black border-b-2 border-[#F4C542] pb-1' : 'text-[#F7EFE1]'}`}
+              className={`transition-colors whitespace-nowrap hover:text-[#E65C00] ${isCurrent('/') ? 'text-[#E65C00] font-black border-b-2 border-[#E65C00] pb-1' : 'text-[#3D1A00]'}`}
             >
               Home
             </Link>
@@ -129,22 +129,22 @@ export default function Header() {
                 onMouseEnter={() => setAboutDropdown(true)}
                 onMouseLeave={() => setAboutDropdown(false)}
               >
-                <button className="flex items-center gap-1 text-[#F7EFE1] hover:text-[#F4C542] py-2 whitespace-nowrap">
+                <button className="flex items-center gap-1 text-[#3D1A00] hover:text-[#E65C00] py-2 whitespace-nowrap">
                   <span>About US</span>
                   <ChevronDown className="w-3.5 h-3.5" />
                 </button>
                 {aboutDropdown && (
-                  <div className="absolute top-full left-0 w-56 bg-[#160B08] shadow-2xl rounded-2xl py-2 border border-[#D4AF37]/40 z-50">
-                    <Link href="/about" className="block px-4 py-2 text-xs text-[#F7EFE1] hover:bg-[#7A1620] hover:text-[#F4C542] whitespace-nowrap">MITRA UK Mission</Link>
-                    <Link href="/history" className="block px-4 py-2 text-xs text-[#F7EFE1] hover:bg-[#7A1620] hover:text-[#F4C542] whitespace-nowrap">Guinness World Record</Link>
-                    <Link href="/chairman-message" className="block px-4 py-2 text-xs text-[#F7EFE1] hover:bg-[#7A1620] hover:text-[#F4C542] whitespace-nowrap">Chairman's Address</Link>
+                  <div className="absolute top-full left-0 w-56 bg-[#FFFAF5] shadow-xl rounded-2xl py-2 border border-[#E65C00]/20 z-50">
+                    <Link href="/about" className="block px-4 py-2 text-xs text-[#3D1A00] hover:bg-[#FFF0E0] hover:text-[#E65C00] whitespace-nowrap">MITRA UK Mission</Link>
+                    <Link href="/history" className="block px-4 py-2 text-xs text-[#3D1A00] hover:bg-[#FFF0E0] hover:text-[#E65C00] whitespace-nowrap">Guinness World Record</Link>
+                    <Link href="/chairman-message" className="block px-4 py-2 text-xs text-[#3D1A00] hover:bg-[#FFF0E0] hover:text-[#E65C00] whitespace-nowrap">Chairman's Address</Link>
                   </div>
                 )}
               </div>
             ) : (
               <Link 
                 href="/about" 
-                className={`transition-colors whitespace-nowrap hover:text-[#F4C542] ${isCurrent('/about') ? 'text-[#F4C542] font-black border-b-2 border-[#F4C542] pb-1' : 'text-[#F7EFE1]'}`}
+                className={`transition-colors whitespace-nowrap hover:text-[#E65C00] ${isCurrent('/about') ? 'text-[#E65C00] font-black border-b-2 border-[#E65C00] pb-1' : 'text-[#3D1A00]'}`}
               >
                 About US
               </Link>
@@ -154,7 +154,7 @@ export default function Header() {
             {NAV_CONFIG.SHOW_LEADERSHIP && (
               <Link 
                 href="/leadership" 
-                className={`transition-colors whitespace-nowrap hover:text-[#F4C542] ${isCurrent('/leadership') ? 'text-[#F4C542] font-black' : 'text-[#F7EFE1]'}`}
+                className={`transition-colors whitespace-nowrap hover:text-[#E65C00] ${isCurrent('/leadership') ? 'text-[#E65C00] font-black' : 'text-[#3D1A00]'}`}
               >
                 Leadership
               </Link>
@@ -162,7 +162,7 @@ export default function Header() {
 
             <Link 
               href="/events" 
-              className={`transition-colors whitespace-nowrap hover:text-[#F4C542] ${isCurrent('/events') ? 'text-[#F4C542] font-black' : 'text-[#F7EFE1]'}`}
+              className={`transition-colors whitespace-nowrap hover:text-[#E65C00] ${isCurrent('/events') ? 'text-[#E65C00] font-black' : 'text-[#3D1A00]'}`}
             >
               Events
             </Link>
@@ -173,15 +173,15 @@ export default function Header() {
               onMouseEnter={() => setMediaDropdown(true)}
               onMouseLeave={() => setMediaDropdown(false)}
             >
-              <button className="flex items-center gap-1 text-[#F7EFE1] hover:text-[#F4C542] py-2 whitespace-nowrap">
+              <button className="flex items-center gap-1 text-[#3D1A00] hover:text-[#E65C00] py-2 whitespace-nowrap">
                 <span>Media &amp; photo graphics</span>
                 <ChevronDown className="w-3.5 h-3.5" />
               </button>
               {mediaDropdown && (
-                <div className="absolute top-full left-0 w-56 bg-[#160B08] shadow-2xl rounded-2xl py-2 border border-[#D4AF37]/40 z-50">
-                  <Link href="/media?tab=photos" className="block px-4 py-2 text-xs text-[#F7EFE1] hover:bg-[#7A1620] hover:text-[#F4C542] whitespace-nowrap">Photo Gallery</Link>
-                  <Link href="/media?tab=videos" className="block px-4 py-2 text-xs text-[#F7EFE1] hover:bg-[#7A1620] hover:text-[#F4C542] whitespace-nowrap">Teaser Reel &amp; Videos</Link>
-                  <Link href="/media?tab=patrika" className="block px-4 py-2 text-xs text-[#F7EFE1] hover:bg-[#7A1620] hover:text-[#F4C542] whitespace-nowrap">Souvenir &amp; Patrika</Link>
+                <div className="absolute top-full left-0 w-56 bg-[#FFFAF5] shadow-xl rounded-2xl py-2 border border-[#E65C00]/20 z-50">
+                  <Link href="/media?tab=photos" className="block px-4 py-2 text-xs text-[#3D1A00] hover:bg-[#FFF0E0] hover:text-[#E65C00] whitespace-nowrap">Photo Gallery</Link>
+                  <Link href="/media?tab=videos" className="block px-4 py-2 text-xs text-[#3D1A00] hover:bg-[#FFF0E0] hover:text-[#E65C00] whitespace-nowrap">Teaser Reel &amp; Videos</Link>
+                  <Link href="/media?tab=patrika" className="block px-4 py-2 text-xs text-[#3D1A00] hover:bg-[#FFF0E0] hover:text-[#E65C00] whitespace-nowrap">Souvenir &amp; Patrika</Link>
                 </div>
               )}
             </div>
@@ -190,7 +190,7 @@ export default function Header() {
             {NAV_CONFIG.SHOW_MEMBERSHIP && (
               <Link 
                 href="/membership" 
-                className={`transition-colors whitespace-nowrap hover:text-[#F4C542] ${isCurrent('/membership') ? 'text-[#F4C542] font-black' : 'text-[#F7EFE1]'}`}
+                className={`transition-colors whitespace-nowrap hover:text-[#E65C00] ${isCurrent('/membership') ? 'text-[#E65C00] font-black' : 'text-[#3D1A00]'}`}
               >
                 Membership
               </Link>
@@ -198,14 +198,14 @@ export default function Header() {
 
             <Link 
               href="/sponsors" 
-              className={`transition-colors whitespace-nowrap hover:text-[#F4C542] ${isCurrent('/sponsors') ? 'text-[#F4C542] font-black' : 'text-[#F7EFE1]'}`}
+              className={`transition-colors whitespace-nowrap hover:text-[#E65C00] ${isCurrent('/sponsors') ? 'text-[#E65C00] font-black' : 'text-[#3D1A00]'}`}
             >
               Sponsors
             </Link>
 
             <Link 
               href="/contact" 
-              className={`transition-colors whitespace-nowrap hover:text-[#F4C542] ${isCurrent('/contact') ? 'text-[#F4C542] font-black' : 'text-[#F7EFE1]'}`}
+              className={`transition-colors whitespace-nowrap hover:text-[#E65C00] ${isCurrent('/contact') ? 'text-[#E65C00] font-black' : 'text-[#3D1A00]'}`}
             >
               Contact
             </Link>
@@ -223,29 +223,29 @@ export default function Header() {
                   onMouseEnter={() => setUserDropdown(true)}
                   onMouseLeave={() => setUserDropdown(false)}
                 >
-                  <button className="flex items-center gap-2 bg-[#160B08] border border-[#D4AF37]/40 rounded-full px-3 py-1.5 hover:border-[#D4AF37] transition-colors">
-                    <div className="w-7 h-7 rounded-full bg-[#7A1620] border border-[#D4AF37]/60 flex items-center justify-center">
-                      <User className="w-3.5 h-3.5 text-[#F4C542]" />
+                  <button className="flex items-center gap-2 bg-[#FFF0E0] border border-[#E65C00]/30 rounded-full px-3 py-1.5 hover:border-[#E65C00] transition-colors">
+                    <div className="w-7 h-7 rounded-full bg-[#E65C00] border border-[#CC4000]/60 flex items-center justify-center">
+                      <User className="w-3.5 h-3.5 text-white" />
                     </div>
-                    <span className="text-[11px] font-bold text-[#F4C542] max-w-[90px] truncate">
+                    <span className="text-[11px] font-bold text-[#E65C00] max-w-[90px] truncate">
                       {user?.fullName?.split(' ')[0] || user?.email?.split('@')[0]}
                     </span>
-                    <ChevronDown className="w-3 h-3 text-[#D4AF37]" />
+                    <ChevronDown className="w-3 h-3 text-[#6B3A2A]" />
                   </button>
 
                   {userDropdown && (
-                    <div className="absolute top-full right-0 mt-1 w-52 bg-[#160B08] shadow-2xl rounded-2xl py-2 border border-[#D4AF37]/40 z-50">
-                      <div className="px-4 py-2 border-b border-[#D4AF37]/20 mb-1">
-                        <p className="text-[10px] text-[#C9B79C] uppercase font-bold tracking-wider">Signed in as</p>
-                        <p className="text-xs text-[#F4C542] font-black truncate">{user?.email}</p>
-                        <span className="text-[10px] bg-[#7A1620] text-[#FFD87A] px-2 py-0.5 rounded-full font-bold inline-block mt-1">
+                    <div className="absolute top-full right-0 mt-1 w-52 bg-[#FFFAF5] shadow-xl rounded-2xl py-2 border border-[#E65C00]/20 z-50">
+                      <div className="px-4 py-2 border-b border-[#E65C00]/15 mb-1">
+                        <p className="text-[10px] text-[#6B3A2A] uppercase font-bold tracking-wider">Signed in as</p>
+                        <p className="text-xs text-[#E65C00] font-black truncate">{user?.email}</p>
+                        <span className="text-[10px] bg-[#FFF0E0] text-[#E65C00] px-2 py-0.5 rounded-full font-bold inline-block mt-1 border border-[#E65C00]/30">
                           {user?.tier || user?.role}
                         </span>
                       </div>
                       {NAV_CONFIG.SHOW_MEMBER_PORTAL && (
                         <Link
                           href="/membership/portal"
-                          className="flex items-center gap-2 px-4 py-2 text-xs text-[#F7EFE1] hover:bg-[#7A1620] hover:text-[#F4C542] transition-colors"
+                          className="flex items-center gap-2 px-4 py-2 text-xs text-[#3D1A00] hover:bg-[#FFF0E0] hover:text-[#E65C00] transition-colors"
                         >
                           <LayoutDashboard className="w-3.5 h-3.5" />
                           <span>My Profile</span>
@@ -254,7 +254,7 @@ export default function Header() {
                       {user?.role === 'Admin' && (
                         <Link
                           href="/admin"
-                          className="flex items-center gap-2 px-4 py-2 text-xs text-[#F7EFE1] hover:bg-[#7A1620] hover:text-[#F4C542] transition-colors"
+                          className="flex items-center gap-2 px-4 py-2 text-xs text-[#3D1A00] hover:bg-[#FFF0E0] hover:text-[#E65C00] transition-colors"
                         >
                           <ShieldAlert className="w-3.5 h-3.5" />
                           <span>Admin CMS</span>
@@ -262,7 +262,7 @@ export default function Header() {
                       )}
                       <button
                         onClick={() => logout()}
-                        className="flex items-center gap-2 px-4 py-2 text-xs text-rose-400 hover:bg-rose-950/30 transition-colors w-full text-left"
+                        className="flex items-center gap-2 px-4 py-2 text-xs text-rose-600 hover:bg-rose-50 transition-colors w-full text-left"
                       >
                         <LogOut className="w-3.5 h-3.5" />
                         <span>Sign Out</span>
@@ -274,7 +274,7 @@ export default function Header() {
                 /* Not logged in → show Login link */
                 <Link 
                   href="/login" 
-                  className="text-[#F4C542] hover:underline font-bold text-xs px-2 flex items-center gap-1"
+                  className="text-[#E65C00] hover:underline font-bold text-xs px-2 flex items-center gap-1"
                 >
                   <UserCheck className="w-3.5 h-3.5" />
                   <span>Login</span>
@@ -286,7 +286,7 @@ export default function Header() {
               <Link 
                 href="/search" 
                 aria-label="Search Website"
-                className="p-2 text-[#C9B79C] hover:text-[#F4C542] transition-colors rounded-full hover:bg-[#160B08]"
+                className="p-2 text-[#6B3A2A] hover:text-[#E65C00] transition-colors rounded-full hover:bg-[#FFF0E0]"
               >
                 <Search className="w-4 h-4" />
               </Link>
@@ -307,7 +307,7 @@ export default function Header() {
           <div className="flex lg:hidden items-center space-x-2">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-md text-[#F7EFE1] hover:text-[#F4C542] focus:outline-none"
+              className="p-2 rounded-md text-[#3D1A00] hover:text-[#E65C00] focus:outline-none"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -318,18 +318,18 @@ export default function Header() {
 
       {/* Mobile Drawer Navigation */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-[#160B08] border-b border-[#D4AF37]/30 px-6 pt-4 pb-8 space-y-4 font-bold text-xs uppercase">
+        <div className="lg:hidden bg-[#FFFAF5] border-b border-[#E65C00]/20 px-6 pt-4 pb-8 space-y-4 font-bold text-xs uppercase">
           
           {/* Mobile Auth Status */}
           {isLoggedIn ? (
-            <div className="bg-[#0D0705] border border-[#D4AF37]/30 rounded-2xl p-3 space-y-2">
+            <div className="bg-[#FFF0E0] border border-[#E65C00]/20 rounded-2xl p-3 space-y-2">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-[#7A1620] border border-[#D4AF37]/60 flex items-center justify-center">
-                  <User className="w-4 h-4 text-[#F4C542]" />
+                <div className="w-8 h-8 rounded-full bg-[#E65C00] border border-[#CC4000]/60 flex items-center justify-center">
+                  <User className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <p className="text-[#F4C542] text-xs font-black">{user?.fullName || user?.email}</p>
-                  <span className="text-[10px] bg-[#7A1620] text-[#FFD87A] px-2 py-0.5 rounded-full font-bold inline-block">
+                  <p className="text-[#E65C00] text-xs font-black">{user?.fullName || user?.email}</p>
+                  <span className="text-[10px] bg-[#FFF8F0] text-[#E65C00] px-2 py-0.5 rounded-full font-bold inline-block border border-[#E65C00]/30">
                     {user?.tier || user?.role}
                   </span>
                 </div>
@@ -338,7 +338,7 @@ export default function Header() {
                 <Link
                   href="/membership/portal"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2 text-[#F7EFE1] hover:text-[#F4C542] py-1"
+                  className="flex items-center gap-2 text-[#3D1A00] hover:text-[#E65C00] py-1"
                 >
                   <LayoutDashboard className="w-3.5 h-3.5" />
                   <span>My Profile</span>
@@ -346,7 +346,7 @@ export default function Header() {
               )}
               <button
                 onClick={() => { logout(); setMobileMenuOpen(false); }}
-                className="flex items-center gap-2 text-rose-400 py-1"
+                className="flex items-center gap-2 text-rose-600 py-1"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 <span>Sign Out</span>
@@ -356,7 +356,7 @@ export default function Header() {
             <Link 
               href="/login" 
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2 py-2 text-[#F4C542]"
+              className="flex items-center gap-2 py-2 text-[#E65C00]"
             >
               <UserCheck className="w-4 h-4" />
               <span>Member Login</span>
@@ -366,14 +366,14 @@ export default function Header() {
           <Link 
             href="/" 
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-[#F4C542]"
+            className="block py-2 text-[#E65C00]"
           >
             Home (Maha Mahotsav 2026)
           </Link>
           <Link 
             href="/about" 
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-[#F7EFE1]"
+            className="block py-2 text-[#3D1A00]"
           >
             About US
           </Link>
@@ -381,7 +381,7 @@ export default function Header() {
             <Link 
               href="/leadership" 
               onClick={() => setMobileMenuOpen(false)}
-              className="block py-2 text-[#F7EFE1]"
+              className="block py-2 text-[#3D1A00]"
             >
               Leadership
             </Link>
@@ -389,14 +389,14 @@ export default function Header() {
           <Link 
             href="/events" 
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-[#F7EFE1]"
+            className="block py-2 text-[#3D1A00]"
           >
             Events
           </Link>
           <Link 
             href="/media" 
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-[#F7EFE1]"
+            className="block py-2 text-[#3D1A00]"
           >
             Media &amp; photo graphics
           </Link>
@@ -404,7 +404,7 @@ export default function Header() {
             <Link 
               href="/membership" 
               onClick={() => setMobileMenuOpen(false)}
-              className="block py-2 text-[#F7EFE1]"
+              className="block py-2 text-[#3D1A00]"
             >
               Membership
             </Link>
@@ -412,14 +412,14 @@ export default function Header() {
           <Link 
             href="/sponsors" 
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-[#F7EFE1]"
+            className="block py-2 text-[#3D1A00]"
           >
             Sponsors
           </Link>
           <Link 
             href="/contact" 
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-[#F7EFE1]"
+            className="block py-2 text-[#3D1A00]"
           >
             Contact
           </Link>

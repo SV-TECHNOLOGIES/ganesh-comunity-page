@@ -47,12 +47,12 @@ export default function MediaTeaserSection() {
   };
 
   return (
-    <section className="py-20 bg-[#160B08] text-[#F7EFE1] border-y border-[#D4AF37]/30">
+    <section className="py-20 bg-[#FFF3E0] text-[#3D1A00] border-y border-[#E65C00]/20">
       <div className="max-w-6xl mx-auto px-4 space-y-12">
         
         {/* Section Header */}
         <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-2 bg-[#7A1620]/60 border border-[#D4AF37]/40 px-4 py-1 rounded-full text-xs font-extrabold text-[#F4C542] uppercase tracking-widest">
+          <div className="inline-flex items-center gap-2 bg-[#FFF0E0] border border-[#E65C00]/30 px-4 py-1 rounded-full text-xs font-extrabold text-[#E65C00] uppercase tracking-widest">
             <Film className="w-4 h-4" />
             <span>OFFICIAL ASSETS & CINEMATIC TEASER</span>
           </div>
@@ -61,29 +61,29 @@ export default function MediaTeaserSection() {
             TEASER REEL & EVENT POSTERS
           </h2>
           
-          <p className="max-w-xl mx-auto text-xs sm:text-sm text-[#C9B79C]">
+          <p className="max-w-xl mx-auto text-xs sm:text-sm text-[#6B3A2A]">
             Experience the official Maha Ganapathi video teaser reel and high-resolution event artwork from our media assets.
           </p>
         </div>
 
-        {/* Video Player Card with HTML5 Video */}
-        <div className="relative rounded-3xl overflow-hidden border-2 border-[#D4AF37]/50 shadow-[0_0_40px_rgba(212,175,55,0.2)] bg-[#0D0705]">
-          <div className="relative aspect-video w-full flex items-center justify-center bg-black">
+        {/* Video Player Card */}
+        <div className="relative rounded-3xl overflow-hidden border-2 border-[#E65C00]/30 shadow-[0_0_40px_rgba(230,92,0,0.12)] bg-white">
+          <div className="relative aspect-video w-full flex items-center justify-center bg-[#FFF0E0]">
             {!playing && (
-              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center space-y-4 bg-black/40 backdrop-blur-[2px]">
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center space-y-4 bg-[#FFF8F0]/60 backdrop-blur-[2px]">
                 <img
                   src="/assets/poster.jpg"
                   alt="Poster Backdrop"
-                  className="absolute inset-0 w-full h-full object-cover opacity-50 filter brightness-75"
+                  className="absolute inset-0 w-full h-full object-cover opacity-40 filter brightness-90"
                 />
                 <div className="relative z-20 flex flex-col items-center space-y-4">
                   <button
                     onClick={handleStartPlay}
-                    className="w-20 h-20 rounded-full bg-[#D4AF37] hover:bg-[#F4C542] text-[#0D0705] flex items-center justify-center shadow-2xl transition-transform hover:scale-110 group"
+                    className="w-20 h-20 rounded-full bg-[#E65C00] hover:bg-[#FF7A00] text-white flex items-center justify-center shadow-2xl transition-transform hover:scale-110 group"
                   >
                     <Play className="w-8 h-8 fill-current ml-1" />
                   </button>
-                  <span className="text-xs font-black tracking-widest text-[#F7EFE1] uppercase font-cinzel bg-[#0D0705]/80 px-4 py-1.5 rounded-full border border-[#D4AF37]/40">
+                  <span className="text-xs font-black tracking-widest text-[#3D1A00] uppercase font-cinzel bg-white/80 px-4 py-1.5 rounded-full border border-[#E65C00]/30 shadow-sm">
                     Play Official Teaser Video (.MP4)
                   </span>
                 </div>
@@ -101,31 +101,31 @@ export default function MediaTeaserSection() {
           </div>
         </div>
 
-        {/* Official Assets Masonry Photo Gallery Grid */}
+        {/* Photo Gallery Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {galleryImages.map((img, idx) => (
             <div
               key={idx}
               onClick={() => setLightboxImage(img.src)}
-              className="temple-card rounded-2xl overflow-hidden border border-[#D4AF37]/30 cursor-pointer group hover:border-[#F4C542] transition-all relative"
+              className="temple-card rounded-2xl overflow-hidden border border-[#E65C00]/20 cursor-pointer group hover:border-[#E65C00]/70 transition-all relative hover:shadow-[0_12px_30px_rgba(230,92,0,0.15)] hover:-translate-y-1"
             >
-              <div className="relative h-60 w-full overflow-hidden bg-[#0D0705]">
+              <div className="relative h-60 w-full overflow-hidden bg-[#FFF0E0]">
                 <img
                   src={img.src}
                   alt={img.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0D0705] via-transparent to-transparent opacity-70" />
-                <span className="absolute top-3 left-3 bg-[#7A1620] text-[#F4C542] text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border border-[#D4AF37]/40 shadow-md">
+                <div className="absolute inset-0 bg-gradient-to-t from-[#3D1A00]/20 via-transparent to-transparent opacity-70" />
+                <span className="absolute top-3 left-3 bg-[#E65C00] text-white text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full shadow-md">
                   {img.category}
                 </span>
               </div>
               <div className="p-4 space-y-1">
-                <h3 className="text-xs font-bold text-[#F7EFE1] group-hover:text-[#F4C542] transition-colors line-clamp-1">
+                <h3 className="text-xs font-bold text-[#3D1A00] group-hover:text-[#E65C00] transition-colors line-clamp-1">
                   {img.title}
                 </h3>
-                <span className="text-[10px] text-[#C9B79C] flex items-center gap-1">
-                  <ImageIcon className="w-3 h-3 text-[#D4AF37]" />
+                <span className="text-[10px] text-[#6B3A2A] flex items-center gap-1">
+                  <ImageIcon className="w-3 h-3 text-[#E65C00]" />
                   <span>Tap to expand full artwork</span>
                 </span>
               </div>
@@ -137,11 +137,11 @@ export default function MediaTeaserSection() {
 
       {/* Lightbox Modal */}
       {lightboxImage && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4" onClick={() => setLightboxImage(null)}>
-          <div className="relative max-w-4xl w-full border-2 border-[#D4AF37] rounded-3xl overflow-hidden bg-[#0D0705] p-2" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 bg-[#3D1A00]/80 backdrop-blur-md flex items-center justify-center p-4" onClick={() => setLightboxImage(null)}>
+          <div className="relative max-w-4xl w-full border-2 border-[#E65C00] rounded-3xl overflow-hidden bg-white p-2" onClick={e => e.stopPropagation()}>
             <button
               onClick={() => setLightboxImage(null)}
-              className="absolute top-4 right-4 bg-[#7A1620] text-white p-2 rounded-full z-10 hover:scale-110 transition-transform shadow-xl"
+              className="absolute top-4 right-4 bg-[#E65C00] text-white p-2 rounded-full z-10 hover:scale-110 transition-transform shadow-xl"
             >
               <X className="w-6 h-6" />
             </button>

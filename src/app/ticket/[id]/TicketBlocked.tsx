@@ -25,9 +25,9 @@ export default function TicketBlocked({
     ? {
         icon: <XCircle className="w-14 h-14 text-rose-500" />,
         label: 'Payment Failed',
-        labelClass: 'bg-rose-950 text-rose-400 border-rose-500/40',
-        borderColor: 'border-rose-500/30',
-        glowColor: 'shadow-[0_0_60px_rgba(239,68,68,0.15)]',
+        labelClass: 'bg-rose-50 text-rose-700 border-rose-300',
+        borderColor: 'border-rose-200',
+        glowColor: 'shadow-md',
         headline: 'This ticket is not available.',
         subtext:
           'The payment for this transaction did not go through. No ticket or receipt has been issued.',
@@ -35,22 +35,22 @@ export default function TicketBlocked({
       }
     : isPending
     ? {
-        icon: <Clock className="w-14 h-14 text-amber-400" />,
+        icon: <Clock className="w-14 h-14 text-amber-500" />,
         label: 'Payment Pending',
-        labelClass: 'bg-amber-950 text-amber-400 border-amber-500/40',
-        borderColor: 'border-amber-500/30',
-        glowColor: 'shadow-[0_0_60px_rgba(251,191,36,0.12)]',
+        labelClass: 'bg-amber-50 text-amber-700 border-amber-300',
+        borderColor: 'border-amber-200',
+        glowColor: 'shadow-md',
         headline: 'Payment is still processing.',
         subtext:
           'Your payment has not yet been confirmed. The ticket will be available once the payment is completed.',
         hint: 'This usually takes a few seconds. Please refresh the page or check back shortly.',
       }
     : {
-        icon: <AlertTriangle className="w-14 h-14 text-orange-400" />,
+        icon: <AlertTriangle className="w-14 h-14 text-orange-500" />,
         label: `Status: ${status}`,
-        labelClass: 'bg-orange-950 text-orange-400 border-orange-500/40',
-        borderColor: 'border-orange-500/30',
-        glowColor: 'shadow-[0_0_60px_rgba(251,146,60,0.12)]',
+        labelClass: 'bg-orange-50 text-orange-700 border-orange-300',
+        borderColor: 'border-orange-200',
+        glowColor: 'shadow-md',
         headline: 'Ticket unavailable.',
         subtext: `The payment status is "${status}". Tickets are only issued for completed payments.`,
         hint: 'Please contact support if you have questions about this transaction.',
@@ -58,14 +58,14 @@ export default function TicketBlocked({
 
   return (
     <div
-      className="min-h-screen bg-[#0D0705] flex flex-col items-center justify-center py-12 px-4"
+      className="min-h-screen bg-[#FFF8F0] flex flex-col items-center justify-center py-12 px-4"
       style={{ fontFamily: "'Cinzel', 'Georgia', serif" }}
     >
       {/* Back link */}
       <div className="w-full max-w-lg mb-8">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#F4C542] hover:underline"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#E65C00] hover:underline"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to MITRA UK
@@ -74,19 +74,19 @@ export default function TicketBlocked({
 
       {/* Card */}
       <div
-        className={`w-full max-w-lg rounded-3xl border-2 ${statusConfig.borderColor} ${statusConfig.glowColor} overflow-hidden`}
+        className={`w-full max-w-lg rounded-3xl border-2 bg-white ${statusConfig.borderColor} ${statusConfig.glowColor} overflow-hidden`}
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#160B08] via-[#1C0E0B] to-[#160B08] px-8 py-6 text-center border-b border-[#D4AF37]/20">
+        <div className="bg-gradient-to-r from-[#FFF8F0] via-white to-[#FFF8F0] px-8 py-6 text-center border-b border-[#E65C00]/20">
           <div className="flex items-center justify-center gap-3">
             <img
               src="/assets/poster.jpg"
               alt="MITRA UK"
-              className="w-9 h-9 rounded-full object-cover border-2 border-[#D4AF37]"
+              className="w-9 h-9 rounded-full object-cover border-2 border-[#E65C00]"
             />
             <div className="text-left">
-              <p className="text-[#F4C542] font-black text-base tracking-widest">MITRA UK</p>
-              <p className="text-[#FFD87A] text-[9px] font-bold uppercase tracking-widest">
+              <p className="text-[#3D1A00] font-black text-base tracking-widest">MITRA UK</p>
+              <p className="text-[#6B3A2A] text-[9px] font-bold uppercase tracking-widest">
                 Donation Ticket
               </p>
             </div>
@@ -94,9 +94,9 @@ export default function TicketBlocked({
         </div>
 
         {/* Body */}
-        <div className="bg-[#0D0705] px-8 py-10 flex flex-col items-center text-center gap-5">
+        <div className="bg-white px-8 py-10 flex flex-col items-center text-center gap-5">
           {/* Icon */}
-          <div className="w-24 h-24 rounded-full bg-[#160B08] border border-[#D4AF37]/20 flex items-center justify-center">
+          <div className="w-24 h-24 rounded-full bg-[#FFF0E0] border border-[#E65C00]/20 flex items-center justify-center">
             {statusConfig.icon}
           </div>
 
@@ -109,50 +109,50 @@ export default function TicketBlocked({
 
           {/* Headline */}
           <div className="space-y-2">
-            <h1 className="text-2xl font-black text-[#F7EFE1]">{statusConfig.headline}</h1>
-            <p className="text-sm text-[#C9B79C] leading-relaxed max-w-sm">{statusConfig.subtext}</p>
+            <h1 className="text-2xl font-black text-[#3D1A00]">{statusConfig.headline}</h1>
+            <p className="text-sm text-[#6B3A2A] leading-relaxed max-w-sm">{statusConfig.subtext}</p>
           </div>
 
           {/* Payment details */}
-          <div className="w-full bg-[#160B08] border border-[#D4AF37]/20 rounded-2xl p-5 space-y-3 text-left">
+          <div className="w-full bg-[#FFF8F0] border border-[#E65C00]/20 rounded-2xl p-5 space-y-3 text-left shadow-sm">
             <div>
-              <p className="text-[9px] text-[#C9B79C] uppercase font-bold tracking-widest mb-0.5">
+              <p className="text-[9px] text-[#6B3A2A] uppercase font-bold tracking-widest mb-0.5">
                 Transaction ID
               </p>
-              <p className="font-mono text-[#F4C542] text-xs font-black tracking-wider">
+              <p className="font-mono text-[#E65C00] text-xs font-black tracking-wider">
                 {paymentId.toUpperCase()}
               </p>
             </div>
             <div>
-              <p className="text-[9px] text-[#C9B79C] uppercase font-bold tracking-widest mb-0.5">
+              <p className="text-[9px] text-[#6B3A2A] uppercase font-bold tracking-widest mb-0.5">
                 Name
               </p>
-              <p className="text-[#F7EFE1] text-sm font-bold">{customerName}</p>
+              <p className="text-[#3D1A00] text-sm font-bold">{customerName}</p>
             </div>
             <div>
-              <p className="text-[9px] text-[#C9B79C] uppercase font-bold tracking-widest mb-0.5">
+              <p className="text-[9px] text-[#6B3A2A] uppercase font-bold tracking-widest mb-0.5">
                 Description
               </p>
-              <p className="text-[#F7EFE1] text-sm">{description}</p>
+              <p className="text-[#3D1A00] text-sm">{description}</p>
             </div>
             <div>
-              <p className="text-[9px] text-[#C9B79C] uppercase font-bold tracking-widest mb-0.5">
+              <p className="text-[9px] text-[#6B3A2A] uppercase font-bold tracking-widest mb-0.5">
                 Amount
               </p>
-              <p className="text-[#F4C542] font-black text-xl">
+              <p className="text-[#E65C00] font-black text-xl">
                 £{amount.toFixed(2)}{' '}
-                <span className="text-sm font-bold text-[#C9B79C]">{currency}</span>
+                <span className="text-sm font-bold text-[#6B3A2A]">{currency}</span>
               </p>
             </div>
           </div>
 
           {/* Hint */}
-          <p className="text-[11px] text-[#C9B79C]/70 max-w-sm leading-relaxed">{statusConfig.hint}</p>
+          <p className="text-[11px] text-[#6B3A2A]/70 max-w-sm leading-relaxed">{statusConfig.hint}</p>
         </div>
 
         {/* Footer */}
-        <div className="bg-[#160B08] border-t border-[#D4AF37]/20 px-8 py-4 text-center">
-          <p className="text-[9px] text-[#C9B79C] uppercase tracking-wider">
+        <div className="bg-[#FFF0E0] border-t border-[#E65C00]/20 px-8 py-4 text-center">
+          <p className="text-[9px] text-[#6B3A2A] uppercase tracking-wider">
             MITRA UK (MITRA) · Registered UK Community Organisation
           </p>
         </div>
@@ -162,13 +162,13 @@ export default function TicketBlocked({
       <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
         <Link
           href="/donate"
-          className="inline-flex items-center gap-2 px-8 py-3 rounded-full font-black text-sm uppercase tracking-wider text-[#0D0705] bg-[#D4AF37] hover:bg-[#F4C542] transition-colors shadow-xl"
+          className="inline-flex items-center gap-2 px-8 py-3 rounded-full font-black text-sm uppercase tracking-wider text-white bg-[#E65C00] hover:bg-[#FF7A00] transition-colors shadow-md"
         >
           Try Again
         </Link>
         <Link
           href="/membership/portal/donations"
-          className="inline-flex items-center gap-2 px-8 py-3 rounded-full font-bold text-sm uppercase tracking-wider border border-[#D4AF37]/40 text-[#F4C542] hover:bg-[#D4AF37]/10 transition-colors"
+          className="inline-flex items-center gap-2 px-8 py-3 rounded-full font-bold text-sm uppercase tracking-wider border border-[#E65C00]/40 text-[#E65C00] hover:bg-[#FFF0E0] transition-colors"
         >
           My Donations
         </Link>

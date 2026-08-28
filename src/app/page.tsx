@@ -12,7 +12,7 @@ export default function HomePage() {
   const [notifyModalOpen, setNotifyModalOpen] = useState(false);
 
   return (
-    <div className="bg-[#0D0705] text-[#F7EFE1] min-h-screen">
+    <div className="bg-[#FFF8F0] text-[#3D1A00] min-h-screen">
       {/* 1. HERO — 3D VEILED GANESHA & REVEAL EXPERIENCE */}
       {/* Home page passes NO Pooja/Donate handlers → shows WhatsApp + View Event CTAs */}
       <Ganesha3DHero onNotifyClick={() => setNotifyModalOpen(true)} />
