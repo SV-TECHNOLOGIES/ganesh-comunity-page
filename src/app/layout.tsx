@@ -6,6 +6,8 @@ import AnalyticsTracker from '@/components/AnalyticsTracker';
 import { constructMetadata, generateOrganizationJsonLd } from '@/lib/seo-config';
 import { AuthProvider } from '@/lib/auth-context';
 
+export const revalidate = 10;
+
 export const metadata: Metadata = constructMetadata();
 
 export default function RootLayout({

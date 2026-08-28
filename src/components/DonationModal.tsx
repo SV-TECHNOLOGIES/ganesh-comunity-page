@@ -301,8 +301,8 @@ export default function DonationModal({
   }, [customAmount, amount]);
 
   const getCauseName = useCallback(() => {
-    if (category === 'Annadanam') return 'Annadanam Community Prasadam Fund';
-    return 'Slough Mahotsav Event & Cultural Support Fund';
+    if (category === 'Annadanam') return 'London Ganesh Mahotsav Annadanam Fund.';
+    return 'London Ganesh Mahotsav Event & Cultural Support Donation';
   }, [category]);
 
   // Step 1: Submit details → create Stripe PaymentIntent

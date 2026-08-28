@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapPin, Calendar, Clock, Download, ExternalLink, Sparkles, Flame, Heart, Utensils, Star, CheckCircle } from 'lucide-react';
 import { POOJA_DATES } from '@/components/PoojaBookingModal';
+import { DataStore } from '@/lib/data-store';
 
 interface EventDetailsSectionProps {
   onOpenPoojaBooking?: (dateId?: string) => void;
@@ -13,6 +14,40 @@ export default function EventDetailsSection({
   onOpenPoojaBooking,
   onOpenDonation,
 }: EventDetailsSectionProps) {
+  const [dbCounts, setDbCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const res = await fetch('/api/payments/booking-counts');
+        const data = await res.json();
+        if (data.success && data.counts) {
+          setDbCounts(data.counts);
+        }
+      } catch (e) {
+        console.error('Error fetching booking counts:', e);
+      }
+    };
+    fetchCounts();
+  }, []);
+
+  const getBookingCount = (dateStr: string) => {
+    const dbCount = dbCounts[dateStr] || 0;
+    
+    // Check client-side DataStore
+    let localCount = 0;
+    try {
+      const localDonations = DataStore.getDonations();
+      localCount = localDonations.filter((d) => {
+        const causeLower = d.cause.toLowerCase();
+        const isPooja = causeLower.includes('pooja seva') || causeLower.includes('pooja booking');
+        const matchesDate = causeLower.includes(dateStr.toLowerCase());
+        return isPooja && matchesDate && d.status === 'Completed';
+      }).length;
+    } catch {}
+
+    return Math.max(dbCount, localCount);
+  };
 
   const dailySchedule = [
     { time: '09:00 AM', event: 'Daily Ganapathi Abhishekam & Archana', desc: 'Vedic chants and ritual sanctum offerings.' },
@@ -58,63 +93,78 @@ export default function EventDetailsSection({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {POOJA_DATES.map((dayItem, idx) => (
-              <div
-                key={dayItem.id}
-                className={`temple-card rounded-3xl p-6 border-2 flex flex-col justify-between space-y-5 relative transition-all duration-300 hover:scale-[1.02] ${
-                  dayItem.id === 'day-2'
-                    ? 'border-[#E65C00] bg-gradient-to-b from-[#FFF0E0] to-white shadow-md'
-                    : 'border-[#E65C00]/25 bg-white hover:border-[#E65C00]'
-                }`}
-              >
-                {/* Header Badge */}
-                <div className="flex justify-between items-start">
-                  <div className="space-y-0.5">
-                    <span className="text-[11px] font-black uppercase text-[#E65C00] font-cinzel tracking-wider">
-                      {dayItem.day}
-                    </span>
-                    <h4 className="text-xl font-black text-[#3D1A00] font-cinzel">
-                      {dayItem.date}
-                    </h4>
-                  </div>
-
-                  {dayItem.badge ? (
-                    <span className="bg-[#E65C00] text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow">
-                      {dayItem.badge}
-                    </span>
-                  ) : (
-                    <span className="bg-[#FFF0E0] text-[#E65C00] border border-[#E65C00]/30 text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
-                      DAY {idx + 1}
-                    </span>
-                  )}
-                </div>
-
-                {/* Day Details */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Flame className="w-4 h-4 text-[#E65C00] shrink-0" />
-                    <h5 className="text-base font-bold text-[#E65C00] font-cinzel leading-tight">
-                      {dayItem.title}
-                    </h5>
-                  </div>
-                  <p className="text-xs font-semibold text-[#3D1A00]">
-                    {dayItem.theme}
-                  </p>
-                  <p className="text-[11px] text-[#6B3A2A] leading-relaxed italic">
-                    ✦ {dayItem.blessing}
-                  </p>
-                </div>
-
-                {/* Card Action */}
-                <button
-                  onClick={() => onOpenPoojaBooking?.(dayItem.id)}
-                  className="gold-button w-full py-2.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm"
+            {POOJA_DATES.map((dayItem, idx) => {
+              const count = getBookingCount(dayItem.date);
+              const isFullyBooked = count >= 10;
+              return (
+                <div
+                  key={dayItem.id}
+                  className={`temple-card rounded-3xl p-6 border-2 flex flex-col justify-between space-y-5 relative transition-all duration-300 hover:scale-[1.02] ${
+                    isFullyBooked
+                      ? 'border-slate-300 bg-slate-50 opacity-70 shadow-none'
+                      : dayItem.id === 'day-2'
+                      ? 'border-[#E65C00] bg-gradient-to-b from-[#FFF0E0] to-white shadow-md'
+                      : 'border-[#E65C00]/25 bg-white hover:border-[#E65C00]'
+                  }`}
                 >
-                  <Flame className="w-3.5 h-3.5 fill-current text-white" />
-                  <span>Book Pooja (£116)</span>
-                </button>
-              </div>
-            ))}
+                  {/* Header Badge */}
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-0.5">
+                      <span className="text-[11px] font-black uppercase text-[#E65C00] font-cinzel tracking-wider">
+                        {dayItem.day}
+                      </span>
+                      <h4 className={`text-xl font-black font-cinzel ${isFullyBooked ? 'text-slate-400 line-through' : 'text-[#3D1A00]'}`}>
+                        {dayItem.date}
+                      </h4>
+                    </div>
+
+                    {isFullyBooked ? (
+                      <span className="bg-red-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow">
+                        FULLY BOOKED
+                      </span>
+                    ) : dayItem.badge ? (
+                      <span className="bg-[#E65C00] text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow">
+                        {dayItem.badge}
+                      </span>
+                    ) : (
+                      <span className="bg-[#FFF0E0] text-[#E65C00] border border-[#E65C00]/30 text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
+                        DAY {idx + 1}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Day Details */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Flame className={`w-4 h-4 shrink-0 ${isFullyBooked ? 'text-slate-400' : 'text-[#E65C00]'}`} />
+                      <h5 className={`text-base font-bold font-cinzel leading-tight ${isFullyBooked ? 'text-slate-400' : 'text-[#E65C00]'}`}>
+                        {dayItem.title}
+                      </h5>
+                    </div>
+                    <p className={`text-xs font-semibold ${isFullyBooked ? 'text-slate-400' : 'text-[#3D1A00]'}`}>
+                      {dayItem.theme}
+                    </p>
+                    <p className={`text-[11px] leading-relaxed italic ${isFullyBooked ? 'text-slate-400' : 'text-[#6B3A2A]'}`}>
+                      ✦ {isFullyBooked ? 'Daily booking limit reached.' : dayItem.blessing}
+                    </p>
+                  </div>
+
+                  {/* Card Action */}
+                  <button
+                    disabled={isFullyBooked}
+                    onClick={() => !isFullyBooked && onOpenPoojaBooking?.(dayItem.id)}
+                    className={`w-full py-2.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm ${
+                      isFullyBooked
+                        ? 'bg-slate-300 text-slate-500 border border-slate-400/30 cursor-not-allowed'
+                        : 'gold-button'
+                    }`}
+                  >
+                    <Flame className="w-3.5 h-3.5 fill-current text-white" />
+                    <span>{isFullyBooked ? 'Fully Booked' : 'Book Pooja (£116)'}</span>
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
 

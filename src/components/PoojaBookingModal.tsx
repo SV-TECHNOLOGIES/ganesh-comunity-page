@@ -254,7 +254,7 @@ export default function PoojaBookingModal({
 }) {
   const { user, isLoggedIn, login } = useAuth();
 
-  const [selectedDateId, setSelectedDateId] = useState<string>(initialDateId || 'day-2');
+  const [selectedDateId, setSelectedDateId] = useState<string>(initialDateId || 'day-1');
   const [devoteeName, setDevoteeName] = useState('');
   const [gotram, setGotram] = useState('');
   const [familyMembers, setFamilyMembers] = useState('');
@@ -275,6 +275,37 @@ export default function PoojaBookingModal({
   const [receipt, setReceipt] = useState<DonationRecord | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [sessionError, setSessionError] = useState<string | null>(null);
+  const [dbCounts, setDbCounts] = useState<Record<string, number>>({});
+
+  const fetchCounts = useCallback(async () => {
+    try {
+      const res = await fetch('/api/payments/booking-counts');
+      const data = await res.json();
+      if (data.success && data.counts) {
+        setDbCounts(data.counts);
+      }
+    } catch (e) {
+      console.error('Error fetching booking counts:', e);
+    }
+  }, []);
+
+  const getBookingCount = useCallback((dateStr: string) => {
+    const dbCount = dbCounts[dateStr] || 0;
+    
+    // Check client-side DataStore
+    let localCount = 0;
+    try {
+      const localDonations = DataStore.getDonations();
+      localCount = localDonations.filter((d) => {
+        const causeLower = d.cause.toLowerCase();
+        const isPooja = causeLower.includes('pooja seva') || causeLower.includes('pooja booking');
+        const matchesDate = causeLower.includes(dateStr.toLowerCase());
+        return isPooja && matchesDate && d.status === 'Completed';
+      }).length;
+    } catch {}
+
+    return Math.max(dbCount, localCount);
+  }, [dbCounts]);
 
   // Sync initial date if passed
   useEffect(() => {
@@ -282,6 +313,29 @@ export default function PoojaBookingModal({
       setSelectedDateId(initialDateId);
     }
   }, [initialDateId]);
+
+  // Auto-select first available date if selected one is full
+  useEffect(() => {
+    if (isOpen && Object.keys(dbCounts).length > 0) {
+      const currentSelectedDate = POOJA_DATES.find(d => d.id === selectedDateId);
+      if (currentSelectedDate) {
+        const count = getBookingCount(currentSelectedDate.date);
+        if (count >= 10) {
+          // Find first date that is not fully booked
+          const availableDate = POOJA_DATES.find(d => getBookingCount(d.date) < 10);
+          if (availableDate) {
+            setSelectedDateId(availableDate.id);
+          }
+        }
+      }
+    }
+  }, [isOpen, dbCounts, selectedDateId, getBookingCount]);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchCounts();
+    }
+  }, [isOpen, fetchCounts]);
 
   // On open: decide starting step based on auth
   useEffect(() => {
@@ -373,6 +427,13 @@ export default function PoojaBookingModal({
   const handleDetailsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!devoteeName || !email) return;
+
+    // Double check limit before proceeding to pay
+    const count = getBookingCount(selectedDateObj.date);
+    if (count >= 10) {
+      setSessionError(`Sorry, ${selectedDateObj.date} is now fully booked. Please choose another date.`);
+      return;
+    }
 
     setSubmitting(true);
     setSessionError(null);
@@ -658,38 +719,53 @@ export default function PoojaBookingModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
                 {POOJA_DATES.map((item) => {
                   const isSelected = selectedDateId === item.id;
+                  const count = getBookingCount(item.date);
+                  const isFullyBooked = count >= 10;
                   return (
                     <button
                       key={item.id}
                       type="button"
-                      onClick={() => setSelectedDateId(item.id)}
+                      disabled={isFullyBooked}
+                      onClick={() => !isFullyBooked && setSelectedDateId(item.id)}
                       className={`p-3 rounded-2xl text-left transition-all border relative flex flex-col justify-between ${
-                        isSelected
+                        isFullyBooked
+                          ? 'bg-slate-100 border-slate-200 opacity-60 cursor-not-allowed'
+                          : isSelected
                           ? 'bg-gradient-to-r from-[#E65C00] to-[#FF7A00] border-[#E65C00] shadow-md ring-1 ring-[#E65C00]'
                           : 'bg-white hover:bg-[#FFF8F0] border-[#E65C00]/20 hover:border-[#E65C00]'
                       }`}
                     >
-                      {item.badge && (
+                      {isFullyBooked ? (
+                        <span className="absolute top-2 right-2 text-[8px] font-black px-1.5 py-0.5 rounded-md uppercase bg-red-600 text-white">
+                          FULLY BOOKED
+                        </span>
+                      ) : item.badge ? (
                         <span className={`absolute top-2 right-2 text-[8px] font-black px-1.5 py-0.5 rounded-md uppercase ${
                           isSelected ? 'bg-white text-[#E65C00]' : 'bg-[#E65C00] text-white'
                         }`}>
                           {item.badge}
                         </span>
+                      ) : (
+                        <span className={`absolute top-2 right-2 text-[8px] font-bold px-1.5 py-0.5 rounded-md ${
+                          isSelected ? 'bg-white/20 text-white' : 'bg-[#E65C00]/10 text-[#E65C00]'
+                        }`}>
+                          {10 - count} slots left
+                        </span>
                       )}
                       <div>
                         <div className="flex items-baseline gap-1.5">
-                          <span className={`text-xs font-black font-cinzel ${isSelected ? 'text-white' : 'text-[#3D1A00]'}`}>
+                          <span className={`text-xs font-black font-cinzel ${isFullyBooked ? 'text-slate-400 line-through' : isSelected ? 'text-white' : 'text-[#3D1A00]'}`}>
                             {item.date}
                           </span>
-                          <span className="text-[10px] font-medium text-[#6B3A2A]">
+                          <span className={`text-[10px] font-medium ${isFullyBooked ? 'text-slate-400' : 'text-[#6B3A2A]'}`}>
                             ({item.day})
                           </span>
                         </div>
-                        <h4 className={`text-xs font-bold mt-0.5 leading-snug ${isSelected ? 'text-white' : 'text-[#3D1A00]'}`}>
+                        <h4 className={`text-xs font-bold mt-0.5 leading-snug ${isFullyBooked ? 'text-slate-400' : isSelected ? 'text-white' : 'text-[#3D1A00]'}`}>
                           {item.title}
                         </h4>
                         <p className="text-[10px] text-[#6B3A2A] line-clamp-1 mt-0.5">
-                          {item.theme}
+                          {isFullyBooked ? 'Bookings Closed' : item.theme}
                         </p>
                       </div>
                     </button>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Calendar, Ticket, User, Mail, Phone, CheckCircle, X, MapPin, Sparkles, Download } from 'lucide-react';
+import { Calendar, Ticket, User, Mail, Phone, CheckCircle, X, MapPin, Sparkles, Download, Clock } from 'lucide-react';
 
 interface EventRSVPModalProps {
   event: {
@@ -82,7 +82,11 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
               <div className="text-xs text-[#6B3A2A] flex flex-wrap items-center gap-3">
                 <span className="flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5 text-[#E65C00]" />
-                  <span>{event.date} · {event.time}</span>
+                  <span>{event.date} </span>
+                </span>
+                <span className="flex items-center gap-1">
+                  <Clock className="w-3.5 h-3.5 text-[#E65C00]" />
+                  <span>{event.time}</span>
                 </span>
                 <span className="flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5 text-[#E65C00]" />

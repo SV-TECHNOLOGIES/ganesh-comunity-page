@@ -11,7 +11,7 @@ async function main() {
     data: [
       {
         id: 'evt-ganesh-chaturthi',
-        title: 'Ganesh Chaturthi — Maha Ganapathi Mahotsav 2026',
+        title: 'London Ganesh Mahotsav 2026',
         category: 'Mahotsav & Darshan',
         date: '2026-09-14',
         time: '09:00 AM - 09:00 PM BST',
