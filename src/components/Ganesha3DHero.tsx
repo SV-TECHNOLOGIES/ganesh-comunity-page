@@ -431,9 +431,9 @@ export default function Ganesha3DHero({
         </div>
 
         {/* Teaser Narrative Caption */}
-        <p className="max-w-2xl mx-auto text-sm sm:text-base text-[#C9B79C] leading-relaxed font-medium">
+        {/* <p className="max-w-2xl mx-auto text-sm sm:text-base text-[#C9B79C] leading-relaxed font-medium">
           A single-page devotional reveal experience — step inside the sanctum as we countdown to the iconic 6ft Maha Ganapathi arrival in Slough, Langley.
-        </p>
+        </p> */}
 
         {/* Action CTAs */}
         <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
