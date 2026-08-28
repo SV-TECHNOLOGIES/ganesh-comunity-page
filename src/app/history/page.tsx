@@ -6,7 +6,7 @@ export default function HistoryPage() {
   const timeline = [
     {
       year: '2012',
-      title: 'Foundation of UK Telugu Association',
+      title: 'Foundation of Mana Indian Telugu Roots Abroad',
       desc: 'Established by Dr. Venkat S. Chary and founding members in London to bring together families across the UK for Ugadi and cultural preservation.'
     },
     {

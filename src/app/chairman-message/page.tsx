@@ -23,7 +23,7 @@ export default function ChairmanMessagePage() {
             <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">
               Dr. Venkat S. Chary
             </h1>
-            <p className="text-xs text-slate-500 font-semibold">Founder President, UK Telugu Association</p>
+            <p className="text-xs text-slate-500 font-semibold">Founder President, Mana Indian Telugu Roots Abroad</p>
           </div>
         </div>
 
@@ -33,7 +33,7 @@ export default function ChairmanMessagePage() {
             "Dear Community Members, Patrons, and Friends,
           </p>
           <p className="relative z-10">
-            It gives me immense pride to welcome you to the redesigned digital home of the UK Telugu Association. Over the past decade, our association has grown from a humble vision into a pillar of cultural unity and welfare across Great Britain.
+            It gives me immense pride to welcome you to the redesigned digital home of the Mana Indian Telugu Roots Abroad. Over the past decade, our association has grown from a humble vision into a pillar of cultural unity and welfare across Great Britain.
           </p>
           <p className="relative z-10">
             Our commitment remains steadfast: preserving our rich Telugu language and classical arts for our youth, supporting international students navigating life in the UK, and stepping forward whenever a member of our community faces hardship.
@@ -53,7 +53,7 @@ export default function ChairmanMessagePage() {
           Message of Appreciation from 10 Downing Street
         </h2>
         <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-          "The Prime Minister extends warmest greetings to the UK Telugu Association. The contribution of the Telugu community in medicine, technology, finance, and the arts enriches the fabric of the United Kingdom. We commend MITRA for its leadership in cultural preservation and international student welfare."
+          "The Prime Minister extends warmest greetings to the Mana Indian Telugu Roots Abroad. The contribution of the Telugu community in medicine, technology, finance, and the arts enriches the fabric of the United Kingdom. We commend MITRA for its leadership in cultural preservation and international student welfare."
         </p>
         <div className="text-xs text-mitra-gold font-mono pt-2 border-t border-white/10">
           — Office of the Prime Minister, London

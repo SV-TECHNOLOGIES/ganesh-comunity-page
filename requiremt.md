@@ -1,7 +1,7 @@
 # MITRA Website Rebuild
 ### Business & Product Requirement Document (BRD/PRD)
 
-**Prepared for:** UK Telugu Association (MITRA)
+**Prepared for:** Mana Indian Telugu Roots Abroad (MITRA)
 **Reference site:** https://www.mitra.org.uk/
 **Document Version:** 1.0
 **Date:** 24 August 2026
@@ -23,7 +23,7 @@
 
 ## 2. Project Overview & Objectives
 
-The UK Telugu Association (MITRA) is a non-profit, non-religious organisation serving the Telugu-speaking community across the UK. The current website (built on WordPress/Elementor) is content-heavy, image-driven, and maintained manually by IT volunteers. This project aims to rebuild the website with a modern, refined, mobile-first UI, and introduce a dedicated Admin Panel so that non-technical committee members can independently manage content, events, membership, media and enquiries without developer involvement.
+The Mana Indian Telugu Roots Abroad (MITRA) is a non-profit, non-religious organisation serving the Telugu-speaking community across the UK. The current website (built on WordPress/Elementor) is content-heavy, image-driven, and maintained manually by IT volunteers. This project aims to rebuild the website with a modern, refined, mobile-first UI, and introduce a dedicated Admin Panel so that non-technical committee members can independently manage content, events, membership, media and enquiries without developer involvement.
 
 ### 2.1 Goals
 

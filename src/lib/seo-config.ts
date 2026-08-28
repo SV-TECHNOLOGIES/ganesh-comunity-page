@@ -4,7 +4,7 @@ import { EventItem, BlogPost } from './types';
 export const BASE_URL = 'https://www.mitra.org.uk';
 
 export function constructMetadata({
-  title = 'UK Telugu Association (MITRA) | Official Website',
+  title = 'Mana Indian Telugu Roots Abroad (MITRA) | Official Website',
   description = 'The premier UK non-profit organization promoting Telugu language, culture, arts, community welfare, student counselling, and high-impact charitable programs across Great Britain.',
   image = '/assets/poster.jpg',
   canonical = '/',
@@ -20,7 +20,7 @@ export function constructMetadata({
     title: `${title} | MITRA`,
     description,
     keywords: [
-      'UK Telugu Association',
+      'Mana Indian Telugu Roots Abroad',
       'MITRA',
       'Telugu Community UK',
       'London Telugu Events',
@@ -29,7 +29,7 @@ export function constructMetadata({
       'Kuchipudi Dance London',
       'Telugu Student Help London',
     ],
-    authors: [{ name: 'UK Telugu Association IT Committee' }],
+    authors: [{ name: 'Mana Indian Telugu Roots Abroad IT Committee' }],
     metadataBase: new URL(BASE_URL),
     alternates: {
       canonical,
@@ -38,7 +38,7 @@ export function constructMetadata({
       title,
       description,
       url: canonical,
-      siteName: 'UK Telugu Association (MITRA)',
+      siteName: 'Mana Indian Telugu Roots Abroad (MITRA)',
       images: [
         {
           url: image,
@@ -67,7 +67,7 @@ export function generateOrganizationJsonLd() {
   return {
     '@context': 'https://schema.org',
     '@type': 'NGO',
-    name: 'UK Telugu Association',
+    name: 'Mana Indian Telugu Roots Abroad',
     alternateName: 'MITRA',
     url: BASE_URL,
     logo: `${BASE_URL}/logo.png`,
@@ -110,7 +110,7 @@ export function generateEventJsonLd(event: EventItem) {
     image: [event.bannerUrl],
     organizer: {
       '@type': 'Organization',
-      name: 'UK Telugu Association',
+      name: 'Mana Indian Telugu Roots Abroad',
       url: BASE_URL,
     },
     offers: {

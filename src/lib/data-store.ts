@@ -238,7 +238,7 @@ const INITIAL_NEWS: BlogPost[] = [
     slug: 'mitra-announces-ugadi-fest-2026',
     title: 'MITRA Announces Grand Ugadi Cultural Celebrations 2026 in London',
     excerpt: 'Join us at Logan Hall, London for an unforgettable evening of Telugu classical music, dance, and authentic Panchanga Sravanam.',
-    content: `The UK Telugu Association (MITRA) is thrilled to announce its flagship annual event, the Ugadi Cultural Fest 2026, scheduled to take place on Sunday, 12th April 2026 at Logan Hall, University of London.
+    content: `The Mana Indian Telugu Roots Abroad (MITRA) is thrilled to announce its flagship annual event, the Ugadi Cultural Fest 2026, scheduled to take place on Sunday, 12th April 2026 at Logan Hall, University of London.
 
 This year's celebrations will feature special guest performances by acclaimed playback singers from Telangana and Andhra Pradesh, traditional Kuchipudi recitals by UK youth troupes, and the sacred Panchanga Sravanam.
 
@@ -254,7 +254,7 @@ This year's celebrations will feature special guest performances by acclaimed pl
     slug: 'guinness-world-record-recognition',
     title: 'MITRA Recognized by Parliament for Guinness World Record Cultural Achievement',
     excerpt: 'Members of the UK Parliament praise MITRA for fostering cultural integration and promoting South Asian classical arts.',
-    content: `In a historic parliamentary motion, the UK Telugu Association was commended for organizing the largest synchronized Kuchipudi ensemble outside India, bringing together over 500 performers from across Europe.`,
+    content: `In a historic parliamentary motion, the Mana Indian Telugu Roots Abroad was commended for organizing the largest synchronized Kuchipudi ensemble outside India, bringing together over 500 performers from across Europe.`,
     category: 'Achievements',
     author: 'MITRA PR Officer',
     date: '2025-11-05',
@@ -264,7 +264,7 @@ This year's celebrations will feature special guest performances by acclaimed pl
 ];
 
 const INITIAL_SETTINGS: SiteSettings = {
-  siteTitle: 'UK Telugu Association (MITRA)',
+  siteTitle: 'Mana Indian Telugu Roots Abroad (MITRA)',
   tagline: 'Serving and Connecting the Telugu Community in the United Kingdom',
   contactEmail: 'info@mitra.org.uk',
   contactPhone: '+44 20 8123 4567',

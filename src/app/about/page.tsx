@@ -17,7 +17,7 @@ export default function AboutPage() {
           Uniting & Serving the UK Telugu Community
         </h1>
         <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-          UK Telugu Association (MITRA) is a non-profit, non-religious community organization incorporated in the United Kingdom to preserve Telugu language, promote traditional arts, and assist international students and families.
+          Mana Indian Telugu Roots Abroad (MITRA) is a non-profit, non-religious community organization incorporated in the United Kingdom to preserve Telugu language, promote traditional arts, and assist international students and families.
         </p>
       </div>
 

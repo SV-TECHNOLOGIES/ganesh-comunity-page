@@ -54,7 +54,7 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-[#FFD4A0] leading-relaxed">
-              Mana Indian Telugu Roots Abroad (MITRA UK) in association with ELE Entertainments and UK Telugu Association (MITRA), hosting the biggest Maha Ganapathi Mahotsav in Slough, Langley.
+              Mana Indian Telugu Roots Abroad (MITRA UK) in association with ELE Entertainments and Mana Indian Telugu Roots Abroad (MITRA), hosting the biggest Maha Ganapathi Mahotsav in Slough, Langley.
             </p>
             <div className="flex items-center space-x-3 text-[#FF9A3C]">
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full border border-[#E65C00]/30 hover:border-[#FF9A3C] hover:bg-[#E65C00]/20 transition-colors">
@@ -122,7 +122,7 @@ export default function Footer() {
 
         {/* Copyright Bar */}
         <div className="pt-8 border-t border-[#E65C00]/20 flex flex-col sm:flex-row items-center justify-between text-[11px] text-[#FFD4A0] gap-4">
-          <p>© 2026 MITRA UK &amp; UK Telugu Association (MITRA). All Rights Reserved.</p>
+          <p>© 2026 MITRA UK &amp; Mana Indian Telugu Roots Abroad (MITRA). All Rights Reserved.</p>
           <p className="text-[#FF9A3C] font-semibold">
             Presented by Biryanis and more! · In association with ELE Entertainments
           </p>

@@ -321,7 +321,7 @@ async function main() {
         slug: 'guinness-world-record-recognition',
         title: 'MITRA Recognized by Parliament for Guinness World Record Cultural Achievement',
         excerpt: 'Members of the UK Parliament praise MITRA for fostering cultural integration and promoting South Asian classical arts.',
-        content: `In a historic parliamentary motion, the UK Telugu Association was commended for organizing the largest synchronized Kuchipudi ensemble outside India, bringing together over 500 performers from across Europe.`,
+        content: `In a historic parliamentary motion, the Mana Indian Telugu Roots Abroad was commended for organizing the largest synchronized Kuchipudi ensemble outside India, bringing together over 500 performers from across Europe.`,
         category: 'Achievements',
         author: 'MITRA PR Officer',
         date: '2025-11-05',

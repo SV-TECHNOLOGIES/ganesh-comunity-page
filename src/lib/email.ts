@@ -86,7 +86,7 @@ export const sendGuestWelcomeEmail = async (
       <div style="background: linear-gradient(135deg, #7A1620 0%, #9C1F2E 100%); padding: 32px 28px; text-align: center; border-bottom: 2px solid #D4AF37;">
         <div style="font-size: 28px; margin-bottom: 8px;">🕉️</div>
         <h1 style="color: #F4C542; font-size: 22px; font-weight: 900; margin: 0; letter-spacing: 1px; text-transform: uppercase;">Welcome to MITRA UK</h1>
-        <p style="color: #F7EFE1; font-size: 13px; margin: 8px 0 0; opacity: 0.85;">UK Telugu Association — Serving Our Community</p>
+        <p style="color: #F7EFE1; font-size: 13px; margin: 8px 0 0; opacity: 0.85;">Mana Indian Telugu Roots Abroad — Serving Our Community</p>
       </div>
 
       <!-- Body -->
@@ -128,7 +128,7 @@ export const sendGuestWelcomeEmail = async (
       <!-- Footer -->
       <div style="padding: 18px 28px; border-top: 1px solid rgba(212,175,55,0.2); text-align: center;">
         <p style="color: #7D6A4F; font-size: 11px; margin: 0;">
-          MITRA — UK Telugu Association · <a href="https://mitra.org.uk" style="color: #D4AF37; text-decoration: none;">mitra.org.uk</a>
+          MITRA — Mana Indian Telugu Roots Abroad · <a href="https://mitra.org.uk" style="color: #D4AF37; text-decoration: none;">mitra.org.uk</a>
         </p>
         <p style="color: #7D6A4F; font-size: 11px; margin: 6px 0 0;">If you did not make this request, you can safely ignore this email.</p>
       </div>
