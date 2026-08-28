@@ -49,7 +49,7 @@ export default function ContactPage() {
           Get In Touch
         </span>
         <h1 className="text-4xl font-black text-slate-900 dark:text-white">
-          Contact Mana Indian Telugu Roots Abroad
+          Contact Mitra UK Team
         </h1>
         <p className="text-sm text-slate-600 dark:text-slate-300">
           Have a query or feedback? Choose your relevant department and our committee will respond.
@@ -150,15 +150,15 @@ export default function ContactPage() {
             <div className="space-y-3 text-xs text-slate-600 dark:text-slate-300">
               <div className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-mitra-red shrink-0 mt-0.5" />
-                <span>MITRA Centre, Chiswick Park, 566 Chiswick High Rd, London W4 5YA, United Kingdom</span>
+                <span>London ,United Kingdom</span>
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-mitra-red shrink-0" />
-                <a href="mailto:info@mitra.org.uk" className="font-semibold text-mitra-red dark:text-mitra-gold">info@mitra.org.uk</a>
+                <a href="mailto:info@mitra.org.uk" className="font-semibold text-mitra-red dark:text-mitra-gold">contactus@mitrauk.com</a>
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-mitra-red shrink-0" />
-                <span>+44 20 8123 4567</span>
+                <span>+447436978097</span>
               </div>
             </div>
           </div>
@@ -169,11 +169,11 @@ export default function ContactPage() {
               All MITRA social accounts are verified and updated daily with event recordings and photo albums.
             </p>
             <div className="grid grid-cols-2 gap-3 text-xs pt-2">
-              <a href="https://twitter.com/mitra_official" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-slate-800 p-2.5 rounded-xl hover:bg-mitra-red transition-colors">
-                <Twitter className="w-4 h-4 text-sky-400" />
-                <span>Twitter / X</span>
+              <a href="https://www.instagram.com/mitra_unitedkingdom?igsi=aDY5OHF6amFzODds" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-slate-800 p-2.5 rounded-xl hover:bg-mitra-red transition-colors">
+                <Instagram className="w-4 h-4 text-sky-400" />
+                <span>Instagram</span>
               </a>
-              <a href="https://linkedin.com/company/mitra-official" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-slate-800 p-2.5 rounded-xl hover:bg-mitra-red transition-colors">
+              {/* <a href="https://linkedin.com/company/mitra-official" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-slate-800 p-2.5 rounded-xl hover:bg-mitra-red transition-colors">
                 <Linkedin className="w-4 h-4 text-blue-400" />
                 <span>LinkedIn</span>
               </a>
@@ -184,7 +184,7 @@ export default function ContactPage() {
               <a href="https://youtube.com/@mitraofficial" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-slate-800 p-2.5 rounded-xl hover:bg-mitra-red transition-colors">
                 <Youtube className="w-4 h-4 text-red-500" />
                 <span>YouTube</span>
-              </a>
+              </a> */}
             </div>
           </div>
         </div>

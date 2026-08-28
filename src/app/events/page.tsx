@@ -47,10 +47,10 @@ export default function EventsPage() {
           MITRA UK COMMUNITY EVENTS & FESTIVALS
         </span>
         <h1 className="text-4xl sm:text-5xl font-black font-cinzel gold-foil-text">
-          EVENTS & POOJA
+          EVENTS 
         </h1>
         <p className="text-xs sm:text-sm text-[#C9B79C] max-w-2xl mx-auto">
-          Discover upcoming Slough Mahotsav schedules, Ugadi cultural celebrations, business leadership summits, and book sacred Poojas or Annadanam.
+         Discover upcoming Telugu cultural, sports, music, dance, and community events across the UK.
         </p>
       </div>
 

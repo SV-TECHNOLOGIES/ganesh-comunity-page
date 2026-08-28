@@ -37,7 +37,7 @@ export default function Footer() {
         </div>
 
         {/* Footer Navigation Columns */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 text-xs ">
           
           {/* Column 1: Organizers Info */}
           <div className="space-y-4">
@@ -54,7 +54,7 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-[#FFD4A0] leading-relaxed">
-              Mana Indian Telugu Roots Abroad (MITRA UK) in association with ELE Entertainments and Mana Indian Telugu Roots Abroad (MITRA), hosting the biggest Maha Ganapathi Mahotsav in Slough, Langley.
+              Mana Indian Telugu Roots Abroad (MITRA UK) hosting the biggest Maha Ganapathi Mahotsav in UK.
             </p>
             <div className="flex items-center space-x-3 text-[#FF9A3C]">
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full border border-[#E65C00]/30 hover:border-[#FF9A3C] hover:bg-[#E65C00]/20 transition-colors">
@@ -69,18 +69,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Column 2: Event Quick Links */}
-          <div className="space-y-3">
-            <h4 className="font-black font-cinzel text-sm text-[#FF9A3C] uppercase tracking-wider">
-              Mahotsav Highlights
-            </h4>
-            <ul className="space-y-2 text-[#FFD4A0]">
-              <li><a href="#ritual-clock" className="hover:text-[#FF9A3C] transition-colors">Ritual Countdown Clock</a></li>
-              <li><Link href="/events" className="hover:text-[#FF9A3C] transition-colors">Slough Langley Venue Schedule</Link></li>
-              <li><Link href="/media?tab=videos" className="hover:text-[#FF9A3C] transition-colors">Official Teaser Reel</Link></li>
-              <li><Link href="/about" className="hover:text-[#FF9A3C] transition-colors">6ft Bappa Artisan Specs</Link></li>
-            </ul>
-          </div>
+          
 
           {/* Column 3: Community Services */}
           <div className="space-y-3">
@@ -100,20 +89,17 @@ export default function Footer() {
           {/* Column 4: Contact & Venue */}
           <div className="space-y-3">
             <h4 className="font-black font-cinzel text-sm text-[#FF9A3C] uppercase tracking-wider">
-              Venue & Contact
+              Contact Us
             </h4>
             <div className="space-y-2 text-[#FFD4A0]">
-              <div className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 text-[#FF9A3C] shrink-0 mt-0.5" />
-                <span>Langley, Slough, Berkshire, United Kingdom</span>
-              </div>
+              
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-[#FF9A3C] shrink-0" />
-                <span>info@mitra.org.uk</span>
+                <span>contactus@mitrauk.com</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-[#FF9A3C] shrink-0" />
-                <span>+44 20 8000 1080</span>
+                <span>+447404530041</span>
               </div>
             </div>
           </div>
@@ -123,9 +109,6 @@ export default function Footer() {
         {/* Copyright Bar */}
         <div className="pt-8 border-t border-[#E65C00]/20 flex flex-col sm:flex-row items-center justify-between text-[11px] text-[#FFD4A0] gap-4">
           <p>© 2026 MITRA UK &amp; Mana Indian Telugu Roots Abroad (MITRA). All Rights Reserved.</p>
-          <p className="text-[#FF9A3C] font-semibold">
-            Presented by Biryanis and more! · In association with ELE Entertainments
-          </p>
         </div>
 
       </div>
