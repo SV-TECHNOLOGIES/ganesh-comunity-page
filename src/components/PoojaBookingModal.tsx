@@ -3,14 +3,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { DataStore } from '@/lib/data-store';
 import { trackDonation } from '@/lib/analytics';
-import Link from 'next/link';
 import {
   Flame,
   CheckCircle2,
   Lock,
   X,
   Calendar,
-  UserCheck,
   ArrowLeft,
   AlertCircle,
   Loader2,
@@ -23,7 +21,6 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { DonationRecord } from '@/lib/types';
-import { SITE_CONFIG } from '@/config/site-config';
 import { useAuth } from '@/lib/auth-context';
 import { loadStripe, Stripe as StripeType } from '@stripe/stripe-js';
 import {
@@ -107,7 +104,7 @@ export const POOJA_DATES: PoojaDateOption[] = [
   }
 ];
 
-type Step = 'details' | 'payment' | 'success';
+type Step = 'guest-details' | 'details' | 'payment' | 'success';
 
 interface CheckoutFormProps {
   clientSecret: string;
@@ -255,7 +252,7 @@ export default function PoojaBookingModal({
   onClose: () => void;
   initialDateId?: string;
 }) {
-  const { user, isLoggedIn } = useAuth();
+  const { user, isLoggedIn, login } = useAuth();
 
   const [selectedDateId, setSelectedDateId] = useState<string>(initialDateId || 'day-2');
   const [devoteeName, setDevoteeName] = useState('');
@@ -264,6 +261,13 @@ export default function PoojaBookingModal({
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [specialWishes, setSpecialWishes] = useState('');
+
+  // ── Guest capture state ──────────────────────────────────────────────────
+  const [guestName, setGuestName] = useState('');
+  const [guestEmail, setGuestEmail] = useState('');
+  const [guestPhone, setGuestPhone] = useState('');
+  const [guestSubmitting, setGuestSubmitting] = useState(false);
+  const [guestError, setGuestError] = useState<string | null>(null);
 
   const [step, setStep] = useState<Step>('details');
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -279,14 +283,19 @@ export default function PoojaBookingModal({
     }
   }, [initialDateId]);
 
-  // Pre-fill user data from session
+  // On open: decide starting step based on auth
   useEffect(() => {
-    if (isOpen && user) {
-      if (user.fullName && !devoteeName) setDevoteeName(user.fullName);
-      if (user.email && !email) setEmail(user.email);
-      if (user.phone && !phone) setPhone(user.phone);
+    if (isOpen) {
+      if (isLoggedIn && user) {
+        if (user.fullName) setDevoteeName(user.fullName);
+        if (user.email) setEmail(user.email);
+        if (user.phone) setPhone(user.phone);
+        setStep('details');
+      } else {
+        setStep('guest-details');
+      }
     }
-  }, [isOpen, user]);
+  }, [isOpen, isLoggedIn]);
 
   // Reset modal state on close
   useEffect(() => {
@@ -295,6 +304,7 @@ export default function PoojaBookingModal({
       setClientSecret(null);
       setSessionError(null);
       setReceipt(null);
+      setGuestError(null);
     }
   }, [isOpen]);
 
@@ -311,6 +321,47 @@ export default function PoojaBookingModal({
         .catch(console.error);
     }
   }, [isOpen]);
+
+  // ── Guest details submit ──────────────────────────────────────────────────
+  const handleGuestSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    setGuestSubmitting(true);
+    setGuestError(null);
+
+    try {
+      const res = await fetch('/api/auth/guest-register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: guestName.trim(),
+          email: guestEmail.trim(),
+          phone: guestPhone.trim(),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        setGuestError(data.error || 'Could not create your account. Please try again.');
+        return;
+      }
+
+      // Silently log in
+      login(data.user);
+
+      // Pre-fill devotee details
+      setDevoteeName(guestName.trim());
+      setEmail(guestEmail.trim());
+      setPhone(guestPhone.trim());
+
+      // Move to pooja booking details
+      setStep('details');
+    } catch {
+      setGuestError('Network error. Please check your connection and try again.');
+    } finally {
+      setGuestSubmitting(false);
+    }
+  }, [guestName, guestEmail, guestPhone, login]);
 
   const selectedDateObj = POOJA_DATES.find((d) => d.id === selectedDateId) || POOJA_DATES[1];
   const poojaAmount = 116;
@@ -468,42 +519,110 @@ export default function PoojaBookingModal({
             </button>
           </div>
 
-        /* ── NOT LOGGED IN ──────────────────────────────────────────────── */
-        ) : !isLoggedIn ? (
-          <div className="text-center py-6 space-y-6">
-            <div className="w-16 h-16 bg-[#7A1620] text-[#F4C542] rounded-full flex items-center justify-center mx-auto border-2 border-[#D4AF37] shadow-xl">
-              <Lock className="w-8 h-8" />
+        /* ── GUEST DETAILS (not logged in) ─────────────────────────────── */
+        ) : step === 'guest-details' ? (
+          <form onSubmit={handleGuestSubmit} className="space-y-5">
+            {/* Header */}
+            <div className="flex items-center gap-3 border-b border-[#D4AF37]/30 pb-3">
+              <div className="p-3 bg-[#7A1620] text-[#F4C542] rounded-2xl shadow border border-[#D4AF37]/40">
+                <Flame className="w-6 h-6 fill-current text-[#F4C542]" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg sm:text-xl font-black font-cinzel gold-foil-text">SACRED POOJA BOOKING</h2>
+                  <span className="bg-[#D4AF37] text-[#0D0705] text-[9px] font-black px-2 py-0.5 rounded-full uppercase">£116 SEVA</span>
+                </div>
+                <p className="text-xs text-[#C9B79C]">Quick details — no account needed</p>
+              </div>
             </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-black font-cinzel gold-foil-text">
-                LOGIN REQUIRED FOR POOJA BOOKING
-              </h2>
-              <p className="text-xs text-[#C9B79C] max-w-sm mx-auto leading-relaxed">
-                Please sign in to your MITRA UK Member account to complete your sacred Maha Ganapathi Pooja Booking (£116) and record your Gotram Sankalpam.
+
+            {/* Info banner */}
+            <div className="bg-[#160B08] border border-[#D4AF37]/30 rounded-xl p-3 flex items-start gap-2.5">
+              <Sparkles className="w-4 h-4 text-[#F4C542] shrink-0 mt-0.5" />
+              <p className="text-[11px] text-[#C9B79C] leading-relaxed">
+                Enter your details below. We'll create your free MITRA account instantly and email your login credentials — then take you straight to your Pooja booking.
               </p>
             </div>
 
-            {SITE_CONFIG.SHOW_DEMO_CREDENTIALS && (
-              <div className="bg-[#160B08] p-4 rounded-2xl border border-[#D4AF37]/30 text-xs space-y-1 text-center">
-                <span className="text-[#F4C542] font-bold block">Quick Demo Member Credentials:</span>
-                <div className="text-[#C9B79C] text-[11px]">
-                  Email: <code className="text-[#F7EFE1]">{SITE_CONFIG.DEMO_MEMBER_EMAIL}</code> | Password:{' '}
-                  <code className="text-[#F7EFE1]">{SITE_CONFIG.DEMO_MEMBER_PASSWORD}</code>
-                </div>
+            {/* Name */}
+            <div>
+              <label className="flex items-center gap-1.5 text-xs font-bold text-[#C9B79C] mb-1.5">
+                <User className="w-3.5 h-3.5 text-[#F4C542]" />
+                <span>Full Name / Yajamani Name *</span>
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Suresh Kumar"
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                className="w-full bg-[#0D0705] border border-[#D4AF37]/40 rounded-xl p-2.5 text-xs text-[#F7EFE1] focus:border-[#F4C542] focus:outline-none"
+              />
+            </div>
+
+            {/* Email + Phone */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="flex items-center gap-1.5 text-xs font-bold text-[#C9B79C] mb-1.5">
+                  <Mail className="w-3.5 h-3.5 text-[#F4C542]" />
+                  <span>Email Address *</span>
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="devotee@example.com"
+                  value={guestEmail}
+                  onChange={(e) => setGuestEmail(e.target.value)}
+                  className="w-full bg-[#0D0705] border border-[#D4AF37]/40 rounded-xl p-2.5 text-xs text-[#F7EFE1] focus:border-[#F4C542] focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="flex items-center gap-1.5 text-xs font-bold text-[#C9B79C] mb-1.5">
+                  <Phone className="w-3.5 h-3.5 text-[#F4C542]" />
+                  <span>Phone / WhatsApp *</span>
+                </label>
+                <input
+                  type="tel"
+                  required
+                  placeholder="+44 7000 000000"
+                  value={guestPhone}
+                  onChange={(e) => setGuestPhone(e.target.value)}
+                  className="w-full bg-[#0D0705] border border-[#D4AF37]/40 rounded-xl p-2.5 text-xs text-[#F7EFE1] focus:border-[#F4C542] focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Guest error */}
+            {guestError && (
+              <div className="bg-red-950/80 border border-red-500/50 text-red-200 text-xs p-3 rounded-xl flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                <span>{guestError}</span>
               </div>
             )}
 
-            <div className="space-y-3">
-              <Link
-                href="/login"
-                onClick={onClose}
-                className="gold-button w-full py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl"
-              >
-                <UserCheck className="w-4 h-4 text-[#0D0705]" />
-                <span>Go to Member Login &rarr;</span>
-              </Link>
+            <div className="text-[11px] text-[#C9B79C] flex items-center justify-center gap-1.5">
+              <Lock className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Your details are kept private · PCI-DSS Encrypted</span>
             </div>
-          </div>
+
+            <button
+              type="submit"
+              disabled={guestSubmitting}
+              className="gold-button w-full py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {guestSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 text-[#0D0705] animate-spin" />
+                  <span>Setting up your account...</span>
+                </>
+              ) : (
+                <>
+                  <Flame className="w-4 h-4 fill-current text-[#0D0705]" />
+                  <span>Continue to Pooja Booking →</span>
+                </>
+              )}
+            </button>
+          </form>
 
         /* ── STEP 1: POOJA DETAILS FORM ─────────────────────────────────── */
         ) : step === 'details' ? (
