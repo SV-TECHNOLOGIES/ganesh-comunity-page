@@ -4,12 +4,12 @@ import { hashPassword, signToken } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
-    const { fullName, email, phone, tier, address, profession, password } = await request.json();
+    const { fullName, email, phone, tier, address, profession, password, otp } = await request.json();
 
     // Validate required fields
-    if (!fullName || !email || !phone || !password) {
+    if (!fullName || !email || !phone || !password || !otp) {
       return NextResponse.json(
-        { success: false, error: 'Full name, email, phone, and password are required.' },
+        { success: false, error: 'Full name, email, phone, password, and OTP are required.' },
         { status: 400 }
       );
     }
@@ -27,6 +27,23 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { success: false, error: 'An account with this email already exists.' },
         { status: 409 }
+      );
+    }
+
+    // Verify OTP
+    const validOtp = await prisma.oTP.findFirst({
+      where: {
+        email,
+        type: 'REGISTER',
+        code: otp,
+        expiresAt: { gt: new Date() },
+      },
+    });
+
+    if (!validOtp) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid or expired OTP.' },
+        { status: 400 }
       );
     }
 
@@ -55,6 +72,11 @@ export async function POST(request: Request) {
         status: 'Active',
         role: 'Member',
       },
+    });
+
+    // Delete used OTP
+    await prisma.oTP.deleteMany({
+      where: { email, type: 'REGISTER' },
     });
 
     // Issue JWT token right away so user can be logged in immediately

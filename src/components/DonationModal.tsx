@@ -472,7 +472,7 @@ export default function DonationModal({
               <div className="grid grid-cols-3 gap-2">
                 {(
                   [
-                    { key: 'Annadanam' as Category, label: 'Annadanam', icon: <Utensils className="w-4 h-4 text-[#F4C542]" />, badge: undefined },
+                    { key: 'Annadanam' as Category, label: 'Annadanam Donation', icon: <Utensils className="w-4 h-4 text-[#F4C542]" />, badge: undefined },
                     { key: 'Pooja Booking' as Category, label: 'Pooja Booking', icon: <Flame className="w-4 h-4 text-[#F4C542]" />, badge: '£116 FIXED' },
                     { key: 'Event Donations' as Category, label: 'Event Donations', icon: <Calendar className="w-4 h-4 text-[#F4C542]" />, badge: undefined },
                   ] as Array<{ key: Category; label: string; icon: React.ReactNode; badge?: string }>

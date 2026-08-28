@@ -11,13 +11,13 @@ export default function AboutPage() {
       {/* Header */}
       <div className="text-center max-w-3xl mx-auto space-y-4">
         <span className="bg-ukta-red/10 text-ukta-red dark:bg-ukta-gold/10 dark:text-ukta-gold text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
-          About UKTA
+          About MITRA
         </span>
         <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
           Uniting & Serving the UK Telugu Community
         </h1>
         <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-          UK Telugu Association (UKTA) is a non-profit, non-religious community organization incorporated in the United Kingdom to preserve Telugu language, promote traditional arts, and assist international students and families.
+          UK Telugu Association (MITRA) is a non-profit, non-religious community organization incorporated in the United Kingdom to preserve Telugu language, promote traditional arts, and assist international students and families.
         </p>
       </div>
 
@@ -45,7 +45,7 @@ export default function AboutPage() {
       </div>
 
       {/* Governing Documents Downloads */}
-      <div id="governing-docs" className="bg-slate-100 dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-6">
+      {/* <div id="governing-docs" className="bg-slate-100 dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-6">
         <div className="flex items-center gap-3">
           <BookOpen className="w-6 h-6 text-ukta-red dark:text-ukta-gold" />
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
@@ -77,7 +77,7 @@ export default function AboutPage() {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
     </div>
   );

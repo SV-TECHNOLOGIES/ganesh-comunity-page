@@ -11,11 +11,33 @@ export default function ContactPage() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    trackEvent('contact_form_submitted', '/contact', { department, email });
-    setSubmitted(true);
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ department, name, email, message }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        trackEvent('contact_form_submitted', '/contact', { department, email });
+        setSubmitted(true);
+      } else {
+        setError(data.error || 'Failed to send message. Please try again.');
+      }
+    } catch {
+      setError('Connection error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -50,6 +72,11 @@ export default function ContactPage() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="bg-rose-50 border border-rose-500/50 text-rose-700 text-xs p-3 rounded-xl text-center">
+                  {error}
+                </div>
+              )}
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Department / Topic
@@ -106,9 +133,10 @@ export default function ContactPage() {
 
               <button
                 type="submit"
-                className="w-full bg-ukta-red hover:bg-ukta-red-dark text-white font-extrabold py-3.5 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2"
+                disabled={loading}
+                className="w-full bg-ukta-red hover:bg-ukta-red-dark text-white font-extrabold py-3.5 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-60"
               >
-                <span>Send Department Message</span>
+                <span>{loading ? 'Sending Message...' : 'Send Department Message'}</span>
                 <Send className="w-4 h-4" />
               </button>
             </form>

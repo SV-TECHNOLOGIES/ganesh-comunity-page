@@ -31,7 +31,7 @@ export default function SponsorsPage() {
           Partnerships & Support
         </span>
         <h1 className="text-4xl font-black text-slate-900 dark:text-white">
-          Sponsors & Corporate Partners
+          Sponsors 
         </h1>
         <p className="text-sm text-slate-600 dark:text-slate-300">
           We gratefully acknowledge our corporate sponsors who support UKTA festivals and community welfare initiatives.
@@ -42,9 +42,9 @@ export default function SponsorsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {sponsors.map((sp, idx) => (
           <div key={idx} className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center text-center space-y-3">
-            <span className="bg-ukta-navy text-ukta-gold text-[10px] font-black px-3 py-1 rounded-full uppercase">
+            {/* <span className="bg-ukta-navy text-ukta-gold text-[10px] font-black px-3 py-1 rounded-full uppercase">
               {sp.tier}
-            </span>
+            </span> */}
             <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">
               <Image src={sp.logo} alt={sp.name} fill className="object-cover" />
             </div>

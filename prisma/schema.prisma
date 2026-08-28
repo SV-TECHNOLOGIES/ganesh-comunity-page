@@ -150,3 +150,14 @@ model AdminUser {
   role         String   @default("Admin")
   createdAt    DateTime @default(now())
 }
+
+model OTP {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  type      String   // "REGISTER" or "FORGOT_PASSWORD"
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email, type])
+}

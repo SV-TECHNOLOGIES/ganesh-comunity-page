@@ -22,6 +22,8 @@ export default function MembershipPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -43,26 +45,44 @@ export default function MembershipPage() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fullName: name,
-          email,
-          phone,
-          tier: selectedTier,
-          address,
-          profession,
-          password,
-        }),
-      });
+      if (!otpSent) {
+        // Step 1: Send OTP
+        const res = await fetch('/api/auth/send-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, type: 'REGISTER' }),
+        });
 
-      const data = await res.json();
+        const data = await res.json();
 
-      if (!data.success) {
-        setError(data.error || 'Registration failed. Please try again.');
-        return;
-      }
+        if (data.success) {
+          setOtpSent(true);
+        } else {
+          setError(data.error || 'Failed to send OTP. Please try again.');
+        }
+      } else {
+        // Step 2: Complete Registration
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fullName: name,
+            email,
+            phone,
+            tier: selectedTier,
+            address,
+            profession,
+            password,
+            otp,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!data.success) {
+          setError(data.error || 'Registration failed. Please try again.');
+          return;
+        }
 
       // Track analytics
       trackMembership(selectedTier, data.user?.id || email);
@@ -82,7 +102,7 @@ export default function MembershipPage() {
         router.push('/membership/portal');
       }, 2500);
 
-    } catch {
+    }} catch {
       setError('Connection error. Please try again.');
     } finally {
       setLoading(false);
@@ -133,7 +153,7 @@ export default function MembershipPage() {
       </div>
 
       {/* Tier Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {SITE_CONFIG.ENABLE_MEMBERSHIP && <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         
         {/* Tier 1: Life Member */}
         <div 
@@ -207,7 +227,7 @@ export default function MembershipPage() {
           </div>
         )}
 
-      </div>
+      </div>}
 
       {/* Registration Form — controlled by ENABLE_MEMBERSHIP_REGISTRATION in site-config.json */}
       {SITE_CONFIG.ENABLE_MEMBERSHIP_REGISTRATION ? (
@@ -337,13 +357,39 @@ export default function MembershipPage() {
               </div>
             </div>
 
+            {/* OTP Input (Shown only after Send OTP) */}
+            {otpSent && (
+              <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                  <span className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">Email Verification</span>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Enter 6-digit OTP sent to your email</label>
+                  <input
+                    type="text"
+                    required
+                    maxLength={6}
+                    placeholder="123456"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl p-3 text-center tracking-widest text-lg font-bold text-slate-900 dark:text-white"
+                  />
+                </div>
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={loading}
               className="w-full bg-ukta-red hover:bg-ukta-red-dark text-white font-extrabold py-3.5 rounded-xl text-sm shadow-md transition-all flex items-center justify-center gap-2 mt-4 disabled:opacity-60"
             >
               <Sparkles className="w-4 h-4 text-ukta-gold" />
-              <span>{loading ? 'Creating Account…' : 'Complete Registration & Get Member Pass'}</span>
+              <span>
+                {loading 
+                  ? (otpSent ? 'Creating Account…' : 'Sending OTP…') 
+                  : (otpSent ? 'Complete Registration & Get Member Pass' : 'Send Verification OTP')}
+              </span>
             </button>
           </form>
         </div>

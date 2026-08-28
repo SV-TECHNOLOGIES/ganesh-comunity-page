@@ -98,9 +98,9 @@ export default function Header() {
           <Link href="/" className="flex items-center gap-3 group">
             <div className="w-16 h-16 rounded-full overflow-hidden shrink-0">
               <img
-                src="/assets/poster-dark.jpeg"
+                src="/assets/poster.jpg"
                 alt="MITRA UK Logo"
-                className="w-full h-full object-cover rounded-full"
+                className="w-full h-full object-cover rounded-full "
               />
             </div>
             <div>
