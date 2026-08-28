@@ -1,6 +1,6 @@
 # Stripe Integration Setup Guide
 
-Complete setup guide for the UKTA Stripe payment integration — covers local development and production deployment.
+Complete setup guide for the MITRA Stripe payment integration — covers local development and production deployment.
 
 ---
 
@@ -135,7 +135,7 @@ You can update Stripe keys **without redeploying** through the Admin Panel:
 3. Paste your new Publishable Key and Secret Key
 4. Click **Save & Switch Stripe Payout Account**
 
-All future payments will immediately use the new Stripe account. This lets you switch between test and live accounts, or between different UKTA Stripe accounts, with zero downtime.
+All future payments will immediately use the new Stripe account. This lets you switch between test and live accounts, or between different MITRA Stripe accounts, with zero downtime.
 
 > [!IMPORTANT]
 > When switching from test to live keys, also update `STRIPE_WEBHOOK_SECRET` in your hosting environment with the live endpoint's signing secret.

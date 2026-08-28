@@ -28,11 +28,11 @@ function MediaContent() {
       
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto space-y-3">
-        <span className="bg-ukta-red/10 text-ukta-red dark:bg-ukta-gold/10 dark:text-ukta-gold text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
+        <span className="bg-mitra-red/10 text-mitra-red dark:bg-mitra-gold/10 dark:text-mitra-gold text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
           Media Archives
         </span>
         <h1 className="text-4xl font-black text-slate-900 dark:text-white">
-          Photo Gallery, Videos & UKTA Patrika
+          Photo Gallery, Videos & MITRA Patrika
         </h1>
         <p className="text-sm text-slate-600 dark:text-slate-300">
           Relive grand festival highlights, Guinness World Record performances, and download digital Patrika magazines.
@@ -45,7 +45,7 @@ function MediaContent() {
           onClick={() => setActiveTab('photos')}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition-all ${
             activeTab === 'photos'
-              ? 'bg-ukta-red text-white shadow-md'
+              ? 'bg-mitra-red text-white shadow-md'
               : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100'
           }`}
         >
@@ -57,7 +57,7 @@ function MediaContent() {
           onClick={() => setActiveTab('videos')}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition-all ${
             activeTab === 'videos'
-              ? 'bg-ukta-red text-white shadow-md'
+              ? 'bg-mitra-red text-white shadow-md'
               : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100'
           }`}
         >
@@ -69,12 +69,12 @@ function MediaContent() {
           onClick={() => setActiveTab('patrika')}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold transition-all ${
             activeTab === 'patrika'
-              ? 'bg-ukta-navy text-ukta-gold border border-ukta-gold/40 shadow-md'
+              ? 'bg-mitra-navy text-mitra-gold border border-mitra-gold/40 shadow-md'
               : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100'
           }`}
         >
           <BookOpen className="w-4 h-4" />
-          <span>UKTA Patrika & Souvenir (PDFs)</span>
+          <span>MITRA Patrika & Souvenir (PDFs)</span>
         </button>
       </div>
 
@@ -98,7 +98,7 @@ function MediaContent() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
               <div className="absolute bottom-4 left-4 right-4 text-white">
                 <span className="text-xs font-extrabold">{item.title}</span>
-                <span className="block text-[10px] text-ukta-gold">Click to open Lightbox</span>
+                <span className="block text-[10px] text-mitra-gold">Click to open Lightbox</span>
               </div>
             </div>
           ))}
@@ -113,9 +113,9 @@ function MediaContent() {
             { title: 'TTD Celestial Srinivasa Kalyanam Highlights', desc: 'Devotional ceremonies across major UK cities.' }
           ].map((vid, idx) => (
             <div key={idx} className="bg-white dark:bg-slate-900 rounded-3xl p-4 border border-slate-200 dark:border-slate-800 shadow-md space-y-3">
-              <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-900 flex items-center justify-center border border-ukta-gold/30 group">
+              <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-900 flex items-center justify-center border border-mitra-gold/30 group">
                 <Image src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=800" alt="Video cover" fill className="object-cover opacity-70 group-hover:scale-105 transition-transform" />
-                <div className="w-14 h-14 rounded-full bg-ukta-red text-white flex items-center justify-center shadow-2xl relative z-10">
+                <div className="w-14 h-14 rounded-full bg-mitra-red text-white flex items-center justify-center shadow-2xl relative z-10">
                   <Play className="w-6 h-6 fill-white ml-1" />
                 </div>
               </div>
@@ -129,20 +129,20 @@ function MediaContent() {
       {/* Tab 3: PDF Magazines */}
       {activeTab === 'patrika' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {mediaItems.filter(m => m.category === 'UKTA Patrika' || m.category === 'UKTA Souvenir').map((pub) => (
+          {mediaItems.filter(m => m.category === 'MITRA Patrika' || m.category === 'MITRA Souvenir').map((pub) => (
             <div key={pub.id} className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-md flex gap-6 items-center">
-              <div className="relative w-28 h-36 rounded-xl overflow-hidden shadow-md border border-ukta-gold shrink-0">
+              <div className="relative w-28 h-36 rounded-xl overflow-hidden shadow-md border border-mitra-gold shrink-0">
                 <Image src={pub.coverImage} alt={pub.title} fill className="object-cover" />
               </div>
               <div className="space-y-2 flex-1">
-                <span className="text-[10px] font-bold bg-ukta-navy text-ukta-gold px-2 py-0.5 rounded">
+                <span className="text-[10px] font-bold bg-mitra-navy text-mitra-gold px-2 py-0.5 rounded">
                   {pub.category}
                 </span>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">{pub.title}</h3>
                 <p className="text-xs text-slate-500 line-clamp-2">{pub.description}</p>
                 <button
                   onClick={() => alert(`Opening PDF viewer for ${pub.title}...`)}
-                  className="bg-ukta-red hover:bg-ukta-red-dark text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow transition-colors"
+                  className="bg-mitra-red hover:bg-mitra-red-dark text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow transition-colors"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Read / Download PDF</span>

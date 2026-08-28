@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Starting UKTA & Slough Mahotsav database seeding...');
+  console.log('🌱 Starting MITRA & Slough Mahotsav database seeding...');
 
   // 1. Seed Events
   await prisma.event.deleteMany({});
@@ -43,14 +43,14 @@ async function main() {
       },
       {
         id: 'evt-102',
-        title: 'UKTA Ugadi Celebrations & Cultural Fest 2026',
+        title: 'MITRA Ugadi Celebrations & Cultural Fest 2026',
         category: 'Cultural Events',
         date: '2026-04-12',
         time: '04:00 PM - 09:00 PM BST',
         venue: 'Logan Hall, University of London',
         address: '20 Bedford Way, Bloomsbury, London WC1H 0AL',
         description: 'Celebrate Telugu New Year Ugadi with authentic Panchanga Sravanam, traditional music recitals, Kuchipudi dance recitals, and traditional Ugadi Pachadi.',
-        bannerUrl: '/assets/poster-dark.jpeg',
+        bannerUrl: '/assets/poster.jpg',
         status: 'Upcoming',
         capacity: 500,
         rsvpCount: 342,
@@ -97,8 +97,8 @@ async function main() {
         time: '06:00 PM - 10:00 PM BST',
         venue: 'Royal Albert Hall',
         address: 'Kensington Gore, London SW7 2AP',
-        description: 'Historic assembly celebrating the Guinness World Record set by UKTA for the largest synchronized Kuchipudi dance performance outside India.',
-        bannerUrl: '/assets/poster-dark.jpeg',
+        description: 'Historic assembly celebrating the Guinness World Record set by MITRA for the largest synchronized Kuchipudi dance performance outside India.',
+        bannerUrl: '/assets/poster.jpg',
         status: 'Past',
         capacity: 800,
         rsvpCount: 800,
@@ -135,17 +135,17 @@ async function main() {
         id: 'sp-3',
         name: 'MITRA UK',
         tier: 'Organizer',
-        logoUrl: '/assets/poster-dark.jpeg',
+        logoUrl: '/assets/poster.jpg',
         websiteUrl: '#',
         order: 3,
         active: true,
       },
       {
         id: 'sp-4',
-        name: 'UK Telugu Association (UKTA)',
+        name: 'UK Telugu Association (MITRA)',
         tier: 'Platform Partner',
         logoUrl: '/assets/poster.jpg',
-        websiteUrl: 'https://ukta.org.uk',
+        websiteUrl: 'https://mitra.org.uk',
         order: 4,
         active: true,
       },
@@ -158,9 +158,9 @@ async function main() {
   await prisma.member.createMany({
     data: [
       {
-        id: 'UKTA-MEM-5001',
+        id: 'MITRA-MEM-5001',
         fullName: 'Mahesh Babu G',
-        email: 'member@ukta.org.uk',
+        email: 'member@mitra.org.uk',
         phone: '+44 7890 123456',
         tier: 'Life Member',
         role: 'Executive',
@@ -172,7 +172,7 @@ async function main() {
         expiryDate: 'Lifetime',
       },
       {
-        id: 'UKTA-MEM-5002',
+        id: 'MITRA-MEM-5002',
         fullName: 'Priyanka Reddy',
         email: 'priyanka.reddy@example.co.uk',
         phone: '+44 7890 654321',
@@ -186,7 +186,7 @@ async function main() {
         expiryDate: '2027-02-10',
       },
       {
-        id: 'UKTA-MEM-5003',
+        id: 'MITRA-MEM-5003',
         fullName: 'Venkatesh Naidu',
         email: 'v.naidu@example.co.uk',
         phone: '+44 7890 987654',
@@ -208,7 +208,7 @@ async function main() {
   await prisma.charityCase.createMany({
     data: [
       {
-        id: 'UKTA-HELP-1092',
+        id: 'MITRA-HELP-1092',
         applicantName: 'Srinivas Rao',
         contactEmail: 'srinivas.r@gmail.com',
         contactPhone: '+44 7700 900123',
@@ -218,9 +218,9 @@ async function main() {
         urgency: 'Medium',
       },
       {
-        id: 'UKTA-HELP-1093',
+        id: 'MITRA-HELP-1093',
         applicantName: 'Confidential Beneficiary',
-        contactEmail: 'help.welfare@ukta.org.uk',
+        contactEmail: 'help.welfare@mitra.org.uk',
         contactPhone: '+44 7700 900456',
         category: 'Women Helpline',
         description: 'Domestic support request and legal advisory referral.',
@@ -228,7 +228,7 @@ async function main() {
         urgency: 'High',
       },
       {
-        id: 'UKTA-HELP-1091',
+        id: 'MITRA-HELP-1091',
         applicantName: 'Family of Late K. Sharma',
         contactEmail: 'sharma.family@outlook.com',
         contactPhone: '+44 7700 900789',
@@ -257,13 +257,13 @@ async function main() {
         id: 'med-2',
         title: 'Guinness World Record Kuchipudi Highlights',
         category: 'Video',
-        coverImage: '/assets/poster-dark.jpeg',
+        coverImage: '/assets/poster.jpg',
         url: 'https://youtube.com',
         description: 'Official recording of the historic Kuchipudi performance in London.',
       },
       {
         id: 'med-3',
-        title: 'UKTA Patrika — Mahotsav Special Edition 2026',
+        title: 'MITRA Patrika — Mahotsav Special Edition 2026',
         category: 'Patrika',
         coverImage: '/assets/organizers-poster.jpg',
         url: '#',
@@ -280,11 +280,11 @@ async function main() {
       {
         id: 'news-1',
         slug: 'maha-ganapathi-slough-mahotsav-2026',
-        title: 'MITRA UK & UKTA Announce London’s Largest Maha Ganapathi Mahotsav 2026',
+        title: 'MITRA UK Announce London’s Largest Maha Ganapathi Mahotsav 2026',
         excerpt: 'Step inside the sanctum on 14th September 2026 in Langley, Slough as we unveil the 6ft eco-friendly Maha Ganapathi idol.',
         content: `MITRA UK in association with ELE Entertainments and presented by Biryanis and more! is proud to announce the biggest Maha Ganapathi Mahotsav in the United Kingdom, taking place on 14th September 2026 in Langley, Slough.`,
         category: 'Mahotsav News',
-        author: 'UKTA Media Cell',
+        author: 'MITRA Media Cell',
         date: '2026-08-25',
         coverImage: '/assets/poster.jpg',
         tags: ['Ganesh Chaturthi', 'Slough', 'Mahotsav', 'MITRA UK'],
@@ -292,13 +292,13 @@ async function main() {
       {
         id: 'news-2',
         slug: 'guinness-world-record-recognition',
-        title: 'UKTA Recognized by Parliament for Guinness World Record Cultural Achievement',
-        excerpt: 'Members of the UK Parliament praise UKTA for fostering cultural integration and promoting South Asian classical arts.',
+        title: 'MITRA Recognized by Parliament for Guinness World Record Cultural Achievement',
+        excerpt: 'Members of the UK Parliament praise MITRA for fostering cultural integration and promoting South Asian classical arts.',
         content: `In a historic parliamentary motion, the UK Telugu Association was commended for organizing the largest synchronized Kuchipudi ensemble outside India, bringing together over 500 performers from across Europe.`,
         category: 'Achievements',
-        author: 'UKTA PR Officer',
+        author: 'MITRA PR Officer',
         date: '2025-11-05',
-        coverImage: '/assets/poster-dark.jpeg',
+        coverImage: '/assets/poster.jpg',
         tags: ['Guinness World Record', 'Parliament', 'Achievement'],
       },
     ],
@@ -310,7 +310,7 @@ async function main() {
   await prisma.adminUser.create({
     data: {
       username: 'admin',
-      email: 'admin@ukta.org.uk',
+      email: 'admin@mitra.org.uk',
       passwordHash: 'admin123',
       role: 'SuperAdmin',
     },
@@ -325,11 +325,11 @@ async function main() {
         currency: 'GBP',
         status: 'Completed',
         customerName: 'Mahesh Babu G',
-        customerEmail: 'member@ukta.org.uk',
+        customerEmail: 'member@mitra.org.uk',
         customerPhone: '+44 7890 123456',
         description: 'Donation — Ganesh Mahotsav 2026 Seva Fund',
         paymentMethod: 'Stripe Card',
-        memberId: 'UKTA-MEM-5001',
+        memberId: 'MITRA-MEM-5001',
         stripePaymentIntentId: 'pi_3Mxt5k2eZvKYlo2C01a2b3c4',
       },
       {
@@ -338,11 +338,11 @@ async function main() {
         currency: 'GBP',
         status: 'Completed',
         customerName: 'Mahesh Babu G',
-        customerEmail: 'member@ukta.org.uk',
+        customerEmail: 'member@mitra.org.uk',
         customerPhone: '+44 7890 123456',
         description: 'Pooja Booking — Ganesh Chaturthi Morning Slot',
         paymentMethod: 'Stripe ApplePay',
-        memberId: 'UKTA-MEM-5001',
+        memberId: 'MITRA-MEM-5001',
         stripePaymentIntentId: 'pi_3Mxt9x2eZvKYlo2C05d6e7f8',
       },
       {
@@ -355,7 +355,7 @@ async function main() {
         customerPhone: '+44 7700 987654',
         description: 'Life Membership Plan Registration',
         paymentMethod: 'Stripe Card',
-        memberId: 'UKTA-MEM-5002',
+        memberId: 'MITRA-MEM-5002',
         stripePaymentIntentId: 'pi_3Myu122eZvKYlo2C09g0h1i2',
       },
       {

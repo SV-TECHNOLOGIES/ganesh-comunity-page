@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-const TICKET_SECRET = process.env.JWT_SECRET || 'ukta-secure-ticket-salt-2026';
+const TICKET_SECRET = process.env.JWT_SECRET || 'mitra-secure-ticket-salt-2026';
 
 /**
  * Creates an unguessable, cryptographically signed hash token for a given payment ID.

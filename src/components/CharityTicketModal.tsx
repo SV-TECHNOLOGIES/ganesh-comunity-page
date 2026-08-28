@@ -33,7 +33,7 @@ export default function CharityTicketModal({ isOpen, onClose }: { isOpen: boolea
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-ukta-gold/40 relative max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-mitra-gold/40 relative max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-white p-1"
@@ -50,11 +50,11 @@ export default function CharityTicketModal({ isOpen, onClose }: { isOpen: boolea
               Help Request Submitted
             </h2>
             <p className="text-sm text-slate-600 dark:text-slate-300">
-              Your ticket has been logged into the UKTA Charity Case Queue. A committee welfare officer will reach out confidentially.
+              Your ticket has been logged into the MITRA Charity Case Queue. A committee welfare officer will reach out confidentially.
             </p>
-            <div className="bg-ukta-navy/5 dark:bg-slate-800 p-4 rounded-2xl border border-ukta-gold/30">
+            <div className="bg-mitra-navy/5 dark:bg-slate-800 p-4 rounded-2xl border border-mitra-gold/30">
               <span className="text-xs font-semibold text-slate-500 uppercase block mb-1">Your Ticket Reference Number</span>
-              <span className="text-2xl font-black text-ukta-red dark:text-ukta-gold tracking-widest">{createdCase.id}</span>
+              <span className="text-2xl font-black text-mitra-red dark:text-mitra-gold tracking-widest">{createdCase.id}</span>
             </div>
             <div className="text-xs text-slate-500 flex items-center justify-center gap-1">
               <Lock className="w-3.5 h-3.5" />
@@ -65,7 +65,7 @@ export default function CharityTicketModal({ isOpen, onClose }: { isOpen: boolea
                 setCreatedCase(null);
                 onClose();
               }}
-              className="mt-4 bg-ukta-red hover:bg-ukta-red-dark text-white font-bold px-8 py-3 rounded-xl text-sm shadow transition-all"
+              className="mt-4 bg-mitra-red hover:bg-mitra-red-dark text-white font-bold px-8 py-3 rounded-xl text-sm shadow transition-all"
             >
               Close Window
             </button>
@@ -73,7 +73,7 @@ export default function CharityTicketModal({ isOpen, onClose }: { isOpen: boolea
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div className="p-2.5 bg-ukta-red/10 text-ukta-red rounded-2xl">
+              <div className="p-2.5 bg-mitra-red/10 text-mitra-red rounded-2xl">
                 <ShieldAlert className="w-6 h-6" />
               </div>
               <div>
@@ -81,7 +81,7 @@ export default function CharityTicketModal({ isOpen, onClose }: { isOpen: boolea
                   Request for Help / Welfare Support
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Confidential support provided by UKTA Committee Welfare Officers.
+                  Confidential support provided by MITRA Committee Welfare Officers.
                 </p>
               </div>
             </div>
@@ -166,7 +166,7 @@ export default function CharityTicketModal({ isOpen, onClose }: { isOpen: boolea
                 id="conf"
                 checked={isConfidential}
                 onChange={(e) => setIsConfidential(e.target.checked)}
-                className="w-4 h-4 text-ukta-red rounded border-slate-300 focus:ring-ukta-red"
+                className="w-4 h-4 text-mitra-red rounded border-slate-300 focus:ring-mitra-red"
               />
               <label htmlFor="conf" className="text-xs text-slate-600 dark:text-slate-300 cursor-pointer">
                 Strictly Confidential (Restricted to Welfare Committee Lead only)
@@ -175,9 +175,9 @@ export default function CharityTicketModal({ isOpen, onClose }: { isOpen: boolea
 
             <button
               type="submit"
-              className="w-full bg-ukta-red hover:bg-ukta-red-dark text-white font-bold py-3 rounded-xl text-sm shadow-md transition-all flex items-center justify-center gap-2 mt-4"
+              className="w-full bg-mitra-red hover:bg-mitra-red-dark text-white font-bold py-3 rounded-xl text-sm shadow-md transition-all flex items-center justify-center gap-2 mt-4"
             >
-              <Sparkles className="w-4 h-4 text-ukta-gold" />
+              <Sparkles className="w-4 h-4 text-mitra-gold" />
               <span>Submit Help Ticket</span>
             </button>
           </form>

@@ -72,7 +72,7 @@ export default function AdminEventsPage() {
 
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="bg-ukta-red hover:bg-ukta-red-dark text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow"
+          className="bg-mitra-red hover:bg-mitra-red-dark text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow"
         >
           <Plus className="w-4 h-4" />
           <span>{showAddForm ? 'Cancel Form' : 'Add New Event'}</span>
@@ -81,8 +81,8 @@ export default function AdminEventsPage() {
 
       {/* Add Event Form Modal / Expandable Card */}
       {showAddForm && (
-        <form onSubmit={handleCreateEvent} className="bg-slate-950 p-6 rounded-3xl border-2 border-ukta-gold space-y-4 text-xs">
-          <h2 className="text-base font-bold text-ukta-gold">Create New UKTA Event</h2>
+        <form onSubmit={handleCreateEvent} className="bg-slate-950 p-6 rounded-3xl border-2 border-mitra-gold space-y-4 text-xs">
+          <h2 className="text-base font-bold text-mitra-gold">Create New MITRA Event</h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -90,7 +90,7 @@ export default function AdminEventsPage() {
               <input
                 type="text"
                 required
-                placeholder="e.g. UKTA Bathukamma Festival 2026"
+                placeholder="e.g. MITRA Bathukamma Festival 2026"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white"
@@ -184,7 +184,7 @@ export default function AdminEventsPage() {
 
           <button
             type="submit"
-            className="w-full bg-ukta-red hover:bg-ukta-red-dark text-white font-bold py-3 rounded-xl transition-colors"
+            className="w-full bg-mitra-red hover:bg-mitra-red-dark text-white font-bold py-3 rounded-xl transition-colors"
           >
             Publish Event Immediately
           </button>
@@ -208,7 +208,7 @@ export default function AdminEventsPage() {
               <tr key={evt.id} className="hover:bg-slate-900/50">
                 <td className="p-4 font-bold text-white">{evt.title}</td>
                 <td className="p-4">
-                  <span className="bg-ukta-red/20 text-ukta-gold font-mono px-2 py-0.5 rounded text-[10px]">
+                  <span className="bg-mitra-red/20 text-mitra-gold font-mono px-2 py-0.5 rounded text-[10px]">
                     {evt.category}
                   </span>
                 </td>
@@ -221,7 +221,7 @@ export default function AdminEventsPage() {
                     onClick={() => exportRSVPsCSV(evt)}
                     className="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg font-semibold text-[11px] inline-flex items-center gap-1"
                   >
-                    <Download className="w-3 h-3 text-ukta-gold" />
+                    <Download className="w-3 h-3 text-mitra-gold" />
                     <span>Export CSV</span>
                   </button>
                 </td>

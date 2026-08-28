@@ -3,10 +3,10 @@ import { prisma } from '@/lib/prisma';
 
 const DEFAULT_SETTINGS = {
   id: 'default',
-  stripePublishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_ukta_default_key',
-  stripeSecretKey: process.env.STRIPE_SECRET_KEY || 'sk_test_ukta_default_key',
+  stripePublishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_mitra_default_key',
+  stripeSecretKey: process.env.STRIPE_SECRET_KEY || 'sk_test_mitra_default_key',
   currency: 'GBP',
-  activeAccountName: 'UKTA Main UK Account (Barclays/Stripe)',
+  activeAccountName: 'MITRA Main UK Account (Barclays/Stripe)',
 };
 
 export async function GET() {
@@ -38,14 +38,14 @@ export async function PUT(request: Request) {
           stripePublishableKey: stripePublishableKey || DEFAULT_SETTINGS.stripePublishableKey,
           stripeSecretKey: stripeSecretKey || DEFAULT_SETTINGS.stripeSecretKey,
           currency: currency || 'GBP',
-          activeAccountName: activeAccountName || 'UKTA Configured Stripe Account',
+          activeAccountName: activeAccountName || 'MITRA Configured Stripe Account',
         },
         create: {
           id: 'default',
           stripePublishableKey: stripePublishableKey || DEFAULT_SETTINGS.stripePublishableKey,
           stripeSecretKey: stripeSecretKey || DEFAULT_SETTINGS.stripeSecretKey,
           currency: currency || 'GBP',
-          activeAccountName: activeAccountName || 'UKTA Configured Stripe Account',
+          activeAccountName: activeAccountName || 'MITRA Configured Stripe Account',
         },
       });
 

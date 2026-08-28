@@ -23,7 +23,7 @@ const DEMO_PAYMENTS = [
     customerName: 'Anil Varma',
     customerEmail: 'anil.v@example.co.uk',
     customerPhone: '+44 7900 654321',
-    description: 'UKTA Ugadi Cultural Fest Entry Pass (1 Ticket)',
+    description: 'MITRA Ugadi Cultural Fest Entry Pass (1 Ticket)',
     paymentMethod: 'Stripe ApplePay',
     stripePaymentIntentId: 'pi_3Mxt9x2eZvKYlo2C05d6e7f8',
     createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),

@@ -66,7 +66,7 @@ export default function EventsPage() {
               onClick={() => setStatusFilter('Upcoming')}
               className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all ${
                 statusFilter === 'Upcoming'
-                  ? 'bg-ukta-red text-white shadow'
+                  ? 'bg-mitra-red text-white shadow'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
               }`}
             >
@@ -76,7 +76,7 @@ export default function EventsPage() {
               onClick={() => setStatusFilter('Past')}
               className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all ${
                 statusFilter === 'Past'
-                  ? 'bg-ukta-navy text-ukta-gold border border-ukta-gold/30 shadow'
+                  ? 'bg-mitra-navy text-mitra-gold border border-mitra-gold/30 shadow'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
               }`}
             >
@@ -101,7 +101,7 @@ export default function EventsPage() {
               <button
                 onClick={() => setViewMode('grid')}
                 className={`p-2 rounded-lg text-xs font-semibold ${
-                  viewMode === 'grid' ? 'bg-white dark:bg-slate-700 shadow text-ukta-red' : 'text-slate-500'
+                  viewMode === 'grid' ? 'bg-white dark:bg-slate-700 shadow text-mitra-red' : 'text-slate-500'
                 }`}
                 title="Grid View"
               >
@@ -110,7 +110,7 @@ export default function EventsPage() {
               <button
                 onClick={() => setViewMode('calendar')}
                 className={`p-2 rounded-lg text-xs font-semibold ${
-                  viewMode === 'calendar' ? 'bg-white dark:bg-slate-700 shadow text-ukta-red' : 'text-slate-500'
+                  viewMode === 'calendar' ? 'bg-white dark:bg-slate-700 shadow text-mitra-red' : 'text-slate-500'
                 }`}
                 title="Calendar Timeline View"
               >
@@ -158,12 +158,12 @@ export default function EventsPage() {
           {filteredEvents.map((event) => (
             <div key={event.id} className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="flex items-start gap-4">
-                <div className="bg-ukta-red text-white text-center p-3 rounded-2xl w-20 shrink-0">
+                <div className="bg-mitra-red text-white text-center p-3 rounded-2xl w-20 shrink-0">
                   <span className="text-xs font-bold uppercase block">{new Date(event.date).toLocaleDateString('en-GB', { month: 'short' })}</span>
                   <span className="text-2xl font-black block">{new Date(event.date).getDate()}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold bg-ukta-gold/20 text-ukta-navy px-2 py-0.5 rounded uppercase">
+                  <span className="text-[10px] font-bold bg-mitra-gold/20 text-mitra-navy px-2 py-0.5 rounded uppercase">
                     {event.category}
                   </span>
                   <h3 className="text-base font-bold text-slate-900 dark:text-white mt-1">

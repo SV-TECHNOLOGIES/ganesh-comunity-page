@@ -33,7 +33,7 @@ export interface LeadershipMember {
 export interface MediaAlbum {
   id: string;
   title: string;
-  category: 'Photo Gallery' | 'Video Gallery' | 'Press Releases' | 'UKTA Patrika' | 'UKTA Souvenir';
+  category: 'Photo Gallery' | 'Video Gallery' | 'Press Releases' | 'MITRA Patrika' | 'MITRA Souvenir';
   date: string;
   coverImage: string;
   itemCount: number;
@@ -43,7 +43,7 @@ export interface MediaAlbum {
 }
 
 export interface CharityCase {
-  id: string; // UKTA-HELP-XXXX
+  id: string; // MITRA-HELP-XXXX
   name: string;
   email: string;
   phone: string;
@@ -57,7 +57,7 @@ export interface CharityCase {
 }
 
 export interface Member {
-  id: string; // UKTA-MEM-XXXX
+  id: string; // MITRA-MEM-XXXX
   name: string;
   email: string;
   phone: string;

@@ -1,8 +1,8 @@
-# UKTA Website Rebuild
+# MITRA Website Rebuild
 ### Business & Product Requirement Document (BRD/PRD)
 
-**Prepared for:** UK Telugu Association (UKTA)
-**Reference site:** https://www.ukta.org.uk/
+**Prepared for:** UK Telugu Association (MITRA)
+**Reference site:** https://www.mitra.org.uk/
 **Document Version:** 1.0
 **Date:** 24 August 2026
 
@@ -12,23 +12,23 @@
 
 | Field | Detail |
 |---|---|
-| Project Name | UKTA Website Redesign & Rebuild with Admin Panel (CMS) |
-| Current Site | https://www.ukta.org.uk/ (WordPress + Elementor) |
-| Document Owner | Project Sponsor / UKTA IT Secretary |
+| Project Name | MITRA Website Redesign & Rebuild with Admin Panel (CMS) |
+| Current Site | https://www.mitra.org.uk/ (WordPress + Elementor) |
+| Document Owner | Project Sponsor / MITRA IT Secretary |
 | Prepared By | [Development Agency / Team Name] |
 | Status | Draft v1.0 — for stakeholder review |
-| Purpose | Define scope, sitemap, features and admin panel requirements for rebuilding the UKTA website with a refined UI and self-service content management system |
+| Purpose | Define scope, sitemap, features and admin panel requirements for rebuilding the MITRA website with a refined UI and self-service content management system |
 
 ---
 
 ## 2. Project Overview & Objectives
 
-The UK Telugu Association (UKTA) is a non-profit, non-religious organisation serving the Telugu-speaking community across the UK. The current website (built on WordPress/Elementor) is content-heavy, image-driven, and maintained manually by IT volunteers. This project aims to rebuild the website with a modern, refined, mobile-first UI, and introduce a dedicated Admin Panel so that non-technical committee members can independently manage content, events, membership, media and enquiries without developer involvement.
+The UK Telugu Association (MITRA) is a non-profit, non-religious organisation serving the Telugu-speaking community across the UK. The current website (built on WordPress/Elementor) is content-heavy, image-driven, and maintained manually by IT volunteers. This project aims to rebuild the website with a modern, refined, mobile-first UI, and introduce a dedicated Admin Panel so that non-technical committee members can independently manage content, events, membership, media and enquiries without developer involvement.
 
 ### 2.1 Goals
 
-- Deliver a clean, modern, mobile-responsive public website that reflects UKTA's brand and community identity.
-- Replace ad-hoc WordPress page editing with a purpose-built Admin Panel tailored to UKTA's actual workflows (events, membership, gallery, sponsors, charity requests).
+- Deliver a clean, modern, mobile-responsive public website that reflects MITRA's brand and community identity.
+- Replace ad-hoc WordPress page editing with a purpose-built Admin Panel tailored to MITRA's actual workflows (events, membership, gallery, sponsors, charity requests).
 - Improve site structure/navigation (reduce redundant menu items, fix broken/placeholder links such as Twitter and LinkedIn).
 - Enable online membership sign-up, event registration and donations with proper record-keeping (currently routed to external tinyurl / third-party forms).
 - Improve performance, SEO, and accessibility over the current Elementor-based build.
@@ -57,8 +57,8 @@ Summary of the existing site structure and features, used as the baseline for th
 
 | Section / Page | URL Path | Existing Features / Content |
 |---|---|---|
-| Home | `/` | Hero banner/slider of event photos, About UKTA summary, Guinness World Record feature, Video highlights (Yadagirigutta Swamy & TTD Srinivasa Kalyanam tour), Photo gallery preview, Message from 10 Downing Street, Upcoming events (external tinyurl links), Committee member preview grid, Sponsor logo strip |
-| Home > Welcome to UKTA | `/welcome-to-ukta/` | About/mission long-form content |
+| Home | `/` | Hero banner/slider of event photos, About MITRA summary, Guinness World Record feature, Video highlights (Yadagirigutta Swamy & TTD Srinivasa Kalyanam tour), Photo gallery preview, Message from 10 Downing Street, Upcoming events (external tinyurl links), Committee member preview grid, Sponsor logo strip |
+| Home > Welcome to MITRA | `/welcome-to-mitra/` | About/mission long-form content |
 | Home > Chairman Message | `/president-message/` | Static message page |
 | Home > Prominent Message | `/prominent-message/` | Static message page |
 | Home > History | `/history/` | Organisation history |
@@ -72,10 +72,10 @@ Summary of the existing site structure and features, used as the baseline for th
 | Media > Video Gallery | `/video-gallery/` | Embedded YouTube videos |
 | Media > Press Releases > Print Media | `/print-media/` | Newspaper/press clippings |
 | Media > Press Releases > Videos | `/videos/` | Press video clips |
-| Media > UKTA Patrika | `/ukta-patrika/` | Newsletter/magazine archive |
-| Media > UKTA Souvenir | `/ukta-souvenir/` | Souvenir publication archive |
-| Media > UKTA YouTube Channel | `/ukta-youtube-channel/` | Link/embed to channel |
-| Events > UKTA Events | `/ukta-events/` | General events listing |
+| Media > MITRA Patrika | `/mitra-patrika/` | Newsletter/magazine archive |
+| Media > MITRA Souvenir | `/mitra-souvenir/` | Souvenir publication archive |
+| Media > MITRA YouTube Channel | `/mitra-youtube-channel/` | Link/embed to channel |
+| Events > MITRA Events | `/mitra-events/` | General events listing |
 | Events > Business Networking | `/business-nerworking/` | Business event listing (note: URL typo "nerworking") |
 | Events > Cultural Events | `/cultural-events/` | Cultural event listing |
 | Events > Sports | `/sports/` | Sports event listing |
@@ -86,7 +86,7 @@ Summary of the existing site structure and features, used as the baseline for th
 | Charity Services > Women Helpline | `/women-helpline/` | Helpline info |
 | Charity Services > Request For Help | `/request-for-help/` | Help request form |
 | Charity Services > Community Service | `/community-service/` | Service info |
-| Charity Services > UKTA Awards | `/ukta-awards/` | Awards info |
+| Charity Services > MITRA Awards | `/mitra-awards/` | Awards info |
 | Membership > Life Membership | `/life-membership/` | Membership info + sign-up |
 | Membership > Event Registration | `/event-registration/` | Event sign-up form |
 | Membership > Volunteer | `/volunteer/` | Volunteer sign-up form |
@@ -115,7 +115,7 @@ Refined information architecture — consolidates redundant menus, fixes naming/
 ```
 01. Home
     - Hero (rotating banner: current campaign / featured event)
-    - About UKTA snapshot + CTA to full About page
+    - About MITRA snapshot + CTA to full About page
     - Featured achievement (e.g., Guinness World Record spotlight)
     - Upcoming Events strip (live from Events module, with 'Register' buttons)
     - Latest News / Press strip
@@ -152,16 +152,16 @@ Refined information architecture — consolidates redundant menus, fixes naming/
     - Photo Gallery (album/category structure, lightbox, lazy-load)
     - Video Gallery (YouTube embed grid, filter by event/year)
     - Press Releases (Print Media, Video clips)
-    - UKTA Patrika (newsletter archive, PDF viewer/download)
-    - UKTA Souvenir (archive, PDF viewer/download)
-    - UKTA YouTube Channel (embed + subscribe CTA)
+    - MITRA Patrika (newsletter archive, PDF viewer/download)
+    - MITRA Souvenir (archive, PDF viewer/download)
+    - MITRA YouTube Channel (embed + subscribe CTA)
 
 06. Charity & Community Services
     - Student Counselling
     - Repatriation Support
     - Women's Helpline
     - Community Service Programmes
-    - UKTA Awards (nomination form + past winners)
+    - MITRA Awards (nomination form + past winners)
     - Request for Help (structured form -> admin case queue)
 
 07. Membership
@@ -219,7 +219,7 @@ Refined information architecture — consolidates redundant menus, fixes naming/
 
 ## 6. Admin Panel — Requirements
 
-The Admin Panel is the core new capability requested. It should let authorised UKTA committee members manage all dynamic content and submissions from a single dashboard, without developer involvement, replacing direct WordPress/Elementor editing.
+The Admin Panel is the core new capability requested. It should let authorised MITRA committee members manage all dynamic content and submissions from a single dashboard, without developer involvement, replacing direct WordPress/Elementor editing.
 
 ### 6.1 Admin Panel — Module List & Capabilities
 
@@ -324,7 +324,7 @@ The Admin Panel is the core new capability requested. It should let authorised U
 | Hosting | Vercel/Netlify (frontend) + managed DB/host (backend) | Managed WordPress hosting (e.g., WP Engine, SiteGround) |
 | Best for | Full custom UI/UX, best performance, tailored admin workflows | Faster build, lower cost, easier for volunteer IT admins already familiar with WordPress |
 
-**Recommendation:** given UKTA is volunteer-run and content changes are frequent (events, galleries), a hybrid approach — modern custom-designed frontend with either a headless CMS (e.g., WordPress as headless API, or Strapi) or an extended WordPress admin with custom plugins for Events/Membership/Charity Cases — offers the best balance of refined UI and manageable long-term maintenance.
+**Recommendation:** given MITRA is volunteer-run and content changes are frequent (events, galleries), a hybrid approach — modern custom-designed frontend with either a headless CMS (e.g., WordPress as headless API, or Strapi) or an extended WordPress admin with custom plugins for Events/Membership/Charity Cases — offers the best balance of refined UI and manageable long-term maintenance.
 
 ---
 
@@ -353,8 +353,8 @@ The Admin Panel is the core new capability requested. It should let authorised U
 ## 11. Assumptions & Open Questions
 
 ### 11.1 Assumptions
-- UKTA will provide access to existing WordPress export and media files for migration.
-- A payment gateway account (Stripe/PayPal/GoCardless) will be set up by UKTA for donations/membership fees.
+- MITRA will provide access to existing WordPress export and media files for migration.
+- A payment gateway account (Stripe/PayPal/GoCardless) will be set up by MITRA for donations/membership fees.
 - Committee will nominate at least one Super Admin and module owners for each admin role.
 
 ### 11.2 Open Questions for Stakeholders

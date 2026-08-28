@@ -80,7 +80,7 @@ export default function TicketBlocked({
         <div className="bg-gradient-to-r from-[#160B08] via-[#1C0E0B] to-[#160B08] px-8 py-6 text-center border-b border-[#D4AF37]/20">
           <div className="flex items-center justify-center gap-3">
             <img
-              src="/assets/poster-dark.jpeg"
+              src="/assets/poster.jpg"
               alt="MITRA UK"
               className="w-9 h-9 rounded-full object-cover border-2 border-[#D4AF37]"
             />
@@ -153,7 +153,7 @@ export default function TicketBlocked({
         {/* Footer */}
         <div className="bg-[#160B08] border-t border-[#D4AF37]/20 px-8 py-4 text-center">
           <p className="text-[9px] text-[#C9B79C] uppercase tracking-wider">
-            MITRA UK (UKTA) · Registered UK Community Organisation
+            MITRA UK (MITRA) · Registered UK Community Organisation
           </p>
         </div>
       </div>

@@ -24,19 +24,19 @@ export default function HomePage() {
       <Ganesha3DHero onNotifyClick={() => setNotifyModalOpen(true)} />
 
       {/* 2. RITUAL COUNTDOWN CLOCK */}
-      <RitualCountdown />
+      {/* <RitualCountdown /> */}
 
       {/* 3. MITRA UK COMMUNITY SHOWCASE & PILLARS */}
       <MitraCommunitySection />
 
       {/* 4. THE DEVOTIONAL STORY */}
-      <StorySection />
+      {/* <StorySection /> */}
 
       {/* 4. THE IDOL SPECS PLAQUE */}
-      <IdolSpecsCard />
+      {/* <IdolSpecsCard /> */}
 
       {/* 5. EVENT & VENUE DETAILS */}
-      <EventDetailsSection />
+      {/* <EventDetailsSection /> */}
 
       {/* 6. MEDIA & TEASER GALLERY */}
       <MediaTeaserSection />

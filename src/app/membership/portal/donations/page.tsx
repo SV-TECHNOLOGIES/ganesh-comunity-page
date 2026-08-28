@@ -154,7 +154,7 @@ function MyDonationsContent() {
               <Inbox className="w-8 h-8 text-[#C9B79C]" />
             </div>
             <p className="text-sm text-[#C9B79C] font-bold">No donations yet</p>
-            <p className="text-xs text-[#C9B79C]/70">Make your first contribution to the UKTA community.</p>
+            <p className="text-xs text-[#C9B79C]/70">Make your first contribution to the MITRA community.</p>
             <Link
               href="/donate"
               className="gold-button inline-flex items-center gap-2 px-6 py-3 rounded-full font-black text-xs uppercase tracking-wider shadow-lg"

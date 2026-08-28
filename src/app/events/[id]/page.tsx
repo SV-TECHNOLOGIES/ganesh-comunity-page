@@ -49,7 +49,7 @@ export default function EventDetailPage() {
     return (
       <div className="max-w-4xl mx-auto px-4 py-20 text-center space-y-4">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Event Not Found</h1>
-        <Link href="/events" className="text-ukta-red font-bold underline text-sm">Return to Events Hub</Link>
+        <Link href="/events" className="text-mitra-red font-bold underline text-sm">Return to Events Hub</Link>
       </div>
     );
   }
@@ -68,7 +68,7 @@ export default function EventDetailPage() {
   const handleICSDownload = () => {
     const icsData = `BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//UKTA Events//EN
+PRODID:-//MITRA Events//EN
 BEGIN:VEVENT
 SUMMARY:${event.title}
 DESCRIPTION:${event.description}
@@ -134,20 +134,20 @@ END:VCALENDAR`;
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <Link href="/events" className="inline-flex items-center gap-1 text-xs font-bold text-ukta-red dark:text-ukta-gold hover:underline">
+      <Link href="/events" className="inline-flex items-center gap-1 text-xs font-bold text-mitra-red dark:text-mitra-gold hover:underline">
         <ArrowLeft className="w-4 h-4" />
         <span>Back to Events Calendar</span>
       </Link>
 
       {/* Hero Banner */}
-      <div className="relative h-80 sm:h-96 rounded-3xl overflow-hidden shadow-2xl border-4 border-ukta-gold/30">
+      <div className="relative h-80 sm:h-96 rounded-3xl overflow-hidden shadow-2xl border-4 border-mitra-gold/30">
         <Image src={event.bannerUrl} alt={event.title} fill className="object-cover" priority />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
         <div className="absolute top-4 left-4 flex gap-2">
-          <span className="bg-ukta-red text-white text-xs font-bold px-3 py-1 rounded-full uppercase shadow">
+          <span className="bg-mitra-red text-white text-xs font-bold px-3 py-1 rounded-full uppercase shadow">
             {event.category}
           </span>
-          <span className="bg-ukta-gold text-ukta-navy text-xs font-black px-3 py-1 rounded-full uppercase shadow">
+          <span className="bg-mitra-gold text-mitra-navy text-xs font-black px-3 py-1 rounded-full uppercase shadow">
             {event.ticketPrice === 0 ? 'FREE EVENT' : `£${event.ticketPrice}`}
           </span>
         </div>
@@ -156,7 +156,7 @@ END:VCALENDAR`;
             {event.title}
           </h1>
           <p className="text-xs sm:text-sm text-slate-300">
-            Hosted by MITRA UK & UKTA
+            Hosted by MITRA UK
           </p>
         </div>
       </div>
@@ -186,7 +186,7 @@ END:VCALENDAR`;
             
             {/* Interactive Map Placeholder */}
             <div className="h-48 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 text-xs font-semibold">
-              <MapPin className="w-5 h-5 text-ukta-red mr-2" />
+              <MapPin className="w-5 h-5 text-mitra-red mr-2" />
               <span>Interactive Google Map Location Pin ({event.venue})</span>
             </div>
           </div>
@@ -194,9 +194,9 @@ END:VCALENDAR`;
 
         {/* Right Col: RSVP Card & ICS Export */}
         <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border-2 border-ukta-gold/50 shadow-xl space-y-4 sticky top-28">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border-2 border-mitra-gold/50 shadow-xl space-y-4 sticky top-28">
             <div className="border-b border-slate-100 dark:border-slate-800 pb-3">
-              <span className="text-[10px] font-bold text-ukta-red uppercase tracking-wider block">Registration Status</span>
+              <span className="text-[10px] font-bold text-mitra-red uppercase tracking-wider block">Registration Status</span>
               <span className="text-xl font-black text-slate-900 dark:text-white">
                 {event.ticketPrice === 0 ? 'Free RSVP' : `£${event.ticketPrice} per Ticket`}
               </span>
@@ -204,15 +204,15 @@ END:VCALENDAR`;
 
             <div className="space-y-3 text-xs text-slate-700 dark:text-slate-200">
               <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-ukta-gold shrink-0" />
+                <Calendar className="w-4 h-4 text-mitra-gold shrink-0" />
                 <span>{new Date(event.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-ukta-gold shrink-0" />
+                <Clock className="w-4 h-4 text-mitra-gold shrink-0" />
                 <span>{event.time}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-ukta-gold shrink-0" />
+                <Users className="w-4 h-4 text-mitra-gold shrink-0" />
                 <span>{rsvpCount} / {event.capacity} Confirmed Attendees</span>
               </div>
             </div>
@@ -221,7 +221,7 @@ END:VCALENDAR`;
             <div className="space-y-1">
               <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
                 <div 
-                  className="bg-ukta-red h-2 rounded-full" 
+                  className="bg-mitra-red h-2 rounded-full" 
                   style={{ width: `${Math.min(100, (rsvpCount / event.capacity) * 100)}%` }} 
                 />
               </div>
@@ -236,7 +236,7 @@ END:VCALENDAR`;
               className={`w-full py-3 rounded-xl font-extrabold text-xs shadow-md transition-all flex items-center justify-center gap-2 ${
                 rsvped
                   ? 'bg-emerald-600 text-white cursor-default'
-                  : 'bg-ukta-red hover:bg-ukta-red-dark text-white'
+                  : 'bg-mitra-red hover:bg-mitra-red-dark text-white'
               }`}
             >
               {rsvped ? (
@@ -253,7 +253,7 @@ END:VCALENDAR`;
               onClick={handleICSDownload}
               className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs rounded-xl transition-colors flex items-center justify-center gap-2"
             >
-              <Download className="w-3.5 h-3.5 text-ukta-gold" />
+              <Download className="w-3.5 h-3.5 text-mitra-gold" />
               <span>Add to iCal / Outlook (.ICS)</span>
             </button>
           </div>

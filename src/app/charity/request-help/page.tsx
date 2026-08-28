@@ -16,7 +16,7 @@ export default function RequestHelpPage() {
       </p>
       <button
         onClick={() => setOpen(true)}
-        className="bg-ukta-red text-white font-bold px-6 py-3 rounded-xl text-xs"
+        className="bg-mitra-red text-white font-bold px-6 py-3 rounded-xl text-xs"
       >
         Open Help Request Ticket Form
       </button>

@@ -31,7 +31,7 @@ export default function SponsorRibbonBand() {
           <div className="shrink-0 flex flex-col items-center justify-center space-y-2">
             <div className="w-20 h-20 rounded-full border-2 border-[#D4AF37] p-1 shadow-[0_0_30px_rgba(212,175,55,0.4)] bg-[#160B08] flex items-center justify-center relative overflow-hidden">
               <img
-                src="/assets/poster-dark.jpeg"
+                src="/assets/poster.jpg"
                 alt="MITRA UK Emblem"
                 className="w-full h-full object-cover rounded-full"
               />
@@ -66,7 +66,7 @@ export default function SponsorRibbonBand() {
         {/* Bottom Subtext Line */}
         <div className="mt-12 text-center pt-6 border-t border-[#D4AF37]/20 text-xs text-[#C9B79C]">
           <span>Official Event Platform Partner: </span>
-          <span className="font-extrabold text-[#F4C542] font-cinzel">UK Telugu Association (UKTA)</span>
+          <span className="font-extrabold text-[#F4C542] font-cinzel">UK Telugu Association (MITRA)</span>
           <span> · Langley, Slough 2026</span>
         </div>
       </div>

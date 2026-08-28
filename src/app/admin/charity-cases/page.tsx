@@ -57,12 +57,12 @@ export default function AdminCharityCasesPage() {
               onClick={() => setSelectedCase(c)}
               className={`p-4 rounded-2xl border transition-all cursor-pointer space-y-2 ${
                 selectedCase?.id === c.id
-                  ? 'bg-slate-900 border-ukta-gold shadow-md'
+                  ? 'bg-slate-900 border-mitra-gold shadow-md'
                   : 'bg-slate-950 border-slate-800 hover:border-slate-700'
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="font-mono font-bold text-xs text-ukta-red">{c.id}</span>
+                <span className="font-mono font-bold text-xs text-mitra-red">{c.id}</span>
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
                   c.status === 'New' ? 'bg-amber-500/20 text-amber-400' :
                   c.status === 'In Progress' ? 'bg-sky-500/20 text-sky-400' : 'bg-emerald-500/20 text-emerald-400'
@@ -87,7 +87,7 @@ export default function AdminCharityCasesPage() {
               
               <div className="flex items-center justify-between border-b border-slate-800 pb-4">
                 <div>
-                  <span className="font-mono font-bold text-xs text-ukta-gold block">{selectedCase.id}</span>
+                  <span className="font-mono font-bold text-xs text-mitra-gold block">{selectedCase.id}</span>
                   <h2 className="text-xl font-bold text-white">{selectedCase.category}</h2>
                 </div>
 
@@ -98,7 +98,7 @@ export default function AdminCharityCasesPage() {
                       onClick={() => handleUpdateStatus(selectedCase.id, st)}
                       className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${
                         selectedCase.status === st
-                          ? 'bg-ukta-red text-white border-ukta-red'
+                          ? 'bg-mitra-red text-white border-mitra-red'
                           : 'bg-slate-900 text-slate-400 border-slate-800'
                       }`}
                     >
@@ -123,7 +123,7 @@ export default function AdminCharityCasesPage() {
                 </div>
                 <div>
                   <span className="text-slate-400 block">Assigned Welfare Lead</span>
-                  <span className="font-bold text-ukta-gold">{selectedCase.assignedTo || 'Unassigned'}</span>
+                  <span className="font-bold text-mitra-gold">{selectedCase.assignedTo || 'Unassigned'}</span>
                 </div>
               </div>
 
@@ -137,7 +137,7 @@ export default function AdminCharityCasesPage() {
               {/* Internal Notes */}
               <div className="space-y-3 pt-2">
                 <h4 className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                  <MessageSquare className="w-4 h-4 text-ukta-gold" />
+                  <MessageSquare className="w-4 h-4 text-mitra-gold" />
                   <span>Internal Case Log & Notes</span>
                 </h4>
 
@@ -159,7 +159,7 @@ export default function AdminCharityCasesPage() {
                   />
                   <button
                     type="submit"
-                    className="bg-ukta-gold text-ukta-navy font-bold px-4 py-2 rounded-xl text-xs"
+                    className="bg-mitra-gold text-mitra-navy font-bold px-4 py-2 rounded-xl text-xs"
                   >
                     Add Note
                   </button>

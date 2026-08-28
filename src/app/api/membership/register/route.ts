@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     }
 
     const randomNum = Math.floor(5000 + Math.random() * 4000);
-    const memberId = `UKTA-MEM-${randomNum}`;
+    const memberId = `MITRA-MEM-${randomNum}`;
     const today = new Date().toISOString().split('T')[0];
     const selectedTier = tier || 'Annual Member';
     const expiry = selectedTier === 'Life Member' ? 'Lifetime' : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
       });
 
       // Automatically log in newly registered member
-      response.cookies.set('ukta_member_session', JSON.stringify({ id: newMember.id, fullName, email, tier: selectedTier, status: 'Active', expiryDate: expiry }), {
+      response.cookies.set('mitra_member_session', JSON.stringify({ id: newMember.id, fullName, email, tier: selectedTier, status: 'Active', expiryDate: expiry }), {
         path: '/',
         maxAge: 60 * 60 * 24 * 30,
       });
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
         data: newMember,
       });
 
-      response.cookies.set('ukta_member_session', JSON.stringify({ id: newMember.id, fullName, email, tier: selectedTier, status: 'Active', expiryDate: expiry }), {
+      response.cookies.set('mitra_member_session', JSON.stringify({ id: newMember.id, fullName, email, tier: selectedTier, status: 'Active', expiryDate: expiry }), {
         path: '/',
         maxAge: 60 * 60 * 24 * 30,
       });

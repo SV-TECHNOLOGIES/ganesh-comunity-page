@@ -45,17 +45,17 @@ export default function Footer() {
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-full border border-[#D4AF37] overflow-hidden shrink-0">
                 <img
-                  src="/assets/poster-dark.jpeg"
+                  src="/assets/poster.jpg"
                   alt="MITRA UK Logo"
                   className="w-full h-full object-cover rounded-full"
                 />
               </div>
               <span className="font-black text-lg font-cinzel text-[#F4C542] tracking-wider">
-                MITRA UK & UKTA
+                MITRA UK
               </span>
             </div>
             <p className="text-[#C9B79C] leading-relaxed">
-              Mana Indian Telugu Roots Abroad (MITRA UK) in association with ELE Entertainments and UK Telugu Association (UKTA), hosting the biggest Maha Ganapathi Mahotsav in Slough, Langley.
+              Mana Indian Telugu Roots Abroad (MITRA UK) in association with ELE Entertainments and UK Telugu Association (MITRA), hosting the biggest Maha Ganapathi Mahotsav in Slough, Langley.
             </p>
             <div className="flex items-center space-x-3 text-[#F4C542]">
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full border border-[#D4AF37]/30 hover:border-[#F4C542] hover:bg-[#160B08] transition-colors">
@@ -110,7 +110,7 @@ export default function Footer() {
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-[#F4C542] shrink-0" />
-                <span>info@ukta.org.uk</span>
+                <span>info@mitra.org.uk</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-[#F4C542] shrink-0" />
@@ -123,7 +123,7 @@ export default function Footer() {
 
         {/* Copyright Bar */}
         <div className="pt-8 border-t border-[#D4AF37]/20 flex flex-col sm:flex-row items-center justify-between text-[11px] text-[#C9B79C] gap-4">
-          <p>© 2026 MITRA UK & UK Telugu Association (UKTA). All Rights Reserved.</p>
+          <p>© 2026 MITRA UK & UK Telugu Association (MITRA). All Rights Reserved.</p>
           <p className="text-[#F4C542] font-semibold">
             Presented by Biryanis and more! · In association with ELE Entertainments
           </p>

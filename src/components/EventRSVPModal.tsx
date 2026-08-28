@@ -198,7 +198,7 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
             <div className="bg-[#160B08] p-5 rounded-2xl border-2 border-dashed border-[#D4AF37]/50 text-left space-y-3 font-mono text-xs">
               <div className="flex justify-between border-b border-[#D4AF37]/20 pb-2">
                 <span className="text-[#C9B79C]">Pass Reference:</span>
-                <span className="font-bold text-[#F4C542]">{ticketDetails?.rsvpId || 'UKTA-PASS-108'}</span>
+                <span className="font-bold text-[#F4C542]">{ticketDetails?.rsvpId || 'MITRA-PASS-108'}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-[#C9B79C]">Attendee:</span>

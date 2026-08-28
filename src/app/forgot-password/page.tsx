@@ -141,7 +141,7 @@ export default function ForgotPasswordPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="member@ukta.org.uk"
+                  placeholder="member@mitra.org.uk"
                   className="w-full bg-[#0D0705] border border-[#D4AF37]/40 rounded-xl pl-10 pr-4 py-2.5 text-[#F7EFE1] focus:border-[#F4C542] focus:outline-none"
                 />
               </div>

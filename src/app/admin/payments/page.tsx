@@ -29,10 +29,10 @@ export default function AdminPaymentsPage() {
   const [activeTab, setActiveTab] = useState<'ledger' | 'settings'>('ledger');
   const [payments, setPayments] = useState<PaymentItem[]>([]);
   const [settings, setSettings] = useState<PaymentSettingsData>({
-    stripePublishableKey: 'pk_test_ukta_default_key',
-    stripeSecretKey: 'sk_test_ukta_default_key',
+    stripePublishableKey: 'pk_test_mitra_default_key',
+    stripeSecretKey: 'sk_test_mitra_default_key',
     currency: 'GBP',
-    activeAccountName: 'UKTA Main UK Account (Stripe/Barclays)',
+    activeAccountName: 'MITRA Main UK Account (Stripe/Barclays)',
   });
   const [loading, setLoading] = useState(true);
   const [savingSettings, setSavingSettings] = useState(false);
@@ -95,7 +95,7 @@ export default function AdminPaymentsPage() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `UKTA_Payments_Ledger_${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `MITRA_Payments_Ledger_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
   };
 
@@ -266,7 +266,7 @@ export default function AdminPaymentsPage() {
                   required
                   value={settings.activeAccountName}
                   onChange={(e) => setSettings({ ...settings, activeAccountName: e.target.value })}
-                  placeholder="e.g. UKTA Main Barclays Payout Account"
+                  placeholder="e.g. MITRA Main Barclays Payout Account"
                   className="w-full bg-[#0D0705] border border-[#D4AF37]/40 rounded-xl px-4 py-2.5 text-[#F7EFE1] focus:border-[#F4C542] focus:outline-none"
                 />
               </div>
@@ -314,7 +314,7 @@ export default function AdminPaymentsPage() {
                   <ShieldCheck className="w-4 h-4 text-[#F4C542]" />
                   <span>Stripe Security Protocol:</span>
                 </span>
-                <p>Keys are encrypted and stored in PostgreSQL schema <code className="text-[#F7EFE1]">ukta</code>. Updating these keys immediately changes the receiving endpoint for all website payment checkouts.</p>
+                <p>Keys are encrypted and stored in PostgreSQL schema <code className="text-[#F7EFE1]">mitra</code>. Updating these keys immediately changes the receiving endpoint for all website payment checkouts.</p>
               </div>
 
               <button

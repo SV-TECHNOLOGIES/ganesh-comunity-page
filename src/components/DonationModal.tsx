@@ -73,7 +73,7 @@ function CheckoutForm({
       confirmParams: {
         return_url: typeof window !== 'undefined'
           ? `${window.location.origin}/donate?payment=success`
-          : 'https://ukta.org.uk/donate?payment=success',
+          : 'https://mitra.org.uk/donate?payment=success',
         payment_method_data: {
           billing_details: {
             name: donorName,
@@ -352,7 +352,7 @@ export default function DonationModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-ukta-gold/40 relative max-h-[90vh] overflow-y-auto"
+      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-mitra-gold/40 relative max-h-[90vh] overflow-y-auto"
            style={{ background: '#0D0705' }}>
         <button
           onClick={onClose}

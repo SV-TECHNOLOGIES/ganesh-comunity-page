@@ -139,7 +139,7 @@ export default function OfferingPlaques({ onSponsorClick }: OfferingPlaquesProps
 
             <div className="text-center space-y-2">
               <h3 className="text-2xl font-black font-cinzel gold-foil-text">VOLUNTEER SEVA REGISTRATION</h3>
-              <p className="text-xs text-[#C9B79C]">Join the MITRA UK & UKTA volunteer team for Slough Mahotsav 2026.</p>
+              <p className="text-xs text-[#C9B79C]">Join the MITRA UK volunteer team for Slough Mahotsav 2026.</p>
             </div>
 
             {submitted ? (

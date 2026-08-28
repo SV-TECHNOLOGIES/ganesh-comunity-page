@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       );
     }
     const cookieStore = await cookies();
-    const token = cookieStore.get('ukta_token')?.value;
+    const token = cookieStore.get('mitra_token')?.value;
 
     if (!token) {
       return NextResponse.json({ success: false, error: 'Not authenticated.' }, { status: 401 });
@@ -108,14 +108,14 @@ export async function POST(request: Request) {
       amount: Math.round(numAmount * 100), // Stripe uses pence (smallest currency unit)
       currency: 'gbp',
       automatic_payment_methods: { enabled: true },
-      description: description || 'UKTA Community Contribution',
+      description: description || 'MITRA Community Contribution',
       metadata: {
         customerName,
         customerEmail,
         customerPhone: customerPhone || '',
         paymentMethod: paymentMethod || 'Stripe Card',
         memberId: memberId || '',
-        source: 'ukta-website',
+        source: 'mitra-website',
       },
       receipt_email: customerEmail,
     });
@@ -131,7 +131,7 @@ export async function POST(request: Request) {
           customerName,
           customerEmail,
           customerPhone: customerPhone || null,
-          description: description || 'UKTA Community Contribution',
+          description: description || 'MITRA Community Contribution',
           paymentMethod: paymentMethod || 'Stripe Card',
           stripePaymentIntentId: paymentIntent.id,
           memberId,

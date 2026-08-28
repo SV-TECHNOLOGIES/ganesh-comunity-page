@@ -21,7 +21,7 @@ export const sendEmail = async (to: string, subject: string, html: string) => {
 
   try {
     const info = await transporter.sendMail({
-      from: process.env.SMTP_FROM || 'UKTA <noreply@ukta.org.uk>',
+      from: process.env.SMTP_FROM || 'MITRA <noreply@mitra.org.uk>',
       to,
       subject,
       html,
@@ -40,10 +40,10 @@ export const sendOTP = async (to: string, code: string, type: 'REGISTER' | 'FORG
   let html = '';
 
   if (type === 'REGISTER') {
-    subject = 'Your UKTA Registration OTP';
+    subject = 'Your MITRA Registration OTP';
     html = `
       <div style="font-family: sans-serif; max-w-md; margin: 0 auto;">
-        <h2 style="color: #7A1620;">Welcome to UKTA</h2>
+        <h2 style="color: #7A1620;">Welcome to MITRA</h2>
         <p>Your One-Time Password for registration is:</p>
         <div style="font-size: 24px; font-weight: bold; padding: 10px; background: #f0f0f0; text-align: center; border-radius: 5px; margin: 20px 0;">
           ${code}
@@ -53,10 +53,10 @@ export const sendOTP = async (to: string, code: string, type: 'REGISTER' | 'FORG
       </div>
     `;
   } else if (type === 'FORGOT_PASSWORD') {
-    subject = 'UKTA Password Reset OTP';
+    subject = 'MITRA Password Reset OTP';
     html = `
       <div style="font-family: sans-serif; max-w-md; margin: 0 auto;">
-        <h2 style="color: #7A1620;">UKTA Password Reset</h2>
+        <h2 style="color: #7A1620;">MITRA Password Reset</h2>
         <p>You requested a password reset. Your One-Time Password is:</p>
         <div style="font-size: 24px; font-weight: bold; padding: 10px; background: #f0f0f0; text-align: center; border-radius: 5px; margin: 20px 0;">
           ${code}

@@ -45,13 +45,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Hydrate from localStorage on mount
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('ukta_user');
+      const stored = localStorage.getItem('mitra_user');
       if (stored) {
         const parsed = JSON.parse(stored) as AuthUser;
         setUser(parsed);
       }
     } catch {
-      localStorage.removeItem('ukta_user');
+      localStorage.removeItem('mitra_user');
     } finally {
       setIsLoading(false);
     }
@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback((authUser: AuthUser) => {
     setUser(authUser);
-    localStorage.setItem('ukta_user', JSON.stringify(authUser));
+    localStorage.setItem('mitra_user', JSON.stringify(authUser));
   }, []);
 
   const logout = useCallback(async () => {
@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Proceed even if fetch fails
     }
     setUser(null);
-    localStorage.removeItem('ukta_user');
+    localStorage.removeItem('mitra_user');
     router.push('/');
   }, [router]);
 

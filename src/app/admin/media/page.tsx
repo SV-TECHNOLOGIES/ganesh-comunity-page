@@ -8,7 +8,7 @@ import { Image as ImageIcon, BookOpen, Plus, Download, CheckCircle2 } from 'luci
 export default function AdminMediaPage() {
   const [media, setMedia] = useState<MediaAlbum[]>([]);
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState<MediaAlbum['category']>('UKTA Patrika');
+  const [category, setCategory] = useState<MediaAlbum['category']>('MITRA Patrika');
   const [description, setDescription] = useState('');
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export default function AdminMediaPage() {
   return (
     <div className="space-y-8">
       <div className="border-b border-slate-800 pb-4">
-        <h1 className="text-2xl font-black text-white">Media Library & UKTA Patrika Publisher</h1>
+        <h1 className="text-2xl font-black text-white">Media Library & MITRA Patrika Publisher</h1>
         <p className="text-xs text-slate-400">
           Upload new Patrika PDF issues, souvenir archives, and manage photo/video galleries.
         </p>
@@ -32,7 +32,7 @@ export default function AdminMediaPage() {
               <img src={item.coverImage} alt={item.title} className="w-full h-full object-cover" />
             </div>
             <div className="space-y-1 text-xs">
-              <span className="bg-ukta-red/20 text-ukta-gold font-mono px-2 py-0.5 rounded text-[10px]">
+              <span className="bg-mitra-red/20 text-mitra-gold font-mono px-2 py-0.5 rounded text-[10px]">
                 {item.category}
               </span>
               <h3 className="font-bold text-white">{item.title}</h3>

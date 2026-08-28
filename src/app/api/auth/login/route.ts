@@ -34,9 +34,9 @@ export async function POST(request: Request) {
       }
 
       // 2. Fallback hardcoded admin (demo / first-run)
-      if (!adminMatched && email === 'admin@ukta.org.uk' && password === 'admin123') {
+      if (!adminMatched && email === 'admin@mitra.org.uk' && password === 'admin123') {
         adminMatched = true;
-        adminRecord = { id: 'admin-default', username: 'admin', email: 'admin@ukta.org.uk', role: 'Admin' };
+        adminRecord = { id: 'admin-default', username: 'admin', email: 'admin@mitra.org.uk', role: 'Admin' };
       }
 
       if (!adminMatched || !adminRecord) {
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
 
       const response = NextResponse.json({ success: true, role: 'Admin', user: userPayload });
 
-      response.cookies.set('ukta_token', token, {
+      response.cookies.set('mitra_token', token, {
         httpOnly: true,
         path: '/',
         maxAge: 60 * 60 * 24 * 7,
@@ -77,13 +77,13 @@ export async function POST(request: Request) {
     }
 
     // Fallback demo member — look up real DB record first
-    if (!memberMatched && email === 'member@ukta.org.uk' && password === 'pass123') {
+    if (!memberMatched && email === 'member@mitra.org.uk' && password === 'pass123') {
       // Try to get the real member from DB so the id is correct
-      const demoMember = await prisma.member.findUnique({ where: { email: 'member@ukta.org.uk' } }).catch(() => null);
+      const demoMember = await prisma.member.findUnique({ where: { email: 'member@mitra.org.uk' } }).catch(() => null);
 
       const userPayload = {
-        id: demoMember?.id || 'UKTA-MEM-DEMO',
-        email: 'member@ukta.org.uk',
+        id: demoMember?.id || 'MITRA-MEM-DEMO',
+        email: 'member@mitra.org.uk',
         role: 'Member' as const,
         fullName: demoMember?.fullName || 'Mahesh Babu G',
         tier: demoMember?.tier || 'Life Member',
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
       const token = signToken({ id: userPayload.id, email: userPayload.email, role: 'Member', tier: userPayload.tier });
       const response = NextResponse.json({ success: true, role: 'Member', user: userPayload });
 
-      response.cookies.set('ukta_token', token, {
+      response.cookies.set('mitra_token', token, {
         httpOnly: true,
         path: '/',
         maxAge: 60 * 60 * 24 * 30,
@@ -134,7 +134,7 @@ export async function POST(request: Request) {
 
     const response = NextResponse.json({ success: true, role: 'Member', user: userPayload });
 
-    response.cookies.set('ukta_token', token, {
+    response.cookies.set('mitra_token', token, {
       httpOnly: true,
       path: '/',
       maxAge: 60 * 60 * 24 * 30,

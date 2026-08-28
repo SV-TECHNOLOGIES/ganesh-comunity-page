@@ -1,10 +1,10 @@
 import { Metadata } from 'next';
 import { EventItem, BlogPost } from './types';
 
-export const BASE_URL = 'https://www.ukta.org.uk';
+export const BASE_URL = 'https://www.mitra.org.uk';
 
 export function constructMetadata({
-  title = 'UK Telugu Association (UKTA) | Official Website',
+  title = 'UK Telugu Association (MITRA) | Official Website',
   description = 'The premier UK non-profit organization promoting Telugu language, culture, arts, community welfare, student counselling, and high-impact charitable programs across Great Britain.',
   image = '/assets/poster.jpg',
   canonical = '/',
@@ -17,11 +17,11 @@ export function constructMetadata({
   noIndex?: boolean;
 } = {}): Metadata {
   return {
-    title: `${title} | UKTA`,
+    title: `${title} | MITRA`,
     description,
     keywords: [
       'UK Telugu Association',
-      'UKTA',
+      'MITRA',
       'Telugu Community UK',
       'London Telugu Events',
       'Ugadi Celebrations UK',
@@ -38,7 +38,7 @@ export function constructMetadata({
       title,
       description,
       url: canonical,
-      siteName: 'UK Telugu Association (UKTA)',
+      siteName: 'UK Telugu Association (MITRA)',
       images: [
         {
           url: image,
@@ -55,7 +55,7 @@ export function constructMetadata({
       title,
       description,
       images: [image],
-      creator: '@ukta_official',
+      creator: '@mitra_official',
     },
     robots: noIndex
       ? { index: false, follow: false }
@@ -68,14 +68,14 @@ export function generateOrganizationJsonLd() {
     '@context': 'https://schema.org',
     '@type': 'NGO',
     name: 'UK Telugu Association',
-    alternateName: 'UKTA',
+    alternateName: 'MITRA',
     url: BASE_URL,
     logo: `${BASE_URL}/logo.png`,
     sameAs: [
-      'https://twitter.com/ukta_official',
-      'https://linkedin.com/company/ukta-official',
+      'https://twitter.com/mitra_official',
+      'https://linkedin.com/company/mitra-official',
       'https://facebook.com/ukteluguassociation',
-      'https://youtube.com/@uktaofficial',
+      'https://youtube.com/@mitraofficial',
     ],
     address: {
       '@type': 'PostalAddress',
@@ -88,7 +88,7 @@ export function generateOrganizationJsonLd() {
       '@type': 'ContactPoint',
       telephone: '+44-20-8123-4567',
       contactType: 'customer service',
-      email: 'info@ukta.org.uk',
+      email: 'info@mitra.org.uk',
     },
   };
 }

@@ -108,7 +108,7 @@ model BlogPost {
   excerpt    String
   content    String
   category   String
-  author     String   @default("UKTA Editorial")
+  author     String   @default("MITRA Editorial")
   date       String
   coverImage String
   tags       String[]
@@ -138,7 +138,7 @@ model PaymentSettings {
   stripePublishableKey  String
   stripeSecretKey       String
   currency              String   @default("GBP")
-  activeAccountName     String   @default("UKTA Main Account")
+  activeAccountName     String   @default("MITRA Main Account")
   updatedAt             DateTime @updatedAt
 }
 

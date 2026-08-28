@@ -116,7 +116,7 @@ export default function MembershipPage() {
           <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-500">
             <ShieldCheck className="w-10 h-10 text-emerald-400" />
           </div>
-          <h2 className="text-3xl font-black font-cinzel gold-foil-text">Welcome to UKTA!</h2>
+          <h2 className="text-3xl font-black font-cinzel gold-foil-text">Welcome to MITRA!</h2>
           <p className="text-[#C9B79C] text-sm">
             Your <strong className="text-[#F4C542]">{selectedTier}</strong> membership has been created. Redirecting you to your Member Dashboard…
           </p>
@@ -131,11 +131,11 @@ export default function MembershipPage() {
       
       {/* Title */}
       <div className="text-center max-w-2xl mx-auto space-y-3">
-        <span className="bg-ukta-gold/20 text-ukta-gold-dark dark:text-ukta-gold text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
-          Join UKTA Family
+        <span className="bg-mitra-gold/20 text-mitra-gold-dark dark:text-mitra-gold text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
+          Join MITRA Family
         </span>
         <h1 className="text-4xl font-black text-slate-900 dark:text-white">
-          UKTA Membership &amp; Community Registration
+          MITRA Membership &amp; Community Registration
         </h1>
         <p className="text-sm text-slate-600 dark:text-slate-300">
           Enjoy priority festival seating, digital pass verification, student mentoring, and voting rights.
@@ -144,7 +144,7 @@ export default function MembershipPage() {
         <div className="pt-2">
           <Link
             href="/login"
-            className="inline-flex items-center gap-1.5 text-xs font-extrabold text-ukta-red dark:text-ukta-gold hover:underline"
+            className="inline-flex items-center gap-1.5 text-xs font-extrabold text-mitra-red dark:text-mitra-gold hover:underline"
           >
             <UserCheck className="w-4 h-4" />
             <span>Already a Member? Login to your Portal &rarr;</span>
@@ -160,23 +160,23 @@ export default function MembershipPage() {
           onClick={() => setSelectedTier('Life Member')}
           className={`bg-white dark:bg-slate-900 rounded-3xl p-8 border-2 transition-all cursor-pointer relative shadow-lg flex flex-col justify-between ${
             selectedTier === 'Life Member'
-              ? 'border-ukta-gold ring-4 ring-ukta-gold/20'
+              ? 'border-mitra-gold ring-4 ring-mitra-gold/20'
               : 'border-slate-200 dark:border-slate-800'
           }`}
         >
-          <span className="bg-ukta-gold text-ukta-navy text-[10px] font-black px-3 py-1 rounded-full uppercase absolute -top-3 right-6">
+          <span className="bg-mitra-gold text-mitra-navy text-[10px] font-black px-3 py-1 rounded-full uppercase absolute -top-3 right-6">
             MOST POPULAR
           </span>
           <div className="space-y-4">
             <h3 className="text-2xl font-black text-slate-900 dark:text-white">Life Membership</h3>
-            <div className="text-3xl font-extrabold text-ukta-red dark:text-ukta-gold">
+            <div className="text-3xl font-extrabold text-mitra-red dark:text-mitra-gold">
               £100 <span className="text-xs font-normal text-slate-500">/ One-time fee</span>
             </div>
             <ul className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
               <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500" /> Lifetime voting rights at AGM</li>
               <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500" /> VIP priority seating at Ugadi &amp; Events</li>
               <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500" /> Digital Membership ID Card Pass</li>
-              <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500" /> Complimentary printed UKTA Patrika</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500" /> Complimentary printed MITRA Patrika</li>
             </ul>
           </div>
         </div>
@@ -186,13 +186,13 @@ export default function MembershipPage() {
           onClick={() => setSelectedTier('Annual Member')}
           className={`bg-white dark:bg-slate-900 rounded-3xl p-8 border-2 transition-all cursor-pointer shadow-lg flex flex-col justify-between ${
             selectedTier === 'Annual Member'
-              ? 'border-ukta-gold ring-4 ring-ukta-gold/20'
+              ? 'border-mitra-gold ring-4 ring-mitra-gold/20'
               : 'border-slate-200 dark:border-slate-800'
           }`}
         >
           <div className="space-y-4">
             <h3 className="text-2xl font-black text-slate-900 dark:text-white">Annual Membership</h3>
-            <div className="text-3xl font-extrabold text-ukta-red dark:text-ukta-gold">
+            <div className="text-3xl font-extrabold text-mitra-red dark:text-mitra-gold">
               £25 <span className="text-xs font-normal text-slate-500">/ per year</span>
             </div>
             <ul className="space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
@@ -209,7 +209,7 @@ export default function MembershipPage() {
             onClick={() => setSelectedTier('Volunteer')}
             className={`bg-white dark:bg-slate-900 rounded-3xl p-8 border-2 transition-all cursor-pointer shadow-lg flex flex-col justify-between ${
               selectedTier === 'Volunteer'
-                ? 'border-ukta-gold ring-4 ring-ukta-gold/20'
+                ? 'border-mitra-gold ring-4 ring-mitra-gold/20'
                 : 'border-slate-200 dark:border-slate-800'
             }`}
           >
@@ -236,7 +236,7 @@ export default function MembershipPage() {
             Apply for {selectedTier}
           </h2>
           <p className="text-xs text-slate-500 mb-6">
-            Create your UKTA account to get your digital membership pass and access the Member Portal.
+            Create your MITRA account to get your digital membership pass and access the Member Portal.
           </p>
 
           {error && (
@@ -314,7 +314,7 @@ export default function MembershipPage() {
             {/* Password divider */}
             <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
               <div className="flex items-center gap-2 mb-4">
-                <KeyRound className="w-4 h-4 text-ukta-red dark:text-ukta-gold" />
+                <KeyRound className="w-4 h-4 text-mitra-red dark:text-mitra-gold" />
                 <span className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">Set Your Portal Password</span>
               </div>
 
@@ -382,9 +382,9 @@ export default function MembershipPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-ukta-red hover:bg-ukta-red-dark text-white font-extrabold py-3.5 rounded-xl text-sm shadow-md transition-all flex items-center justify-center gap-2 mt-4 disabled:opacity-60"
+              className="w-full bg-mitra-red hover:bg-mitra-red-dark text-white font-extrabold py-3.5 rounded-xl text-sm shadow-md transition-all flex items-center justify-center gap-2 mt-4 disabled:opacity-60"
             >
-              <Sparkles className="w-4 h-4 text-ukta-gold" />
+              <Sparkles className="w-4 h-4 text-mitra-gold" />
               <span>
                 {loading 
                   ? (otpSent ? 'Creating Account…' : 'Sending OTP…') 
@@ -401,7 +401,7 @@ export default function MembershipPage() {
           </div>
           <h2 className="text-2xl font-black font-cinzel text-[#F4C542]">Membership Registration</h2>
           <p className="text-sm text-[#C9B79C] leading-relaxed">
-            Online membership registration is <strong className="text-[#F4C542]">coming soon</strong>. Please contact us directly to join the UKTA family.
+            Online membership registration is <strong className="text-[#F4C542]">coming soon</strong>. Please contact us directly to join the MITRA family.
           </p>
           <p className="text-xs text-[#C9B79C]">
             Already a member?{' '}

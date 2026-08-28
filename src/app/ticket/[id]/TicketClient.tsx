@@ -89,7 +89,7 @@ export default function TicketClient({ payment, qrDataUrl, ticketUrl }: TicketCl
             }} />
             <div className="relative">
               <div className="flex items-center justify-center gap-3 mb-2">
-                <img src="/assets/poster-dark.jpeg" alt="MITRA UK" className="w-10 h-10 rounded-full object-cover border-2 border-[#D4AF37]" />
+                <img src="/assets/poster.jpg" alt="MITRA UK" className="w-10 h-10 rounded-full object-cover border-2 border-[#D4AF37]" />
                 <div className="text-left">
                   <p className="text-[#F4C542] font-black text-lg tracking-widest">MITRA UK</p>
                   <p className="text-[#FFD87A] text-[9px] font-bold uppercase tracking-widest">Official Donation Receipt</p>
@@ -181,7 +181,7 @@ export default function TicketClient({ payment, qrDataUrl, ticketUrl }: TicketCl
           {/* Footer Band */}
           <div className="bg-[#160B08] border-t border-[#D4AF37]/30 px-8 py-4 text-center">
             <p className="text-[9px] text-[#C9B79C] uppercase tracking-wider">
-              This is an official computer-generated receipt. No signature required. · MITRA UK (UKTA) · Registered UK Community Organisation
+              This is an official computer-generated receipt. No signature required. · MITRA UK (MITRA) · Registered UK Community Organisation
             </p>
             <p className="text-[9px] text-[#C9B79C] mt-1">
               Verify online: <span className="text-[#F4C542] font-mono">{ticketUrl}</span>

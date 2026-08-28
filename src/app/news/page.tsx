@@ -18,7 +18,7 @@ export default function NewsPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
       <div className="text-center max-w-2xl mx-auto space-y-3">
-        <span className="bg-ukta-red/10 text-ukta-red dark:bg-ukta-gold/10 dark:text-ukta-gold text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
+        <span className="bg-mitra-red/10 text-mitra-red dark:bg-mitra-gold/10 dark:text-mitra-gold text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
           Community News & Press
         </span>
         <h1 className="text-4xl font-black text-slate-900 dark:text-white">
@@ -34,7 +34,7 @@ export default function NewsPage() {
           <div key={post.id} className="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-md hover:shadow-xl transition-all flex flex-col justify-between group">
             <div className="relative h-56 w-full">
               <Image src={post.coverImage} alt={post.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-              <span className="absolute top-3 left-3 bg-ukta-red text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase">
+              <span className="absolute top-3 left-3 bg-mitra-red text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase">
                 {post.category}
               </span>
             </div>
@@ -46,7 +46,7 @@ export default function NewsPage() {
                   <span>{post.date}</span>
                   <span>&bull; By {post.author}</span>
                 </div>
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-ukta-red dark:group-hover:text-ukta-gold transition-colors">
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-mitra-red dark:group-hover:text-mitra-gold transition-colors">
                   <Link href={`/news/${post.slug}`}>{post.title}</Link>
                 </h2>
                 <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 line-clamp-3 leading-relaxed">
@@ -62,7 +62,7 @@ export default function NewsPage() {
                     </span>
                   ))}
                 </div>
-                <Link href={`/news/${post.slug}`} className="text-xs font-bold text-ukta-red dark:text-ukta-gold hover:underline flex items-center gap-1">
+                <Link href={`/news/${post.slug}`} className="text-xs font-bold text-mitra-red dark:text-mitra-gold hover:underline flex items-center gap-1">
                   <span>Read Article</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>

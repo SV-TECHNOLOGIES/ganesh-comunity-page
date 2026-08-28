@@ -10,8 +10,8 @@ export default function DonatePage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-16 text-center space-y-8">
       <div className="space-y-3">
-        <span className="bg-ukta-red/10 text-ukta-red dark:bg-ukta-gold/10 dark:text-ukta-gold text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
-          Support UKTA Charity Fund
+        <span className="bg-mitra-red/10 text-mitra-red dark:bg-mitra-gold/10 dark:text-mitra-gold text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
+          Support MITRA Charity Fund
         </span>
         <h1 className="text-4xl font-black text-slate-900 dark:text-white">
           Make a Difference in Our Community
@@ -23,7 +23,7 @@ export default function DonatePage() {
 
       <button
         onClick={() => setModalOpen(true)}
-        className="bg-ukta-red hover:bg-ukta-red-dark text-white font-extrabold px-8 py-4 rounded-2xl text-sm shadow-xl transition-all inline-flex items-center gap-2"
+        className="bg-mitra-red hover:bg-mitra-red-dark text-white font-extrabold px-8 py-4 rounded-2xl text-sm shadow-xl transition-all inline-flex items-center gap-2"
       >
         <Heart className="w-5 h-5 fill-white" />
         <span>Open Donation Gateway</span>

@@ -118,7 +118,7 @@ CREATE TABLE "BlogPost" (
     "excerpt" TEXT NOT NULL,
     "content" TEXT NOT NULL,
     "category" TEXT NOT NULL,
-    "author" TEXT NOT NULL DEFAULT 'UKTA Editorial',
+    "author" TEXT NOT NULL DEFAULT 'MITRA Editorial',
     "date" TEXT NOT NULL,
     "coverImage" TEXT NOT NULL,
     "tags" TEXT[],
@@ -152,7 +152,7 @@ CREATE TABLE "PaymentSettings" (
     "stripePublishableKey" TEXT NOT NULL,
     "stripeSecretKey" TEXT NOT NULL,
     "currency" TEXT NOT NULL DEFAULT 'GBP',
-    "activeAccountName" TEXT NOT NULL DEFAULT 'UKTA Main Account',
+    "activeAccountName" TEXT NOT NULL DEFAULT 'MITRA Main Account',
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "PaymentSettings_pkey" PRIMARY KEY ("id")

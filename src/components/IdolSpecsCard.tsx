@@ -85,7 +85,7 @@ export default function IdolSpecsCard() {
                 <h3 className="font-bold text-sm uppercase tracking-wider font-cinzel">London Journey</h3>
               </div>
               <p className="text-xs text-[#C9B79C] leading-relaxed">
-                Specially transported to London under the stewardship of MITRA UK & UKTA to unite the British Indian diaspora.
+                Specially transported to London under the stewardship of MITRA UK to unite the British Indian diaspora.
               </p>
             </div>
 

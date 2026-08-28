@@ -100,7 +100,7 @@ export default function Header() {
               <img
                 src="/assets/poster.jpg"
                 alt="MITRA UK Logo"
-                className="w-full h-full object-cover rounded-full "
+                className="w-full h-full object-cover rounded-full scale-110"
               />
             </div>
             <div>

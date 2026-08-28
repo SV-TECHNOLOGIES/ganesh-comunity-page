@@ -380,7 +380,7 @@ export default function Ganesha3DHero({ onNotifyClick }: Ganesha3DHeroProps) {
           <div className="absolute inset-0 z-30 bg-[#0D0705]/95 backdrop-blur-md flex flex-col items-center justify-center space-y-4 animate-in fade-in duration-300">
             <div className="relative w-20 h-20 rounded-full border-2 border-[#D4AF37]/40 flex items-center justify-center bg-[#160B08] p-2">
               <div className="absolute inset-0 rounded-full border-2 border-dashed border-[#F4C542] animate-spin" style={{ animationDuration: '6s' }} />
-              <img src="/assets/poster-dark.jpeg" alt="Loading Bappa" className="w-full h-full object-cover rounded-full filter brightness-110" />
+              <img src="/assets/poster.jpg" alt="Loading Bappa" className="w-full h-full object-cover rounded-full filter brightness-110" />
             </div>
             
             <div className="text-center space-y-2">

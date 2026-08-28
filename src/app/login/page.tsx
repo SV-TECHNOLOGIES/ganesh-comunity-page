@@ -79,7 +79,7 @@ function LoginForm() {
             <ArrowLeft className="w-4 h-4" />
             <span>Return to Live Mahotsav</span>
           </Link>
-          <span className="text-[10px] font-black text-[#D4AF37] uppercase tracking-wider font-cinzel">UKTA PORTAL</span>
+          <span className="text-[10px] font-black text-[#D4AF37] uppercase tracking-wider font-cinzel">MITRA PORTAL</span>
         </div>
 
         {/* Tab Switcher */}
@@ -119,7 +119,7 @@ function LoginForm() {
           <p className="text-xs text-[#C9B79C]">
             {activeTab === 'member'
               ? 'Access your digital membership card & event benefits.'
-              : 'Authorized UKTA committee officers & event managers.'}
+              : 'Authorized MITRA committee officers & event managers.'}
           </p>
         </div>
 
@@ -167,7 +167,7 @@ function LoginForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={activeTab === 'member' ? 'member@ukta.org.uk' : 'admin@ukta.org.uk'}
+                placeholder={activeTab === 'member' ? 'member@mitra.org.uk' : 'admin@mitra.org.uk'}
                 className="w-full bg-[#0D0705] border border-[#D4AF37]/40 rounded-xl pl-10 pr-4 py-2.5 text-[#F7EFE1] focus:border-[#F4C542] focus:outline-none"
               />
             </div>

@@ -61,16 +61,16 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
         <div className="space-y-6">
           
           <div className="space-y-2">
-            <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-ukta-gold hover:underline">
+            <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-mitra-gold hover:underline">
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Return to Public Website</span>
             </Link>
             <div className="flex items-center gap-3 pt-2">
-              <div className="w-9 h-9 rounded-full bg-ukta-gold text-ukta-navy font-black flex items-center justify-center text-sm shadow">
+              <div className="w-9 h-9 rounded-full bg-mitra-gold text-mitra-navy font-black flex items-center justify-center text-sm shadow">
                 CMS
               </div>
               <div>
-                <h2 className="text-base font-extrabold text-white leading-tight">UKTA Admin</h2>
+                <h2 className="text-base font-extrabold text-white leading-tight">MITRA Admin</h2>
                 <span className="text-[10px] text-slate-400">Control Panel v2.0</span>
               </div>
             </div>
@@ -81,21 +81,21 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
             <div className="bg-slate-900 p-3 rounded-2xl border border-emerald-500/30 space-y-1">
               <p className="text-[10px] font-bold uppercase text-emerald-400 block">Authenticated As</p>
               <p className="text-xs font-black text-white truncate">{user.email}</p>
-              <span className="text-[10px] bg-ukta-red/80 text-ukta-gold px-2 py-0.5 rounded-full font-bold inline-block border border-ukta-gold/30">
+              <span className="text-[10px] bg-mitra-red/80 text-mitra-gold px-2 py-0.5 rounded-full font-bold inline-block border border-mitra-gold/30">
                 {user.role}
               </span>
             </div>
           )}
 
           {/* Role Switcher (RBAC simulation) */}
-          <div className="bg-slate-900 p-3 rounded-2xl border border-ukta-gold/30 space-y-1">
-            <label className="text-[10px] font-bold uppercase text-ukta-gold block">
+          <div className="bg-slate-900 p-3 rounded-2xl border border-mitra-gold/30 space-y-1">
+            <label className="text-[10px] font-bold uppercase text-mitra-gold block">
               Simulate Active RBAC Role:
             </label>
             <select
               value={currentRole}
               onChange={(e) => setCurrentRole(e.target.value as Role)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white font-semibold focus:outline-none focus:border-ukta-gold"
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white font-semibold focus:outline-none focus:border-mitra-gold"
             >
               {roles.map((r) => (
                 <option key={r} value={r}>{r}</option>
@@ -120,14 +120,14 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                   }}
                   className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all ${
                     isCurrent(item.href)
-                      ? 'bg-ukta-red text-white font-bold shadow'
+                      ? 'bg-mitra-red text-white font-bold shadow'
                       : hasAccess
                       ? 'text-slate-300 hover:bg-slate-900 hover:text-white'
                       : 'text-slate-600 opacity-50 cursor-not-allowed'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <IconComp className="w-4 h-4 text-ukta-gold" />
+                    <IconComp className="w-4 h-4 text-mitra-gold" />
                     <span>{item.label}</span>
                   </div>
                   <ChevronRight className="w-3.5 h-3.5 opacity-50" />

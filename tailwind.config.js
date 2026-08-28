@@ -9,7 +9,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        ukta: {
+        mitra: {
           red: '#7A1620',
           'red-dark': '#5a0000',
           'red-light': '#9C1F2E',

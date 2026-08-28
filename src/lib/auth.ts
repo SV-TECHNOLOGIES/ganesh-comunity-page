@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'ukta-secret-fallback-key-2026';
+const JWT_SECRET = process.env.JWT_SECRET || 'mitra-secret-fallback-key-2026';
 const SALT_ROUNDS = 10;
 
 // ── Password utilities ──────────────────────────────────────────────────────

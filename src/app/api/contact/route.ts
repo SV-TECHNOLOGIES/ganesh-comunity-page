@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     `;
 
     // Send the email to the organization's info address.
-    const adminEmail = process.env.SMTP_FROM || 'info@ukta.org.uk';
+    const adminEmail = process.env.SMTP_FROM || 'info@mitra.org.uk';
     
     const emailSent = await sendEmail(adminEmail, subject, html);
 

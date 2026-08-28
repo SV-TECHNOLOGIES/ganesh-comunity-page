@@ -101,7 +101,7 @@ export async function POST(request: Request) {
 
     const response = NextResponse.json({ success: true, user: userPayload }, { status: 201 });
 
-    response.cookies.set('ukta_token', token, {
+    response.cookies.set('mitra_token', token, {
       httpOnly: true,
       path: '/',
       maxAge: 60 * 60 * 24 * 30, // 30 days

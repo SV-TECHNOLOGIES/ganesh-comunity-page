@@ -33,7 +33,7 @@ export default function AdminMembersPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `UKTA_Members_List_${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `MITRA_Members_List_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
   };
 
@@ -85,13 +85,13 @@ export default function AdminMembersPage() {
           <tbody className="divide-y divide-slate-800">
             {filteredMembers.map((mem) => (
               <tr key={mem.id} className="hover:bg-slate-900/50">
-                <td className="p-4 font-mono font-bold text-ukta-gold">{mem.id}</td>
+                <td className="p-4 font-mono font-bold text-mitra-gold">{mem.id}</td>
                 <td className="p-4">
                   <div className="font-bold text-white">{mem.name}</div>
                   <div className="text-[11px] text-slate-400">{mem.email}</div>
                 </td>
                 <td className="p-4">
-                  <span className="bg-ukta-navy text-ukta-gold border border-ukta-gold/30 px-2 py-0.5 rounded text-[10px] font-bold uppercase">
+                  <span className="bg-mitra-navy text-mitra-gold border border-mitra-gold/30 px-2 py-0.5 rounded text-[10px] font-bold uppercase">
                     {mem.tier}
                   </span>
                 </td>
@@ -107,7 +107,7 @@ export default function AdminMembersPage() {
                     onClick={() => setPassModalMember(mem)}
                     className="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg font-semibold text-[11px] inline-flex items-center gap-1"
                   >
-                    <QrCode className="w-3.5 h-3.5 text-ukta-gold" />
+                    <QrCode className="w-3.5 h-3.5 text-mitra-gold" />
                     <span>Pass</span>
                   </button>
                 </td>

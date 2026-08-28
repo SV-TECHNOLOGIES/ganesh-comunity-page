@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
                 customerName: meta.customerName || 'Unknown',
                 customerEmail: metaEmail,
                 customerPhone: meta.customerPhone || null,
-                description: pi.description || 'UKTA Community Contribution',
+                description: pi.description || 'MITRA Community Contribution',
                 paymentMethod: meta.paymentMethod || 'Stripe',
                 stripePaymentIntentId: pi.id,
                 memberId: resolvedMemberId,

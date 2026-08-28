@@ -43,7 +43,7 @@ export default function AdminDashboardPage() {
       {/* Title */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
-          <h1 className="text-2xl font-black text-white">UKTA Executive CMS Dashboard</h1>
+          <h1 className="text-2xl font-black text-white">MITRA Executive CMS Dashboard</h1>
           <p className="text-xs text-slate-400">
             Real-time metric summary across membership, live events, confidential welfare tickets, and analytics tracking.
           </p>
@@ -59,7 +59,7 @@ export default function AdminDashboardPage() {
           </Link>
           <Link
             href="/admin/events"
-            className="bg-ukta-red hover:bg-ukta-red-dark text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow"
+            className="bg-mitra-red hover:bg-mitra-red-dark text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow"
           >
             <Plus className="w-4 h-4" />
             <span>Create New Event</span>
@@ -71,7 +71,7 @@ export default function AdminDashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         
         <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-2">
-          <div className="flex items-center justify-between text-ukta-gold">
+          <div className="flex items-center justify-between text-mitra-gold">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Active Members</span>
             <Users className="w-5 h-5" />
           </div>
@@ -80,7 +80,7 @@ export default function AdminDashboardPage() {
         </div>
 
         <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-2">
-          <div className="flex items-center justify-between text-ukta-gold">
+          <div className="flex items-center justify-between text-mitra-gold">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Upcoming Events</span>
             <Calendar className="w-5 h-5" />
           </div>
@@ -89,12 +89,12 @@ export default function AdminDashboardPage() {
         </div>
 
         <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-2">
-          <div className="flex items-center justify-between text-ukta-red">
+          <div className="flex items-center justify-between text-mitra-red">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Pending Welfare Cases</span>
             <ShieldAlert className="w-5 h-5" />
           </div>
           <div className="text-3xl font-black text-white">{stats.charityCasesCount}</div>
-          <span className="text-[10px] text-ukta-gold font-semibold block">Confidential Queue</span>
+          <span className="text-[10px] text-mitra-gold font-semibold block">Confidential Queue</span>
         </div>
 
         <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-2">
@@ -112,10 +112,10 @@ export default function AdminDashboardPage() {
       <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-4">
         <div className="flex items-center justify-between border-b border-slate-800 pb-3">
           <div className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-ukta-gold" />
+            <TrendingUp className="w-5 h-5 text-mitra-gold" />
             <h2 className="text-base font-bold text-white">Real-Time Site Analytics Stream</h2>
           </div>
-          <Link href="/admin/seo-analytics" className="text-xs text-ukta-gold hover:underline">
+          <Link href="/admin/seo-analytics" className="text-xs text-mitra-gold hover:underline">
             View Live SEO Stream &rarr;
           </Link>
         </div>
@@ -127,7 +127,7 @@ export default function AdminDashboardPage() {
             recentLogs.map((log) => (
               <div key={log.id} className="bg-slate-900 p-3 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-3">
-                  <span className="bg-ukta-red/20 text-ukta-gold font-mono text-[10px] px-2 py-0.5 rounded font-bold">
+                  <span className="bg-mitra-red/20 text-mitra-gold font-mono text-[10px] px-2 py-0.5 rounded font-bold">
                     {log.eventName}
                   </span>
                   <span className="text-slate-300 font-semibold">{log.path}</span>

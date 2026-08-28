@@ -26,7 +26,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = request.cookies.get('ukta_token')?.value;
+  const token = request.cookies.get('mitra_token')?.value;
   const payload = token ? decodeJwtPayload(token) : null;
 
   // Not authenticated at all → redirect to login
