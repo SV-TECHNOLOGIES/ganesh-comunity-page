@@ -14,14 +14,14 @@ export default function EventsPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [donateModalOpen, setDonateModalOpen] = useState(false);
-  const [selectedDonationCategory, setSelectedDonationCategory] = useState<'Annadanam' | 'Pooja Booking' | 'Event Donations'>('Annadanam');
+  const [selectedDonationCategory, setSelectedDonationCategory] = useState<'Annadanam' | 'Event Donations'>('Annadanam');
 
   useEffect(() => {
     DataStore.init();
     setEvents(DataStore.getEvents());
   }, []);
 
-  const openDonation = (cat: 'Annadanam' | 'Pooja Booking' | 'Event Donations') => {
+  const openDonation = (cat: 'Annadanam' | 'Event Donations') => {
     setSelectedDonationCategory(cat);
     setDonateModalOpen(true);
   };

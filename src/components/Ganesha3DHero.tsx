@@ -3,13 +3,19 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { Sparkles, MessageCircle, Bell, RotateCcw } from 'lucide-react';
+import { Sparkles, Flame, Heart, RotateCcw } from 'lucide-react';
 
 interface Ganesha3DHeroProps {
-  onNotifyClick: () => void;
+  onBookPoojaClick?: () => void;
+  onDonateClick?: () => void;
+  onNotifyClick?: () => void;
 }
 
-export default function Ganesha3DHero({ onNotifyClick }: Ganesha3DHeroProps) {
+export default function Ganesha3DHero({
+  onBookPoojaClick,
+  onDonateClick,
+  onNotifyClick,
+}: Ganesha3DHeroProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const [modelLoaded, setModelLoaded] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(15);
@@ -430,22 +436,20 @@ export default function Ganesha3DHero({ onNotifyClick }: Ganesha3DHeroProps) {
 
         {/* Action CTAs */}
         <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
-          <a
-            href="https://chat.whatsapp.com/IVqirWWzM96IBNRfhSWGEd"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="gold-button px-7 py-3.5 rounded-full text-sm flex items-center gap-2.5 shadow-xl hover:scale-105 transition-all"
+          <button
+            onClick={onBookPoojaClick}
+            className="gold-button px-8 py-3.5 rounded-full text-sm font-black uppercase tracking-wider flex items-center gap-2.5 shadow-[0_0_25px_rgba(212,175,55,0.4)] hover:scale-105 transition-all"
           >
-            <MessageCircle className="w-5 h-5 fill-current" />
-            <span>Join Official WhatsApp Group</span>
-          </a>
+            <Flame className="w-5 h-5 fill-current text-[#0D0705]" />
+            <span>Book Pooja (£116)</span>
+          </button>
 
           <button
-            onClick={onNotifyClick}
-            className="maroon-button px-7 py-3.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-xl hover:scale-105 transition-all"
+            onClick={onDonateClick}
+            className="maroon-button px-8 py-3.5 rounded-full text-sm font-black uppercase tracking-wider flex items-center gap-2.5 shadow-xl hover:scale-105 transition-all border border-[#D4AF37]/50"
           >
-            <Bell className="w-4 h-4 text-[#F4C542]" />
-            <span>Notify Me for Live Reveal</span>
+            <Heart className="w-5 h-5 text-[#F4C542] fill-current" />
+            <span>Make Donation</span>
           </button>
         </div>
 

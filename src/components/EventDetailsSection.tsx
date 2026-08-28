@@ -1,117 +1,123 @@
 'use client';
 
-import { useState } from 'react';
-import { MapPin, Calendar, Clock, Download, ExternalLink, Sparkles, Flame, Heart, Utensils } from 'lucide-react';
-import DonationModal from '@/components/DonationModal';
+import React from 'react';
+import { MapPin, Calendar, Clock, Download, ExternalLink, Sparkles, Flame, Heart, Utensils, Star, CheckCircle } from 'lucide-react';
+import { POOJA_DATES } from '@/components/PoojaBookingModal';
 
-export default function EventDetailsSection() {
-  const [donateModalOpen, setDonateModalOpen] = useState(false);
-  const [selectedDonationCategory, setSelectedDonationCategory] = useState<'Annadanam' | 'Pooja Booking' | 'Event Donations'>('Pooja Booking');
+interface EventDetailsSectionProps {
+  onOpenPoojaBooking?: (dateId?: string) => void;
+  onOpenDonation?: (cat?: 'Annadanam' | 'Event Donations') => void;
+}
 
-  const openDonation = (cat: 'Annadanam' | 'Pooja Booking' | 'Event Donations') => {
-    setSelectedDonationCategory(cat);
-    setDonateModalOpen(true);
-  };
+export default function EventDetailsSection({
+  onOpenPoojaBooking,
+  onOpenDonation,
+}: EventDetailsSectionProps) {
 
-  const schedule = [
-    { time: '09:00 AM', event: 'Ganapathi Sthapana & Prana Pratishtha', desc: 'Ritual installation of the 6ft Maha Ganapathi idol.' },
+  const dailySchedule = [
+    { time: '09:00 AM', event: 'Daily Ganapathi Abhishekam & Archana', desc: 'Vedic chants and ritual sanctum offerings.' },
     { time: '12:30 PM', event: 'Grand Afternoon Aarti & Mahaprasadam', desc: 'Devotional bhajans and community lunch distribution.' },
-    { time: '05:30 PM', event: 'Cultural Performances & Kuchipudi Showcase', desc: 'Classical dance performances by UK youth.' },
-    { time: '08:00 PM', event: 'Maha Mangala Aarti & Visarjan Procession Prep', desc: 'Evening grand illumination and devotional prayer.' },
+    { time: '05:30 PM', event: 'Cultural Performances & Kuchipudi Showcase', desc: 'Classical dance and Telugu devotional songs by UK youth.' },
+    { time: '08:00 PM', event: 'Maha Mangala Aarti & Evening Darshan', desc: 'Illumination ceremony with hundreds of oil lamps.' },
   ];
 
   return (
     <section className="py-20 bg-[#160B08] text-[#F7EFE1] border-b border-[#D4AF37]/30">
-      <div className="max-w-6xl mx-auto px-4 space-y-12">
+      <div className="max-w-6xl mx-auto px-4 space-y-16">
         
         {/* Section Header */}
         <div className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 bg-[#7A1620]/60 border border-[#D4AF37]/40 px-4 py-1 rounded-full text-xs font-extrabold text-[#F4C542] uppercase tracking-widest">
             <Calendar className="w-4 h-4" />
-            <span>GANESH MAHOTSAV 2026 DETAILS</span>
+            <span>GANESH MAHOTSAV 2026 SCHEDULE & SEVA</span>
           </div>
 
           <h2 className="text-3xl sm:text-5xl font-black font-cinzel gold-foil-text tracking-wider">
-            GANESH MAHOTSAV EVENT & SEVA
+            7-DAY MAHOTSAV & POOJA CALENDAR
           </h2>
 
-          <p className="max-w-xl mx-auto text-xs sm:text-sm text-[#C9B79C]">
-            Join us on 14th September 2026 in Langley, Slough for a day of divine darshan, cultural festivities, and sacred Poojas.
+          <p className="max-w-2xl mx-auto text-xs sm:text-sm text-[#C9B79C] leading-relaxed">
+            Experience 7 divine days of Darshan, Vedic rituals, and cultural celebrations from 13th to 19th September 2026 in Langley, Slough.
           </p>
         </div>
 
-        {/* MAKE A DONATION OR BOOK A POOJA CARD FOR GANESH MAHOTSAV */}
-        <div className="temple-card p-6 sm:p-8 rounded-3xl border-2 border-[#D4AF37] space-y-6 shadow-[0_0_35px_rgba(212,175,55,0.25)]">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#D4AF37]/30 pb-4">
-            <div className="space-y-1">
+        {/* 7-DAY FESTIVAL SCHEDULE GRID */}
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-[#D4AF37]/30 pb-3">
+            <div>
               <span className="text-xs font-black font-cinzel text-[#F4C542] uppercase tracking-widest block">
-                GANESH MAHOTSAV SEVA REGISTRY
+                SACRED RITUAL SCHEDULE (13TH – 19TH SEP 2026)
               </span>
               <h3 className="text-xl sm:text-2xl font-black font-cinzel text-[#F7EFE1]">
-                MAKE A DONATION OR BOOK A POOJA FOR GANESH MAHOTSAV
+                CHOOSE YOUR AUSPICIOUS POOJA DAY
               </h3>
-              <p className="text-xs text-[#C9B79C]">
-                Book your sacred Maha Ganapathi Pooja (£116 fixed) or sponsor Annadanam Prasadam for thousands of devotees.
-              </p>
             </div>
+            <span className="text-xs text-[#C9B79C]">
+              Each pooja includes personalized family Sankalpam & Prasadam box (£116)
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Annadanam */}
-            <button
-              onClick={() => openDonation('Annadanam')}
-              className="bg-[#0D0705] border border-[#D4AF37]/40 hover:border-[#F4C542] p-5 rounded-2xl text-left space-y-2 hover:scale-[1.02] transition-transform group"
-            >
-              <div className="flex items-center gap-2 text-[#F4C542] font-black text-sm font-cinzel">
-                <Utensils className="w-5 h-5 text-[#F4C542]" />
-                <span>ANNADANAM SEVA</span>
-              </div>
-              <p className="text-xs text-[#C9B79C]">
-                Sponsor Mahaprasadam food distribution for thousands of devotees during Ganesh Mahotsav. (Any amount)
-              </p>
-              <span className="gold-button px-4 py-1.5 rounded-full text-[10px] font-black uppercase inline-block mt-2">
-                Donate Annadanam &rarr;
-              </span>
-            </button>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {POOJA_DATES.map((dayItem, idx) => (
+              <div
+                key={dayItem.id}
+                className={`temple-card rounded-3xl p-6 border-2 flex flex-col justify-between space-y-5 relative transition-all duration-300 hover:scale-[1.02] ${
+                  dayItem.id === 'day-2'
+                    ? 'border-[#D4AF37] bg-gradient-to-b from-[#7A1620]/70 to-[#160B08] shadow-[0_0_25px_rgba(212,175,55,0.3)]'
+                    : 'border-[#D4AF37]/40 bg-[#0D0705]/90 hover:border-[#F4C542]'
+                }`}
+              >
+                {/* Header Badge */}
+                <div className="flex justify-between items-start">
+                  <div className="space-y-0.5">
+                    <span className="text-[11px] font-black uppercase text-[#F4C542] font-cinzel tracking-wider">
+                      {dayItem.day}
+                    </span>
+                    <h4 className="text-xl font-black text-[#F7EFE1] font-cinzel">
+                      {dayItem.date}
+                    </h4>
+                  </div>
 
-            {/* Pooja Booking */}
-            <button
-              onClick={() => openDonation('Pooja Booking')}
-              className="bg-gradient-to-r from-[#7A1620] to-[#9C1F2E] border-2 border-[#D4AF37] p-5 rounded-2xl text-left space-y-2 hover:scale-[1.02] transition-transform shadow-xl relative"
-            >
-              <span className="absolute -top-3 right-4 bg-[#D4AF37] text-[#0D0705] text-[10px] font-black px-2 py-0.5 rounded-full uppercase shadow">
-                £116 FIXED SEVA
-              </span>
-              <div className="flex items-center gap-2 text-[#F4C542] font-black text-sm font-cinzel">
-                <Flame className="w-5 h-5 text-[#F4C542]" />
-                <span>POOJA BOOKING</span>
-              </div>
-              <p className="text-xs text-[#F7EFE1]">
-                Personalized Maha Ganapathi Archana, Priest Sankalpam with family name, and sacred Prasadam box.
-              </p>
-              <span className="gold-button px-4 py-1.5 rounded-full text-[10px] font-black uppercase inline-block mt-2">
-                Book Pooja (£116) &rarr;
-              </span>
-            </button>
+                  {dayItem.badge ? (
+                    <span className="bg-[#D4AF37] text-[#0D0705] text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow">
+                      {dayItem.badge}
+                    </span>
+                  ) : (
+                    <span className="bg-[#7A1620] text-[#F4C542] border border-[#D4AF37]/30 text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
+                      DAY {idx + 1}
+                    </span>
+                  )}
+                </div>
 
-            {/* Event Donations */}
-            <button
-              onClick={() => openDonation('Event Donations')}
-              className="bg-[#0D0705] border border-[#D4AF37]/40 hover:border-[#F4C542] p-5 rounded-2xl text-left space-y-2 hover:scale-[1.02] transition-transform group"
-            >
-              <div className="flex items-center gap-2 text-[#F4C542] font-black text-sm font-cinzel">
-                <Heart className="w-5 h-5 text-[#F4C542]" />
-                <span>EVENT DONATION</span>
+                {/* Day Details */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Flame className="w-4 h-4 text-[#F4C542] shrink-0" />
+                    <h5 className="text-base font-bold text-[#F4C542] font-cinzel leading-tight">
+                      {dayItem.title}
+                    </h5>
+                  </div>
+                  <p className="text-xs font-semibold text-[#F7EFE1]">
+                    {dayItem.theme}
+                  </p>
+                  <p className="text-[11px] text-[#C9B79C] leading-relaxed italic">
+                    ✦ {dayItem.blessing}
+                  </p>
+                </div>
+
+                {/* Card Action */}
+                <button
+                  onClick={() => onOpenPoojaBooking?.(dayItem.id)}
+                  className="gold-button w-full py-2.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+                >
+                  <Flame className="w-3.5 h-3.5 fill-current text-[#0D0705]" />
+                  <span>Book Pooja (£116)</span>
+                </button>
               </div>
-              <p className="text-xs text-[#C9B79C]">
-                Support Ganesh Mahotsav 6ft Idol installation, Mandap decoration, sound systems, and cultural stage.
-              </p>
-              <span className="gold-button px-4 py-1.5 rounded-full text-[10px] font-black uppercase inline-block mt-2">
-                Donate to Event &rarr;
-              </span>
-            </button>
+            ))}
           </div>
         </div>
+
 
         {/* Venue Info & Add to Calendar Bar */}
         <div className="temple-card rounded-3xl p-8 border-2 border-[#D4AF37]/50 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -121,7 +127,7 @@ export default function EventDetailsSection() {
               <span>Langley Community Mandap, Slough</span>
             </div>
             <p className="text-xs text-[#C9B79C]">
-              Easy access via Elizabeth Line (Langley Station) & M4 Junction 5. Ample parking available.
+              Easy access via Elizabeth Line (Langley Station) & M4 Junction 5. Ample parking available for families.
             </p>
           </div>
 
@@ -138,18 +144,18 @@ export default function EventDetailsSection() {
           </div>
         </div>
 
-        {/* Program Schedule & Map Grid */}
+        {/* Daily Program Aarti Schedule & Map Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* Schedule List */}
+          {/* Daily Schedule List */}
           <div className="lg:col-span-7 space-y-4">
             <h3 className="text-xl font-bold font-cinzel text-[#F4C542] flex items-center gap-2 uppercase tracking-wider">
               <Flame className="w-5 h-5 text-[#F4C542]" />
-              <span>Mahotsav Aarti & Puja Schedule</span>
+              <span>Daily Mahotsav Aarti & Puja Timings</span>
             </h3>
 
             <div className="space-y-3">
-              {schedule.map((item, idx) => (
+              {dailySchedule.map((item, idx) => (
                 <div key={idx} className="temple-card p-5 rounded-2xl border border-[#D4AF37]/30 flex items-start gap-4">
                   <div className="bg-[#7A1620] text-[#F4C542] px-3 py-1.5 rounded-xl font-black text-xs shrink-0 font-cinzel border border-[#D4AF37]/40">
                     {item.time}
@@ -186,13 +192,6 @@ export default function EventDetailsSection() {
         </div>
 
       </div>
-
-      {/* DONATION & POOJA MODAL */}
-      <DonationModal
-        isOpen={donateModalOpen}
-        onClose={() => setDonateModalOpen(false)}
-        initialCategory={selectedDonationCategory}
-      />
     </section>
   );
 }

@@ -31,7 +31,7 @@ import {
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-type Category = 'Annadanam' | 'Pooja Booking' | 'Event Donations';
+type Category = 'Annadanam' | 'Event Donations';
 type Step = 'details' | 'payment' | 'success';
 
 interface CheckoutFormProps {
@@ -80,8 +80,6 @@ function CheckoutForm({
             email: donorEmail,
           },
         },
-       
-        
       },
       redirect: 'if_required', // Avoid page redirect for card payments
     });
@@ -136,14 +134,12 @@ function CheckoutForm({
       </div>
 
       {/* Stripe Payment Element */}
-      {/* <div className="rounded-2xl overflow-hidden border border-[#D4AF37]/30"> */}
-        <PaymentElement
-          options={{
-            layout: 'tabs',
-            paymentMethodOrder: ['card', 'apple_pay', 'google_pay'],
-          }}
-        />
-      {/* </div> */}
+      <PaymentElement
+        options={{
+          layout: 'tabs',
+          paymentMethodOrder: ['card', 'apple_pay', 'google_pay'],
+        }}
+      />
 
       {/* Error message */}
       {paymentError && (
@@ -225,15 +221,11 @@ export default function DonationModal({
     }
   }, [isOpen]);
 
-  // Auto-select amount for Pooja Booking
   useEffect(() => {
-    if (category === 'Pooja Booking') {
-      setAmount(116);
-      setCustomAmount('');
-    } else if (amount === 116 && !customAmount) {
-      setAmount(50);
+    if (initialCategory) {
+      setCategory(initialCategory);
     }
-  }, [category]);
+  }, [initialCategory]);
 
   // Load publishable key and initialise Stripe.js once (on first open)
   useEffect(() => {
@@ -251,12 +243,10 @@ export default function DonationModal({
 
   // ── Derived values — must be above the early return so hook order is stable ──
   const getFinalAmount = useCallback(() => {
-    if (category === 'Pooja Booking') return 116;
     return customAmount ? parseFloat(customAmount) : amount;
-  }, [category, customAmount, amount]);
+  }, [customAmount, amount]);
 
   const getCauseName = useCallback(() => {
-    if (category === 'Pooja Booking') return 'Sacred Mahotsav Pooja Booking (£116 Fixed)';
     if (category === 'Annadanam') return 'Annadanam Community Prasadam Fund';
     return 'Slough Mahotsav Event & Cultural Support Fund';
   }, [category]);
@@ -347,9 +337,6 @@ export default function DonationModal({
   // ── Early return AFTER all hooks ──────────────────────────────────────────
   if (!isOpen) return null;
 
-
-
-
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
       <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-mitra-gold/40 relative max-h-[90vh] overflow-y-auto"
@@ -417,10 +404,10 @@ export default function DonationModal({
             </div>
             <div className="space-y-2">
               <h2 className="text-2xl font-black font-cinzel gold-foil-text">
-                LOGIN REQUIRED FOR POOJA & DONATIONS
+                LOGIN REQUIRED FOR DONATIONS
               </h2>
               <p className="text-xs text-[#C9B79C] max-w-sm mx-auto leading-relaxed">
-                Please sign in to your MITRA UK Member account to complete your sacred Pooja Booking (£116) or Annadanam donation.
+                Please sign in to your MITRA UK Member account to complete your donation and support community seva.
               </p>
             </div>
 
@@ -456,7 +443,7 @@ export default function DonationModal({
               </div>
               <div>
                 <h2 className="text-xl font-black font-cinzel gold-foil-text">
-                  DONATION & POOJA SEVA
+                  MAKE A DONATION
                 </h2>
                 <p className="text-xs text-[#C9B79C]">
                   MITRA UK & Mahotsav Seva Contributions
@@ -467,81 +454,65 @@ export default function DonationModal({
             {/* Category Selection */}
             <div>
               <label className="block text-xs font-bold text-[#F4C542] uppercase tracking-wider mb-2">
-                Select Donation / Seva Category
+                Select Donation Category
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 {(
                   [
-                    { key: 'Annadanam' as Category, label: 'Annadanam Donation', icon: <Utensils className="w-4 h-4 text-[#F4C542]" />, badge: undefined },
-                    { key: 'Pooja Booking' as Category, label: 'Pooja Booking', icon: <Flame className="w-4 h-4 text-[#F4C542]" />, badge: '£116 FIXED' },
-                    { key: 'Event Donations' as Category, label: 'Event Donations', icon: <Calendar className="w-4 h-4 text-[#F4C542]" />, badge: undefined },
-                  ] as Array<{ key: Category; label: string; icon: React.ReactNode; badge?: string }>
-                ).map(({ key, label, icon, badge }) => (
+                    { key: 'Annadanam' as Category, label: 'Annadanam Seva', icon: <Utensils className="w-4 h-4 text-[#F4C542]" />, desc: 'Sponsor Mahaprasadam food distribution' },
+                    { key: 'Event Donations' as Category, label: 'Event Support Fund', icon: <Calendar className="w-4 h-4 text-[#F4C542]" />, desc: 'Support 6ft idol, mandap & stage setup' },
+                  ] as Array<{ key: Category; label: string; icon: React.ReactNode; desc: string }>
+                ).map(({ key, label, icon, desc }) => (
                   <button
                     key={key}
                     type="button"
                     onClick={() => setCategory(key)}
-                    className={`py-2.5 px-2 rounded-xl text-xs font-bold transition-all border flex flex-col items-center gap-1 relative ${
+                    className={`py-3 px-3 rounded-2xl text-xs font-bold transition-all border flex flex-col items-start gap-1 relative text-left ${
                       category === key
-                        ? 'bg-[#7A1620] text-[#F4C542] border-[#D4AF37] shadow-lg'
+                        ? 'bg-[#7A1620] text-[#F4C542] border-[#D4AF37] shadow-lg ring-1 ring-[#F4C542]'
                         : 'bg-[#160B08] text-[#C9B79C] border-[#D4AF37]/20 hover:border-[#F4C542]'
                     }`}
                   >
-                    {badge && (
-                      <span className="absolute -top-2 bg-[#D4AF37] text-[#0D0705] text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase">
-                        {badge}
-                      </span>
-                    )}
-                    {icon}
-                    <span>{label}</span>
+                    <div className="flex items-center gap-1.5 font-cinzel font-black">
+                      {icon}
+                      <span className={category === key ? 'text-[#F4C542]' : 'text-[#F7EFE1]'}>{label}</span>
+                    </div>
+                    <p className="text-[10px] text-[#C9B79C] leading-snug">{desc}</p>
                   </button>
                 ))}
-
               </div>
             </div>
 
             {/* Amount Selection */}
-            {category === 'Pooja Booking' ? (
-              <div className="bg-[#160B08] p-4 rounded-2xl border-2 border-[#D4AF37]/60 space-y-1">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs font-bold text-[#C9B79C]">Pooja Booking Sankalpam:</span>
-                  <span className="text-xl font-black font-cinzel text-[#F4C542]">£116.00 GBP</span>
-                </div>
-                <p className="text-[11px] text-[#C9B79C] italic">
-                  Fixed Pooja Seva includes Special Archana, Name in Priest Sankalpam registry, and Mahaprasadam box.
-                </p>
+            <div>
+              <label className="block text-xs font-bold text-[#C9B79C] mb-2">
+                Select Donation Amount (GBP £ · Min £1)
+              </label>
+              <div className="grid grid-cols-4 gap-2 mb-3">
+                {[21, 51, 108, 251].map((amt) => (
+                  <button
+                    key={amt}
+                    type="button"
+                    onClick={() => { setAmount(amt); setCustomAmount(''); }}
+                    className={`py-2.5 rounded-xl text-xs font-black transition-all border ${
+                      amount === amt && !customAmount
+                        ? 'bg-[#7A1620] text-[#F4C542] border-[#D4AF37]'
+                        : 'bg-[#160B08] text-[#C9B79C] border-[#D4AF37]/20 hover:border-[#F4C542]'
+                    }`}
+                  >
+                    £{amt}
+                  </button>
+                ))}
               </div>
-            ) : (
-              <div>
-                <label className="block text-xs font-bold text-[#C9B79C] mb-2">
-                  Select Amount (GBP £ · Min £1)
-                </label>
-                <div className="grid grid-cols-4 gap-2 mb-3">
-                  {[21, 51, 108, 251].map((amt) => (
-                    <button
-                      key={amt}
-                      type="button"
-                      onClick={() => { setAmount(amt); setCustomAmount(''); }}
-                      className={`py-2.5 rounded-xl text-xs font-black transition-all border ${
-                        amount === amt && !customAmount
-                          ? 'bg-[#7A1620] text-[#F4C542] border-[#D4AF37]'
-                          : 'bg-[#160B08] text-[#C9B79C] border-[#D4AF37]/20 hover:border-[#F4C542]'
-                      }`}
-                    >
-                      £{amt}
-                    </button>
-                  ))}
-                </div>
-                <input
-                  type="number"
-                  min="1"
-                  placeholder="Or enter any amount above £1"
-                  value={customAmount}
-                  onChange={(e) => setCustomAmount(e.target.value)}
-                  className="w-full bg-[#0D0705] border border-[#D4AF37]/40 rounded-xl p-2.5 text-xs text-[#F7EFE1] focus:border-[#F4C542] focus:outline-none"
-                />
-              </div>
-            )}
+              <input
+                type="number"
+                min="1"
+                placeholder="Or enter any custom amount above £1"
+                value={customAmount}
+                onChange={(e) => setCustomAmount(e.target.value)}
+                className="w-full bg-[#0D0705] border border-[#D4AF37]/40 rounded-xl p-2.5 text-xs text-[#F7EFE1] focus:border-[#F4C542] focus:outline-none"
+              />
+            </div>
 
             {/* Donor Details */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -600,9 +571,7 @@ export default function DonationModal({
                 <>
                   <Heart className="w-4 h-4 fill-current text-[#0D0705]" />
                   <span>
-                    {category === 'Pooja Booking'
-                      ? 'Proceed to Pay £116 Pooja Seva'
-                      : `Proceed to Pay £${getFinalAmount()}.00`}
+                    Proceed to Pay £{getFinalAmount()}.00
                   </span>
                 </>
               )}
