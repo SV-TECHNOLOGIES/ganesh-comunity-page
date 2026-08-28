@@ -47,7 +47,7 @@ export default function Footer() {
                 <img
                   src="/assets/poster.jpg"
                   alt="MITRA UK Logo"
-                  className="w-full h-full object-cover rounded-full"
+                  className="w-full h-full object-cover rounded-full scale-[1.75]"
                 />
               </div>
               <span className="font-black text-lg font-cinzel text-[#F4C542] tracking-wider">

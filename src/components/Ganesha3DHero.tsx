@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { Sparkles, Flame, Heart, RotateCcw } from 'lucide-react';
+import { Sparkles, Flame, Heart, RotateCcw, ExternalLink } from 'lucide-react';
 
 interface Ganesha3DHeroProps {
   onBookPoojaClick?: () => void;
@@ -384,9 +385,9 @@ export default function Ganesha3DHero({
         {/* Temple 3D Loading Screen Overlay */}
         {!modelLoaded && (
           <div className="absolute inset-0 z-30 bg-[#0D0705]/95 backdrop-blur-md flex flex-col items-center justify-center space-y-4 animate-in fade-in duration-300">
-            <div className="relative w-20 h-20 rounded-full border-2 border-[#D4AF37]/40 flex items-center justify-center bg-[#160B08] p-2">
+            <div className="relative w-20 h-20 rounded-full border-2 border-[#D4AF37]/40 flex items-center justify-center bg-[#160B08] overflow-hidden">
               <div className="absolute inset-0 rounded-full border-2 border-dashed border-[#F4C542] animate-spin" style={{ animationDuration: '6s' }} />
-              <img src="/assets/poster.jpg" alt="Loading Bappa" className="w-full h-full object-cover rounded-full filter brightness-110" />
+              <img src="/assets/poster.jpg" alt="Loading Bappa" className="w-full h-full object-cover rounded-full filter brightness-110 scale-[1.75]" />
             </div>
             
             <div className="text-center space-y-2">
@@ -436,21 +437,47 @@ export default function Ganesha3DHero({
 
         {/* Action CTAs */}
         <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
-          <button
-            onClick={onBookPoojaClick}
-            className="gold-button px-8 py-3.5 rounded-full text-sm font-black uppercase tracking-wider flex items-center gap-2.5 shadow-[0_0_25px_rgba(212,175,55,0.4)] hover:scale-105 transition-all"
-          >
-            <Flame className="w-5 h-5 fill-current text-[#0D0705]" />
-            <span>Book Pooja (£116)</span>
-          </button>
+          {onBookPoojaClick && onDonateClick ? (
+            // ── Event page: show Pooja + Donate buttons ──────────────────────
+            <>
+              <button
+                onClick={onBookPoojaClick}
+                className="gold-button px-8 py-3.5 rounded-full text-sm font-black uppercase tracking-wider flex items-center gap-2.5 shadow-[0_0_25px_rgba(212,175,55,0.4)] hover:scale-105 transition-all"
+              >
+                <Flame className="w-5 h-5 fill-current text-[#0D0705]" />
+                <span>Book Pooja (£116)</span>
+              </button>
 
-          <button
-            onClick={onDonateClick}
-            className="maroon-button px-8 py-3.5 rounded-full text-sm font-black uppercase tracking-wider flex items-center gap-2.5 shadow-xl hover:scale-105 transition-all border border-[#D4AF37]/50"
-          >
-            <Heart className="w-5 h-5 text-[#F4C542] fill-current" />
-            <span>Make Donation</span>
-          </button>
+              <button
+                onClick={onDonateClick}
+                className="maroon-button px-8 py-3.5 rounded-full text-sm font-black uppercase tracking-wider flex items-center gap-2.5 shadow-xl hover:scale-105 transition-all border border-[#D4AF37]/50"
+              >
+                <Heart className="w-5 h-5 text-[#F4C542] fill-current" />
+                <span>Make Donation</span>
+              </button>
+            </>
+          ) : (
+            // ── Home page: show WhatsApp + View Event ─────────────────────────
+            <>
+              <a
+                href="https://chat.whatsapp.com/IVqirWWzM96IBNRfhSWGEd"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="gold-button px-8 py-3.5 rounded-full text-sm font-black uppercase tracking-wider flex items-center gap-2.5 shadow-[0_0_25px_rgba(212,175,55,0.4)] hover:scale-105 transition-all"
+              >
+                <img src="/assets/whatsapp.png" alt="WhatsApp" className="w-5 h-5 object-contain" />
+                <span>Join WhatsApp Group</span>
+              </a>
+
+              <Link
+                href="/ganesh-event-2026"
+                className="maroon-button px-8 py-3.5 rounded-full text-sm font-black uppercase tracking-wider flex items-center gap-2.5 shadow-xl hover:scale-105 transition-all border border-[#D4AF37]/50"
+              >
+                <ExternalLink className="w-5 h-5 text-[#F4C542]" />
+                <span>View Event</span>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Scroll Cue Bell */}

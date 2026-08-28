@@ -33,7 +33,7 @@ export default function SponsorRibbonBand() {
               <img
                 src="/assets/poster.jpg"
                 alt="MITRA UK Emblem"
-                className="w-full h-full object-cover rounded-full"
+                className="w-full h-full object-cover rounded-full scale-[1.75]"
               />
             </div>
             <span className="text-xs font-black font-cinzel text-[#F4C542] tracking-widest uppercase">

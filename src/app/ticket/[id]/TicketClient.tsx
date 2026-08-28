@@ -89,7 +89,9 @@ export default function TicketClient({ payment, qrDataUrl, ticketUrl }: TicketCl
             }} />
             <div className="relative">
               <div className="flex items-center justify-center gap-3 mb-2">
-                <img src="/assets/poster.jpg" alt="MITRA UK" className="w-10 h-10 rounded-full object-cover border-2 border-[#D4AF37]" />
+                <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#D4AF37] shrink-0">
+                  <img src="/assets/poster.jpg" alt="MITRA UK" className="w-full h-full object-cover scale-[1.75]" />
+                </div>
                 <div className="text-left">
                   <p className="text-[#F4C542] font-black text-lg tracking-widest">MITRA UK</p>
                   <p className="text-[#FFD87A] text-[9px] font-bold uppercase tracking-widest">Official Donation Receipt</p>
