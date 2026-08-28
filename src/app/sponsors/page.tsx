@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Award, ExternalLink, Send } from 'lucide-react';
+import { SPONSORS_DATA } from '@/data/sponsors';
 
 export default function SponsorsPage() {
   const [enquirySent, setEnquirySent] = useState(false);
@@ -14,16 +15,6 @@ export default function SponsorsPage() {
     e.preventDefault();
     setEnquirySent(true);
   };
-
-  const sponsors = [
-    { tier: 'Presented By', name: 'Biryanis', logo: '/assets/sponsers/Biryanies.jpeg' },
-    { tier: 'In Association With', name: 'ELE Entertainments', logo: '/assets/sponsers/ELE%20Enteratinments.jpeg' },
-    { tier: 'Partner', name: 'FT Light', logo: '/assets/sponsers/FT%20Light%20logo%20.png', blackLogoBg: true },
-    { tier: 'Community Partner', name: 'Langley Telugu Association', logo: '/assets/sponsers/Langley%20Telugu%20Association.jpeg' },
-    { tier: 'Partner', name: 'United Core', logo: '/assets/sponsers/United%20Core.jpeg' },
-    { tier: 'Partner', name: 'Willow Pharmacy', logo: '/assets/sponsers/Willow%20Pharmacy.jpeg' },
-    { tier: 'Partner', name: 'Wealthmax', logo: '/assets/sponsers/wealthmax%20logo%20High%20Resolution.%20(1).pdf' },
-  ];
 
   const renderLogo = (logo: string, name: string, blackLogoBg = false) => {
     const isPdf = logo.toLowerCase().endsWith('.pdf');
@@ -71,13 +62,13 @@ export default function SponsorsPage() {
 
       {/* Directory Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {sponsors.map((sp, idx) => (
-          <div key={idx} className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center text-center space-y-3">
+        {SPONSORS_DATA.map((sp) => (
+          <div key={sp.id || sp.name} className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center text-center space-y-3">
             <span className="bg-mitra-gold/15 text-mitra-gold-dark text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-[0.2em]">
               {sp.tier}
             </span>
             <div className="relative w-32 h-24 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-              {renderLogo(sp.logo, sp.name, sp.blackLogoBg)}
+              {renderLogo(sp.logoUrl, sp.name, sp.blackLogoBg)}
             </div>
             <h3 className="text-sm font-bold text-slate-900 dark:text-white">{sp.name}</h3>
           </div>

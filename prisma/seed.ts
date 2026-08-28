@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { SPONSORS_DATA } from '../src/data/sponsors';
 
 const prisma = new PrismaClient();
 
@@ -112,71 +113,15 @@ async function main() {
   // 2. Seed Sponsors
   await prisma.sponsor.deleteMany({});
   await prisma.sponsor.createMany({
-    data: [
-      {
-        id: 'sp-1',
-        name: 'Biryanis',
-        tier: 'Presented By',
-        logoUrl: '/assets/sponsers/Biryanies.jpeg',
-        websiteUrl: '#',
-        order: 1,
-        active: true,
-      },
-      {
-        id: 'sp-2',
-        name: 'ELE Entertainments',
-        tier: 'In Association With',
-        logoUrl: '/assets/sponsers/ELE%20Enteratinments.jpeg',
-        websiteUrl: '#',
-        order: 2,
-        active: true,
-      },
-      {
-        id: 'sp-3',
-        name: 'FT Light',
-        tier: 'Partner',
-        logoUrl: '/assets/sponsers/FT%20Light%20logo%20.png',
-        websiteUrl: '#',
-        order: 3,
-        active: true,
-      },
-      {
-        id: 'sp-4',
-        name: 'Langley Telugu Association',
-        tier: 'Community Partner',
-        logoUrl: '/assets/sponsers/Langley%20Telugu%20Association.jpeg',
-        websiteUrl: '#',
-        order: 4,
-        active: true,
-      },
-      {
-        id: 'sp-5',
-        name: 'United Core',
-        tier: 'Partner',
-        logoUrl: '/assets/sponsers/United%20Core.jpeg',
-        websiteUrl: '#',
-        order: 5,
-        active: true,
-      },
-      {
-        id: 'sp-6',
-        name: 'Willow Pharmacy',
-        tier: 'Partner',
-        logoUrl: '/assets/sponsers/Willow%20Pharmacy.jpeg',
-        websiteUrl: '#',
-        order: 6,
-        active: true,
-      },
-      {
-        id: 'sp-7',
-        name: 'Wealthmax',
-        tier: 'Partner',
-        logoUrl: '/assets/sponsers/wealthmax%20logo%20High%20Resolution.%20(1).pdf',
-        websiteUrl: '#',
-        order: 7,
-        active: true,
-      },
-    ],
+    data: SPONSORS_DATA.map((sp) => ({
+      id: sp.id,
+      name: sp.name,
+      tier: sp.tier,
+      logoUrl: sp.logoUrl,
+      websiteUrl: sp.websiteUrl || '#',
+      order: sp.order,
+      active: sp.active ?? true,
+    })),
   });
   console.log('✅ Sponsors seeded');
 

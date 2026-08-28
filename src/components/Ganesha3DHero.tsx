@@ -258,62 +258,6 @@ export default function Ganesha3DHero({
     divineGlow.position.set(0, 0.8, 1);
     scene.add(divineGlow);
 
-    // Mouse Drag / Orbit Interaction State
-    let isDragging = false;
-    let previousMousePosition = { x: 0, y: 0 };
-
-    const onMouseDown = (e: MouseEvent) => {
-      isDragging = true;
-      previousMousePosition = { x: e.clientX, y: e.clientY };
-    };
-
-    const onMouseMove = (e: MouseEvent) => {
-      if (!isDragging) return;
-      const deltaX = e.clientX - previousMousePosition.x;
-      const deltaY = e.clientY - previousMousePosition.y;
-
-      idolGroup.rotation.y += deltaX * 0.008;
-      idolGroup.rotation.x += deltaY * 0.004;
-
-      previousMousePosition = { x: e.clientX, y: e.clientY };
-    };
-
-    const onMouseUp = () => {
-      isDragging = false;
-    };
-
-    const domElem = renderer.domElement;
-    domElem.addEventListener('mousedown', onMouseDown);
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
-
-    // Touch Support for Mobile
-    const onTouchStart = (e: TouchEvent) => {
-      if (e.touches.length === 1) {
-        isDragging = true;
-        previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      }
-    };
-
-    const onTouchMove = (e: TouchEvent) => {
-      if (!isDragging || e.touches.length !== 1) return;
-      const deltaX = e.touches[0].clientX - previousMousePosition.x;
-      const deltaY = e.touches[0].clientY - previousMousePosition.y;
-
-      idolGroup.rotation.y += deltaX * 0.008;
-      idolGroup.rotation.x += deltaY * 0.004;
-
-      previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    };
-
-    const onTouchEnd = () => {
-      isDragging = false;
-    };
-
-    domElem.addEventListener('touchstart', onTouchStart, { passive: true });
-    window.addEventListener('touchmove', onTouchMove, { passive: true });
-    window.addEventListener('touchend', onTouchEnd);
-
     // Animation Loop
     let animationFrameId: number;
     const clock = new THREE.Clock();
@@ -322,10 +266,8 @@ export default function Ganesha3DHero({
       animationFrameId = requestAnimationFrame(animate);
       const elapsedTime = clock.getElapsedTime();
 
-      // Gentle auto-rotation when not dragging
-      if (!isDragging) {
-        idolGroup.rotation.y += 0.006;
-      }
+      // Gentle auto-rotation of Lord Ganesh
+      idolGroup.rotation.y += 0.006;
 
       // Particle floating loop
       const posAttr = particleGeo.attributes.position as THREE.BufferAttribute;
@@ -360,12 +302,6 @@ export default function Ganesha3DHero({
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', handleResize);
-      domElem.removeEventListener('mousedown', onMouseDown);
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
-      domElem.removeEventListener('touchstart', onTouchStart);
-      window.removeEventListener('touchmove', onTouchMove);
-      window.removeEventListener('touchend', onTouchEnd);
       if (currentMount.contains(renderer.domElement)) {
         currentMount.removeChild(renderer.domElement);
       }
@@ -420,7 +356,7 @@ export default function Ganesha3DHero({
           </div>
         )}
 
-        <div ref={mountRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
+        <div ref={mountRef} className="w-full h-full pointer-events-none select-none" />
       </div>
 
       {/* Hero Content Overlay */}
