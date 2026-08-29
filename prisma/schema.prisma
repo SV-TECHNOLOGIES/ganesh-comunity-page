@@ -28,17 +28,18 @@ model Event {
 }
 
 model EventRSVP {
-  id            String   @id @default(cuid())
-  eventId       String
-  event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  attendeeName  String
-  attendeeEmail String
-  attendeePhone String
-  ticketsCount  Int      @default(1)
-  adultsCount   Int      @default(1)
-  childrenCount Int      @default(0)
-  selectedDates String[] @default([])
-  createdAt     DateTime @default(now())
+  id             String   @id @default(cuid())
+  eventId        String
+  event          Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  attendeeName   String
+  attendeeEmail  String
+  attendeePhone  String
+  travellingFrom String?
+  ticketsCount   Int      @default(1)
+  adultsCount    Int      @default(1)
+  childrenCount  Int      @default(0)
+  selectedDates  String[] @default([])
+  createdAt      DateTime @default(now())
 }
 
 model Sponsor {

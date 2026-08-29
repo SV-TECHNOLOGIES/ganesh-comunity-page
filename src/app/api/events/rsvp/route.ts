@@ -8,6 +8,7 @@ export async function POST(request: Request) {
       attendeeName,
       attendeeEmail,
       attendeePhone,
+      travellingFrom,
       ticketsCount,
       adultsCount,
       childrenCount,
@@ -25,6 +26,7 @@ export async function POST(request: Request) {
     const children = Number(childrenCount) || 0;
     const totalTickets = Number(ticketsCount) || (adults + children);
     const datesArray: string[] = Array.isArray(selectedDates) ? selectedDates : ['14 Sep (Mon)'];
+    const travelOrigin = travellingFrom ? String(travellingFrom).trim() : null;
 
     try {
       // Ensure Event exists in DB to avoid foreign key violation
@@ -63,6 +65,7 @@ export async function POST(request: Request) {
           attendeeName,
           attendeeEmail,
           attendeePhone: attendeePhone || '',
+          travellingFrom: travelOrigin,
           ticketsCount: totalTickets,
           adultsCount: adults,
           childrenCount: children,
@@ -79,6 +82,7 @@ export async function POST(request: Request) {
           attendeeName: rsvp.attendeeName,
           attendeeEmail: rsvp.attendeeEmail,
           attendeePhone: rsvp.attendeePhone,
+          travellingFrom: rsvp.travellingFrom,
           ticketsCount: rsvp.ticketsCount,
           adultsCount: rsvp.adultsCount,
           childrenCount: rsvp.childrenCount,
@@ -97,6 +101,7 @@ export async function POST(request: Request) {
           attendeeName,
           attendeeEmail,
           attendeePhone,
+          travellingFrom: travelOrigin,
           ticketsCount: totalTickets,
           adultsCount: adults,
           childrenCount: children,

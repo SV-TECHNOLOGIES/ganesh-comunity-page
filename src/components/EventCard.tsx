@@ -76,13 +76,18 @@ export default function EventCard({ event, onRSVP }: { event: EventItem; onRSVP?
                 {event.date}
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-[#E65C00] shrink-0" />
-              <span>{event.time}</span>
+            <div className="flex items-start gap-2">
+              <Clock className="w-4 h-4 text-[#E65C00] shrink-0 mt-0.5" />
+              <span className="leading-snug">{event.time}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-[#E65C00] shrink-0" />
-              <span className="truncate">{event.venue}</span>
+            <div className="flex items-start gap-2">
+              <MapPin className="w-4 h-4 text-[#E65C00] shrink-0 mt-0.5" />
+              <div className="leading-snug">
+                <span className="font-medium text-[#3D1A00]">{event.venue}</span>
+                {event.address && (
+                  <span className="block text-[11px] text-[#6B3A2A]/80">{event.address}</span>
+                )}
+              </div>
             </div>
             {/* <div className="flex items-center gap-2 pt-1 text-[11px]">
               <Users className="w-3.5 h-3.5 text-[#E65C00] shrink-0" />

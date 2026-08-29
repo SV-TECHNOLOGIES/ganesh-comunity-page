@@ -30,6 +30,7 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
   const [attendeeName, setAttendeeName] = useState('');
   const [attendeeEmail, setAttendeeEmail] = useState('');
   const [attendeePhone, setAttendeePhone] = useState('');
+  const [travellingFrom, setTravellingFrom] = useState('');
   
   // Date selection state (supports multiple dates)
   const [selectedDates, setSelectedDates] = useState<string[]>(['14 Sep (Mon)']);
@@ -82,6 +83,7 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
           attendeeName,
           attendeeEmail,
           attendeePhone,
+          travellingFrom,
           ticketsCount: totalTickets,
           adultsCount,
           childrenCount,
@@ -137,7 +139,7 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
                 </span>
                 <span className="flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5 text-[#E65C00]" />
-                  <span>E Block, SLOUGH &amp; LANGLEY COLLEGE (SL3 8GW)</span>
+                  <span>E Block, SLOUGH &amp; LANGLEY COLLEGE Langley Road, SL3 8GW</span>
                 </span>
               </div>
             </div>
@@ -270,6 +272,27 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
                 </div>
               </div>
 
+              {/* Where are you travelling from? */}
+              <div>
+                <label className="block text-[#6B3A2A] font-semibold mb-1">
+                  Where are you travelling from? *
+                </label>
+                <div className="relative">
+                  <MapPin className="w-4 h-4 text-[#E65C00] absolute left-3.5 top-3" />
+                  <input
+                    type="text"
+                    required
+                    value={travellingFrom}
+                    onChange={(e) => setTravellingFrom(e.target.value)}
+                    placeholder="e.g. Slough, Langley, Hounslow, Reading, London"
+                    className="w-full bg-white border border-[#E65C00]/30 rounded-xl pl-10 pr-4 py-2.5 text-[#3D1A00] focus:border-[#E65C00] focus:outline-none placeholder:text-[#6B3A2A]/40"
+                  />
+                </div>
+                <p className="text-[10px] text-[#6B3A2A]/70 mt-1">
+                  Please enter your town/city (e.g., Slough, Langley, Hounslow, Reading, London).
+                </p>
+              </div>
+
               {/* Pass Summary Bar */}
               <div className="bg-[#FFF0E0] p-4 rounded-2xl border border-[#E65C00]/20 flex justify-between items-center text-xs">
                 <div>
@@ -320,6 +343,12 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
                 <span className="text-[#6B3A2A]">Attendee Name:</span>
                 <span className="font-bold text-[#3D1A00]">{attendeeName}</span>
               </div>
+              {travellingFrom && (
+                <div className="flex justify-between">
+                  <span className="text-[#6B3A2A]">Travelling From:</span>
+                  <span className="font-bold text-[#E65C00]">{travellingFrom}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-[#6B3A2A]">Pass Breakdown:</span>
                 <span className="font-bold text-[#E65C00]">{adultsCount} Adult(s), {childrenCount} Child(ren) ({totalTickets} Total)</span>

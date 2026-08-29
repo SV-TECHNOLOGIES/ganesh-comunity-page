@@ -26,6 +26,7 @@ interface RSVPRecord {
   attendeeName: string;
   attendeeEmail: string;
   attendeePhone: string;
+  travellingFrom?: string | null;
   ticketsCount: number;
   adultsCount: number;
   childrenCount: number;
@@ -153,6 +154,7 @@ export default function AdminEventsPage() {
       rsvp.attendeeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       rsvp.attendeeEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
       rsvp.attendeePhone.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (rsvp.travellingFrom && rsvp.travellingFrom.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (rsvp.selectedDates && rsvp.selectedDates.some(d => d.toLowerCase().includes(searchQuery.toLowerCase()))) ||
       (rsvp.event?.title && rsvp.event.title.toLowerCase().includes(searchQuery.toLowerCase()));
 
@@ -166,14 +168,15 @@ export default function AdminEventsPage() {
   // Export full detailed attendee CSV
   const exportAllRSVPsCSV = () => {
     let csvContent = 'data:text/csv;charset=utf-8,';
-    csvContent += 'RSVP ID,Event Title,Attendee Name,Email Address,Phone Number,Adults,Children,Total Passes,Selected Dates,Registered At\n';
+    csvContent += 'RSVP ID,Event Title,Attendee Name,Email Address,Phone Number,Travelling From,Adults,Children,Total Passes,Selected Dates,Registered At\n';
 
     filteredRsvps.forEach((r) => {
       const datesStr = (r.selectedDates || []).join(' | ').replace(/"/g, '""');
       const eventName = (r.event?.title || 'London Ganesh Mahotsav').replace(/"/g, '""');
+      const originStr = (r.travellingFrom || '').replace(/"/g, '""');
       const createdStr = new Date(r.createdAt).toLocaleString('en-GB');
 
-      csvContent += `"${r.id}","${eventName}","${r.attendeeName}","${r.attendeeEmail}","${r.attendeePhone}",${r.adultsCount || 1},${r.childrenCount || 0},${r.ticketsCount || 1},"${datesStr}","${createdStr}"\n`;
+      csvContent += `"${r.id}","${eventName}","${r.attendeeName}","${r.attendeeEmail}","${r.attendeePhone}","${originStr}",${r.adultsCount || 1},${r.childrenCount || 0},${r.ticketsCount || 1},"${datesStr}","${createdStr}"\n`;
     });
 
     const encodedUri = encodeURI(csvContent);
@@ -188,16 +191,17 @@ export default function AdminEventsPage() {
   const exportSingleEventCSV = (event: EventItem) => {
     const eventRsvps = rsvps.filter((r) => r.eventId === event.id);
     let csvContent = 'data:text/csv;charset=utf-8,';
-    csvContent += 'RSVP ID,Event Title,Attendee Name,Email Address,Phone Number,Adults,Children,Total Passes,Selected Dates,Registered At\n';
+    csvContent += 'RSVP ID,Event Title,Attendee Name,Email Address,Phone Number,Travelling From,Adults,Children,Total Passes,Selected Dates,Registered At\n';
 
     if (eventRsvps.length > 0) {
       eventRsvps.forEach((r) => {
         const datesStr = (r.selectedDates || []).join(' | ').replace(/"/g, '""');
+        const originStr = (r.travellingFrom || '').replace(/"/g, '""');
         const createdStr = new Date(r.createdAt).toLocaleString('en-GB');
-        csvContent += `"${r.id}","${event.title}","${r.attendeeName}","${r.attendeeEmail}","${r.attendeePhone}",${r.adultsCount || 1},${r.childrenCount || 0},${r.ticketsCount || 1},"${datesStr}","${createdStr}"\n`;
+        csvContent += `"${r.id}","${event.title}","${r.attendeeName}","${r.attendeeEmail}","${r.attendeePhone}","${originStr}",${r.adultsCount || 1},${r.childrenCount || 0},${r.ticketsCount || 1},"${datesStr}","${createdStr}"\n`;
       });
     } else {
-      csvContent += `"${event.id}","${event.title}","Summary Record","","Total RSVPs: ${event.rsvpCount}",,,${event.rsvpCount},"${event.date}",""\n`;
+      csvContent += `"${event.id}","${event.title}","Summary Record","","","",,,${event.rsvpCount},"${event.date}",""\n`;
     }
 
     const encodedUri = encodeURI(csvContent);
@@ -561,6 +565,12 @@ export default function AdminEventsPage() {
                       {/* Attendee Name & Pass ID */}
                       <td className="p-4">
                         <div className="font-bold text-white text-sm">{rsvp.attendeeName}</div>
+                        {rsvp.travellingFrom && (
+                          <div className="text-[11px] text-amber-300 flex items-center gap-1 mt-0.5 font-semibold">
+                            <MapPin className="w-3 h-3 text-mitra-gold shrink-0" />
+                            <span>From: {rsvp.travellingFrom}</span>
+                          </div>
+                        )}
                         <div className="text-[10px] font-mono text-mitra-gold flex items-center gap-1 mt-0.5">
                           <Ticket className="w-3 h-3 text-mitra-gold shrink-0" />
                           <span>{rsvp.id}</span>
