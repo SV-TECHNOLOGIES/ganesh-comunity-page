@@ -57,16 +57,19 @@ export interface CharityCase {
 }
 
 export interface Member {
-  id: string; // MITRA-MEM-XXXX
+  id: string; // MITRA-MEM-XXXX or cuid
   name: string;
+  fullName?: string;
   email: string;
   phone: string;
-  tier: 'Life Member' | 'Annual Member' | 'Volunteer';
-  status: 'Active' | 'Pending Review' | 'Expired';
-  startDate: string;
-  expiryDate: string;
-  address: string;
-  profession?: string;
+  tier: string;
+  role?: string;
+  status: string;
+  startDate?: string | null;
+  expiryDate?: string | null;
+  address?: string | null;
+  profession?: string | null;
+  createdAt?: string;
 }
 
 export interface DonationRecord {

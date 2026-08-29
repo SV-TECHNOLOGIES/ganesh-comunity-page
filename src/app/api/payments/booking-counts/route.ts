@@ -10,12 +10,15 @@ export async function GET() {
       where: {
         status: 'Completed',
         OR: [
+          { donationType: 'pooja' },
+          { poojaDate: { not: null } },
           { description: { contains: 'Pooja Booking' } },
           { description: { contains: 'Pooja Seva' } }
         ]
       },
       select: {
-        description: true
+        description: true,
+        poojaDate: true,
       }
     });
 
@@ -35,8 +38,13 @@ export async function GET() {
       counts[d] = 0;
     });
 
-    // Count occurrences by parsing the description string
+    // Count occurrences by poojaDate column or parsing description string
     payments.forEach(p => {
+      if (p.poojaDate && counts[p.poojaDate] !== undefined) {
+        counts[p.poojaDate] += 1;
+        return;
+      }
+
       const desc = p.description || '';
       for (const d of dates) {
         if (desc.includes(d)) {

@@ -315,6 +315,9 @@ export default function DonationModal({
           customerEmail: donorEmail,
           description: getCauseName(),
           paymentMethod: 'Stripe Card',
+          eventId: 'evt-ganesh-chaturthi',
+          eventName: 'London Ganesh Mahotsav 2026',
+          donationType: category.toLowerCase().includes('annadanam') ? 'anadanam' : 'event donation',
         }),
       });
 

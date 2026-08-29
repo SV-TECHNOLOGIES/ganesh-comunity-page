@@ -129,6 +129,15 @@ export async function POST(req: NextRequest) {
                 paymentMethod: meta.paymentMethod || 'Stripe',
                 stripePaymentIntentId: pi.id,
                 memberId: resolvedMemberId,
+                eventId: meta.eventId || null,
+                eventName: meta.eventName || null,
+                donationType: meta.donationType ? String(meta.donationType).toLowerCase().trim() : null,
+                poojaDate: meta.poojaDate || null,
+                poojaDay: meta.poojaDay || null,
+                poojaTitle: meta.poojaTitle || null,
+                gotram: meta.gotram || null,
+                familyMembers: meta.familyMembers || null,
+                primaryDevoteeName: meta.primaryDevoteeName || meta.customerName || null,
               },
             });
           }

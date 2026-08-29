@@ -133,8 +133,23 @@ model Payment {
   stripePaymentIntentId String?
   memberId              String?
   member                Member?  @relation(fields: [memberId], references: [id], onDelete: SetNull)
+
+  // ── Event & Donation Classification (flexible string, no enum) ─────────
+  eventId               String?  // e.g. "evt-ganesh-chaturthi"
+  eventName             String?  // e.g. "London Ganesh Mahotsav 2026"
+  donationType          String?  // e.g. "pooja", "anadanam", "event donation", "membership", "general"
+
+  // ── Sacred Pooja & Devotee Sankalpam Details ───────────────────────────
+  poojaDate             String?  // e.g. "13th Sep"
+  poojaDay              String?  // e.g. "Sunday"
+  poojaTitle            String?  // e.g. "Ganapathi Agamana"
+  gotram                String?  // e.g. "Kasyapa"
+  familyMembers         String?  // e.g. "Priya (Rohini), Aryan (Revathi)"
+  specialWishes         String?  // Special prayer / wish notes
+  primaryDevoteeName    String?  // Yajamani name
+
   createdAt             DateTime @default(now())
-  // updatedAt  DateTime @updatedAt
+  // updatedAt          DateTime @updatedAt
 }
 
 model PaymentSettings {

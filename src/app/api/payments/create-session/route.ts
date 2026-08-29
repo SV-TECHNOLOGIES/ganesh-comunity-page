@@ -20,6 +20,16 @@ export async function POST(request: Request) {
       customerPhone,
       description,
       paymentMethod,
+      eventId,
+      eventName,
+      donationType,
+      poojaDate,
+      poojaDay,
+      poojaTitle,
+      gotram,
+      familyMembers,
+      specialWishes,
+      primaryDevoteeName,
     } = await request.json();
 
     if (!amount || !customerName || !customerEmail) {
@@ -35,18 +45,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Not authenticated.' }, { status: 401 });
     }
 
-        const payload = verifyToken(token);
+    const payload = verifyToken(token);
     if (!payload || !payload.id) {
       return NextResponse.json({ success: false, error: 'Invalid session.' }, { status: 401 });
     }
 
     const userId = payload.id as string;
-    const userEmail = payload.email as string | undefined;
     const userRole = payload.role as string | undefined;
-    if(userRole === 'Admin') {
+    if (userRole === 'Admin') {
       return NextResponse.json({ success: false, error: 'Admin cannot make Donation themselves.' }, { status: 401 });
     }
-    
 
     const numAmount = Number(amount);
     if (isNaN(numAmount) || numAmount < 0.5) {
@@ -89,11 +97,6 @@ export async function POST(request: Request) {
       apiVersion: '2026-07-29.dahlia',
     });
 
-
-    // ── Resolve memberId from auth token (primary source) ───────────────────
-    // Strategy: use the JWT auth token id directly — this is the authoritative
-    // identity. Email lookup is NOT used here to avoid mismatches.
-    // If the user is not logged in (guest payment), memberId stays null.
     let memberId = userId;
     if (!memberId) {
       return NextResponse.json(
@@ -102,10 +105,9 @@ export async function POST(request: Request) {
       );
     }
 
-
     // ── Create Stripe PaymentIntent ───────────────────────────────────────────
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(numAmount * 100), // Stripe uses pence (smallest currency unit)
+      amount: Math.round(numAmount * 100), // Stripe uses pence
       currency: 'gbp',
       automatic_payment_methods: { enabled: true },
       description: description || 'MITRA Community Contribution',
@@ -115,13 +117,21 @@ export async function POST(request: Request) {
         customerPhone: customerPhone || '',
         paymentMethod: paymentMethod || 'Stripe Card',
         memberId: memberId || '',
+        eventId: eventId || '',
+        eventName: eventName || '',
+        donationType: donationType || '',
+        poojaDate: poojaDate || '',
+        poojaDay: poojaDay || '',
+        poojaTitle: poojaTitle || '',
+        gotram: gotram || '',
+        familyMembers: familyMembers || '',
+        primaryDevoteeName: primaryDevoteeName || customerName,
         source: 'mitra-website',
       },
       receipt_email: customerEmail,
     });
 
     // ── Persist a Pending Payment record ─────────────────────────────────────
-    // Status will be updated to 'Completed' or 'Failed' via the webhook
     try {
       await prisma.payment.create({
         data: {
@@ -135,12 +145,20 @@ export async function POST(request: Request) {
           paymentMethod: paymentMethod || 'Stripe Card',
           stripePaymentIntentId: paymentIntent.id,
           memberId,
+          eventId: eventId || null,
+          eventName: eventName || null,
+          donationType: donationType ? String(donationType).toLowerCase().trim() : null,
+          poojaDate: poojaDate || null,
+          poojaDay: poojaDay || null,
+          poojaTitle: poojaTitle || null,
+          gotram: gotram || null,
+          familyMembers: familyMembers || null,
+          specialWishes: specialWishes || null,
+          primaryDevoteeName: primaryDevoteeName || customerName,
         },
       });
     } catch (dbErr) {
       console.error('Failed to persist pending payment record:', dbErr);
-      // Do not fail the request — the PaymentIntent was already created in Stripe.
-      // The webhook will upsert the record on confirmation.
     }
 
     return NextResponse.json({

@@ -399,8 +399,11 @@ export default function PoojaBookingModal({
   const poojaAmount = 116;
 
   const getCauseDescription = useCallback(() => {
-    return `Pooja Booking: ${selectedDateObj.date} (${selectedDateObj.title}) - £116 Fixed | Gotram: ${gotram || 'N/A'} | Devotee: ${devoteeName}`;
-  }, [selectedDateObj, gotram, devoteeName]);
+    let desc = `Pooja Booking: ${selectedDateObj.date} (${selectedDateObj.title}) - £116 Fixed | Devotee: ${devoteeName}`;
+    if (gotram) desc += ` | Gotram: ${gotram}`;
+    if (familyMembers) desc += ` | Priest Sankalpam: ${familyMembers}`;
+    return desc;
+  }, [selectedDateObj, gotram, devoteeName, familyMembers]);
 
   const handleDetailsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -427,6 +430,16 @@ export default function PoojaBookingModal({
           customerPhone: phone,
           description: getCauseDescription(),
           paymentMethod: 'Stripe Card',
+          eventId: 'evt-ganesh-chaturthi',
+          eventName: 'London Ganesh Mahotsav 2026',
+          donationType: 'pooja',
+          poojaDate: selectedDateObj.date,
+          poojaDay: selectedDateObj.day,
+          poojaTitle: selectedDateObj.title,
+          gotram: gotram ? gotram.trim() : null,
+          familyMembers: familyMembers ? familyMembers.trim() : null,
+          specialWishes: specialWishes ? specialWishes.trim() : null,
+          primaryDevoteeName: devoteeName ? devoteeName.trim() : null,
         }),
       });
 

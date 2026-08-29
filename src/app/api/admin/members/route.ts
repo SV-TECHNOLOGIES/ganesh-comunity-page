@@ -7,8 +7,16 @@ export async function GET() {
     const members = await prisma.member.findMany({
       orderBy: { createdAt: 'desc' },
     });
-    return NextResponse.json({ success: true, source: 'prisma', data: members });
-  } catch {
+    const normalized = members.map((m) => ({
+      ...m,
+      name: m.fullName || '',
+      fullName: m.fullName || '',
+      startDate: m.startDate || (m.createdAt ? new Date(m.createdAt).toISOString().split('T')[0] : '2026-01-01'),
+      expiryDate: m.expiryDate || 'Lifetime',
+    }));
+    return NextResponse.json({ success: true, source: 'prisma', data: normalized });
+  } catch (error) {
+    console.error('[ADMIN MEMBERS API] Error:', error);
     return NextResponse.json({ success: true, source: 'static', data: INITIAL_MEMBERS });
   }
 }
