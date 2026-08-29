@@ -35,10 +35,8 @@ export default function EventDetailsSection({
   };
 
   const dailySchedule = [
-    { time: '09:00 AM', event: 'Daily Ganapathi Abhishekam & Archana', desc: 'Vedic chants and ritual sanctum offerings.' },
-    { time: '12:30 PM', event: 'Grand Afternoon Aarti & Mahaprasadam', desc: 'Devotional bhajans and community lunch distribution.' },
-    { time: '05:30 PM', event: 'Cultural Performances & Kuchipudi Showcase', desc: 'Classical dance and Telugu devotional songs by UK youth.' },
-    { time: '08:00 PM', event: 'Maha Mangala Aarti & Evening Darshan', desc: 'Illumination ceremony with hundreds of oil lamps.' },
+    { time: 'Mon – Fri: 6:00 PM – 9:00 PM', event: 'Evening Darshan & Maha Aarti', desc: 'Vedic chants, ritual sanctum offerings, cultural recitals, and Maha Mangala Aarti.' },
+    { time: 'Saturday: 11:00 AM – 3:00 PM', event: 'Weekend Darshan, Cultural Fest & Mahaprasadam', desc: 'Grand daytime Darshan, Kuchipudi classical dance, bhajans, and community food distribution.' },
   ];
 
   return (
@@ -57,7 +55,7 @@ export default function EventDetailsSection({
           </h2>
 
           <p className="max-w-2xl mx-auto text-xs sm:text-sm text-[#6B3A2A] leading-relaxed">
-            Experience 7 divine days of Darshan, Vedic rituals, and cultural celebrations from 13th to 19th September 2026 in Langley, Slough.
+            Experience 7 divine days of Darshan, Vedic rituals, and cultural celebrations from 13th to 19th September 2026 at E Block, SLOUGH &amp; LANGLEY COLLEGE, Langley Road, SL3 8GW.
           </p>
         </div>
 
@@ -158,16 +156,16 @@ export default function EventDetailsSection({
           <div className="space-y-3 text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-2 text-[#E65C00] font-black text-sm uppercase tracking-wider font-cinzel">
               <MapPin className="w-5 h-5" />
-              <span>Langley Community Mandap, Slough</span>
+              <span>E Block, SLOUGH &amp; LANGLEY COLLEGE</span>
             </div>
             <p className="text-xs text-[#6B3A2A]">
-              Easy access via Elizabeth Line (Langley Station) &amp; M4 Junction 5. Ample parking available for families.
+              Address: Langley Road, SL3 8GW · Easy access via Elizabeth Line (Langley Station) &amp; M4 Junction 5. Ample parking available for families.
             </p>
           </div>
 
           <div className="flex flex-wrap gap-3">
             <a
-              href="https://maps.google.com/?q=Langley+Slough+UK"
+              href="https://maps.google.com/?q=Langley+Road+SL3+8GW+Slough+UK"
               target="_blank"
               rel="noopener noreferrer"
               className="maroon-button px-6 py-3 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-2 border border-[#E65C00]/20"

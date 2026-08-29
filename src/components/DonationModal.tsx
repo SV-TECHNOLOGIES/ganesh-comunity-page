@@ -188,7 +188,7 @@ export default function DonationModal({
 
   // ── Form state ───────────────────────────────────────────────────────────
   const [category, setCategory] = useState<Category>(initialCategory);
-  const [amount, setAmount] = useState<number>(50);
+  const [amount, setAmount] = useState<number>(0);
   const [customAmount, setCustomAmount] = useState<string>('');
   const [donorName, setDonorName] = useState('');
   const [donorEmail, setDonorEmail] = useState('');
@@ -570,7 +570,7 @@ export default function DonationModal({
                 {(
                   [
                     { key: 'Annadanam' as Category, label: 'Annadanam Seva', icon: <Utensils className="w-4 h-4 text-[#E65C00]" />, desc: 'Sponsor Mahaprasadam food distribution' },
-                    { key: 'Event Donations' as Category, label: 'Event Support Fund', icon: <Calendar className="w-4 h-4 text-[#E65C00]" />, desc: 'Support 6ft idol, mandap &amp; stage setup' },
+                    { key: 'Event Donations' as Category, label: 'Event Donation', icon: <Calendar className="w-4 h-4 text-[#E65C00]" />, desc: 'For Idol Purchase, Puja Samagri, Flower Decor, Fruits' },
                   ] as Array<{ key: Category; label: string; icon: React.ReactNode; desc: string }>
                 ).map(({ key, label, icon, desc }) => (
                   <button
@@ -669,7 +669,7 @@ export default function DonationModal({
 
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || !getFinalAmount() || getFinalAmount() <= 0}
               className="gold-button w-full py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {submitting ? (
@@ -677,13 +677,15 @@ export default function DonationModal({
                   <Loader2 className="w-4 h-4 text-white animate-spin" />
                   <span>Preparing Secure Payment...</span>
                 </>
-              ) : (
+              ) : getFinalAmount() && getFinalAmount() > 0 ? (
                 <>
                   <Heart className="w-4 h-4 fill-current text-white" />
                   <span>
                     Proceed to Pay £{getFinalAmount()}.00
                   </span>
                 </>
+              ) : (
+                <span>Please enter donation amount</span>
               )}
             </button>
           </form>

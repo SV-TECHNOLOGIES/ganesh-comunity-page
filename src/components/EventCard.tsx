@@ -84,10 +84,10 @@ export default function EventCard({ event, onRSVP }: { event: EventItem; onRSVP?
               <MapPin className="w-4 h-4 text-[#E65C00] shrink-0" />
               <span className="truncate">{event.venue}</span>
             </div>
-            <div className="flex items-center gap-2 pt-1 text-[11px]">
+            {/* <div className="flex items-center gap-2 pt-1 text-[11px]">
               <Users className="w-3.5 h-3.5 text-[#E65C00] shrink-0" />
               <span>{count} / {event.capacity} Confirmed Attendees</span>
-            </div>
+            </div> */}
           </div>
 
           {/* Card Buttons */}

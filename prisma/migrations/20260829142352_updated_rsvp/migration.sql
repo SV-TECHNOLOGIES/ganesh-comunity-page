@@ -1,0 +1,19 @@
+-- AlterTable
+ALTER TABLE "EventRSVP" ADD COLUMN     "adultsCount" INTEGER NOT NULL DEFAULT 1,
+ADD COLUMN     "childrenCount" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "selectedDates" TEXT[] DEFAULT ARRAY[]::TEXT[];
+
+-- CreateTable
+CREATE TABLE "OTP" (
+    "id" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "code" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "OTP_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE INDEX "OTP_email_type_idx" ON "OTP"("email", "type");

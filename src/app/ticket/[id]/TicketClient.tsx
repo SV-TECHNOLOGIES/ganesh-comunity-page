@@ -89,8 +89,8 @@ export default function TicketClient({ payment, qrDataUrl, ticketUrl }: TicketCl
             }} />
             <div className="relative">
               <div className="flex items-center justify-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#E65C00] shrink-0">
-                  <img src="/assets/poster.jpg" alt="MITRA UK" className="w-full h-full object-cover scale-[1.75]" />
+                <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#E65C00] shrink-0 bg-white p-0.5 flex items-center justify-center">
+                  <img src="/assets/favicon.ico" alt="MITRA UK" className="w-full h-full object-contain" />
                 </div>
                 <div className="text-left">
                   <p className="text-[#3D1A00] font-black text-lg tracking-widest">MITRA UK</p>

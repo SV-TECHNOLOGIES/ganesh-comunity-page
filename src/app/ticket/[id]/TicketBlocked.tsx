@@ -80,9 +80,9 @@ export default function TicketBlocked({
         <div className="bg-gradient-to-r from-[#FFF8F0] via-white to-[#FFF8F0] px-8 py-6 text-center border-b border-[#E65C00]/20">
           <div className="flex items-center justify-center gap-3">
             <img
-              src="/assets/poster.jpg"
+              src="/assets/favicon.ico"
               alt="MITRA UK"
-              className="w-9 h-9 rounded-full object-cover border-2 border-[#E65C00]"
+              className="w-9 h-9 rounded-full object-contain border-2 border-[#E65C00] bg-white p-0.5"
             />
             <div className="text-left">
               <p className="text-[#3D1A00] font-black text-base tracking-widest">MITRA UK</p>

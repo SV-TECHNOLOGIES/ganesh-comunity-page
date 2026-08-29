@@ -57,7 +57,7 @@ export default function Header() {
                 LONDON GANESH MAHOTSAV 2026
               </span>
               <span className="hidden sm:inline text-[#FFF0DD]">
-                14th September 2026 · Langley, Slough
+                13th – 19th September 2026 · E Block, SLOUGH &amp; LANGLEY COLLEGE, Langley Road, SL3 8GW
               </span>
             </div>
 
@@ -96,11 +96,11 @@ export default function Header() {
           
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-16 h-16 rounded-full overflow-hidden shrink-0 ring-2 ring-[#E65C00]/30 group-hover:ring-[#E65C00] transition-all">
+            <div className="w-14 h-14 rounded-full overflow-hidden shrink-0 ring-2 ring-[#E65C00]/30 group-hover:ring-[#E65C00] transition-all bg-white p-1 flex items-center justify-center">
               <img
-                src="/assets/poster.jpg"
+                src="/assets/favicon.ico"
                 alt="MITRA UK Logo"
-                className="w-full h-full object-cover rounded-full scale-[1.75]"
+                className="w-full h-full object-contain rounded-full"
               />
             </div>
             <div>

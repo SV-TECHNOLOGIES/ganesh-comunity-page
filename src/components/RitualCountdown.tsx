@@ -101,9 +101,8 @@ export default function RitualCountdown() {
             <div className="flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold text-[#6B3A2A]">
               <Calendar className="w-4 h-4 text-[#E65C00]" />
               <span>14th September 2026 (Ganesh Chaturthi)</span>
-              <span className="text-[#E65C00]">•</span>
               <MapPin className="w-4 h-4 text-[#E65C00]" />
-              <span>Langley, Slough, United Kingdom</span>
+              <span>E Block, SLOUGH &amp; LANGLEY COLLEGE, Langley Road, SL3 8GW</span>
             </div>
           </div>
 

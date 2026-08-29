@@ -19,7 +19,7 @@ export default function Footer() {
               LONDON'S LARGEST MAHA GANAPATHI MAHOTSAV 2026
             </h3>
             <p className="text-xs text-[#FFD4A0] max-w-xl">
-              14th September 2026 · Langley, Slough. Join thousands of devotees celebrating culture, unity, and tradition.
+              13th – 19th September 2026 · E Block, SLOUGH &amp; LANGLEY COLLEGE, Langley Road, SL3 8GW. Join thousands of devotees celebrating culture, unity, and tradition.
             </p>
           </div>
 
@@ -42,11 +42,11 @@ export default function Footer() {
           {/* Column 1: Organizers Info */}
           <div className="space-y-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full border border-[#E65C00]/60 overflow-hidden shrink-0">
+              <div className="w-8 h-8 rounded-full border border-[#E65C00]/60 overflow-hidden shrink-0 bg-white p-0.5 flex items-center justify-center">
                 <img
-                  src="/assets/poster.jpg"
+                  src="/assets/favicon.ico"
                   alt="MITRA UK Logo"
-                  className="w-full h-full object-cover rounded-full scale-[1.75]"
+                  className="w-full h-full object-contain rounded-full"
                 />
               </div>
               <span className="font-black text-lg font-cinzel text-[#FF9A3C] tracking-wider">

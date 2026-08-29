@@ -23,19 +23,25 @@ export default function AdminDashboardPage() {
     { id: '4', eventName: 'membership_signup', path: '/membership', timestamp: '09:15 AM, Today' },
   ]);
 
+  const [rsvpsCount, setRsvpsCount] = useState(0);
+
   useEffect(() => {
     // Fetch live counts from API if available
     Promise.allSettled([
       fetch('/api/admin/members').then(r => r.json()),
       fetch('/api/admin/events').then(r => r.json()),
       fetch('/api/admin/charity-cases').then(r => r.json()),
-    ]).then(([membersRes, eventsRes, casesRes]) => {
+      fetch('/api/admin/rsvps').then(r => r.json()),
+    ]).then(([membersRes, eventsRes, casesRes, rsvpsRes]) => {
       setStats(prev => ({
         ...prev,
         membersCount: membersRes.status === 'fulfilled' && membersRes.value.data ? membersRes.value.data.length : prev.membersCount,
         eventsCount: eventsRes.status === 'fulfilled' && eventsRes.value.data ? eventsRes.value.data.length : prev.eventsCount,
         charityCasesCount: casesRes.status === 'fulfilled' && casesRes.value.data ? casesRes.value.data.length : prev.charityCasesCount,
       }));
+      if (rsvpsRes.status === 'fulfilled' && Array.isArray(rsvpsRes.value.data)) {
+        setRsvpsCount(rsvpsRes.value.data.length);
+      }
     });
   }, []);
 
@@ -86,8 +92,8 @@ export default function AdminDashboardPage() {
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Upcoming Events</span>
             <Calendar className="w-5 h-5" />
           </div>
-          <div className="text-3xl font-black text-white">{stats.eventsCount}</div>
-          <span className="text-[10px] text-slate-400 block">Ugadi & Summer Fest Active</span>
+          <div className="text-3xl font-black text-white">{stats.eventsCount} Events</div>
+          <span className="text-[10px] text-emerald-400 font-semibold block">{rsvpsCount} Total RSVP Registrations in DB</span>
         </div>
 
         <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-2">
