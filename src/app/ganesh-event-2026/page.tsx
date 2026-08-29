@@ -92,8 +92,8 @@ export default function GaneshEvent2026Page() {
       {/* 6. MEDIA & TEASER GALLERY */}
       <MediaTeaserSection />
 
-      {/* 7. GET INVOLVED — OFFERING PLAQUES & SPONSORSHIP */}
-      <OfferingPlaques onSponsorClick={() => openDonation('Event Donations')} />
+      {/* 7. GET INVOLVED — OFFERING PLAQUES & SPONSORSHIP (EMAIL INQUIRY) */}
+      <OfferingPlaques />
 
       {/* 8. BROUGHT TO YOU BY — SPONSOR RIBBON BAND */}
       <SponsorRibbonBand />

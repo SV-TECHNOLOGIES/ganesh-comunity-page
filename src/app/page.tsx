@@ -23,7 +23,7 @@ export default function HomePage() {
       {/* 3. MEDIA & TEASER GALLERY */}
       <MediaTeaserSection />
 
-      {/* 4. GET INVOLVED — OFFERING PLAQUES */}
+      {/* 4. GET INVOLVED — OFFERING PLAQUES & SPONSOR EMAIL INQUIRY */}
       <OfferingPlaques />
 
       {/* 5. BROUGHT TO YOU BY — SPONSOR RIBBON BAND */}

@@ -7,13 +7,40 @@ import { SPONSORS_DATA } from '@/data/sponsors';
 
 export default function SponsorsPage() {
   const [enquirySent, setEnquirySent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [company, setCompany] = useState('');
   const [contactName, setContactName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
 
-  const handleSponsorSubmit = (e: React.FormEvent) => {
+  const handleSponsorSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setEnquirySent(true);
+    setSubmitting(true);
+
+    try {
+      const res = await fetch('/api/sponsors/inquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          company,
+          contactName,
+          email,
+          phone,
+          tier: 'Corporate Sponsorship Lead',
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setEnquirySent(true);
+      } else {
+        alert(data.error || 'Failed to submit sponsor enquiry');
+      }
+    } catch {
+      alert('Error connecting to server. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const renderLogo = (logo: string, name: string, blackLogoBg = false) => {
@@ -112,7 +139,7 @@ export default function SponsorsPage() {
                 />
               </div>
               <div>
-                <label className="block font-bold text-slate-300 mb-1">Email Address</label>
+                <label className="block font-bold text-slate-300 mb-1">Email Address *</label>
                 <input
                   type="email"
                   required
@@ -123,11 +150,22 @@ export default function SponsorsPage() {
                 />
               </div>
             </div>
+            <div>
+              <label className="block font-bold text-slate-300 mb-1">Phone / WhatsApp Number</label>
+              <input
+                type="tel"
+                placeholder="+44 7900 123456"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white"
+              />
+            </div>
             <button
               type="submit"
-              className="w-full bg-mitra-gold hover:bg-mitra-gold-dark text-mitra-navy font-black py-3 rounded-xl transition-all shadow"
+              disabled={submitting}
+              className="w-full bg-mitra-gold hover:bg-mitra-gold-dark text-mitra-navy font-black py-3.5 rounded-xl transition-all shadow disabled:opacity-60"
             >
-              Submit Sponsor Lead Enquiry
+              {submitting ? 'Sending Sponsor Enquiry via Email...' : 'Submit Sponsor Lead Enquiry via Email'}
             </button>
           </form>
         )}

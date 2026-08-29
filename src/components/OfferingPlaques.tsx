@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { MessageCircle, Heart, HandHeart, Sparkles, X, CheckCircle } from 'lucide-react';
-
 import { SITE_CONFIG } from '@/config/site-config';
+import SponsorInquiryModal from '@/components/SponsorInquiryModal';
 
 interface OfferingPlaquesProps {
   onSponsorClick?: () => void;
@@ -11,6 +11,7 @@ interface OfferingPlaquesProps {
 
 export default function OfferingPlaques({ onSponsorClick }: OfferingPlaquesProps) {
   const [volunteerModalOpen, setVolunteerModalOpen] = useState(false);
+  const [sponsorModalOpen, setSponsorModalOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const handleVolunteerSubmit = (e: React.FormEvent) => {
@@ -22,6 +23,14 @@ export default function OfferingPlaques({ onSponsorClick }: OfferingPlaquesProps
     }, 2000);
   };
 
+  const handleSponsorButton = () => {
+    if (onSponsorClick) {
+      onSponsorClick();
+    } else {
+      setSponsorModalOpen(true);
+    }
+  };
+
   return (
     <>
       <section className="py-20 bg-gradient-to-b from-[#FFF8F0] to-[#FFF3E0] text-[#3D1A00] relative">
@@ -31,7 +40,7 @@ export default function OfferingPlaques({ onSponsorClick }: OfferingPlaquesProps
           <div className="text-center space-y-3">
             <div className="inline-flex items-center gap-2 bg-[#FFF0E0] border border-[#E65C00]/30 px-4 py-1 rounded-full text-xs font-extrabold text-[#E65C00] uppercase tracking-widest">
               <Sparkles className="w-4 h-4" />
-              <span>COMMUNITY SEVA & PARTICIPATION</span>
+              <span>COMMUNITY SEVA &amp; PARTICIPATION</span>
             </div>
 
             <h2 className="text-3xl sm:text-5xl font-black font-cinzel gold-foil-text tracking-wider">
@@ -115,7 +124,7 @@ export default function OfferingPlaques({ onSponsorClick }: OfferingPlaquesProps
               </div>
 
               <button
-                onClick={onSponsorClick}
+                onClick={handleSponsorButton}
                 className="gold-button w-full py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2"
               >
                 <span>Sponsor / Support Seva</span>
@@ -171,9 +180,9 @@ export default function OfferingPlaques({ onSponsorClick }: OfferingPlaquesProps
                   <label className="block text-[#6B3A2A] font-semibold mb-1">Preferred Seva Area</label>
                   <select className="w-full bg-[#FFF8F0] border border-[#E65C00]/30 rounded-xl px-4 py-2.5 text-[#3D1A00] focus:border-[#E65C00] focus:outline-none">
                     <option>Mahaprasadam Distribution</option>
-                    <option>Crowd & Gate Welcome</option>
+                    <option>Crowd &amp; Gate Welcome</option>
                     <option>Cultural Program Assistance</option>
-                    <option>Decoration & Mandap Maintenance</option>
+                    <option>Decoration &amp; Mandap Maintenance</option>
                   </select>
                 </div>
                 <button
@@ -187,6 +196,12 @@ export default function OfferingPlaques({ onSponsorClick }: OfferingPlaquesProps
           </div>
         </div>
       )}
+
+      {/* Sponsor Email Inquiry Modal */}
+      <SponsorInquiryModal
+        isOpen={sponsorModalOpen}
+        onClose={() => setSponsorModalOpen(false)}
+      />
     </>
   );
 }
