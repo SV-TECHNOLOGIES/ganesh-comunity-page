@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { INITIAL_MEMBERS } from '@/data/members';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
   try {
     const members = await prisma.member.findMany({
@@ -14,10 +17,26 @@ export async function GET() {
       startDate: m.startDate || (m.createdAt ? new Date(m.createdAt).toISOString().split('T')[0] : '2026-01-01'),
       expiryDate: m.expiryDate || 'Lifetime',
     }));
-    return NextResponse.json({ success: true, source: 'prisma', data: normalized });
+    return NextResponse.json(
+      { success: true, source: 'prisma', data: normalized },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+          Pragma: 'no-cache',
+          Expires: '0',
+        },
+      }
+    );
   } catch (error) {
     console.error('[ADMIN MEMBERS API] Error:', error);
-    return NextResponse.json({ success: true, source: 'static', data: INITIAL_MEMBERS });
+    return NextResponse.json(
+      { success: true, source: 'static', data: INITIAL_MEMBERS },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+        },
+      }
+    );
   }
 }
 

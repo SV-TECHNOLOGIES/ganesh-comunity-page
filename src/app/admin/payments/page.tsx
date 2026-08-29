@@ -85,8 +85,8 @@ export default function AdminPaymentsPage() {
     setLoading(true);
     try {
       const [resPay, resSet] = await Promise.all([
-        fetch('/api/admin/payments'),
-        fetch('/api/admin/payment-settings'),
+        fetch('/api/admin/payments', { cache: 'no-store' }),
+        fetch('/api/admin/payment-settings', { cache: 'no-store' }),
       ]);
       const dataPay = await resPay.json();
       const dataSet = await resSet.json();

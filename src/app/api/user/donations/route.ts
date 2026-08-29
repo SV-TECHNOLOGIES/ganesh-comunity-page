@@ -6,6 +6,9 @@ import { generateTicketToken } from '@/lib/ticket-token';
 
 
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
   try {
     // Read JWT token from cookie
@@ -62,7 +65,16 @@ export async function GET() {
           createdAt: typeof p.createdAt === 'string' ? p.createdAt : p.createdAt.toISOString(),
           ticketToken: generateTicketToken(p.id),
         }));
-        return NextResponse.json({ success: true, source: 'prisma', data: enriched });
+        return NextResponse.json(
+          { success: true, source: 'prisma', data: enriched },
+          {
+            headers: {
+              'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+              Pragma: 'no-cache',
+              Expires: '0',
+            },
+          }
+        );
       }
     } catch {
       // DB unavailable

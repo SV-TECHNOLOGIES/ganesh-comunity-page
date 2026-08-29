@@ -18,7 +18,7 @@ export default function EventDetailsSection({
   useEffect(() => {
     const fetchCounts = async () => {
       try {
-        const res = await fetch('/api/payments/booking-counts');
+        const res = await fetch('/api/payments/booking-counts', { cache: 'no-store' });
         const data = await res.json();
         if (data.success && data.counts) {
           setDbCounts(data.counts);

@@ -52,7 +52,7 @@ function MyDonationsContent() {
       setLoading(true);
       setError('');
       try {
-        const res = await fetch('/api/user/donations');
+        const res = await fetch('/api/user/donations', { cache: 'no-store' });
         const data = await res.json();
         if (data.success) {
           setDonations(data.data);

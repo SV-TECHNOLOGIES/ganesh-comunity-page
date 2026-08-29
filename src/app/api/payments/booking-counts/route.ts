@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 export const runtime = 'nodejs';
 
 export async function GET() {
@@ -54,7 +56,16 @@ export async function GET() {
       }
     });
 
-    return NextResponse.json({ success: true, counts });
+    return NextResponse.json(
+      { success: true, counts },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+          Pragma: 'no-cache',
+          Expires: '0',
+        },
+      }
+    );
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Database error';
     console.error('[Booking Counts API] Error:', message);

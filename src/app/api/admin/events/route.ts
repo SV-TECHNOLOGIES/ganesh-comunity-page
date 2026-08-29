@@ -2,14 +2,33 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { EVENTS_DATA } from '@/data/events';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
   try {
     const events = await prisma.event.findMany({
       orderBy: { createdAt: 'desc' },
     });
-    return NextResponse.json({ success: true, source: 'prisma', data: events });
+    return NextResponse.json(
+      { success: true, source: 'prisma', data: events },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+          Pragma: 'no-cache',
+          Expires: '0',
+        },
+      }
+    );
   } catch {
-    return NextResponse.json({ success: true, source: 'static', data: EVENTS_DATA });
+    return NextResponse.json(
+      { success: true, source: 'static', data: EVENTS_DATA },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+        },
+      }
+    );
   }
 }
 
