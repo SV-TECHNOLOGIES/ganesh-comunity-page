@@ -154,30 +154,30 @@ export async function POST(request: Request) {
 
     // ── Persist a Pending Payment record ─────────────────────────────────────
     try {
-      // const savedRecord = await prisma.payment.create({
-      //   data: {
-      //     amount: numAmount,
-      //     currency: 'GBP',
-      //     status: 'Pending',
-      //     customerName: safeCustomer,
-      //     customerEmail: normalEmail,
-      //     customerPhone: customerPhone ? String(customerPhone).trim() : null,
-      //     description: description || 'MITRA Community Contribution',
-      //     paymentMethod: paymentMethod || 'Stripe Card',
-      //     stripePaymentIntentId: paymentIntent.id,
-      //     memberId: finalMemberId,
-      //     eventId: eventId || null,
-      //     eventName: safeEvent,
-      //     donationType: safeType,
-      //     poojaDate: poojaDate || null,
-      //     poojaDay: poojaDay || null,
-      //     poojaTitle: poojaTitle || null,
-      //     gotram: gotram ? String(gotram).trim() : null,
-      //     familyMembers: familyMembers ? String(familyMembers).trim() : null,
-      //     specialWishes: specialWishes ? String(specialWishes).trim() : null,
-      //     primaryDevoteeName: (primaryDevoteeName || safeCustomer).trim(),
-      //   },
-      // });
+      const savedRecord = await prisma.payment.create({
+        data: {
+          amount: numAmount,
+          currency: 'GBP',
+          status: 'Pending',
+          customerName: safeCustomer,
+          customerEmail: normalEmail,
+          customerPhone: customerPhone ? String(customerPhone).trim() : null,
+          description: description || 'MITRA Community Contribution',
+          paymentMethod: paymentMethod || 'Stripe Card',
+          stripePaymentIntentId: paymentIntent.id,
+          memberId: finalMemberId,
+          eventId: eventId || null,
+          eventName: safeEvent,
+          donationType: safeType,
+          poojaDate: poojaDate || null,
+          poojaDay: poojaDay || null,
+          poojaTitle: poojaTitle || null,
+          gotram: gotram ? String(gotram).trim() : null,
+          familyMembers: familyMembers ? String(familyMembers).trim() : null,
+          specialWishes: specialWishes ? String(specialWishes).trim() : null,
+          primaryDevoteeName: (primaryDevoteeName || safeCustomer).trim(),
+        },
+      });
 
       console.log(`  └─ [SUCCESS] DB Pending Payment record persisted: ID=${savedRecord.id} for user <${normalEmail}>\n`);
     } catch (dbErr: unknown) {
