@@ -1,0 +1,43 @@
+import { CharityCase } from '@/lib/types';
+
+export const INITIAL_CHARITY_CASES: CharityCase[] = [
+  {
+    id: 'MITRA-HELP-1092',
+    name: 'Srinivas Rao',
+    email: 'srinivas.r@gmail.com',
+    phone: '+44 7700 900123',
+    category: 'Student Counselling',
+    details: 'Urgent assistance requested for university accommodation guidance and part-time work compliance in London.',
+    status: 'In Progress',
+    assignedTo: 'Dr. Sunitha Reddy',
+    createdAt: '2026-08-20',
+    isConfidential: false,
+    notes: ['Initial call conducted on Aug 21. Connected student with MITRA London student mentor network.'],
+  },
+  {
+    id: 'MITRA-HELP-1093',
+    name: 'Confidential Beneficiary',
+    email: 'help.welfare@mitra.org.uk',
+    phone: '+44 7700 900456',
+    category: 'Women Helpline',
+    details: 'Domestic support request and legal advisory referral.',
+    status: 'New',
+    assignedTo: 'Smt. Radhika Prasad',
+    createdAt: '2026-08-23',
+    isConfidential: true,
+    notes: ['Case assigned to Women Helpline Lead. High confidentiality protocol applied.'],
+  },
+  {
+    id: 'MITRA-HELP-1091',
+    name: 'Family of Late K. Sharma',
+    email: 'sharma.family@outlook.com',
+    phone: '+44 7700 900789',
+    category: 'Repatriation Support',
+    details: 'Consular documentation assistance and emergency flights logistics to Hyderabad.',
+    status: 'Resolved',
+    assignedTo: 'Ramesh Babu Kondapalli',
+    createdAt: '2026-08-10',
+    isConfidential: false,
+    notes: ['All consular permits obtained. Flights arranged with Indian High Commission UK support. Case closed successfully.'],
+  },
+];

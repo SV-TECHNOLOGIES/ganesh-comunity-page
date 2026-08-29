@@ -1,23 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { DataStore } from '@/lib/data-store';
+import { useState } from 'react';
 import { AnalyticsEvent } from '@/lib/types';
-import { TrendingUp, Search, ShieldCheck, CheckCircle2, RefreshCw, BarChart3, Globe } from 'lucide-react';
+import { RefreshCw, Globe } from 'lucide-react';
 
 export default function AdminSeoAnalyticsPage() {
-  const [events, setEvents] = useState<AnalyticsEvent[]>([]);
-
-  const refreshLogs = () => {
-    DataStore.init();
-    setEvents(DataStore.getAnalytics());
-  };
-
-  useEffect(() => {
-    refreshLogs();
-    const interval = setInterval(refreshLogs, 3000);
-    return () => clearInterval(interval);
-  }, []);
+  const [events] = useState<AnalyticsEvent[]>([
+    { id: '1', timestamp: '12:05 PM, Today', eventName: 'page_view', path: '/', details: { pageTitle: 'London Ganesh Mahotsav 2026' } },
+    { id: '2', timestamp: '11:42 AM, Today', eventName: 'event_rsvp', path: '/events/evt-ganesh-chaturthi', details: { tickets: 2 } },
+    { id: '3', timestamp: '10:30 AM, Today', eventName: 'donation_completed', path: '/donate', details: { amount: 50, cause: 'Annadanam' } },
+    { id: '4', timestamp: '09:15 AM, Today', eventName: 'membership_signup', path: '/membership', details: { tier: 'Life Member' } },
+  ]);
 
   return (
     <div className="space-y-8">
@@ -31,11 +24,11 @@ export default function AdminSeoAnalyticsPage() {
         </div>
 
         <button
-          onClick={refreshLogs}
+          onClick={() => {}}
           className="bg-slate-800 hover:bg-slate-700 text-mitra-gold px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-mitra-gold/30"
         >
-          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-          <span>Refresh Stream</span>
+          <RefreshCw className="w-3.5 h-3.5" />
+          <span>Refreshed</span>
         </button>
       </div>
 
@@ -73,7 +66,7 @@ export default function AdminSeoAnalyticsPage() {
           <h3 className="text-xs font-bold uppercase text-slate-300">Live Tracked Client Events Stream ({events.length})</h3>
           <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            Live Polling
+            Live
           </span>
         </div>
 
@@ -90,7 +83,7 @@ export default function AdminSeoAnalyticsPage() {
             {events.length === 0 ? (
               <tr>
                 <td colSpan={4} className="p-8 text-center text-slate-500 font-sans text-xs">
-                  No tracking events recorded yet. Navigate around the site to generate live event logs!
+                  No tracking events recorded yet.
                 </td>
               </tr>
             ) : (

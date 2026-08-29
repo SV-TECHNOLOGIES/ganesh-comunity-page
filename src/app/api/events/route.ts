@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { DataStore } from '@/lib/data-store';
+import { EVENTS_DATA } from '@/data/events';
 
 export async function GET() {
   try {
@@ -9,7 +9,6 @@ export async function GET() {
     });
     return NextResponse.json({ success: true, source: 'prisma', data: events });
   } catch {
-    const events = DataStore.getEvents();
-    return NextResponse.json({ success: true, source: 'datastore', data: events });
+    return NextResponse.json({ success: true, source: 'static', data: EVENTS_DATA });
   }
 }

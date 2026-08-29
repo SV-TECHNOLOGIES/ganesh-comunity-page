@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Calendar, Clock, Download, ExternalLink, Sparkles, Flame, Heart, Utensils, Star, CheckCircle } from 'lucide-react';
 import { POOJA_DATES } from '@/components/PoojaBookingModal';
-import { DataStore } from '@/lib/data-store';
 
 interface EventDetailsSectionProps {
   onOpenPoojaBooking?: (dateId?: string) => void;
@@ -32,21 +31,7 @@ export default function EventDetailsSection({
   }, []);
 
   const getBookingCount = (dateStr: string) => {
-    const dbCount = dbCounts[dateStr] || 0;
-    
-    // Check client-side DataStore
-    let localCount = 0;
-    try {
-      const localDonations = DataStore.getDonations();
-      localCount = localDonations.filter((d) => {
-        const causeLower = d.cause.toLowerCase();
-        const isPooja = causeLower.includes('pooja seva') || causeLower.includes('pooja booking');
-        const matchesDate = causeLower.includes(dateStr.toLowerCase());
-        return isPooja && matchesDate && d.status === 'Completed';
-      }).length;
-    } catch {}
-
-    return Math.max(dbCount, localCount);
+    return dbCounts[dateStr] || 0;
   };
 
   const dailySchedule = [

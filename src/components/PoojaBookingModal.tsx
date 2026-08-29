@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { DataStore } from '@/lib/data-store';
 import { trackDonation } from '@/lib/analytics';
 import {
   Flame,
@@ -166,16 +165,9 @@ function CheckoutForm({
         confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
       } catch {}
 
-      const newDonation = DataStore.addDonation({
-        donorName: devoteeName,
-        donorEmail: devoteeEmail,
-        amount,
-        currency: 'GBP',
-        cause,
-        paymentMethod: 'Card',
-      });
+      const receiptNo = `MITRA-REC-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
       trackDonation(amount, cause);
-      onSuccess(newDonation.receiptNo);
+      onSuccess(receiptNo);
     }
 
     setProcessing(false);
@@ -290,21 +282,7 @@ export default function PoojaBookingModal({
   }, []);
 
   const getBookingCount = useCallback((dateStr: string) => {
-    const dbCount = dbCounts[dateStr] || 0;
-    
-    // Check client-side DataStore
-    let localCount = 0;
-    try {
-      const localDonations = DataStore.getDonations();
-      localCount = localDonations.filter((d) => {
-        const causeLower = d.cause.toLowerCase();
-        const isPooja = causeLower.includes('pooja seva') || causeLower.includes('pooja booking');
-        const matchesDate = causeLower.includes(dateStr.toLowerCase());
-        return isPooja && matchesDate && d.status === 'Completed';
-      }).length;
-    } catch {}
-
-    return Math.max(dbCount, localCount);
+    return dbCounts[dateStr] || 0;
   }, [dbCounts]);
 
   // Sync initial date if passed

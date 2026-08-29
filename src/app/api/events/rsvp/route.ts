@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { DataStore } from '@/lib/data-store';
 
 export async function POST(request: Request) {
   try {
@@ -35,11 +34,9 @@ export async function POST(request: Request) {
         data: { rsvpId: rsvp.id, eventId, attendeeName, ticketsCount: tickets },
       });
     } catch {
-      // Memory / DataStore Fallback
-      DataStore.rsvpEvent(eventId);
       return NextResponse.json({
         success: true,
-        source: 'datastore',
+        source: 'static',
         data: { rsvpId: `RSVP-${Date.now()}`, eventId, attendeeName, ticketsCount: tickets },
       });
     }

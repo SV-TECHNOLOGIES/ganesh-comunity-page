@@ -1,19 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { DataStore } from '@/lib/data-store';
+import { NEWS_DATA } from '@/data/news';
 import { BlogPost } from '@/lib/types';
-import { Calendar, Tag, ArrowRight } from 'lucide-react';
+import { Calendar, ArrowRight } from 'lucide-react';
 
 export default function NewsPage() {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-
-  useEffect(() => {
-    DataStore.init();
-    setPosts(DataStore.getNews());
-  }, []);
+  const [posts] = useState<BlogPost[]>(NEWS_DATA);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">

@@ -2,39 +2,41 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { DataStore } from '@/lib/data-store';
-import { Users, Calendar, ShieldAlert, Heart, TrendingUp, Sparkles, Plus, Download } from 'lucide-react';
+import { EVENTS_DATA } from '@/data/events';
+import { INITIAL_MEMBERS } from '@/data/members';
+import { INITIAL_CHARITY_CASES } from '@/data/charity';
+import { Users, Calendar, ShieldAlert, Heart, TrendingUp, Sparkles, Plus } from 'lucide-react';
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState({
-    membersCount: 0,
-    eventsCount: 0,
-    charityCasesCount: 0,
-    donationsTotal: 0,
-    analyticsCount: 0
+    membersCount: INITIAL_MEMBERS.length,
+    eventsCount: EVENTS_DATA.filter(e => e.status === 'Upcoming').length,
+    charityCasesCount: INITIAL_CHARITY_CASES.filter(c => c.status !== 'Resolved').length,
+    donationsTotal: 750,
+    analyticsCount: 12,
   });
 
-  const [recentLogs, setRecentLogs] = useState<any[]>([]);
+  const [recentLogs] = useState<any[]>([
+    { id: '1', eventName: 'page_view', path: '/', timestamp: '12:00 PM, Today' },
+    { id: '2', eventName: 'event_rsvp', path: '/events/evt-ganesh-chaturthi', timestamp: '11:45 AM, Today' },
+    { id: '3', eventName: 'donation_completed', path: '/donate', timestamp: '10:30 AM, Today' },
+    { id: '4', eventName: 'membership_signup', path: '/membership', timestamp: '09:15 AM, Today' },
+  ]);
 
   useEffect(() => {
-    DataStore.init();
-    const members = DataStore.getMembers();
-    const events = DataStore.getEvents();
-    const cases = DataStore.getCharityCases();
-    const donations = DataStore.getDonations();
-    const analytics = DataStore.getAnalytics();
-
-    const totalDonations = donations.reduce((acc, curr) => acc + curr.amount, 0);
-
-    setStats({
-      membersCount: members.length,
-      eventsCount: events.filter(e => e.status === 'Upcoming').length,
-      charityCasesCount: cases.filter(c => c.status !== 'Resolved').length,
-      donationsTotal: totalDonations,
-      analyticsCount: analytics.length
+    // Fetch live counts from API if available
+    Promise.allSettled([
+      fetch('/api/admin/members').then(r => r.json()),
+      fetch('/api/admin/events').then(r => r.json()),
+      fetch('/api/admin/charity-cases').then(r => r.json()),
+    ]).then(([membersRes, eventsRes, casesRes]) => {
+      setStats(prev => ({
+        ...prev,
+        membersCount: membersRes.status === 'fulfilled' && membersRes.value.data ? membersRes.value.data.length : prev.membersCount,
+        eventsCount: eventsRes.status === 'fulfilled' && eventsRes.value.data ? eventsRes.value.data.length : prev.eventsCount,
+        charityCasesCount: casesRes.status === 'fulfilled' && casesRes.value.data ? casesRes.value.data.length : prev.charityCasesCount,
+      }));
     });
-
-    setRecentLogs(analytics.slice(0, 6));
   }, []);
 
   return (

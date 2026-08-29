@@ -1,20 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { DataStore } from '@/lib/data-store';
+import { useState } from 'react';
+import { MEDIA_DATA } from '@/data/media';
 import { MediaAlbum } from '@/lib/types';
-import { Image as ImageIcon, BookOpen, Plus, Download, CheckCircle2 } from 'lucide-react';
 
 export default function AdminMediaPage() {
-  const [media, setMedia] = useState<MediaAlbum[]>([]);
-  const [title, setTitle] = useState('');
-  const [category, setCategory] = useState<MediaAlbum['category']>('MITRA Patrika');
-  const [description, setDescription] = useState('');
-
-  useEffect(() => {
-    DataStore.init();
-    setMedia(DataStore.getMedia());
-  }, []);
+  const [media] = useState<MediaAlbum[]>(MEDIA_DATA);
 
   return (
     <div className="space-y-8">

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { DataStore } from '@/lib/data-store';
+import { EVENTS_DATA } from '@/data/events';
 
 export async function GET() {
   try {
@@ -9,9 +9,7 @@ export async function GET() {
     });
     return NextResponse.json({ success: true, source: 'prisma', data: events });
   } catch {
-    // Fallback to DataStore memory items if DB connection is offline
-    const events = DataStore.getEvents();
-    return NextResponse.json({ success: true, source: 'datastore', data: events });
+    return NextResponse.json({ success: true, source: 'static', data: EVENTS_DATA });
   }
 }
 
@@ -37,20 +35,23 @@ export async function POST(request: Request) {
       });
       return NextResponse.json({ success: true, source: 'prisma', data: newEvent });
     } catch {
-      const newEvent = DataStore.addEvent({
+      const fallbackEvent = {
+        id: `evt-${Date.now()}`,
         title,
-        category,
-        date,
+        category: category || 'Cultural Events',
+        date: date || new Date().toISOString().split('T')[0],
         time: time || '09:00 AM',
-        venue,
+        venue: venue || 'London',
         address: address || 'Langley, Slough, United Kingdom',
         ticketPrice: Number(ticketPrice) || 0,
         status: status || 'Upcoming',
-        description,
+        description: description || '',
         bannerUrl: bannerUrl || '/assets/poster.jpg',
         capacity: 300,
-      });
-      return NextResponse.json({ success: true, source: 'datastore', data: newEvent });
+        rsvpCount: 0,
+        featured: true,
+      };
+      return NextResponse.json({ success: true, source: 'static', data: fallbackEvent });
     }
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : 'Invalid request payload';
@@ -70,7 +71,7 @@ export async function DELETE(request: Request) {
     try {
       await prisma.event.delete({ where: { id } });
     } catch {
-      // Memory fallback if not in DB
+      // Ignore if not in DB
     }
 
     return NextResponse.json({ success: true, message: `Event ${id} deleted` });

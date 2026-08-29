@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { DataStore } from '@/lib/data-store';
+import { EVENTS_DATA } from '@/data/events';
 import { EventItem } from '@/lib/types';
 import { trackRSVP } from '@/lib/analytics';
 import { generateEventJsonLd } from '@/lib/seo-config';
@@ -14,10 +14,8 @@ import {
   MapPin, 
   Users, 
   CheckCircle2, 
-  Share2, 
   Download, 
   ArrowLeft,
-  DollarSign
 } from 'lucide-react';
 import Ganesha3DHero from '@/components/Ganesha3DHero';
 import RitualCountdown from '@/components/RitualCountdown';
@@ -30,19 +28,27 @@ import DonationModal from '@/components/DonationModal';
 export default function EventDetailPage() {
   const params = useParams();
   const id = params?.id as string;
-  const [event, setEvent] = useState<EventItem | null>(null);
+  const [event, setEvent] = useState<EventItem | null>(() => {
+    return EVENTS_DATA.find(e => e.id === id || e.title.toLowerCase().includes('ganesh')) || null;
+  });
   const [rsvped, setRsvped] = useState(false);
-  const [rsvpCount, setRsvpCount] = useState(0);
+  const [rsvpCount, setRsvpCount] = useState(() => event?.rsvpCount || 1420);
   const [notifyModalOpen, setNotifyModalOpen] = useState(false);
   const [donateModalOpen, setDonateModalOpen] = useState(false);
 
   useEffect(() => {
-    DataStore.init();
-    const found = DataStore.getEvents().find(e => e.id === id || e.title.toLowerCase().includes('ganesh'));
-    if (found) {
-      setEvent(found);
-      setRsvpCount(found.rsvpCount);
-    }
+    fetch('/api/events')
+      .then((res) => res.json())
+      .then((resData) => {
+        if (resData.success && Array.isArray(resData.data)) {
+          const found = resData.data.find((e: EventItem) => e.id === id || e.title.toLowerCase().includes('ganesh'));
+          if (found) {
+            setEvent(found);
+            setRsvpCount(found.rsvpCount);
+          }
+        }
+      })
+      .catch(() => {});
   }, [id]);
 
   if (!event) {
@@ -57,12 +63,24 @@ export default function EventDetailPage() {
   const jsonLd = generateEventJsonLd(event);
   const isGaneshEvent = id === 'evt-ganesh-chaturthi' || id === 'evt-101' || event.title.toLowerCase().includes('ganesh');
 
-  const handleRSVP = () => {
+  const handleRSVP = async () => {
     if (rsvped) return;
-    const updated = DataStore.rsvpEvent(event.id);
-    setRsvpCount(updated);
+    setRsvpCount((prev) => prev + 1);
     setRsvped(true);
     trackRSVP(event.id, event.title);
+
+    try {
+      await fetch('/api/events/rsvp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventId: event.id,
+          attendeeName: 'Community Attendee',
+          attendeeEmail: 'attendee@mitra.org.uk',
+          ticketsCount: 1,
+        }),
+      });
+    } catch {}
   };
 
   const handleICSDownload = () => {
@@ -205,7 +223,7 @@ END:VCALENDAR`;
             <div className="space-y-3 text-xs text-slate-700 dark:text-slate-200">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-mitra-gold shrink-0" />
-                <span>{new Date(event.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                <span>{event.date}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-mitra-gold shrink-0" />

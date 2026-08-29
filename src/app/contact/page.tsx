@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { DataStore } from '@/lib/data-store';
 import { trackEvent } from '@/lib/analytics';
 import { MapPin, Mail, Phone, Twitter, Linkedin, Facebook, Instagram, Youtube, Send, CheckCircle2 } from 'lucide-react';
 

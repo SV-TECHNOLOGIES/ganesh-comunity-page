@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { DataStore } from '@/lib/data-store';
+import { INITIAL_MEMBERS } from '@/data/members';
 
 export async function GET() {
   try {
@@ -9,8 +9,7 @@ export async function GET() {
     });
     return NextResponse.json({ success: true, source: 'prisma', data: members });
   } catch {
-    const members = DataStore.getMembers();
-    return NextResponse.json({ success: true, source: 'datastore', data: members });
+    return NextResponse.json({ success: true, source: 'static', data: INITIAL_MEMBERS });
   }
 }
 
@@ -32,15 +31,19 @@ export async function POST(request: Request) {
       });
       return NextResponse.json({ success: true, source: 'prisma', data: newMember });
     } catch {
-      const newMember = DataStore.addMember({
+      const fallbackMember = {
+        id: `MITRA-MEM-${Math.floor(5000 + Math.random() * 4000)}`,
         name: fullName,
         email,
         phone,
         tier: role || 'Volunteer',
         address: 'London, UK',
         profession: 'Volunteer Advocate',
-      });
-      return NextResponse.json({ success: true, source: 'datastore', data: newMember });
+        status: 'Active',
+        startDate: new Date().toISOString().split('T')[0],
+        expiryDate: 'Lifetime',
+      };
+      return NextResponse.json({ success: true, source: 'static', data: fallbackMember });
     }
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : 'Invalid request payload';

@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { DataStore } from '@/lib/data-store';
+import { EVENTS_DATA } from '@/data/events';
 import { EventItem } from '@/lib/types';
-import { Calendar, Plus, Download, Trash2, CheckCircle2, MapPin } from 'lucide-react';
+import { Plus, Download } from 'lucide-react';
 
 export default function AdminEventsPage() {
-  const [events, setEvents] = useState<EventItem[]>([]);
+  const [events, setEvents] = useState<EventItem[]>(EVENTS_DATA);
   const [showAddForm, setShowAddForm] = useState(false);
 
   // New Event Form State
@@ -22,13 +22,20 @@ export default function AdminEventsPage() {
   const [ticketPrice, setTicketPrice] = useState(0);
 
   useEffect(() => {
-    DataStore.init();
-    setEvents(DataStore.getEvents());
+    fetch('/api/admin/events')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+          setEvents(data.data);
+        }
+      })
+      .catch(() => {});
   }, []);
 
-  const handleCreateEvent = (e: React.FormEvent) => {
+  const handleCreateEvent = async (e: React.FormEvent) => {
     e.preventDefault();
-    const created = DataStore.addEvent({
+    const newEvent: EventItem = {
+      id: `evt-${Date.now()}`,
       title,
       category,
       date,
@@ -40,12 +47,22 @@ export default function AdminEventsPage() {
       status: 'Upcoming',
       capacity: Number(capacity),
       ticketPrice: Number(ticketPrice),
-      featured: true
-    });
+      rsvpCount: 0,
+      featured: true,
+    };
 
-    setEvents(DataStore.getEvents());
+    setEvents((prev) => [newEvent, ...prev]);
     setShowAddForm(false);
-    alert(`New Event "${created.title}" successfully created and live on public site!`);
+
+    try {
+      await fetch('/api/admin/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newEvent),
+      });
+    } catch {}
+
+    alert(`New Event "${newEvent.title}" successfully created!`);
   };
 
   const exportRSVPsCSV = (event: EventItem) => {

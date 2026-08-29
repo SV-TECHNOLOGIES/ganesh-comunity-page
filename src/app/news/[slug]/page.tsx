@@ -1,23 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { DataStore } from '@/lib/data-store';
+import { NEWS_DATA } from '@/data/news';
 import { BlogPost } from '@/lib/types';
-import { Calendar, ArrowLeft, Share2 } from 'lucide-react';
+import { Calendar, ArrowLeft } from 'lucide-react';
 
 export default function NewsDetailPage() {
   const params = useParams();
   const slug = params?.slug as string;
-  const [post, setPost] = useState<BlogPost | null>(null);
-
-  useEffect(() => {
-    DataStore.init();
-    const found = DataStore.getNews().find(n => n.slug === slug);
-    if (found) setPost(found);
-  }, [slug]);
+  const [post] = useState<BlogPost | null>(() => {
+    return NEWS_DATA.find(n => n.slug === slug) || null;
+  });
 
   if (!post) {
     return (

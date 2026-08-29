@@ -1,36 +1,55 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { DataStore } from '@/lib/data-store';
+import { INITIAL_CHARITY_CASES } from '@/data/charity';
 import { CharityCase } from '@/lib/types';
-import { ShieldAlert, Lock, CheckCircle2, Clock, MessageSquare } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 
 export default function AdminCharityCasesPage() {
-  const [cases, setCases] = useState<CharityCase[]>([]);
-  const [selectedCase, setSelectedCase] = useState<CharityCase | null>(null);
+  const [cases, setCases] = useState<CharityCase[]>(INITIAL_CHARITY_CASES);
+  const [selectedCase, setSelectedCase] = useState<CharityCase | null>(() => INITIAL_CHARITY_CASES[0] || null);
   const [newNote, setNewNote] = useState('');
 
   useEffect(() => {
-    DataStore.init();
-    setCases(DataStore.getCharityCases());
+    fetch('/api/admin/charity-cases')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+          setCases(data.data);
+          setSelectedCase(data.data[0]);
+        }
+      })
+      .catch(() => {});
   }, []);
 
-  const handleUpdateStatus = (id: string, status: CharityCase['status']) => {
-    DataStore.updateCharityStatus(id, status);
-    setCases(DataStore.getCharityCases());
+  const handleUpdateStatus = async (id: string, status: CharityCase['status']) => {
+    setCases((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, status } : c))
+    );
     if (selectedCase && selectedCase.id === id) {
-      setSelectedCase({ ...selectedCase, status });
+      setSelectedCase((prev) => (prev ? { ...prev, status } : null));
     }
+
+    try {
+      await fetch('/api/admin/charity-cases', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status }),
+      });
+    } catch {}
   };
 
   const handleAddNote = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedCase || !newNote.trim()) return;
-    DataStore.updateCharityStatus(selectedCase.id, selectedCase.status, newNote);
-    const updated = DataStore.getCharityCases();
-    setCases(updated);
-    const found = updated.find(c => c.id === selectedCase.id);
-    if (found) setSelectedCase(found);
+    const note = newNote.trim();
+
+    setCases((prev) =>
+      prev.map((c) => (c.id === selectedCase.id ? { ...c, notes: [...(c.notes || []), note] } : c))
+    );
+    setSelectedCase((prev) =>
+      prev ? { ...prev, notes: [...(prev.notes || []), note] } : null
+    );
     setNewNote('');
   };
 
@@ -142,7 +161,7 @@ export default function AdminCharityCasesPage() {
                 </h4>
 
                 <div className="space-y-2">
-                  {selectedCase.notes.map((note, idx) => (
+                  {(selectedCase.notes || []).map((note, idx) => (
                     <div key={idx} className="bg-slate-900/60 p-3 rounded-xl border border-slate-800 text-xs text-slate-300">
                       {note}
                     </div>

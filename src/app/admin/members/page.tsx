@@ -1,19 +1,25 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { DataStore } from '@/lib/data-store';
+import { INITIAL_MEMBERS } from '@/data/members';
 import { Member } from '@/lib/types';
 import MembershipCardModal from '@/components/MembershipCardModal';
-import { Users, Search, Download, ShieldCheck, QrCode } from 'lucide-react';
+import { Search, Download, ShieldCheck, QrCode } from 'lucide-react';
 
 export default function AdminMembersPage() {
-  const [members, setMembers] = useState<Member[]>([]);
+  const [members, setMembers] = useState<Member[]>(INITIAL_MEMBERS);
   const [query, setQuery] = useState('');
   const [passModalMember, setPassModalMember] = useState<Member | null>(null);
 
   useEffect(() => {
-    DataStore.init();
-    setMembers(DataStore.getMembers());
+    fetch('/api/admin/members')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+          setMembers(data.data);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const filteredMembers = members.filter(

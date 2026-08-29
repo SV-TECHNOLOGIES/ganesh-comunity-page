@@ -1,23 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { DataStore } from '@/lib/data-store';
+import { EVENTS_DATA } from '@/data/events';
+import { LEADERSHIP_DATA } from '@/data/leadership';
+import { NEWS_DATA } from '@/data/news';
 import { EventItem, LeadershipMember, BlogPost } from '@/lib/types';
-import { Search, Calendar, Users, FileText, ArrowRight } from 'lucide-react';
+import { Search, Calendar, Users, FileText } from 'lucide-react';
 
 export default function GlobalSearchPage() {
   const [query, setQuery] = useState('');
-  const [events, setEvents] = useState<EventItem[]>([]);
-  const [leadership, setLeadership] = useState<LeadershipMember[]>([]);
-  const [news, setNews] = useState<BlogPost[]>([]);
-
-  useEffect(() => {
-    DataStore.init();
-    setEvents(DataStore.getEvents());
-    setLeadership(DataStore.getLeadership());
-    setNews(DataStore.getNews());
-  }, []);
+  const [events] = useState<EventItem[]>(EVENTS_DATA);
+  const [leadership] = useState<LeadershipMember[]>(LEADERSHIP_DATA);
+  const [news] = useState<BlogPost[]>(NEWS_DATA);
 
   const matchedEvents = query
     ? events.filter(e => e.title.toLowerCase().includes(query.toLowerCase()) || e.venue.toLowerCase().includes(query.toLowerCase()) || e.description.toLowerCase().includes(query.toLowerCase()))

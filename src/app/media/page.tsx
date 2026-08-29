@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
-import { DataStore } from '@/lib/data-store';
+import { MEDIA_DATA } from '@/data/media';
 import { MediaAlbum } from '@/lib/types';
 import { Image as ImageIcon, Video, BookOpen, Download, Play, X } from 'lucide-react';
 
@@ -15,13 +15,8 @@ function MediaContent() {
     initialTab === 'patrika' ? 'patrika' : initialTab === 'videos' ? 'videos' : 'photos'
   );
   
-  const [mediaItems, setMediaItems] = useState<MediaAlbum[]>([]);
+  const [mediaItems] = useState<MediaAlbum[]>(MEDIA_DATA);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
-
-  useEffect(() => {
-    DataStore.init();
-    setMediaItems(DataStore.getMedia());
-  }, []);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">

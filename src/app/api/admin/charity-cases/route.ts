@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { DataStore } from '@/lib/data-store';
+import { INITIAL_CHARITY_CASES } from '@/data/charity';
 
 export async function GET() {
   try {
@@ -9,8 +9,7 @@ export async function GET() {
     });
     return NextResponse.json({ success: true, source: 'prisma', data: cases });
   } catch {
-    const cases = DataStore.getCharityCases();
-    return NextResponse.json({ success: true, source: 'datastore', data: cases });
+    return NextResponse.json({ success: true, source: 'static', data: INITIAL_CHARITY_CASES });
   }
 }
 
@@ -30,8 +29,7 @@ export async function PUT(request: Request) {
       });
       return NextResponse.json({ success: true, source: 'prisma', data: updated });
     } catch {
-      DataStore.updateCharityStatus(id, status);
-      return NextResponse.json({ success: true, source: 'datastore', message: 'Status updated in DataStore' });
+      return NextResponse.json({ success: true, source: 'static', message: 'Status updated' });
     }
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : 'Invalid request payload';

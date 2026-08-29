@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { DataStore } from '@/lib/data-store';
+import { EVENTS_DATA } from '@/data/events';
 import { EventItem } from '@/lib/types';
 import EventCard from '@/components/EventCard';
 import DonationModal from '@/components/DonationModal';
-import { Calendar as CalendarIcon, List, Filter, Search, Plus, Heart, Flame, Utensils, Sparkles } from 'lucide-react';
+import { Calendar as CalendarIcon, List, Search } from 'lucide-react';
 
 export default function EventsPage() {
-  const [events, setEvents] = useState<EventItem[]>([]);
+  const [events, setEvents] = useState<EventItem[]>(EVENTS_DATA);
   const [viewMode, setViewMode] = useState<'grid' | 'calendar'>('grid');
   const [statusFilter, setStatusFilter] = useState<'Upcoming' | 'Past'>('Upcoming');
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
@@ -17,8 +17,15 @@ export default function EventsPage() {
   const [selectedDonationCategory, setSelectedDonationCategory] = useState<'Annadanam' | 'Event Donations'>('Annadanam');
 
   useEffect(() => {
-    DataStore.init();
-    setEvents(DataStore.getEvents());
+    // Optionally fetch dynamic events from DB
+    fetch('/api/events')
+      .then((res) => res.json())
+      .then((resData) => {
+        if (resData.success && Array.isArray(resData.data) && resData.data.length > 0) {
+          setEvents(resData.data);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const openDonation = (cat: 'Annadanam' | 'Event Donations') => {
@@ -53,8 +60,6 @@ export default function EventsPage() {
          Discover upcoming Telugu cultural, sports, music, dance, and community events across the UK.
         </p>
       </div>
-
-      
 
       {/* Control Bar */}
       <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">

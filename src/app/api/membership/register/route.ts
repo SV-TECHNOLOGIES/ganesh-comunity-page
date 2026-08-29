@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { DataStore } from '@/lib/data-store';
 
 export async function POST(request: Request) {
   try {
@@ -49,22 +48,27 @@ export async function POST(request: Request) {
 
       return response;
     } catch {
-      const newMember = DataStore.addMember({
-        name: fullName,
+      const fallbackMember = {
+        id: memberId,
+        fullName,
         email,
         phone,
         tier: selectedTier,
-        address: address || 'United Kingdom',
+        role: 'Member',
+        status: 'Active',
         profession: profession || 'Community Supporter',
-      });
+        address: address || 'United Kingdom',
+        startDate: today,
+        expiryDate: expiry,
+      };
 
       const response = NextResponse.json({
         success: true,
-        source: 'datastore',
-        data: newMember,
+        source: 'static',
+        data: fallbackMember,
       });
 
-      response.cookies.set('mitra_member_session', JSON.stringify({ id: newMember.id, fullName, email, tier: selectedTier, status: 'Active', expiryDate: expiry }), {
+      response.cookies.set('mitra_member_session', JSON.stringify({ id: memberId, fullName, email, tier: selectedTier, status: 'Active', expiryDate: expiry }), {
         path: '/',
         maxAge: 60 * 60 * 24 * 30,
       });

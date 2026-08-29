@@ -1,20 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { DataStore } from '@/lib/data-store';
+import { useState } from 'react';
+import { LEADERSHIP_DATA } from '@/data/leadership';
 import { LeadershipMember } from '@/lib/types';
 import LeadershipCard from '@/components/LeadershipCard';
 import { Search, Users } from 'lucide-react';
 
 export default function LeadershipPage() {
-  const [members, setMembers] = useState<LeadershipMember[]>([]);
+  const [members] = useState<LeadershipMember[]>(LEADERSHIP_DATA);
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
-
-  useEffect(() => {
-    DataStore.init();
-    setMembers(DataStore.getLeadership());
-  }, []);
 
   const categories = ['All', 'Founders', 'Patrons', 'Trustees', 'Executive Committee', 'Nari Shakthi'];
 

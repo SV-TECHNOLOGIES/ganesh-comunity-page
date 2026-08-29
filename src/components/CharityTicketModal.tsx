@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { DataStore } from '@/lib/data-store';
 import { trackHelpRequest } from '@/lib/analytics';
 import { ShieldAlert, CheckCircle2, Lock, Sparkles, X } from 'lucide-react';
 import { CharityCase } from '@/lib/types';
@@ -17,18 +16,40 @@ export default function CharityTicketModal({ isOpen, onClose }: { isOpen: boolea
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newCase = DataStore.submitCharityHelp({
+    const ticketId = `MITRA-HELP-${Math.floor(1000 + Math.random() * 9000)}`;
+    const newCase: CharityCase = {
+      id: ticketId,
       name,
       email,
       phone,
       category,
       details,
-      isConfidential
-    });
-    trackHelpRequest(category, newCase.id);
+      status: 'New',
+      createdAt: new Date().toISOString().split('T')[0],
+      isConfidential,
+      notes: [`Ticket created via public portal on ${new Date().toLocaleDateString()}`],
+    };
+
+    trackHelpRequest(category, ticketId);
     setCreatedCase(newCase);
+
+    // Optional API call to save ticket in database if backend is available
+    try {
+      await fetch('/api/charity/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          email,
+          phone,
+          category,
+          details,
+          isConfidential,
+        }),
+      });
+    } catch {}
   };
 
   return (

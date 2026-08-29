@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { DataStore } from '@/lib/data-store';
 import { trackDonation } from '@/lib/analytics';
 import {
   Heart,
@@ -95,17 +94,9 @@ function CheckoutForm({
         confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
       } catch {}
 
-      // Record locally for the receipt screen (DB will be updated via webhook)
-      const newDonation = DataStore.addDonation({
-        donorName,
-        donorEmail,
-        amount,
-        currency: 'GBP',
-        cause,
-        paymentMethod: 'Card',
-      });
+      const receiptNo = `MITRA-REC-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
       trackDonation(amount, cause);
-      onSuccess(newDonation.receiptNo);
+      onSuccess(receiptNo);
     }
 
     setProcessing(false);
