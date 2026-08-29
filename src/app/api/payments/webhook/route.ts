@@ -99,22 +99,30 @@ export async function POST(req: NextRequest) {
               }
             }
 
+            // Ensure resolvedMemberId actually exists in Member table to prevent foreign key violation
+            if (resolvedMemberId) {
+              const memExists = await prisma.member.findUnique({ where: { id: resolvedMemberId } }).catch(() => null);
+              if (!memExists) resolvedMemberId = null;
+            }
+
             await prisma.payment.update({
               where: { id: existing.id },
               data: { status: 'Completed', memberId: resolvedMemberId },
             });
           } else {
             // Fallback: create from PaymentIntent metadata (edge case if DB write failed earlier)
-            // memberId in metadata was set from the auth token at create-session time.
-            // Email-based member lookup is only used when memberId is absent (guest payments).
             const meta = pi.metadata || {};
             const metaEmail = meta.customerEmail || '';
 
-            // Try to resolve memberId from email
-            let resolvedMemberId = meta.memberId || null;
+            // Try to resolve memberId from email or metadata
+            let resolvedMemberId: string | null = null;
+            if (meta.memberId) {
+              const memById = await prisma.member.findUnique({ where: { id: meta.memberId } }).catch(() => null);
+              if (memById) resolvedMemberId = memById.id;
+            }
             if (!resolvedMemberId && metaEmail) {
-              const member = await prisma.member.findUnique({ where: { email: metaEmail } });
-              if (member) resolvedMemberId = member.id;
+              const memByEmail = await prisma.member.findUnique({ where: { email: metaEmail } }).catch(() => null);
+              if (memByEmail) resolvedMemberId = memByEmail.id;
             }
 
             await prisma.payment.create({

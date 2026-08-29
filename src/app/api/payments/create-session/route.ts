@@ -38,23 +38,6 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-    const cookieStore = await cookies();
-    const token = cookieStore.get('mitra_token')?.value;
-
-    if (!token) {
-      return NextResponse.json({ success: false, error: 'Not authenticated.' }, { status: 401 });
-    }
-
-    const payload = verifyToken(token);
-    if (!payload || !payload.id) {
-      return NextResponse.json({ success: false, error: 'Invalid session.' }, { status: 401 });
-    }
-
-    const userId = payload.id as string;
-    const userRole = payload.role as string | undefined;
-    if (userRole === 'Admin') {
-      return NextResponse.json({ success: false, error: 'Admin cannot make Donation themselves.' }, { status: 401 });
-    }
 
     const numAmount = Number(amount);
     if (isNaN(numAmount) || numAmount < 0.5) {
@@ -62,6 +45,67 @@ export async function POST(request: Request) {
         { success: false, error: 'Amount must be at least £0.50' },
         { status: 400 }
       );
+    }
+
+    // ── Check Auth Token if present ──────────────────────────────────────────
+    const cookieStore = await cookies();
+    const token = cookieStore.get('mitra_token')?.value;
+    let userId: string | null = null;
+
+    if (token) {
+      const payload = verifyToken(token);
+      if (payload && payload.id) {
+        userId = payload.id as string;
+      }
+    }
+
+    // ── Resolve valid Member ID (strictly preventing foreign key violation) ──
+    let validMemberId: string | null = null;
+
+    if (userId) {
+      const existingMemberById = await prisma.member
+        .findUnique({
+          where: { id: userId },
+        })
+        .catch(() => null);
+
+      if (existingMemberById) {
+        validMemberId = existingMemberById.id;
+      }
+    }
+
+    // Fallback: If not found by ID, look up by customerEmail in Member table
+    if (!validMemberId && customerEmail) {
+      const normalEmail = customerEmail.toLowerCase().trim();
+      const existingMemberByEmail = await prisma.member
+        .findUnique({
+          where: { email: normalEmail },
+        })
+        .catch(() => null);
+
+      if (existingMemberByEmail) {
+        validMemberId = existingMemberByEmail.id;
+      } else {
+        // Automatically create a Member record for the devotee so their profile is saved
+        try {
+          const newMember = await prisma.member.create({
+            data: {
+              fullName: (primaryDevoteeName || customerName).trim(),
+              email: normalEmail,
+              phone: customerPhone ? customerPhone.trim() : '',
+              tier: 'Annual Member',
+              status: 'Active',
+              role: 'Member',
+              startDate: new Date().toISOString().split('T')[0],
+              expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            },
+          });
+          validMemberId = newMember.id;
+        } catch (memErr) {
+          console.warn('[create-session] Could not create member record, leaving memberId null:', memErr);
+          validMemberId = null;
+        }
+      }
     }
 
     // ── Resolve active Stripe Secret Key (DB overrides env) ──────────────────
@@ -97,14 +141,6 @@ export async function POST(request: Request) {
       apiVersion: '2026-07-29.dahlia',
     });
 
-    let memberId = userId;
-    if (!memberId) {
-      return NextResponse.json(
-        { success: false, error: 'Not authenticated.' },
-        { status: 401 }
-      );
-    }
-
     // ── Create Stripe PaymentIntent ───────────────────────────────────────────
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(numAmount * 100), // Stripe uses pence
@@ -116,7 +152,7 @@ export async function POST(request: Request) {
         customerEmail,
         customerPhone: customerPhone || '',
         paymentMethod: paymentMethod || 'Stripe Card',
-        memberId: memberId || '',
+        memberId: validMemberId || '',
         eventId: eventId || '',
         eventName: eventName || '',
         donationType: donationType || '',
@@ -144,7 +180,7 @@ export async function POST(request: Request) {
           description: description || 'MITRA Community Contribution',
           paymentMethod: paymentMethod || 'Stripe Card',
           stripePaymentIntentId: paymentIntent.id,
-          memberId,
+          memberId: validMemberId, // Guaranteed to exist in Member table or be null
           eventId: eventId || null,
           eventName: eventName || null,
           donationType: donationType ? String(donationType).toLowerCase().trim() : null,
@@ -158,7 +194,7 @@ export async function POST(request: Request) {
         },
       });
     } catch (dbErr) {
-      console.error('Failed to persist pending payment record:', dbErr);
+      console.error('[create-session] Failed to persist pending payment record:', dbErr);
     }
 
     return NextResponse.json({
@@ -168,7 +204,7 @@ export async function POST(request: Request) {
     });
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : 'Payment session creation failed';
-    console.error('create-session error:', errorMessage);
+    console.error('[create-session] error:', errorMessage);
     return NextResponse.json({ success: false, error: errorMessage }, { status: 500 });
   }
 }
