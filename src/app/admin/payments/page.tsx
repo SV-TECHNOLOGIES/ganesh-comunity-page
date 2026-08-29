@@ -38,6 +38,7 @@ interface PaymentItem {
   description: string;
   paymentMethod: string;
   stripePaymentIntentId?: string | null;
+  memberId?: string | null;
   eventId?: string | null;
   eventName?: string | null;
   donationType?: string | null;
@@ -183,7 +184,7 @@ export default function AdminPaymentsPage() {
 
   const exportPaymentsCSV = () => {
     const csvRows = [
-      'Payment ID,Event,Donation Type,Customer Name,Primary Devotee,Email,Phone,Pooja Date,Pooja Day,Pooja Title,Gotram,Priest Sankalpam,Special Wishes,Description,Amount (£),Currency,Payment Method,Status,Date',
+      'Payment ID,Member ID,Event,Donation Type,Customer Name,Primary Devotee,Email,Phone,Pooja Date,Pooja Day,Pooja Title,Gotram,Priest Sankalpam,Special Wishes,Description,Amount (£),Currency,Payment Method,Status,Date',
     ];
     filteredPayments.forEach((p) => {
       const eventName = (p.eventName || 'London Ganesh Mahotsav 2026').replace(/"/g, '""');
@@ -197,9 +198,10 @@ export default function AdminPaymentsPage() {
       const pDesc = (p.description || '').replace(/"/g, '""');
       const cName = (p.customerName || '').replace(/"/g, '""');
       const devName = (p.primaryDevoteeName || cName).replace(/"/g, '""');
+      const mId = p.memberId || '';
 
       csvRows.push(
-        `"${p.id}","${eventName}","${dType}","${cName}","${devName}","${p.customerEmail}","${p.customerPhone || ''}","${pDate}","${pDay}","${pTitle}","${pGotram}","${pFamily}","${pWishes}","${pDesc}",${p.amount},"${p.currency}","${p.paymentMethod}","${p.status}","${p.createdAt}"`
+        `"${p.id}","${mId}","${eventName}","${dType}","${cName}","${devName}","${p.customerEmail}","${p.customerPhone || ''}","${pDate}","${pDay}","${pTitle}","${pGotram}","${pFamily}","${pWishes}","${pDesc}",${p.amount},"${p.currency}","${p.paymentMethod}","${p.status}","${p.createdAt}"`
       );
     });
     const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
@@ -724,6 +726,15 @@ export default function AdminPaymentsPage() {
                   {selectedPaymentDetail.eventName || 'London Ganesh Mahotsav 2026'}
                 </span>
               </div>
+
+              {selectedPaymentDetail.memberId && (
+                <div className="flex justify-between border-b border-[#E65C00]/10 pb-2">
+                  <span className="text-[#6B3A2A] font-semibold">Member ID:</span>
+                  <span className="font-mono font-bold text-[#E65C00] text-right">
+                    {selectedPaymentDetail.memberId}
+                  </span>
+                </div>
+              )}
 
               <div className="flex justify-between border-b border-[#E65C00]/10 pb-2">
                 <span className="text-[#6B3A2A] font-semibold">Primary Devotee / Yajamani:</span>

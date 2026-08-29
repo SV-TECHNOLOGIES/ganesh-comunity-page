@@ -68,7 +68,6 @@ model Member {
   startDate    String?
   expiryDate   String?
   notes        String?
-  payments     Payment[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }
@@ -131,8 +130,7 @@ model Payment {
   description           String   // "Donation to Student Fund", "Mahotsav VIP Ticket", etc.
   paymentMethod         String   @default("Stripe Card")
   stripePaymentIntentId String?
-  memberId              String?
-  member                Member?  @relation(fields: [memberId], references: [id], onDelete: SetNull)
+  memberId              String?  // Plain standalone string identifier (no foreign key constraint)
 
   // ── Event & Donation Classification (flexible string, no enum) ─────────
   eventId               String?  // e.g. "evt-ganesh-chaturthi"

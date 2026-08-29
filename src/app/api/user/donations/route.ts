@@ -25,20 +25,14 @@ export async function GET() {
     const userId = payload.id as string;
     const userEmail = payload.email as string | undefined;
 
-    // Query payments linked to this member by auth token id (primary)
-    // Also include payments matched by email for guest payments already in the DB
+    // Query payments linked to this devotee by memberId or email
     try {
       const payments = await prisma.payment.findMany({
         where: {
           OR: [
-            { memberId: userId },
+            ...(userId ? [{ memberId: userId }] : []),
             ...(userEmail ? [{ customerEmail: userEmail }] : []),
           ],
-        },
-        include: {
-          member: {
-            select: { id: true, fullName: true, email: true },
-          },
         },
         orderBy: { createdAt: 'desc' },
       });
@@ -56,13 +50,22 @@ export async function GET() {
           description: p.description,
           paymentMethod: p.paymentMethod,
           memberId: p.memberId,
+          eventId: p.eventId,
+          eventName: p.eventName,
+          donationType: p.donationType,
+          poojaDate: p.poojaDate,
+          poojaDay: p.poojaDay,
+          poojaTitle: p.poojaTitle,
+          gotram: p.gotram,
+          familyMembers: p.familyMembers,
+          primaryDevoteeName: p.primaryDevoteeName,
           createdAt: typeof p.createdAt === 'string' ? p.createdAt : p.createdAt.toISOString(),
           ticketToken: generateTicketToken(p.id),
         }));
         return NextResponse.json({ success: true, source: 'prisma', data: enriched });
       }
     } catch {
-      // DB unavailable — fall through to demo
+      // DB unavailable
     }
 
 

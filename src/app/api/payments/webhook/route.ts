@@ -79,64 +79,63 @@ export async function POST(req: NextRequest) {
         const pi = event.data.object as Stripe.PaymentIntent;
         console.log(`[Webhook] PaymentIntent succeeded: ${pi.id}`);
 
-        // Try to update existing pending record, or create a new one from metadata
+        const meta = pi.metadata || {};
+        const emailToLookup = (meta.customerEmail || pi.receipt_email || '').toLowerCase().trim();
+
+        // 1. Resolve memberId by looking up email first, then fallback to metadata
+        let resolvedMemberId: string | null = null;
+
+        if (emailToLookup) {
+          try {
+            const memberByEmail = await prisma.member.findUnique({
+              where: { email: emailToLookup },
+            });
+            if (memberByEmail) {
+              resolvedMemberId = memberByEmail.id;
+              console.log(`[Webhook] Resolved memberId by email (${emailToLookup}) -> ${resolvedMemberId}`);
+            }
+          } catch (memErr) {
+            console.warn(`[Webhook] Email member lookup notice:`, memErr);
+          }
+        }
+
+        // If not found by email, use from metadata
+        if (!resolvedMemberId && meta.memberId) {
+          resolvedMemberId = String(meta.memberId).trim();
+          console.log(`[Webhook] Used memberId from metadata -> ${resolvedMemberId}`);
+        }
+
+        // Try to update existing pending record, or create a new one
         try {
           const existing = await prisma.payment.findFirst({
             where: { stripePaymentIntentId: pi.id },
           });
 
           if (existing) {
-            // memberId on the existing record was set from the auth token at create-session time.
-            // Only fall back to email lookup for legacy records where memberId was never set.
-            let resolvedMemberId = existing.memberId;
-            if (!resolvedMemberId && existing.customerEmail) {
-              const member = await prisma.member.findUnique({
-                where: { email: existing.customerEmail },
-              });
-              if (member) {
-                resolvedMemberId = member.id;
-                console.log(`[Webhook] Resolved memberId by email for payment ${existing.id}: ${member.fullName}`);
-              }
-            }
-
-            // Ensure resolvedMemberId actually exists in Member table to prevent foreign key violation
-            if (resolvedMemberId) {
-              const memExists = await prisma.member.findUnique({ where: { id: resolvedMemberId } }).catch(() => null);
-              if (!memExists) resolvedMemberId = null;
-            }
-
             await prisma.payment.update({
               where: { id: existing.id },
-              data: { status: 'Completed', memberId: resolvedMemberId },
+              data: {
+                status: 'Completed',
+                ...(resolvedMemberId ? { memberId: resolvedMemberId } : {}),
+              },
             });
+            console.log(`[Webhook] Updated existing payment record ${existing.id} to Completed (memberId=${resolvedMemberId || existing.memberId || 'null'})`);
           } else {
             // Fallback: create from PaymentIntent metadata (edge case if DB write failed earlier)
-            const meta = pi.metadata || {};
-            const metaEmail = meta.customerEmail || '';
+            const metaEmail = meta.customerEmail || pi.receipt_email || '';
 
-            // Try to resolve memberId from email or metadata
-            let resolvedMemberId: string | null = null;
-            if (meta.memberId) {
-              const memById = await prisma.member.findUnique({ where: { id: meta.memberId } }).catch(() => null);
-              if (memById) resolvedMemberId = memById.id;
-            }
-            if (!resolvedMemberId && metaEmail) {
-              const memByEmail = await prisma.member.findUnique({ where: { email: metaEmail } }).catch(() => null);
-              if (memByEmail) resolvedMemberId = memByEmail.id;
-            }
-
-            await prisma.payment.create({
+            const created = await prisma.payment.create({
               data: {
                 amount: pi.amount / 100,
                 currency: pi.currency.toUpperCase(),
                 status: 'Completed',
-                customerName: meta.customerName || 'Unknown',
+                customerName: meta.customerName || 'Unknown Devotee',
                 customerEmail: metaEmail,
                 customerPhone: meta.customerPhone || null,
                 description: pi.description || 'MITRA Community Contribution',
                 paymentMethod: meta.paymentMethod || 'Stripe',
                 stripePaymentIntentId: pi.id,
-                memberId: resolvedMemberId,
+                memberId: resolvedMemberId || meta.memberId || null,
                 eventId: meta.eventId || null,
                 eventName: meta.eventName || null,
                 donationType: meta.donationType ? String(meta.donationType).toLowerCase().trim() : null,
@@ -145,9 +144,11 @@ export async function POST(req: NextRequest) {
                 poojaTitle: meta.poojaTitle || null,
                 gotram: meta.gotram || null,
                 familyMembers: meta.familyMembers || null,
+                specialWishes: meta.specialWishes || null,
                 primaryDevoteeName: meta.primaryDevoteeName || meta.customerName || null,
               },
             });
+            console.log(`[Webhook] Fallback created payment record ${created.id} (memberId=${resolvedMemberId || 'null'})`);
           }
         } catch (dbErr) {
           console.error('[Webhook] DB update error on succeeded:', dbErr);

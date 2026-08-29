@@ -65,46 +65,18 @@ export async function POST(request: Request) {
     }
 
     // ── Member Login ────────────────────────────────────────────────────────
-    const member = await prisma.member.findUnique({ where: { email } }).catch(() => null);
+    const member = await prisma.member
+      .findUnique({ where: { email: email.toLowerCase().trim() } })
+      .catch(() => null);
 
     let memberMatched = false;
 
     if (member && member.passwordHash) {
-      // Try bcrypt first, then legacy plain-text
+      // Support bcrypt hash and legacy plain-text password
       const bcryptMatch = await verifyPassword(password, member.passwordHash).catch(() => false);
       const legacyMatch = member.passwordHash === password || password === 'pass123';
       memberMatched = bcryptMatch || legacyMatch;
     }
-
-    // Fallback demo member — look up real DB record first
-    if (!memberMatched && email === 'member@mitra.org.uk' && password === 'pass123') {
-      // Try to get the real member from DB so the id is correct
-      const demoMember = await prisma.member.findUnique({ where: { email: 'member@mitra.org.uk' } }).catch(() => null);
-
-      const userPayload = {
-        id: demoMember?.id || 'MITRA-MEM-DEMO',
-        email: 'member@mitra.org.uk',
-        role: 'Member' as const,
-        fullName: demoMember?.fullName || 'Mahesh Babu G',
-        tier: demoMember?.tier || 'Life Member',
-        phone: demoMember?.phone || '+44 7890 123456',
-        status: demoMember?.status || 'Active',
-        expiryDate: 'Lifetime',
-      };
-
-      const token = signToken({ id: userPayload.id, email: userPayload.email, role: 'Member', tier: userPayload.tier });
-      const response = NextResponse.json({ success: true, role: 'Member', user: userPayload });
-
-      response.cookies.set('mitra_token', token, {
-        httpOnly: true,
-        path: '/',
-        maxAge: 60 * 60 * 24 * 30,
-        sameSite: 'lax',
-      });
-
-      return response;
-    }
-
 
     if (!memberMatched || !member) {
       return NextResponse.json(

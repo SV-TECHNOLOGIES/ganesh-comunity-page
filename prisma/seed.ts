@@ -221,7 +221,6 @@ async function main() {
         customerPhone: '+44 7890 123456',
         description: 'Donation — Ganesh Mahotsav 2026 Seva Fund',
         paymentMethod: 'Stripe Card',
-        memberId: 'MITRA-MEM-5001',
         stripePaymentIntentId: 'pi_3Mxt5k2eZvKYlo2C01a2b3c4',
       },
       {
@@ -234,7 +233,6 @@ async function main() {
         customerPhone: '+44 7890 123456',
         description: 'Pooja Booking — Ganesh Chaturthi Morning Slot',
         paymentMethod: 'Stripe ApplePay',
-        memberId: 'MITRA-MEM-5001',
         stripePaymentIntentId: 'pi_3Mxt9x2eZvKYlo2C05d6e7f8',
       },
       {
@@ -247,7 +245,6 @@ async function main() {
         customerPhone: '+44 7700 987654',
         description: 'Life Membership Plan Registration',
         paymentMethod: 'Stripe Card',
-        memberId: 'MITRA-MEM-5002',
         stripePaymentIntentId: 'pi_3Myu122eZvKYlo2C09g0h1i2',
       },
       {
