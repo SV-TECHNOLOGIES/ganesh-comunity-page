@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useTransition } from 'react';
 import Link from 'next/link';
 import {
   CreditCard,
-  DollarSign,
   ArrowLeft,
   Settings,
   CheckCircle,
@@ -20,11 +19,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Flame,
-  User,
-  Mail,
-  Phone,
-  Calendar,
-  Sparkles,
+  Clock,
+  CheckCircle2,
+  AlertTriangle,
+  BadgePercent,
 } from 'lucide-react';
 
 interface PaymentItem {
@@ -52,6 +50,24 @@ interface PaymentItem {
   createdAt: string;
 }
 
+interface PaymentStats {
+  completedTotal: number;
+  completedCount: number;
+  pendingTotal: number;
+  pendingCount: number;
+  failedTotal: number;
+  failedCount: number;
+  totalRevenue: number;
+  totalCount: number;
+}
+
+interface PaginationMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 interface PaymentSettingsData {
   stripePublishableKey: string;
   stripeSecretKey: string;
@@ -62,6 +78,23 @@ interface PaymentSettingsData {
 export default function AdminPaymentsPage() {
   const [activeTab, setActiveTab] = useState<'ledger' | 'settings'>('ledger');
   const [payments, setPayments] = useState<PaymentItem[]>([]);
+  const [stats, setStats] = useState<PaymentStats>({
+    completedTotal: 0,
+    completedCount: 0,
+    pendingTotal: 0,
+    pendingCount: 0,
+    failedTotal: 0,
+    failedCount: 0,
+    totalRevenue: 0,
+    totalCount: 0,
+  });
+  const [pagination, setPagination] = useState<PaginationMeta>({
+    total: 0,
+    page: 1,
+    limit: 10,
+    totalPages: 1,
+  });
+
   const [settings, setSettings] = useState<PaymentSettingsData>({
     stripePublishableKey: 'pk_test_mitra_default_key',
     stripeSecretKey: 'sk_test_mitra_default_key',
@@ -69,23 +102,42 @@ export default function AdminPaymentsPage() {
     activeAccountName: 'MITRA Main UK Account (Stripe/Barclays)',
   });
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
   const [savingSettings, setSavingSettings] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
-  // Search & Filter state
+  // Search & Filter state (applied at DB level)
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [selectedPaymentDetail, setSelectedPaymentDetail] = useState<PaymentItem | null>(null);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
 
-  const fetchPaymentsData = async () => {
+  // Debounce search input
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setCurrentPage(1);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  const fetchPaymentsData = useCallback(async () => {
     setLoading(true);
     try {
+      const params = new URLSearchParams();
+      params.set('page', String(currentPage));
+      params.set('limit', String(itemsPerPage));
+      if (debouncedSearch) params.set('search', debouncedSearch);
+      if (typeFilter !== 'all') params.set('type', typeFilter);
+      if (statusFilter !== 'all') params.set('status', statusFilter);
+
       const [resPay, resSet] = await Promise.all([
-        fetch('/api/admin/payments', { cache: 'no-store' }),
+        fetch(`/api/admin/payments?${params.toString()}`, { cache: 'no-store' }),
         fetch('/api/admin/payment-settings', { cache: 'no-store' }),
       ]);
       const dataPay = await resPay.json();
@@ -93,6 +145,8 @@ export default function AdminPaymentsPage() {
 
       if (dataPay.success && Array.isArray(dataPay.data)) {
         setPayments(dataPay.data);
+        if (dataPay.stats) setStats(dataPay.stats);
+        if (dataPay.pagination) setPagination(dataPay.pagination);
       }
       if (dataSet.success && dataSet.data) {
         setSettings(dataSet.data);
@@ -102,11 +156,11 @@ export default function AdminPaymentsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, itemsPerPage, debouncedSearch, typeFilter, statusFilter]);
 
   useEffect(() => {
     fetchPaymentsData();
-  }, []);
+  }, [fetchPaymentsData]);
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,86 +187,59 @@ export default function AdminPaymentsPage() {
     }
   };
 
-  // Filtered Payments
-  const filteredPayments = payments.filter((p) => {
-    const q = searchQuery.toLowerCase().trim();
+  const exportPaymentsCSV = async () => {
+    setExporting(true);
+    try {
+      // Fetch all matching records from DB for export
+      const params = new URLSearchParams();
+      params.set('exportAll', 'true');
+      if (debouncedSearch) params.set('search', debouncedSearch);
+      if (typeFilter !== 'all') params.set('type', typeFilter);
+      if (statusFilter !== 'all') params.set('status', statusFilter);
 
-    // Type filtering
-    const dType = (p.donationType || (p.description?.toLowerCase().includes('pooja') ? 'pooja' : p.description?.toLowerCase().includes('anadanam') || p.description?.toLowerCase().includes('annadanam') ? 'anadanam' : 'event donation')).toLowerCase();
-    const matchesType = typeFilter === 'all' || dType.includes(typeFilter.toLowerCase());
+      const res = await fetch(`/api/admin/payments?${params.toString()}`);
+      const json = await res.json();
+      const exportList: PaymentItem[] = json.success && Array.isArray(json.data) ? json.data : payments;
 
-    if (!matchesType) return false;
-    if (!q) return true;
+      const csvRows = [
+        'Payment ID,Member ID,Event,Donation Type,Customer Name,Primary Devotee,Email,Phone,Pooja Date,Pooja Day,Pooja Title,Gotram,Priest Sankalpam,Special Wishes,Description,Amount (£),Currency,Payment Method,Status,Date',
+      ];
+      exportList.forEach((p) => {
+        const eventName = (p.eventName || 'London Ganesh Mahotsav 2026').replace(/"/g, '""');
+        const dType = (p.donationType || 'Donation').toUpperCase();
+        const pDate = p.poojaDate || '';
+        const pDay = p.poojaDay || '';
+        const pTitle = (p.poojaTitle || '').replace(/"/g, '""');
+        const pGotram = (p.gotram || '').replace(/"/g, '""');
+        const pFamily = (p.familyMembers || '').replace(/"/g, '""');
+        const pWishes = (p.specialWishes || '').replace(/"/g, '""');
+        const pDesc = (p.description || '').replace(/"/g, '""');
+        const cName = (p.customerName || '').replace(/"/g, '""');
+        const devName = (p.primaryDevoteeName || cName).replace(/"/g, '""');
+        const mId = p.memberId || '';
 
-    const nameStr = (p.customerName || '').toLowerCase();
-    const devoteeStr = (p.primaryDevoteeName || '').toLowerCase();
-    const emailStr = (p.customerEmail || '').toLowerCase();
-    const phoneStr = (p.customerPhone || '').toLowerCase();
-    const descStr = (p.description || '').toLowerCase();
-    const eventStr = (p.eventName || '').toLowerCase();
-    const gotramStr = (p.gotram || '').toLowerCase();
-    const familyStr = (p.familyMembers || '').toLowerCase();
-    const idStr = (p.id || '').toLowerCase();
-
-    return (
-      nameStr.includes(q) ||
-      devoteeStr.includes(q) ||
-      emailStr.includes(q) ||
-      phoneStr.includes(q) ||
-      descStr.includes(q) ||
-      eventStr.includes(q) ||
-      gotramStr.includes(q) ||
-      familyStr.includes(q) ||
-      idStr.includes(q)
-    );
-  });
-
-  // Reset to page 1 on query/filter change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, typeFilter, itemsPerPage]);
-
-  // Pagination calculations
-  const totalItems = filteredPayments.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
-  const validCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
-  const startIndex = (validCurrentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-  const paginatedPayments = filteredPayments.slice(startIndex, endIndex);
-
-  const totalRevenue = payments.reduce((acc, p) => acc + (p.amount || 0), 0);
-
-  const exportPaymentsCSV = () => {
-    const csvRows = [
-      'Payment ID,Member ID,Event,Donation Type,Customer Name,Primary Devotee,Email,Phone,Pooja Date,Pooja Day,Pooja Title,Gotram,Priest Sankalpam,Special Wishes,Description,Amount (£),Currency,Payment Method,Status,Date',
-    ];
-    filteredPayments.forEach((p) => {
-      const eventName = (p.eventName || 'London Ganesh Mahotsav 2026').replace(/"/g, '""');
-      const dType = (p.donationType || 'Donation').toUpperCase();
-      const pDate = p.poojaDate || '';
-      const pDay = p.poojaDay || '';
-      const pTitle = (p.poojaTitle || '').replace(/"/g, '""');
-      const pGotram = (p.gotram || '').replace(/"/g, '""');
-      const pFamily = (p.familyMembers || '').replace(/"/g, '""');
-      const pWishes = (p.specialWishes || '').replace(/"/g, '""');
-      const pDesc = (p.description || '').replace(/"/g, '""');
-      const cName = (p.customerName || '').replace(/"/g, '""');
-      const devName = (p.primaryDevoteeName || cName).replace(/"/g, '""');
-      const mId = p.memberId || '';
-
-      csvRows.push(
-        `"${p.id}","${mId}","${eventName}","${dType}","${cName}","${devName}","${p.customerEmail}","${p.customerPhone || ''}","${pDate}","${pDay}","${pTitle}","${pGotram}","${pFamily}","${pWishes}","${pDesc}",${p.amount},"${p.currency}","${p.paymentMethod}","${p.status}","${p.createdAt}"`
-      );
-    });
-    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `MITRA_Payments_Ledger_${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+        csvRows.push(
+          `"${p.id}","${mId}","${eventName}","${dType}","${cName}","${devName}","${p.customerEmail}","${p.customerPhone || ''}","${pDate}","${pDay}","${pTitle}","${pGotram}","${pFamily}","${pWishes}","${pDesc}",${p.amount},"${p.currency}","${p.paymentMethod}","${p.status}","${p.createdAt}"`
+        );
+      });
+      const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `MITRA_Payments_Ledger_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch (err) {
+      console.error('Export CSV error:', err);
+      alert('Failed to export CSV.');
+    } finally {
+      setExporting(false);
+    }
   };
+
+  const startIndex = pagination.total > 0 ? (pagination.page - 1) * pagination.limit + 1 : 0;
+  const endIndex = Math.min(pagination.page * pagination.limit, pagination.total);
 
   return (
     <div className="min-h-screen bg-[#FFF8F0] text-[#3D1A00] p-4 sm:p-8 space-y-8">
@@ -245,7 +272,7 @@ export default function AdminPaymentsPage() {
             }`}
           >
             <CreditCard className="w-4 h-4" />
-            <span>Payments Ledger ({payments.length})</span>
+            <span>Payments Ledger ({stats.totalCount})</span>
           </button>
 
           <button
@@ -262,44 +289,115 @@ export default function AdminPaymentsPage() {
         </div>
       </div>
 
-      {/* Summary KPI Cards */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="temple-card bg-white p-6 rounded-3xl border border-[#E65C00]/25 space-y-2 shadow-sm">
+      {/* Summary KPI Cards - Separate Pending and Completed Totals */}
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        
+        {/* Card 1: Completed Revenue & Bookings */}
+        <div 
+          onClick={() => { setStatusFilter(statusFilter === 'Completed' ? 'all' : 'Completed'); setCurrentPage(1); }}
+          className={`temple-card bg-white p-5 rounded-3xl border transition-all cursor-pointer shadow-sm hover:shadow-md ${
+            statusFilter === 'Completed' ? 'ring-2 ring-emerald-500 border-emerald-500 bg-emerald-50/30' : 'border-emerald-500/30 hover:border-emerald-500'
+          }`}
+        >
           <div className="flex justify-between items-center text-[#6B3A2A]">
-            <span className="text-xs uppercase font-bold tracking-wider">Total Received Revenue</span>
-            <DollarSign className="w-5 h-5 text-[#E65C00]" />
+            <span className="text-[11px] uppercase font-bold tracking-wider text-emerald-700">
+              Completed Revenue
+            </span>
+            <div className="p-2 bg-emerald-100/80 rounded-xl text-emerald-600">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
           </div>
-          <span className="text-3xl font-black font-cinzel text-[#E65C00]">
-            £{totalRevenue.toFixed(2)}
-          </span>
-          <span className="text-[10px] text-[#6B3A2A] block font-medium">
-            Directly deposited to active Stripe account
-          </span>
+          <div className="mt-2 space-y-1">
+            <span className="text-2xl sm:text-3xl font-black font-cinzel text-emerald-700 block">
+              £{stats.completedTotal.toFixed(2)}
+            </span>
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="font-bold text-emerald-700">
+                {stats.completedCount} Completed
+              </span>
+              <span className="text-[10px] text-emerald-600/90 font-medium">
+                {statusFilter === 'Completed' ? '● Filter Active' : 'Click to filter'}
+              </span>
+            </div>
+          </div>
         </div>
 
-        <div className="temple-card bg-white p-6 rounded-3xl border border-[#E65C00]/25 space-y-2 shadow-sm">
+        {/* Card 2: Pending Revenue & Bookings */}
+        <div 
+          onClick={() => { setStatusFilter(statusFilter === 'Pending' ? 'all' : 'Pending'); setCurrentPage(1); }}
+          className={`temple-card bg-white p-5 rounded-3xl border transition-all cursor-pointer shadow-sm hover:shadow-md ${
+            statusFilter === 'Pending' ? 'ring-2 ring-amber-500 border-amber-500 bg-amber-50/30' : 'border-amber-500/30 hover:border-amber-500'
+          }`}
+        >
           <div className="flex justify-between items-center text-[#6B3A2A]">
-            <span className="text-xs uppercase font-bold tracking-wider">Total Transactions</span>
-            <CreditCard className="w-5 h-5 text-[#E65C00]" />
+            <span className="text-[11px] uppercase font-bold tracking-wider text-amber-700">
+              Pending / In-Flight
+            </span>
+            <div className="p-2 bg-amber-100/80 rounded-xl text-amber-600">
+              <Clock className="w-4 h-4" />
+            </div>
           </div>
-          <span className="text-3xl font-black font-cinzel text-[#3D1A00]">{payments.length}</span>
-          <span className="text-[10px] text-emerald-600 block font-semibold">
-            100% Successful Stripe Charges
-          </span>
+          <div className="mt-2 space-y-1">
+            <span className="text-2xl sm:text-3xl font-black font-cinzel text-amber-600 block">
+              £{stats.pendingTotal.toFixed(2)}
+            </span>
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="font-bold text-amber-700">
+                {stats.pendingCount} Pending Bookings
+              </span>
+              <span className="text-[10px] text-amber-600/90 font-medium">
+                {statusFilter === 'Pending' ? '● Filter Active' : 'Click to filter'}
+              </span>
+            </div>
+          </div>
         </div>
 
-        <div className="temple-card bg-white p-6 rounded-3xl border border-[#E65C00]/25 space-y-2 shadow-sm">
+        {/* Card 3: Total Recorded Ledger */}
+        <div 
+          onClick={() => { setStatusFilter('all'); setCurrentPage(1); }}
+          className={`temple-card bg-white p-5 rounded-3xl border transition-all cursor-pointer shadow-sm hover:shadow-md ${
+            statusFilter === 'all' ? 'border-[#E65C00]/30 ring-1 ring-[#E65C00]/20' : 'border-[#E65C00]/25'
+          }`}
+        >
           <div className="flex justify-between items-center text-[#6B3A2A]">
-            <span className="text-xs uppercase font-bold tracking-wider">Active Stripe Payout Account</span>
-            <Building className="w-5 h-5 text-[#E65C00]" />
+            <span className="text-[11px] uppercase font-bold tracking-wider">Total Recorded Ledger</span>
+            <div className="p-2 bg-[#FFF0E0] rounded-xl text-[#E65C00]">
+              <CreditCard className="w-4 h-4" />
+            </div>
           </div>
-          <span className="text-sm font-bold text-[#E65C00] truncate block">
-            {settings.activeAccountName}
-          </span>
-          <span className="text-[10px] text-[#6B3A2A] block font-medium">
-            Currency: {settings.currency} (GBP)
-          </span>
+          <div className="mt-2 space-y-1">
+            <span className="text-2xl sm:text-3xl font-black font-cinzel text-[#3D1A00] block">
+              £{stats.totalRevenue.toFixed(2)}
+            </span>
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="font-bold text-[#6B3A2A]">
+                {stats.totalCount} Total Transactions
+              </span>
+              <span className="text-[10px] text-[#E65C00] font-medium">
+                All records
+              </span>
+            </div>
+          </div>
         </div>
+
+        {/* Card 4: Active Stripe Payout Account */}
+        <div className="temple-card bg-white p-5 rounded-3xl border border-[#E65C00]/25 space-y-2 shadow-sm">
+          <div className="flex justify-between items-center text-[#6B3A2A]">
+            <span className="text-[11px] uppercase font-bold tracking-wider">Payout Account</span>
+            <div className="p-2 bg-[#FFF0E0] rounded-xl text-[#E65C00]">
+              <Building className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-2 space-y-1">
+            <span className="text-sm font-bold text-[#E65C00] truncate block" title={settings.activeAccountName}>
+              {settings.activeAccountName}
+            </span>
+            <span className="text-[11px] text-[#6B3A2A] block font-medium">
+              Currency: <strong>{settings.currency} (GBP)</strong>
+            </span>
+          </div>
+        </div>
+
       </div>
 
       {/* Main Content Area */}
@@ -314,7 +412,7 @@ export default function AdminPaymentsPage() {
                   RECENT PAYMENTS &amp; SANKALPAM LEDGER
                 </h3>
                 <p className="text-xs text-[#6B3A2A] font-semibold">
-                  Detailed logs of all devotee pooja bookings, Gotrams, priest Sankalpam family names, and donations.
+                  Detailed logs of devotee pooja bookings, Gotrams, priest Sankalpam family names, and donations.
                 </p>
               </div>
 
@@ -331,17 +429,17 @@ export default function AdminPaymentsPage() {
 
                 <button
                   onClick={exportPaymentsCSV}
-                  disabled={filteredPayments.length === 0}
+                  disabled={exporting || pagination.total === 0}
                   className="gold-button px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow"
                 >
                   <Download className="w-4 h-4 text-white" />
-                  <span>Export CSV ({filteredPayments.length})</span>
+                  <span>{exporting ? 'Exporting...' : `Export CSV (${pagination.total})`}</span>
                 </button>
               </div>
             </div>
 
             {/* Filter & Controls Bar */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-[#FFF8F0] p-4 rounded-2xl border border-[#E65C00]/20">
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-[#FFF8F0] p-4 rounded-2xl border border-[#E65C00]/20">
               {/* Search Bar */}
               <div className="relative flex-1 max-w-md">
                 <Search className="w-4 h-4 text-[#E65C00] absolute left-3.5 top-3" />
@@ -355,15 +453,37 @@ export default function AdminPaymentsPage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                {/* Type Filter */}
+                {/* Status Filter */}
                 <div className="flex items-center gap-1.5 bg-white border border-[#E65C00]/30 rounded-xl px-3 py-1.5 text-xs">
                   <Filter className="w-3.5 h-3.5 text-[#E65C00]" />
+                  <span className="text-[#6B3A2A] font-semibold">Status:</span>
                   <select
-                    value={typeFilter}
-                    onChange={(e) => setTypeFilter(e.target.value)}
+                    value={statusFilter}
+                    onChange={(e) => {
+                      setStatusFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
                     className="bg-transparent text-[#3D1A00] font-bold focus:outline-none text-xs"
                   >
-                    <option value="all">All Types ({payments.length})</option>
+                    <option value="all">All Statuses ({stats.totalCount})</option>
+                    <option value="Completed">Completed ({stats.completedCount})</option>
+                    <option value="Pending">Pending ({stats.pendingCount})</option>
+                    <option value="Failed">Failed ({stats.failedCount})</option>
+                  </select>
+                </div>
+
+                {/* Type Filter */}
+                <div className="flex items-center gap-1.5 bg-white border border-[#E65C00]/30 rounded-xl px-3 py-1.5 text-xs">
+                  <span className="text-[#6B3A2A] font-semibold">Type:</span>
+                  <select
+                    value={typeFilter}
+                    onChange={(e) => {
+                      setTypeFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="bg-transparent text-[#3D1A00] font-bold focus:outline-none text-xs"
+                  >
+                    <option value="all">All Types</option>
                     <option value="pooja">Pooja Bookings</option>
                     <option value="anadanam">Annadanam Seva</option>
                     <option value="event donation">Event Donations</option>
@@ -376,7 +496,10 @@ export default function AdminPaymentsPage() {
                   <span>Show:</span>
                   <select
                     value={itemsPerPage}
-                    onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                    onChange={(e) => {
+                      setItemsPerPage(Number(e.target.value));
+                      setCurrentPage(1);
+                    }}
                     className="bg-transparent text-[#3D1A00] font-bold focus:outline-none text-xs"
                   >
                     <option value={10}>10 rows</option>
@@ -388,9 +511,55 @@ export default function AdminPaymentsPage() {
               </div>
             </div>
 
+            {/* Active Filters Pill Bar */}
+            {(statusFilter !== 'all' || typeFilter !== 'all' || debouncedSearch) && (
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <span className="text-[#6B3A2A] font-semibold">Active Filters:</span>
+                {statusFilter !== 'all' && (
+                  <span className="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full font-bold flex items-center gap-1 border border-emerald-300">
+                    <span>Status: {statusFilter}</span>
+                    <button onClick={() => { setStatusFilter('all'); setCurrentPage(1); }} className="hover:text-black">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+                {typeFilter !== 'all' && (
+                  <span className="bg-[#FFF0E0] text-[#E65C00] px-2.5 py-1 rounded-full font-bold flex items-center gap-1 border border-[#E65C00]/30">
+                    <span>Type: {typeFilter}</span>
+                    <button onClick={() => { setTypeFilter('all'); setCurrentPage(1); }} className="hover:text-black">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+                {debouncedSearch && (
+                  <span className="bg-slate-100 text-slate-800 px-2.5 py-1 rounded-full font-bold flex items-center gap-1 border border-slate-300">
+                    <span>Search: &ldquo;{debouncedSearch}&rdquo;</span>
+                    <button onClick={() => { setSearchQuery(''); setDebouncedSearch(''); setCurrentPage(1); }} className="hover:text-black">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+                <button
+                  onClick={() => {
+                    setStatusFilter('all');
+                    setTypeFilter('all');
+                    setSearchQuery('');
+                    setDebouncedSearch('');
+                    setCurrentPage(1);
+                  }}
+                  className="text-xs text-[#E65C00] font-bold hover:underline ml-2"
+                >
+                  Reset all filters
+                </button>
+              </div>
+            )}
+
             {/* Table */}
             {loading ? (
-              <div className="text-center py-12 text-[#6B3A2A]">Loading payment transactions...</div>
+              <div className="text-center py-12 text-[#6B3A2A] flex flex-col items-center gap-2">
+                <RefreshCw className="w-6 h-6 animate-spin text-[#E65C00]" />
+                <span>Loading payment ledger records from database...</span>
+              </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs text-[#6B3A2A]">
@@ -407,14 +576,14 @@ export default function AdminPaymentsPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#E65C00]/10">
-                    {paginatedPayments.length === 0 ? (
+                    {payments.length === 0 ? (
                       <tr>
                         <td colSpan={8} className="p-8 text-center text-[#6B3A2A]">
-                          No transactions found matching your filter criteria.
+                          No transactions found matching your database filter criteria.
                         </td>
                       </tr>
                     ) : (
-                      paginatedPayments.map((p) => {
+                      payments.map((p) => {
                         const dType =
                           p.donationType ||
                           (p.description?.toLowerCase().includes('pooja')
@@ -423,6 +592,9 @@ export default function AdminPaymentsPage() {
                               p.description?.toLowerCase().includes('annadanam')
                             ? 'anadanam'
                             : 'event donation');
+
+                        const isCompleted = p.status?.toLowerCase() === 'completed';
+                        const isPending = p.status?.toLowerCase() === 'pending';
 
                         return (
                           <tr key={p.id} className="hover:bg-[#FFF8F0]/60 transition-colors">
@@ -491,10 +663,22 @@ export default function AdminPaymentsPage() {
 
                             {/* Status */}
                             <td className="p-4">
-                              <span className="bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded-full text-[10px] border border-emerald-500/25 flex items-center gap-1 max-w-fit whitespace-nowrap">
-                                <CheckCircle className="w-3 h-3 text-emerald-600" />
-                                <span>{p.status}</span>
-                              </span>
+                              {isCompleted ? (
+                                <span className="bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded-full text-[10px] border border-emerald-500/25 flex items-center gap-1 max-w-fit whitespace-nowrap">
+                                  <CheckCircle className="w-3 h-3 text-emerald-600" />
+                                  <span>Completed</span>
+                                </span>
+                              ) : isPending ? (
+                                <span className="bg-amber-50 text-amber-700 font-bold px-2.5 py-1 rounded-full text-[10px] border border-amber-500/30 flex items-center gap-1 max-w-fit whitespace-nowrap">
+                                  <Clock className="w-3 h-3 text-amber-600" />
+                                  <span>Pending</span>
+                                </span>
+                              ) : (
+                                <span className="bg-rose-50 text-rose-700 font-bold px-2.5 py-1 rounded-full text-[10px] border border-rose-500/30 flex items-center gap-1 max-w-fit whitespace-nowrap">
+                                  <AlertTriangle className="w-3 h-3 text-rose-600" />
+                                  <span>{p.status || 'Failed'}</span>
+                                </span>
+                              )}
                             </td>
 
                             {/* Date */}
@@ -523,19 +707,19 @@ export default function AdminPaymentsPage() {
             )}
 
             {/* Pagination Controls */}
-            {totalItems > 0 && (
+            {pagination.total > 0 && (
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#FFF8F0] p-4 rounded-2xl border border-[#E65C00]/20 text-xs text-[#6B3A2A]">
                 <div>
-                  Showing <strong className="text-[#3D1A00]">{startIndex + 1}</strong> to{' '}
+                  Showing <strong className="text-[#3D1A00]">{startIndex}</strong> to{' '}
                   <strong className="text-[#3D1A00]">{endIndex}</strong> of{' '}
-                  <strong className="text-[#3D1A00]">{totalItems}</strong> transactions
+                  <strong className="text-[#3D1A00]">{pagination.total}</strong> transactions
                 </div>
 
                 <div className="flex items-center gap-1.5">
                   {/* Previous Page Button */}
                   <button
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    disabled={validCurrentPage === 1}
+                    disabled={pagination.page <= 1 || loading}
                     className="p-2 rounded-xl bg-white border border-[#E65C00]/30 hover:bg-[#FFF0E0] disabled:opacity-40 disabled:cursor-not-allowed text-[#3D1A00] transition-colors"
                     title="Previous Page"
                   >
@@ -544,9 +728,12 @@ export default function AdminPaymentsPage() {
 
                   {/* Page number buttons */}
                   <div className="flex items-center gap-1">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
                       .filter(
-                        (p) => p === 1 || p === totalPages || Math.abs(p - validCurrentPage) <= 1
+                        (pageNum) =>
+                          pageNum === 1 ||
+                          pageNum === pagination.totalPages ||
+                          Math.abs(pageNum - pagination.page) <= 1
                       )
                       .map((pageNum, idx, arr) => {
                         const showEllipsis = idx > 0 && pageNum - arr[idx - 1] > 1;
@@ -555,8 +742,9 @@ export default function AdminPaymentsPage() {
                             {showEllipsis && <span className="px-1 text-[#6B3A2A]">...</span>}
                             <button
                               onClick={() => setCurrentPage(pageNum)}
+                              disabled={loading}
                               className={`min-w-[32px] h-8 px-2.5 rounded-xl font-bold transition-all text-xs ${
-                                validCurrentPage === pageNum
+                                pagination.page === pageNum
                                   ? 'bg-[#E65C00] text-white font-black shadow'
                                   : 'bg-white text-[#3D1A00] hover:bg-[#FFF0E0] border border-[#E65C00]/30'
                               }`}
@@ -570,8 +758,8 @@ export default function AdminPaymentsPage() {
 
                   {/* Next Page Button */}
                   <button
-                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={validCurrentPage === totalPages}
+                    onClick={() => setCurrentPage((p) => Math.min(pagination.totalPages, p + 1))}
+                    disabled={pagination.page >= pagination.totalPages || loading}
                     className="p-2 rounded-xl bg-white border border-[#E65C00]/30 hover:bg-[#FFF0E0] disabled:opacity-40 disabled:cursor-not-allowed text-[#3D1A00] transition-colors"
                     title="Next Page"
                   >
