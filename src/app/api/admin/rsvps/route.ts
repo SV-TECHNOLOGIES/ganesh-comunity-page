@@ -168,6 +168,29 @@ export async function GET(request: Request) {
       });
     }
 
+    // 5. Enrich RSVPs with Member account status
+    const attendeeEmails = rsvps.map((r) => r.attendeeEmail.toLowerCase().trim()).filter(Boolean);
+    let memberEmailSet = new Set<string>();
+
+    if (attendeeEmails.length > 0) {
+      try {
+        const existingMembers = await prisma.member.findMany({
+          where: {
+            email: { in: attendeeEmails },
+          },
+          select: { email: true, id: true, tier: true, status: true },
+        });
+        existingMembers.forEach((m) => memberEmailSet.add(m.email.toLowerCase().trim()));
+      } catch (e) {
+        console.warn('[ADMIN RSVPS] Error querying member status:', e);
+      }
+    }
+
+    const enrichedRsvps = rsvps.map((r) => ({
+      ...r,
+      isMember: memberEmailSet.has(r.attendeeEmail.toLowerCase().trim()),
+    }));
+
     const effectiveLimit = limit === 0 ? totalFiltered : limit;
     const totalPages = effectiveLimit > 0 ? Math.max(1, Math.ceil(totalFiltered / effectiveLimit)) : 1;
 
@@ -175,7 +198,7 @@ export async function GET(request: Request) {
       {
         success: true,
         source: 'prisma',
-        data: rsvps,
+        data: enrichedRsvps,
         pagination: {
           total: totalFiltered,
           page,

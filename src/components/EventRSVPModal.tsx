@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { Calendar, Ticket, User, Mail, Phone, CheckCircle, X, MapPin, Sparkles, Clock, Check, Users } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/lib/auth-context';
+import { Calendar, Ticket, User, Mail, Phone, CheckCircle, X, MapPin, Sparkles, Clock, Check, Users, ShieldCheck, Key } from 'lucide-react';
 
 interface EventRSVPModalProps {
   event: {
@@ -27,9 +28,11 @@ const FESTIVAL_DATES = [
 ];
 
 export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPModalProps) {
-  const [attendeeName, setAttendeeName] = useState('');
-  const [attendeeEmail, setAttendeeEmail] = useState('');
-  const [attendeePhone, setAttendeePhone] = useState('');
+  const { user, login } = useAuth();
+
+  const [attendeeName, setAttendeeName] = useState(user?.fullName || '');
+  const [attendeeEmail, setAttendeeEmail] = useState(user?.email || '');
+  const [attendeePhone, setAttendeePhone] = useState(user?.phone || '');
   const [travellingFrom, setTravellingFrom] = useState('');
   
   // Date selection state (supports multiple dates)
@@ -42,6 +45,16 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
   const [submitting, setSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [ticketDetails, setTicketDetails] = useState<any>(null);
+  const [wasNewUser, setWasNewUser] = useState(false);
+
+  // Sync if user logs in or is already logged in
+  useEffect(() => {
+    if (user) {
+      if (!attendeeName && user.fullName) setAttendeeName(user.fullName);
+      if (!attendeeEmail && user.email) setAttendeeEmail(user.email);
+      if (!attendeePhone && user.phone) setAttendeePhone(user.phone);
+    }
+  }, [user]);
 
   const totalTickets = adultsCount + childrenCount;
 
@@ -95,8 +108,17 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
 
       if (data.success) {
         setTicketDetails(data.data);
+        setWasNewUser(Boolean(data.isNewUser));
+
+        // Automatically log in the user via AuthContext
+        if (data.user) {
+          login(data.user);
+        }
+
         setConfirmed(true);
         if (onSuccess) onSuccess();
+      } else {
+        alert(data.error || 'Failed to process RSVP. Please try again.');
       }
     } catch {
       alert('Failed to process RSVP. Please try again.');
@@ -293,6 +315,14 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
                 </p>
               </div>
 
+              {/* Account Benefit Notice */}
+              <div className="bg-[#FFF0E0] p-3 rounded-xl border border-[#E65C00]/25 flex items-center gap-2 text-[11px] text-[#6B3A2A]">
+                <ShieldCheck className="w-4 h-4 text-[#E65C00] shrink-0" />
+                <span>
+                  Automatic guest registration will activate your membership pass &amp; email your login password.
+                </span>
+              </div>
+
               {/* Pass Summary Bar */}
               <div className="bg-[#FFF0E0] p-4 rounded-2xl border border-[#E65C00]/20 flex justify-between items-center text-xs">
                 <div>
@@ -331,6 +361,21 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
               <p className="text-xs text-[#6B3A2A]">
                 Your entry pass has been registered and sent to <strong className="text-[#3D1A00]">{attendeeEmail}</strong>.
               </p>
+            </div>
+
+            {/* Auto Login & Password Notice */}
+            <div className="bg-emerald-50 border border-emerald-500/30 p-3.5 rounded-2xl text-xs text-emerald-800 text-left flex items-start gap-2.5">
+              <Key className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+              <div className="space-y-0.5">
+                <strong className="block text-emerald-900 font-bold">
+                  {wasNewUser ? '🎉 Account Created & Logged In!' : '✓ Logged in as MITRA Member'}
+                </strong>
+                <p className="text-[11px] text-emerald-700">
+                  {wasNewUser
+                    ? `Your MITRA Member Account has been activated and your temporary login password has been emailed to ${attendeeEmail}. You are now logged in.`
+                    : `You are logged in with your MITRA account (${attendeeEmail}). You can view your pass anytime in your member portal.`}
+                </p>
+              </div>
             </div>
 
             {/* Digital Pass Stub */}
