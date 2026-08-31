@@ -21,13 +21,15 @@ export interface LeadershipMember {
   id: string;
   name: string;
   designation: string;
-  category: 'Founders' | 'Patrons' | 'Trustees' | 'Executive Committee' | 'Nari Shakthi';
-  bio: string;
+  category: 'Founders' | 'Patrons'  | 'Executive Committee' | 'Nari Shakthi' | string;
+  bio?: string | null;
   imageUrl: string;
-  email?: string;
-  linkedin?: string;
-  twitter?: string;
+  email?: string | null;
+  phone?: string | null;
+  linkedin?: string | null;
+  twitter?: string | null;
   displayOrder: number;
+  active?: boolean;
 }
 
 export interface MediaAlbum {
@@ -69,6 +71,7 @@ export interface Member {
   expiryDate?: string | null;
   address?: string | null;
   profession?: string | null;
+  imageUrl?: string | null;
   createdAt?: string;
 }
 

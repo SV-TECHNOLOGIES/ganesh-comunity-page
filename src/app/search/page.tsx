@@ -1,18 +1,37 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { EVENTS_DATA } from '@/data/events';
-import { LEADERSHIP_DATA } from '@/data/leadership';
 import { NEWS_DATA } from '@/data/news';
 import { EventItem, LeadershipMember, BlogPost } from '@/lib/types';
 import { Search, Calendar, Users, FileText } from 'lucide-react';
 
 export default function GlobalSearchPage() {
   const [query, setQuery] = useState('');
-  const [events] = useState<EventItem[]>(EVENTS_DATA);
-  const [leadership] = useState<LeadershipMember[]>(LEADERSHIP_DATA);
-  const [news] = useState<BlogPost[]>(NEWS_DATA);
+  const [events, setEvents] = useState<EventItem[]>(EVENTS_DATA);
+  const [leadership, setLeadership] = useState<LeadershipMember[]>([]);
+  const [news, setNews] = useState<BlogPost[]>(NEWS_DATA);
+
+  useEffect(() => {
+    fetch('/api/leadership')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data)) {
+          setLeadership(data.data);
+        }
+      })
+      .catch(() => {});
+
+    fetch('/api/admin/events')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data)) {
+          setEvents(data.data);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const matchedEvents = query
     ? events.filter(e => e.title.toLowerCase().includes(query.toLowerCase()) || e.venue.toLowerCase().includes(query.toLowerCase()) || e.description.toLowerCase().includes(query.toLowerCase()))

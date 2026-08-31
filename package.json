@@ -18,6 +18,7 @@
     "@stripe/stripe-js": "^9.14.0",
     "@types/qrcode": "^1.5.6",
     "@types/three": "^0.185.4",
+    "basic-ftp": "^6.2.1",
     "bcryptjs": "^3.0.3",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",

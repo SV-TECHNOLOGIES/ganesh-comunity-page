@@ -98,6 +98,7 @@ export async function POST(request: Request) {
       phone: member.phone,
       status: member.status,
       expiryDate: member.expiryDate,
+      imageUrl: member.imageUrl,
     };
 
     const response = NextResponse.json({ success: true, role: 'Member', user: userPayload });

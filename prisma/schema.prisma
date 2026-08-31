@@ -68,6 +68,7 @@ model Member {
   startDate    String?
   expiryDate   String?
   notes        String?
+  imageUrl     String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }
@@ -178,3 +179,21 @@ model OTP {
 
   @@index([email, type])
 }
+
+model LeadershipMember {
+  id           String   @id @default(cuid())
+  name         String
+  designation  String
+  category     String   @default("Executive Committee") // Founders, Patrons, Trustees, Executive Committee, Nari Shakthi
+  bio          String?
+  imageUrl     String   @default("/assets/poster.jpg")
+  email        String?
+  phone        String?
+  linkedin     String?
+  twitter      String?
+  displayOrder Int      @default(0)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+

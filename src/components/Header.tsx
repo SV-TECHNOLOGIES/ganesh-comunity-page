@@ -224,8 +224,19 @@ export default function Header() {
                   onMouseLeave={() => setUserDropdown(false)}
                 >
                   <button className="flex items-center gap-2 bg-[#FFF0E0] border border-[#E65C00]/30 rounded-full px-3 py-1.5 hover:border-[#E65C00] transition-colors">
-                    <div className="w-7 h-7 rounded-full bg-[#E65C00] border border-[#CC4000]/60 flex items-center justify-center">
-                      <User className="w-3.5 h-3.5 text-white" />
+                    <div className="w-7 h-7 rounded-full bg-[#E65C00] border border-[#CC4000]/60 flex items-center justify-center overflow-hidden shrink-0">
+                      {user?.imageUrl ? (
+                        <img
+                          src={user.imageUrl}
+                          alt="Avatar"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <User className="w-3.5 h-3.5 text-white" />
+                      )}
                     </div>
                     <span className="text-[11px] font-bold text-[#E65C00] max-w-[90px] truncate">
                       {user?.fullName?.split(' ')[0] || user?.username ||  user?.email?.split('@')[0]}

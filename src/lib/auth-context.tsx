@@ -15,6 +15,7 @@ export interface AuthUser {
   status?: string;
   expiryDate?: string;
   username?: string;
+  imageUrl?: string | null;
 }
 
 interface AuthContextType {

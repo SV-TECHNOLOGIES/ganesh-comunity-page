@@ -4,17 +4,74 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import AuthGuard from '@/components/AuthGuard';
 import {
-  Award, ArrowLeft, LogOut, User, Mail, Phone, Heart, ShieldCheck,
+  Award, ArrowLeft, LogOut, User, Mail, Phone, Heart, ShieldCheck, Camera, Loader2, CheckCircle
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 function MemberPortalContent() {
-  const { user, logout } = useAuth();
+  const { user, login, logout } = useAuth();
   const [loggingOut, setLoggingOut] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleLogout = async () => {
     setLoggingOut(true);
     await logout();
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user?.email) return;
+
+    setUploadingAvatar(true);
+    setUploadSuccess(false);
+
+    try {
+      // 1. Upload to FTP / Storage
+      const body = new FormData();
+      body.append('file', file);
+      body.append('useCase', 'member_profile');
+      body.append('identifier', user.fullName || user.email);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body,
+      });
+
+      const data = await res.json();
+      if (data.success && data.url) {
+        // 2. Save image URL to Member database
+        const updateRes = await fetch('/api/membership/update-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: user.email,
+            imageUrl: data.url,
+          }),
+        });
+
+        const updateData = await updateRes.json();
+        if (updateData.success) {
+          // 3. Update local auth session state
+          login({
+            ...user,
+            imageUrl: data.url,
+          });
+          setUploadSuccess(true);
+          setTimeout(() => setUploadSuccess(false), 4000);
+        }
+      } else {
+        alert(data.error || 'Avatar upload failed.');
+      }
+    } catch (err: any) {
+      alert(`Upload error: ${err?.message || 'Network error'}`);
+    } finally {
+      setUploadingAvatar(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
   };
 
   return (
@@ -33,7 +90,7 @@ function MemberPortalContent() {
           MY PROFILE
         </h1>
         <p className="text-xs text-[#6B3A2A] max-w-xl mx-auto">
-          Welcome back, <strong className="text-[#E65C00]">{user?.fullName || user?.username  || user?.email}</strong>.
+          Welcome back, <strong className="text-[#E65C00]">{user?.fullName || user?.username || user?.email}</strong>.
         </p>
       </div>
 
@@ -42,15 +99,56 @@ function MemberPortalContent() {
         <div className="max-w-4xl mx-auto temple-card p-8 rounded-3xl border-2 border-[#E65C00]/30 shadow-md">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
 
-            {/* Avatar */}
-            <div className="w-20 h-20 rounded-full border-2 border-[#E65C00]/40 bg-[#FFF0E0] flex items-center justify-center shadow-sm shrink-0">
-              <User className="w-10 h-10 text-[#E65C00]" />
+            {/* Avatar with FTP Upload Picker */}
+            <div className="relative group shrink-0">
+              <div className="w-24 h-24 rounded-full border-4 border-[#E65C00]/40 bg-[#FFF0E0] overflow-hidden flex items-center justify-center shadow-md">
+                {user.imageUrl ? (
+                  <img
+                    src={user.imageUrl}
+                    alt={user.fullName || 'Member Avatar'}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/assets/poster.jpg';
+                    }}
+                  />
+                ) : (
+                  <User className="w-12 h-12 text-[#E65C00]" />
+                )}
+              </div>
+
+              {/* Upload trigger button */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                className="hidden"
+                id="member-avatar-upload"
+              />
+              <label
+                htmlFor="member-avatar-upload"
+                className="absolute bottom-0 right-0 bg-[#E65C00] text-white p-2 rounded-full cursor-pointer hover:bg-[#CC4000] shadow transition-transform hover:scale-110 flex items-center justify-center"
+                title="Upload Profile Picture"
+              >
+                {uploadingAvatar ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Camera className="w-4 h-4" />
+                )}
+              </label>
             </div>
 
             {/* Details */}
             <div className="flex-1 space-y-4">
               <div>
-                <p className="text-[10px] text-[#6B3A2A] uppercase font-bold tracking-widest mb-0.5">Full Name</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-[10px] text-[#6B3A2A] uppercase font-bold tracking-widest mb-0.5">Full Name</p>
+                  {uploadSuccess && (
+                    <span className="text-[11px] text-emerald-600 font-bold inline-flex items-center gap-1">
+                      <CheckCircle className="w-3 h-3" /> Photo updated!
+                    </span>
+                  )}
+                </div>
                 <h2 className="text-2xl font-black font-cinzel text-[#3D1A00]">{user.fullName || user?.username || '—'}</h2>
               </div>
 
