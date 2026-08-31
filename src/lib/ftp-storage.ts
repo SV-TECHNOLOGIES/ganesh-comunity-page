@@ -133,6 +133,14 @@ export async function uploadFileViaFTP(
       secure: false,
     });
 
+    console.debug("ftpDetails",{
+      host: ftpHost,
+      user: ftpUser,
+      password: ftpPassword,
+      port: ftpPort,
+      secure: false,
+    });
+
     // Target remote directory: e.g. public_html/uploads/leaders/profiles
     const targetRemoteDir = `${ftpRemoteRootDir}/${config.subDir}`.replace(/\/+/g, '/');
     await client.ensureDir(targetRemoteDir);
