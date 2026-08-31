@@ -33,11 +33,7 @@ export async function POST(request: Request) {
         }
       }
 
-      // 2. Fallback hardcoded admin (demo / first-run)
-      if (!adminMatched && email === 'admin@mitra.org.uk' && password === 'admin123') {
-        adminMatched = true;
-        adminRecord = { id: 'admin-default', username: 'admin', email: 'admin@mitra.org.uk', role: 'Admin' };
-      }
+      
 
       if (!adminMatched || !adminRecord) {
         return NextResponse.json({ success: false, error: 'Invalid admin credentials.' }, { status: 401 });

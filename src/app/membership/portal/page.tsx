@@ -33,7 +33,7 @@ function MemberPortalContent() {
           MY PROFILE
         </h1>
         <p className="text-xs text-[#6B3A2A] max-w-xl mx-auto">
-          Welcome back, <strong className="text-[#E65C00]">{user?.fullName || user?.email}</strong>.
+          Welcome back, <strong className="text-[#E65C00]">{user?.fullName || user?.username  || user?.email}</strong>.
         </p>
       </div>
 
@@ -51,7 +51,7 @@ function MemberPortalContent() {
             <div className="flex-1 space-y-4">
               <div>
                 <p className="text-[10px] text-[#6B3A2A] uppercase font-bold tracking-widest mb-0.5">Full Name</p>
-                <h2 className="text-2xl font-black font-cinzel text-[#3D1A00]">{user.fullName || '—'}</h2>
+                <h2 className="text-2xl font-black font-cinzel text-[#3D1A00]">{user.fullName || user?.username || '—'}</h2>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-[#E65C00]/20 text-xs">

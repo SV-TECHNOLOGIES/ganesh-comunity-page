@@ -228,7 +228,7 @@ export default function Header() {
                       <User className="w-3.5 h-3.5 text-white" />
                     </div>
                     <span className="text-[11px] font-bold text-[#E65C00] max-w-[90px] truncate">
-                      {user?.fullName?.split(' ')[0] || user?.email?.split('@')[0]}
+                      {user?.fullName?.split(' ')[0] || user?.username ||  user?.email?.split('@')[0]}
                     </span>
                     <ChevronDown className="w-3 h-3 text-[#6B3A2A]" />
                   </button>
