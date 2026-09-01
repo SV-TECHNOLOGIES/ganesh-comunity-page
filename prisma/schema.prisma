@@ -197,3 +197,18 @@ model LeadershipMember {
   updatedAt    DateTime @updatedAt
 }
 
+model SystemLog {
+  id        String   @id @default(cuid())
+  level     String   @default("INFO") // INFO, WARN, ERROR, PAYMENT_SUCCESS, PAYMENT_FAILURE
+  source    String   // e.g. "payments/webhook", "payments/create-session", "auth", "system"
+  message   String
+  details   Json?    // Structured metadata, stack traces, payment details
+  ip        String?
+  userId    String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([level])
+  @@index([source])
+}
+

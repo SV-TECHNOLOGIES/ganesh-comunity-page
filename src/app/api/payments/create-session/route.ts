@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
+import { logger } from '@/lib/logger';
+import { sendPaymentFailureAlert } from '@/lib/email';
 import Stripe from 'stripe';
 
 /**
@@ -12,57 +14,61 @@ import Stripe from 'stripe';
  * The payment is only marked Completed once the webhook confirms it.
  */
 export async function POST(request: Request) {
-  const reqTime = new Date().toISOString();
+  let body: any = {};
+  try {
+    body = await request.json();
+  } catch {
+    await logger.warn('payments/create-session', 'Invalid JSON body received in create-session');
+    return NextResponse.json({ success: false, error: 'Invalid request body' }, { status: 400 });
+  }
+
+  const {
+    amount,
+    customerName,
+    customerEmail,
+    customerPhone,
+    description,
+    paymentMethod,
+    eventId,
+    eventName,
+    donationType,
+    poojaDate,
+    poojaDay,
+    poojaTitle,
+    gotram,
+    familyMembers,
+    specialWishes,
+    primaryDevoteeName,
+  } = body;
+
+  const normalEmail = customerEmail ? String(customerEmail).toLowerCase().trim() : '';
+  const safeCustomer = customerName ? String(customerName).trim() : 'Unknown';
+  const safeType = donationType ? String(donationType).toLowerCase().trim() : 'general';
+  const safeEvent = eventName || eventId || 'London Ganesh Mahotsav 2026';
+
+  if (!amount || !customerName || !customerEmail) {
+    await logger.warn('payments/create-session', `Validation failed: Missing required fields for user "${safeCustomer}" <${normalEmail}>`, {
+      body,
+    });
+    return NextResponse.json(
+      { success: false, error: 'Amount, Name and Email are required' },
+      { status: 400 }
+    );
+  }
+
+  const numAmount = Number(amount);
+  if (isNaN(numAmount) || numAmount < 0.5) {
+    await logger.warn('payments/create-session', `Validation failed: Invalid amount £${amount} for user <${normalEmail}>`, {
+      amount,
+      customerEmail,
+    });
+    return NextResponse.json(
+      { success: false, error: 'Amount must be at least £0.50' },
+      { status: 400 }
+    );
+  }
 
   try {
-    const body = await request.json();
-    const {
-      amount,
-      customerName,
-      customerEmail,
-      customerPhone,
-      description,
-      paymentMethod,
-      eventId,
-      eventName,
-      donationType,
-      poojaDate,
-      poojaDay,
-      poojaTitle,
-      gotram,
-      familyMembers,
-      specialWishes,
-      primaryDevoteeName,
-    } = body;
-
-    const normalEmail = customerEmail ? String(customerEmail).toLowerCase().trim() : '';
-    const safeCustomer = customerName ? String(customerName).trim() : 'Unknown';
-    const safeType = donationType ? String(donationType).toLowerCase().trim() : 'general';
-    const safeEvent = eventName || eventId || 'London Ganesh Mahotsav 2026';
-
-    console.log(`\n[CREATE-SESSION] [${reqTime}] Incoming payment checkout request:`);
-    console.log(`  ├─ Customer: "${safeCustomer}" <${normalEmail}>`);
-    console.log(`  ├─ Devotee: "${primaryDevoteeName || safeCustomer}" | Phone: "${customerPhone || 'N/A'}"`);
-    console.log(`  ├─ Donation Type: [${safeType.toUpperCase()}] | Amount: £${amount}`);
-    console.log(`  ├─ Event: "${safeEvent}" | Pooja: "${poojaDate || 'N/A'} - ${poojaTitle || 'N/A'}" | Gotram: "${gotram || 'N/A'}"`);
-
-    if (!amount || !customerName || !customerEmail) {
-      console.warn(`[CREATE-SESSION] [${reqTime}] Validation failed: Missing required fields for user "${safeCustomer}" <${normalEmail}>`);
-      return NextResponse.json(
-        { success: false, error: 'Amount, Name and Email are required' },
-        { status: 400 }
-      );
-    }
-
-    const numAmount = Number(amount);
-    if (isNaN(numAmount) || numAmount < 0.5) {
-      console.warn(`[CREATE-SESSION] [${reqTime}] Validation failed: Invalid amount £${amount} for user <${normalEmail}>`);
-      return NextResponse.json(
-        { success: false, error: 'Amount must be at least £0.50' },
-        { status: 400 }
-      );
-    }
-
     // ── Check Auth Token if present ──────────────────────────────────────────
     const cookieStore = await cookies();
     const token = cookieStore.get('mitra_token')?.value;
@@ -72,23 +78,14 @@ export async function POST(request: Request) {
       const payload = verifyToken(token);
       if (payload && payload.id) {
         userId = payload.id as string;
-        console.log(`  ├─ Auth Session: Logged-in user (Token User ID: ${userId}, Role: ${payload.role || 'Member'})`);
-      } else {
-        console.log(`  ├─ Auth Session: Guest checkout (Invalid/expired token)`);
       }
-    } else {
-      console.log(`  ├─ Auth Session: Guest checkout (No auth cookie)`);
     }
 
     // ── Member ID (standalone string identifier, no foreign key constraint) ──
     const finalMemberId: string | null = (body.memberId as string) || userId || null;
-    if (finalMemberId) {
-      console.log(`  ├─ Member ID: "${finalMemberId}"`);
-    }
 
     // ── Resolve active Stripe Secret Key (DB overrides env) ──────────────────
     let stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
-    let keySource = 'process.env';
     try {
       const settings = await prisma.paymentSettings.findUnique({
         where: { id: 'default' },
@@ -99,14 +96,13 @@ export async function POST(request: Request) {
         !settings.stripeSecretKey.includes('REPLACE_WITH')
       ) {
         stripeSecretKey = settings.stripeSecretKey;
-        keySource = `PostgreSQL PaymentSettings (${settings.activeAccountName || 'Active Account'})`;
       }
     } catch (e) {
-      console.warn(`  ├─ [CONFIG NOTICE] DB PaymentSettings unavailable, fallback to process.env:`, e);
+      console.warn(`[CONFIG NOTICE] DB PaymentSettings unavailable:`, e);
     }
 
     if (!stripeSecretKey || stripeSecretKey.includes('REPLACE_WITH')) {
-      console.error(`[CREATE-SESSION ERROR] [${reqTime}] Stripe is not configured for checkout by <${normalEmail}>.`);
+      await logger.error('payments/create-session', `Stripe is not configured for checkout by <${normalEmail}>`);
       return NextResponse.json(
         {
           success: false,
@@ -116,8 +112,6 @@ export async function POST(request: Request) {
         { status: 503 }
       );
     }
-
-    console.log(`  ├─ Stripe Config: Key resolved from ${keySource}`);
 
     // ── Initialise Stripe with the active secret key ──────────────────────────
     const stripe = new Stripe(stripeSecretKey, {
@@ -150,8 +144,6 @@ export async function POST(request: Request) {
       receipt_email: normalEmail,
     });
 
-    console.log(`  ├─ Stripe PaymentIntent Created: ${paymentIntent.id} (Status: ${paymentIntent.status})`);
-
     // ── Persist a Pending Payment record ─────────────────────────────────────
     try {
       const savedRecord = await prisma.payment.create({
@@ -179,13 +171,17 @@ export async function POST(request: Request) {
         },
       });
 
-      console.log(`  └─ [SUCCESS] DB Pending Payment record persisted: ID=${savedRecord.id} for user <${normalEmail}>\n`);
+      await logger.info('payments/create-session', `Checkout session created: £${numAmount} for "${safeCustomer}" <${normalEmail}> (PI: ${paymentIntent.id}, Payment ID: ${savedRecord.id})`, {
+        paymentId: savedRecord.id,
+        paymentIntentId: paymentIntent.id,
+        amount: numAmount,
+        customerName: safeCustomer,
+        customerEmail: normalEmail,
+        donationType: safeType,
+        eventName: safeEvent,
+      });
     } catch (dbErr: unknown) {
-      const errorMsg = dbErr instanceof Error ? dbErr.message : String(dbErr);
-      console.error(`\n[CREATE-SESSION DB ERROR] [${reqTime}] Failed to persist pending payment record!`);
-      console.error(`  ├─ Target User: "${safeCustomer}" <${normalEmail}> | Phone: ${customerPhone || 'N/A'}`);
-      console.error(`  ├─ PaymentIntent: ${paymentIntent.id} | Amount: £${numAmount} | Type: ${safeType}`);
-      console.error(`  └─ Error Details: ${errorMsg}\n`);
+      await logger.error('payments/create-session', `Failed to persist pending payment record for PI ${paymentIntent.id}`, dbErr);
     }
 
     return NextResponse.json({
@@ -195,10 +191,31 @@ export async function POST(request: Request) {
     });
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : 'Payment session creation failed';
-    const errorStack = err instanceof Error ? err.stack : '';
-    console.error(`\n[CREATE-SESSION FATAL ERROR] [${reqTime}] Checkout session creation crashed!`);
-    console.error(`  ├─ Error: ${errorMessage}`);
-    console.error(`  └─ Stack: ${errorStack}\n`);
+
+    // Log failure and alert REPORT_MAIL
+    await logger.paymentFailure('payments/create-session', `Payment session creation failed: ${errorMessage}`, {
+      error: errorMessage,
+      customerName: safeCustomer,
+      customerEmail: normalEmail,
+      amount: numAmount,
+      cause: safeEvent,
+    });
+
+    try {
+      await sendPaymentFailureAlert({
+        customerName: safeCustomer,
+        customerEmail: normalEmail,
+        customerPhone: customerPhone ? String(customerPhone) : undefined,
+        amount: numAmount,
+        currency: 'GBP',
+        cause: safeEvent,
+        failureReason: errorMessage,
+        source: 'Checkout Session Creation (/api/payments/create-session)',
+        metadata: body,
+      });
+    } catch (alertErr) {
+      console.error('Failed to dispatch failure email alert during create-session:', alertErr);
+    }
 
     return NextResponse.json({ success: false, error: errorMessage }, { status: 500 });
   }

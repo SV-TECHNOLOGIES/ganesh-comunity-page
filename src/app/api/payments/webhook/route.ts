@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger';
+import { sendPaymentFailureAlert } from '@/lib/email';
 import Stripe from 'stripe';
 
 /**
@@ -8,23 +10,11 @@ import Stripe from 'stripe';
  * Handles Stripe webhook events to keep our DB in sync with actual payment state.
  *
  * Events handled:
- *   • payment_intent.succeeded  → Payment.status = 'Completed'
- *   • payment_intent.payment_failed → Payment.status = 'Failed'
- *
- * Webhook signature is verified using STRIPE_WEBHOOK_SECRET.
- *
- * ── Local Dev Setup ──────────────────────────────────────────────────────────
- * 1. Install Stripe CLI: https://stripe.com/docs/stripe-cli
- * 2. Run: stripe listen --forward-to localhost:3000/api/payments/webhook
- * 3. Copy the "webhook signing secret" printed to your .env as STRIPE_WEBHOOK_SECRET
- *
- * ── Production Setup ─────────────────────────────────────────────────────────
- * Register https://your-domain.com/api/payments/webhook in Stripe Dashboard
- * → Developers → Webhooks → Add endpoint.
- * Copy the signing secret to your hosting provider's env vars.
+ *   • payment_intent.succeeded      → Payment.status = 'Completed'
+ *   • payment_intent.payment_failed → Payment.status = 'Failed' + Email Alert + DB Log
+ *   • payment_intent.canceled       → Payment.status = 'Failed' + DB Log
  */
 
-// Next.js App Router: disable body parsing so we can verify the raw body signature
 export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
@@ -46,11 +36,11 @@ export async function POST(req: NextRequest) {
   }
 
   if (!stripeSecretKey || stripeSecretKey.includes('REPLACE_WITH')) {
+    await logger.warn('payments/webhook', 'Stripe webhook received but Stripe secret key is not configured');
     return NextResponse.json({ error: 'Stripe not configured' }, { status: 503 });
   }
 
   const stripe = new Stripe(stripeSecretKey, { apiVersion: '2026-07-29.dahlia' });
-
 
   // Read the raw body for signature verification
   const rawBody = await req.text();
@@ -59,16 +49,14 @@ export async function POST(req: NextRequest) {
   let event: Stripe.Event;
   try {
     if (!webhookSecret || webhookSecret.includes('REPLACE_WITH')) {
-      // If no webhook secret is configured, attempt to parse without verification
-      // (only safe in development — in production ALWAYS set STRIPE_WEBHOOK_SECRET)
-      console.warn('[Webhook] No STRIPE_WEBHOOK_SECRET set — skipping signature verification (DEV only)');
+      await logger.warn('payments/webhook', 'No STRIPE_WEBHOOK_SECRET set — parsing event without signature (DEV mode)');
       event = JSON.parse(rawBody) as Stripe.Event;
     } else {
       event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Webhook signature verification failed';
-    console.error('[Webhook] Signature error:', message);
+    await logger.error('payments/webhook', `Webhook signature verification failed: ${message}`, err);
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
@@ -77,8 +65,6 @@ export async function POST(req: NextRequest) {
     switch (event.type) {
       case 'payment_intent.succeeded': {
         const pi = event.data.object as Stripe.PaymentIntent;
-        console.log(`[Webhook] PaymentIntent succeeded: ${pi.id}`);
-
         const meta = pi.metadata || {};
         const emailToLookup = (meta.customerEmail || pi.receipt_email || '').toLowerCase().trim();
 
@@ -92,17 +78,14 @@ export async function POST(req: NextRequest) {
             });
             if (memberByEmail) {
               resolvedMemberId = memberByEmail.id;
-              console.log(`[Webhook] Resolved memberId by email (${emailToLookup}) -> ${resolvedMemberId}`);
             }
           } catch (memErr) {
             console.warn(`[Webhook] Email member lookup notice:`, memErr);
           }
         }
 
-        // If not found by email, use from metadata
         if (!resolvedMemberId && meta.memberId) {
           resolvedMemberId = String(meta.memberId).trim();
-          console.log(`[Webhook] Used memberId from metadata -> ${resolvedMemberId}`);
         }
 
         // Try to update existing pending record, or create a new one
@@ -119,11 +102,18 @@ export async function POST(req: NextRequest) {
                 ...(resolvedMemberId ? { memberId: resolvedMemberId } : {}),
               },
             });
-            console.log(`[Webhook] Updated existing payment record ${existing.id} to Completed (memberId=${resolvedMemberId || existing.memberId || 'null'})`);
+            await logger.paymentSuccess('payments/webhook', `Payment succeeded: £${existing.amount} (${existing.customerName} <${existing.customerEmail}>)`, {
+              paymentIntentId: pi.id,
+              paymentId: existing.id,
+              amount: existing.amount,
+              customerEmail: existing.customerEmail,
+              customerName: existing.customerName,
+              donationType: existing.donationType,
+              eventName: existing.eventName,
+            });
           } else {
-            // Fallback: create from PaymentIntent metadata (edge case if DB write failed earlier)
+            // Fallback: create from PaymentIntent metadata
             const metaEmail = meta.customerEmail || pi.receipt_email || '';
-
             const created = await prisma.payment.create({
               data: {
                 amount: pi.amount / 100,
@@ -148,19 +138,34 @@ export async function POST(req: NextRequest) {
                 primaryDevoteeName: meta.primaryDevoteeName || meta.customerName || null,
               },
             });
-            console.log(`[Webhook] Fallback created payment record ${created.id} (memberId=${resolvedMemberId || 'null'})`);
+            await logger.paymentSuccess('payments/webhook', `Payment succeeded (fallback created): £${created.amount} (${created.customerName} <${created.customerEmail}>)`, {
+              paymentIntentId: pi.id,
+              paymentId: created.id,
+              amount: created.amount,
+              customerEmail: created.customerEmail,
+            });
           }
         } catch (dbErr) {
-          console.error('[Webhook] DB update error on succeeded:', dbErr);
+          await logger.error('payments/webhook', `DB update error on payment_intent.succeeded for PI ${pi.id}`, dbErr);
         }
         break;
       }
 
-
       case 'payment_intent.payment_failed': {
         const pi = event.data.object as Stripe.PaymentIntent;
-        console.log(`[Webhook] PaymentIntent failed: ${pi.id}`);
+        const meta = pi.metadata || {};
+        const lastError = pi.last_payment_error;
 
+        const failureReason = lastError?.message || 'Payment intent failed during charge processing';
+        const declineCode = lastError?.decline_code || lastError?.code || 'card_declined';
+        const devoteeName = meta.customerName || meta.primaryDevoteeName || 'Devotee';
+        const devoteeEmail = meta.customerEmail || pi.receipt_email || 'Not Provided';
+        const devoteePhone = meta.customerPhone || 'Not Provided';
+        const amount = (pi.amount || 0) / 100;
+        const currency = (pi.currency || 'GBP').toUpperCase();
+        const cause = meta.eventName || meta.poojaTitle || meta.donationType || pi.description || 'MITRA Contribution';
+
+        // 1. Mark DB record as Failed
         try {
           await prisma.payment.updateMany({
             where: { stripePaymentIntentId: pi.id },
@@ -169,27 +174,70 @@ export async function POST(req: NextRequest) {
         } catch (dbErr) {
           console.error('[Webhook] DB update error on failed:', dbErr);
         }
+
+        // 2. Log structured failure to SystemLog
+        await logger.paymentFailure('payments/webhook', `Payment failed: £${amount} ${currency} from ${devoteeName} (${failureReason})`, {
+          paymentIntentId: pi.id,
+          amount,
+          currency,
+          customerName: devoteeName,
+          customerEmail: devoteeEmail,
+          customerPhone: devoteePhone,
+          cause,
+          declineCode,
+          failureReason,
+          stripeError: lastError,
+        });
+
+        // 3. Send Email Alert to REPORT_MAIL
+        try {
+          await sendPaymentFailureAlert({
+            customerName: devoteeName,
+            customerEmail: devoteeEmail,
+            customerPhone: devoteePhone,
+            amount,
+            currency,
+            cause,
+            paymentIntentId: pi.id,
+            failureReason,
+            declineCode,
+            errorCode: lastError?.code,
+            source: 'Stripe Webhook (payment_intent.payment_failed)',
+            metadata: meta,
+            timestamp: new Date().toISOString(),
+          });
+        } catch (emailErr) {
+          await logger.error('payments/webhook', `Failed sending payment failure email alert for PI ${pi.id}`, emailErr);
+        }
+
         break;
       }
 
       case 'payment_intent.canceled': {
         const pi = event.data.object as Stripe.PaymentIntent;
+        const meta = pi.metadata || {};
+
         try {
           await prisma.payment.updateMany({
             where: { stripePaymentIntentId: pi.id },
             data: { status: 'Failed' },
           });
         } catch {}
+
+        await logger.warn('payments/webhook', `PaymentIntent canceled: ${pi.id} (Cancellation reason: ${pi.cancellation_reason || 'Unknown'})`, {
+          paymentIntentId: pi.id,
+          metadata: meta,
+          cancellationReason: pi.cancellation_reason,
+        });
         break;
       }
 
       default:
-        // Ignore other event types
+        await logger.info('payments/webhook', `Stripe event ignored: ${event.type}`, { eventId: event.id });
         break;
     }
   } catch (err) {
-    console.error('[Webhook] Handler error:', err);
-    // Return 200 to prevent Stripe from retrying — we log but don't break the webhook
+    await logger.error('payments/webhook', `Webhook handler runtime error: ${err instanceof Error ? err.message : String(err)}`, err);
   }
 
   return NextResponse.json({ received: true });

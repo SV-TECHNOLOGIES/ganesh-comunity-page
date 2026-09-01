@@ -86,6 +86,26 @@ function CheckoutForm({
     if (error) {
       setPaymentError(error.message || 'Payment failed. Please try again.');
       setProcessing(false);
+
+      // Report failure to backend for DB logging and email alert to REPORT_MAIL
+      try {
+        fetch('/api/payments/report-failure', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            customerName: donorName,
+            customerEmail: donorEmail,
+            amount,
+            currency: 'GBP',
+            cause,
+            paymentIntentId: (error as any)?.payment_intent?.id,
+            errorMessage: error.message,
+            errorCode: error.code,
+            declineCode: (error as any).decline_code,
+          }),
+        }).catch(() => {});
+      } catch {}
+
       return;
     }
 

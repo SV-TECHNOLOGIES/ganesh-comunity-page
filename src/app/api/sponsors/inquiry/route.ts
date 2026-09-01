@@ -19,48 +19,62 @@ export async function POST(request: Request) {
 
     // 1. Email to MITRA Executive Team
     const adminHtml = `
-      <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #FFF8F0; border-radius: 16px; overflow: hidden; border: 1px solid #E65C00;">
-        <div style="background: linear-gradient(135deg, #E65C00 0%, #CC4000 100%); padding: 24px; text-align: center; color: #FFFFFF;">
-          <h2 style="margin: 0; font-size: 20px; text-transform: uppercase; letter-spacing: 1px;">🕉️ New Sponsor Lead Enquiry</h2>
-          <p style="margin: 6px 0 0; font-size: 13px; opacity: 0.9;">London Ganesh Mahotsav & MITRA UK</p>
-        </div>
-        <div style="padding: 24px; color: #3D1A00; font-size: 13px; line-height: 1.6;">
-          <p style="font-size: 14px; font-weight: bold; margin-bottom: 16px;">
-            A new sponsor enquiry has been submitted through the website:
-          </p>
-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-            <tr style="border-bottom: 1px solid rgba(230,92,0,0.15);">
-              <td style="padding: 8px 0; font-weight: bold; color: #6B3A2A; width: 40%;">Company / Sponsor:</td>
-              <td style="padding: 8px 0; font-weight: bold; color: #E65C00;">${companyName}</td>
-            </tr>
-            <tr style="border-bottom: 1px solid rgba(230,92,0,0.15);">
-              <td style="padding: 8px 0; font-weight: bold; color: #6B3A2A;">Contact Person:</td>
-              <td style="padding: 8px 0; color: #3D1A00;">${contactName}</td>
-            </tr>
-            <tr style="border-bottom: 1px solid rgba(230,92,0,0.15);">
-              <td style="padding: 8px 0; font-weight: bold; color: #6B3A2A;">Email:</td>
-              <td style="padding: 8px 0; color: #3D1A00;"><a href="mailto:${email}" style="color: #E65C00;">${email}</a></td>
-            </tr>
-            <tr style="border-bottom: 1px solid rgba(230,92,0,0.15);">
-              <td style="padding: 8px 0; font-weight: bold; color: #6B3A2A;">Phone / WhatsApp:</td>
-              <td style="padding: 8px 0; color: #3D1A00;">${phone || 'Not provided'}</td>
-            </tr>
-            <tr style="border-bottom: 1px solid rgba(230,92,0,0.15);">
-              <td style="padding: 8px 0; font-weight: bold; color: #6B3A2A;">Sponsorship Interest:</td>
-              <td style="padding: 8px 0; font-weight: bold; color: #E65C00;">${sponsorTier}</td>
-            </tr>
-            ${message ? `
-            <tr>
-              <td style="padding: 8px 0; font-weight: bold; color: #6B3A2A; vertical-align: top;">Message / Notes:</td>
-              <td style="padding: 8px 0; color: #3D1A00;">${message}</td>
-            </tr>
-            ` : ''}
-          </table>
-          <p style="font-size: 11px; color: #6B3A2A; margin: 0;">
-            This email was automatically generated from the MITRA UK Website sponsorship portal.
-          </p>
-        </div>
-      </div>
+      <!DOCTYPE html>
+      <html lang="en">
+      <head><meta charset="utf-8"></head>
+      <body style="margin: 0; padding: 24px 12px; background-color: #080403; font-family: 'Plus Jakarta Sans', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;">
+        <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 0 auto; background: #0D0705; border-radius: 18px; overflow: hidden; border: 1px solid rgba(212, 175, 55, 0.4); box-shadow: 0 24px 50px rgba(0,0,0,0.8);">
+          <tr>
+            <td style="background: linear-gradient(135deg, #7A1620 0%, #9C1F2E 50%, #5A0000 100%); padding: 32px 24px; text-align: center; border-bottom: 2px solid #D4AF37;">
+              <div style="font-size: 32px; margin-bottom: 8px;">👑</div>
+              <h1 style="font-family: 'Cinzel', Georgia, serif; color: #F4C542; font-size: 20px; font-weight: 900; margin: 0; text-transform: uppercase; letter-spacing: 1.2px;">New Sponsor Enquiry</h1>
+              <p style="color: #F7EFE1; font-size: 12px; margin: 6px 0 0; opacity: 0.85;">London Ganesh Mahotsav 2026</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 28px 24px; color: #F7EFE1; font-size: 13.5px; line-height: 1.7;">
+              <div style="font-size: 12px; font-weight: 800; color: #F4C542; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 12px; border-bottom: 1px solid rgba(212,175,55,0.25); padding-bottom: 6px;">
+                Partner &amp; Contact Details
+              </div>
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <tr>
+                  <td style="color: #C9B79C; padding: 7px 0; width: 40%;">Company / Sponsor:</td>
+                  <td style="color: #FFD87A; font-weight: 700; font-size: 14px;">${companyName}</td>
+                </tr>
+                <tr>
+                  <td style="color: #C9B79C; padding: 7px 0;">Contact Person:</td>
+                  <td style="color: #FFFFFF; font-weight: 700;">${contactName}</td>
+                </tr>
+                <tr>
+                  <td style="color: #C9B79C; padding: 7px 0;">Email:</td>
+                  <td style="color: #F4C542; font-family: monospace; font-weight: 600;"><a href="mailto:${email}" style="color: #F4C542; text-decoration: none;">${email}</a></td>
+                </tr>
+                <tr>
+                  <td style="color: #C9B79C; padding: 7px 0;">Phone / WhatsApp:</td>
+                  <td style="color: #FFFFFF;">${phone || 'Not provided'}</td>
+                </tr>
+                <tr>
+                  <td style="color: #C9B79C; padding: 7px 0;">Sponsorship Tier:</td>
+                  <td style="color: #F4C542; font-weight: 800;">${sponsorTier}</td>
+                </tr>
+              </table>
+
+              ${message ? `
+              <div style="font-size: 11px; font-weight: 800; color: #F4C542; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Message / Proposal Notes:</div>
+              <div style="background: #160B08; border: 1px solid rgba(212,175,55,0.3); border-radius: 12px; padding: 16px; color: #F7EFE1; white-space: pre-wrap; font-size: 13px; line-height: 1.6; margin-bottom: 12px;">
+                ${message}
+              </div>
+              ` : ''}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 18px 24px; border-top: 1px solid rgba(212,175,55,0.2); text-align: center; background: #080403;">
+              <p style="color: #7D6A4F; font-size: 11px; margin: 0;">MITRA UK Sponsorship Portal · <a href="https://mitra.org.uk" style="color: #D4AF37; text-decoration: none;">mitra.org.uk</a></p>
+            </td>
+          </tr>
+        </table>
+      </body>
+      </html>
     `;
 
     // Send email to team
@@ -68,21 +82,53 @@ export async function POST(request: Request) {
 
     // 2. Acknowledgment email to Sponsor
     const ackHtml = `
-      <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 560px; margin: 0 auto; background: #FFF8F0; border-radius: 16px; overflow: hidden; border: 1px solid #E65C00;">
-        <div style="background: linear-gradient(135deg, #E65C00 0%, #CC4000 100%); padding: 24px; text-align: center; color: #FFFFFF;">
-          <h2 style="margin: 0; font-size: 20px; text-transform: uppercase;">🕉️ Thank You For Supporting MITRA UK</h2>
-        </div>
-        <div style="padding: 24px; color: #3D1A00; font-size: 13px; line-height: 1.6;">
-          <p>Namaste <strong>${contactName}</strong>,</p>
-          <p>Thank you for expressing interest in partnering with <strong>MITRA UK</strong> for the upcoming <strong>London Ganesh Mahotsav 2026</strong> at E Block, SLOUGH & LANGLEY COLLEGE.</p>
-          <p>Our Sponsorship Coordination Team has received your inquiry for <strong>${sponsorTier}</strong> and will reach out to you shortly via email or phone with our official sponsorship deck.</p>
-          <div style="background: #FFF0E0; border: 1px solid #E65C00; border-radius: 12px; padding: 16px; margin: 16px 0;">
-            <p style="margin: 0; font-weight: bold; color: #E65C00;">Direct Contact:</p>
-            <p style="margin: 4px 0 0; color: #6B3A2A;">Email: <a href="mailto:contactus@mitrauk.com" style="color: #E65C00;">contactus@mitrauk.com</a> | Phone: +44 7404 530041</p>
-          </div>
-          <p style="margin: 0;">Warm regards,<br/><strong>MITRA UK Executive Committee</strong></p>
-        </div>
-      </div>
+      <!DOCTYPE html>
+      <html lang="en">
+      <head><meta charset="utf-8"></head>
+      <body style="margin: 0; padding: 24px 12px; background-color: #080403; font-family: 'Plus Jakarta Sans', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;">
+        <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 0 auto; background: #0D0705; border-radius: 18px; overflow: hidden; border: 1px solid rgba(212, 175, 55, 0.4); box-shadow: 0 24px 50px rgba(0,0,0,0.8);">
+          <tr>
+            <td style="background: linear-gradient(135deg, #7A1620 0%, #9C1F2E 50%, #5A0000 100%); padding: 36px 28px 30px; text-align: center; border-bottom: 2px solid #D4AF37;">
+              <div style="font-size: 36px; margin-bottom: 10px;">🕉️</div>
+              <h1 style="font-family: 'Cinzel', Georgia, serif; color: #F4C542; font-size: 22px; font-weight: 900; margin: 0; text-transform: uppercase; letter-spacing: 1.5px;">Thank You For Your Support</h1>
+              <p style="color: #F7EFE1; font-size: 12px; margin: 8px 0 0; opacity: 0.9;">London Ganesh Mahotsav 2026 &amp; MITRA UK</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 32px 28px; color: #F7EFE1; font-size: 14px; line-height: 1.7;">
+              <p style="color: #F7EFE1; font-size: 16px; margin: 0 0 16px;">
+                Namaste <strong style="color: #F4C542;">${contactName}</strong> 🙏,
+              </p>
+              <p style="color: #C9B79C; font-size: 13.5px; line-height: 1.7; margin: 0 0 20px;">
+                Thank you for expressing interest in partnering with <strong>MITRA UK</strong> for the upcoming <strong>London Ganesh Mahotsav 2026</strong>.
+              </p>
+              <p style="color: #C9B79C; font-size: 13.5px; line-height: 1.7; margin: 0 0 24px;">
+                Our Sponsorship Coordination Team has received your inquiry for <strong style="color: #FFD87A;">${sponsorTier}</strong> and will reach out to you shortly with our official sponsorship pack and partnership options.
+              </p>
+
+              <!-- Direct Contact Box -->
+              <div style="background: #160B08; border: 1px solid rgba(212,175,55,0.4); border-radius: 14px; padding: 20px; margin-bottom: 24px;">
+                <div style="font-size: 11px; font-weight: 800; color: #F4C542; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px;">Direct Sponsorship Inquiries</div>
+                <p style="color: #C9B79C; font-size: 13px; margin: 0;">
+                  Email: <a href="mailto:contactus@mitrauk.com" style="color: #F4C542; text-decoration: none; font-weight: 600;">contactus@mitrauk.com</a><br/>
+                  Phone: <strong style="color: #FFFFFF;">+44 7404 530041</strong>
+                </p>
+              </div>
+
+              <p style="color: #7D6A4F; font-size: 12px; margin: 0;">
+                Warm regards,<br/>
+                <strong style="color: #C9B79C;">MITRA UK Executive Committee</strong>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 18px 24px; border-top: 1px solid rgba(212,175,55,0.2); text-align: center; background: #080403;">
+              <p style="color: #7D6A4F; font-size: 11px; margin: 0;">MITRA UK · <a href="https://mitra.org.uk" style="color: #D4AF37; text-decoration: none;">mitra.org.uk</a></p>
+            </td>
+          </tr>
+        </table>
+      </body>
+      </html>
     `;
 
     await sendEmail(email, '🙏 MITRA UK — Sponsorship Inquiry Received', ackHtml);
