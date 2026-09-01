@@ -41,10 +41,10 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     { label: 'Events Manager', href: '/admin/events', icon: Calendar, roleAccess: ['Super Admin', 'Events Coordinator'] },
     { label: 'Membership Database', href: '/admin/members', icon: Users, roleAccess: ['Super Admin', 'Membership Officer'] },
     { label: 'Leadership Directory', href: '/admin/leadership', icon: Users, roleAccess: ['Super Admin'] },
-    { label: 'Charity Case Queue', href: '/admin/charity-cases', icon: ShieldAlert, roleAccess: ['Super Admin', 'Charity Officer'] },
-    { label: 'Media & Patrika', href: '/admin/media', icon: ImageIcon, roleAccess: ['Super Admin', 'Media Secretary'] },
+    // { label: 'Charity Case Queue', href: '/admin/charity-cases', icon: ShieldAlert, roleAccess: ['Super Admin', 'Charity Officer'] },
+    // { label: 'Media & Patrika', href: '/admin/media', icon: ImageIcon, roleAccess: ['Super Admin', 'Media Secretary'] },
     { label: 'Payments & Donations', href: '/admin/payments', icon: CreditCard, roleAccess: ['Super Admin'] },
-    { label: 'SEO & Analytics Stream', href: '/admin/seo-analytics', icon: TrendingUp, roleAccess: ['Super Admin'] },
+    // { label: 'SEO & Analytics Stream', href: '/admin/seo-analytics', icon: TrendingUp, roleAccess: ['Super Admin'] },
   ];
 
   const isCurrent = (href: string) => pathname === href;
