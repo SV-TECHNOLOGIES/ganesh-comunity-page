@@ -21,6 +21,7 @@ import {
   ArrowLeft,
   CreditCard,
   Activity,
+  Building2,
 } from 'lucide-react';
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
@@ -39,6 +40,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
   const navItems = [
     { label: 'Dashboard & Stats', href: '/admin/dashboard', icon: LayoutDashboard, roleAccess: ['Super Admin', 'Media Secretary', 'Events Coordinator', 'Membership Officer', 'Charity Officer'] },
+    { label: 'Telugu Business Directory', href: '/admin/telugu-business', icon: Building2, roleAccess: ['Super Admin', 'Membership Officer', 'Events Coordinator'] },
     { label: 'Events Manager', href: '/admin/events', icon: Calendar, roleAccess: ['Super Admin', 'Events Coordinator'] },
     { label: 'Membership Database', href: '/admin/members', icon: Users, roleAccess: ['Super Admin', 'Membership Officer'] },
     { label: 'Leadership Directory', href: '/admin/leadership', icon: Users, roleAccess: ['Super Admin'] },

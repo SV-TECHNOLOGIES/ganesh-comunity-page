@@ -212,3 +212,31 @@ model SystemLog {
   @@index([source])
 }
 
+model TeluguBusiness {
+  id           String   @id @default(cuid())
+  businessName String
+  ownerName    String
+  category     String   @default("IT & Software Services")
+  tagline      String?
+  description  String
+  logoUrl      String?
+  coverUrl     String?
+  email        String
+  phone        String
+  whatsapp     String?
+  website      String?
+  address      String?
+  city         String   @default("London")
+  postcode     String?
+  status       String   @default("Pending") // "Pending", "Approved", "Rejected"
+  isFeatured   Boolean  @default(false)
+  specialOffer String?  // e.g. "10% off for MITRA members"
+  adminNotes   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([status])
+  @@index([category])
+  @@index([city])
+}
+

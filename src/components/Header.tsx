@@ -166,25 +166,9 @@ export default function Header() {
             >
               Events
             </Link>
-
-            {/* Media Dropdown */}
-            <div 
-              className="relative"
-              onMouseEnter={() => setMediaDropdown(true)}
-              onMouseLeave={() => setMediaDropdown(false)}
-            >
-              <button className="flex items-center gap-1 text-[#3D1A00] hover:text-[#E65C00] py-2 whitespace-nowrap">
-                <span>Media &amp; photo graphics</span>
-                <ChevronDown className="w-3.5 h-3.5" />
-              </button>
-              {mediaDropdown && (
-                <div className="absolute top-full left-0 w-56 bg-[#FFFAF5] shadow-xl rounded-2xl py-2 border border-[#E65C00]/20 z-50">
-                  <Link href="/media?tab=photos" className="block px-4 py-2 text-xs text-[#3D1A00] hover:bg-[#FFF0E0] hover:text-[#E65C00] whitespace-nowrap">Photo Gallery</Link>
-                  <Link href="/media?tab=videos" className="block px-4 py-2 text-xs text-[#3D1A00] hover:bg-[#FFF0E0] hover:text-[#E65C00] whitespace-nowrap">Teaser Reel &amp; Videos</Link>
-                  <Link href="/media?tab=patrika" className="block px-4 py-2 text-xs text-[#3D1A00] hover:bg-[#FFF0E0] hover:text-[#E65C00] whitespace-nowrap">Souvenir &amp; Patrika</Link>
-                </div>
-              )}
-            </div>
+            
+            <Link href="/media" className="block px-4 py-2 text-xs text-[#3D1A00] hover:bg-[#FFF0E0] hover:text-[#E65C00] whitespace-nowrap">Media &amp; photo graphics</Link>
+            
 
             {/* Membership Toggle */}
             {NAV_CONFIG.SHOW_MEMBERSHIP && (
@@ -201,6 +185,13 @@ export default function Header() {
               className={`transition-colors whitespace-nowrap hover:text-[#E65C00] ${isCurrent('/sponsors') ? 'text-[#E65C00] font-black' : 'text-[#3D1A00]'}`}
             >
               Sponsors
+            </Link>
+
+            <Link 
+              href="/telugu-business" 
+              className={`transition-colors whitespace-nowrap hover:text-[#E65C00] ${isCurrent('/telugu-business') ? 'text-[#E65C00] font-black' : 'text-[#3D1A00]'}`}
+            >
+              Telugu Business
             </Link>
 
             <Link 
@@ -426,6 +417,13 @@ export default function Header() {
             className="block py-2 text-[#3D1A00]"
           >
             Sponsors
+          </Link>
+          <Link 
+            href="/telugu-business" 
+            onClick={() => setMobileMenuOpen(false)}
+            className="block py-2 text-[#3D1A00]"
+          >
+            Telugu Business
           </Link>
           <Link 
             href="/contact" 

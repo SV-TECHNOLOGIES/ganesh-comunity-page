@@ -82,6 +82,7 @@ export default function Footer() {
                 <li><Link href="/membership" className="hover:text-[#FF9A3C] transition-colors">Volunteer Seva Registration</Link></li>
               )}
               <li><Link href="/sponsors" className="hover:text-[#FF9A3C] transition-colors">Sponsorship & Offerings</Link></li>
+              <li><Link href="/telugu-business" className="hover:text-[#FF9A3C] transition-colors">Telugu Business Directory</Link></li>
               <li><Link href="/charity" className="hover:text-[#FF9A3C] transition-colors">Student & Community Welfare</Link></li>
             </ul>
           </div>

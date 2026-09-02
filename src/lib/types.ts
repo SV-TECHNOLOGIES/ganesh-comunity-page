@@ -123,3 +123,40 @@ export interface SiteSettings {
   googleAnalyticsId: string;
   enableTracking: boolean;
 }
+
+export type BusinessCategory =
+  | 'IT & Software Services'
+  | 'Restaurants & Catering'
+  | 'Real Estate & Mortgages'
+  | 'Legal & Immigration'
+  | 'Accounting & Tax Services'
+  | 'Healthcare & Dental'
+  | 'Retail & Groceries'
+  | 'Event Management & Photography'
+  | 'Automobile & Logistics'
+  | 'Education & Tutoring'
+  | 'Other Services';
+
+export interface TeluguBusiness {
+  id: string;
+  businessName: string;
+  ownerName: string;
+  category: BusinessCategory | string;
+  tagline?: string | null;
+  description: string;
+  logoUrl?: string | null;
+  coverUrl?: string | null;
+  email: string;
+  phone: string;
+  whatsapp?: string | null;
+  website?: string | null;
+  address?: string | null;
+  city: string;
+  postcode?: string | null;
+  status: 'Pending' | 'Approved' | 'Rejected' | string;
+  isFeatured: boolean;
+  specialOffer?: string | null;
+  adminNotes?: string | null;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+}

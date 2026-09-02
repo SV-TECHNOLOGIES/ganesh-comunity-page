@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { SPONSORS_DATA } from '../src/data/sponsors';
+import { INITIAL_TELUGU_BUSINESSES } from '../src/data/telugu-businesses';
 
 const prisma = new PrismaClient();
 
@@ -262,6 +263,33 @@ async function main() {
     ],
   });
   console.log('✅ Payments seeded with Member links');
+
+  // 10. Seed Telugu Businesses
+  await prisma.teluguBusiness.deleteMany({});
+  await prisma.teluguBusiness.createMany({
+    data: INITIAL_TELUGU_BUSINESSES.map((b) => ({
+      id: b.id,
+      businessName: b.businessName,
+      ownerName: b.ownerName,
+      category: b.category,
+      tagline: b.tagline,
+      description: b.description,
+      logoUrl: b.logoUrl,
+      coverUrl: b.coverUrl,
+      email: b.email,
+      phone: b.phone,
+      whatsapp: b.whatsapp,
+      website: b.website,
+      address: b.address,
+      city: b.city,
+      postcode: b.postcode,
+      status: b.status,
+      isFeatured: b.isFeatured,
+      specialOffer: b.specialOffer,
+      adminNotes: b.adminNotes,
+    })),
+  });
+  console.log('✅ Telugu Businesses seeded');
 
   console.log('🚀 Seeding completed successfully!');
 }
