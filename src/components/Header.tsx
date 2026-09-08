@@ -100,11 +100,13 @@ export default function Header({ previewMode = false }: HeaderProps = {}) {
           
           {/* Logo with explicit shrink protection */}
           <Link href="/" className="flex items-center gap-3 shrink-0 group">
-            <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full overflow-hidden shrink-0 ring-2 ring-[#E65C00]/30 group-hover:ring-[#E65C00] transition-all bg-white p-1 flex items-center justify-center shadow-sm">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 max-w-[48px] max-h-[48px] sm:max-w-[56px] sm:max-h-[56px] rounded-full overflow-hidden shrink-0 ring-2 ring-[#E65C00]/30 group-hover:ring-[#E65C00] transition-all bg-white p-1 flex items-center justify-center shadow-sm">
               <img
                 src="/assets/favicon.ico"
                 alt="MITRA UK Logo"
-                className="w-full h-full object-contain rounded-full"
+                width={56}
+                height={56}
+                className="w-full h-full max-w-full max-h-full object-contain rounded-full block"
               />
             </div>
             <div className="shrink-0 min-w-max">
