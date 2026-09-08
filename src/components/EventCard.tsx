@@ -131,9 +131,9 @@ export default function EventCard({ event, onRSVP }: { event: EventItem; onRSVP?
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setDonationModalOpen(true)}
-                  className="flex-1 py-2 px-3 bg-[#FFF0E0] hover:bg-[#E65C00]/10 text-[#E65C00] border border-[#E65C00]/25 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                  className="gold-button flex-1 py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow"
                 >
-                  <HeartHandshake className="w-3.5 h-3.5 text-[#E65C00]" />
+                  <HeartHandshake className="w-3.5 h-3.5 fill-current text-white animate-pulse" />
                   <span>Donation</span>
                 </button>
                 <button
