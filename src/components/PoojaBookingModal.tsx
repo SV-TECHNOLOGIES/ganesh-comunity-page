@@ -42,17 +42,17 @@ export interface PoojaDateOption {
 }
 
 export const POOJA_DATES: PoojaDateOption[] = [
+  // {
+  //   id: 'day-1',
+  //   date: '13th Sep',
+  //   day: 'Sunday',
+  //   title: 'Ganapathi Agamana',
+  //   theme: 'Ganapathi Agamana & Mandapam Preparation',
+  //   blessing: 'Divine Welcome, Sanctum Purification & Auspicious Beginnings',
+  //   badge: 'DAY 1'
+  // },
   {
     id: 'day-1',
-    date: '13th Sep',
-    day: 'Sunday',
-    title: 'Ganapathi Agamana',
-    theme: 'Ganapathi Agamana & Mandapam Preparation',
-    blessing: 'Divine Welcome, Sanctum Purification & Auspicious Beginnings',
-    badge: 'DAY 1'
-  },
-  {
-    id: 'day-2',
     date: '14th Sep',
     day: 'Monday',
     title: 'Maha Ganapati Prathista',
@@ -61,7 +61,7 @@ export const POOJA_DATES: PoojaDateOption[] = [
     badge: 'GRAND CHATURTHI'
   },
   {
-    id: 'day-3',
+    id: 'day-2',
     date: '15th Sep',
     day: 'Tuesday',
     title: 'Vidya & Arogya Ganapati',
@@ -69,7 +69,7 @@ export const POOJA_DATES: PoojaDateOption[] = [
     blessing: 'Academic Success, Mental Clarity, Vitality & Radiant Health',
   },
   {
-    id: 'day-4',
+    id: 'day-3',
     date: '16th Sep',
     day: 'Wednesday',
     title: 'Lakshmi Ganapati',
@@ -77,7 +77,7 @@ export const POOJA_DATES: PoojaDateOption[] = [
     blessing: 'Financial Growth, Business Auspiciousness & Abundance',
   },
   {
-    id: 'day-5',
+    id: 'day-4',
     date: '17th Sep',
     day: 'Thursday',
     title: 'Korikala Ganapati',
@@ -85,7 +85,7 @@ export const POOJA_DATES: PoojaDateOption[] = [
     blessing: 'Sankalpa Siddhi, Career Milestones & Desire Fulfillment',
   },
   {
-    id: 'day-6',
+    id: 'day-5',
     date: '18th Sep',
     day: 'Friday',
     title: 'Bhakti Ganapati',
@@ -93,7 +93,7 @@ export const POOJA_DATES: PoojaDateOption[] = [
     blessing: 'Inner Serenity, Family Harmony & Spiritual Elevation',
   },
   {
-    id: 'day-7',
+    id: 'day-6',
     date: '19th Sep',
     day: 'Saturday',
     title: 'Utsava Ganapati & Nimajjanam',
