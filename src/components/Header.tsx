@@ -28,6 +28,7 @@ const NAV_CONFIG = {
   SHOW_ABOUT_DROPDOWN: SITE_CONFIG.ENABLE_ABOUT_DROPDOWN,
   SHOW_LEADERSHIP: SITE_CONFIG.ENABLE_LEADERSHIP,
   SHOW_MEMBERSHIP: SITE_CONFIG.ENABLE_MEMBERSHIP,
+  SHOW_TELUGU_BUSINESS: SITE_CONFIG.ENABLE_TELUGU_BUSINESS,
   SHOW_MEMBER_PORTAL: SITE_CONFIG.ENABLE_MEMBER_PORTAL,
   SHOW_LOGIN: SITE_CONFIG.ENABLE_LOGIN,
   SHOW_SEARCH: SITE_CONFIG.ENABLE_SEARCH,
@@ -230,13 +231,15 @@ export default function Header({ previewMode = false }: HeaderProps = {}) {
                       <div className="text-[10px] text-[#6B3A2A] normal-case">Our community champions</div>
                     </div>
                   </Link>
-                  <Link href="/telugu-business" className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs text-[#3D1A00] hover:bg-[#FFF0E0] hover:text-[#E65C00] transition-colors">
-                    <Building2 className="w-4 h-4 text-[#E65C00]" />
-                    <div>
-                      <div className="font-bold">Telugu Business</div>
-                      <div className="text-[10px] text-[#6B3A2A] normal-case">UK diaspora business directory</div>
-                    </div>
-                  </Link>
+                  {NAV_CONFIG.SHOW_TELUGU_BUSINESS && (
+                    <Link href="/telugu-business" className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs text-[#3D1A00] hover:bg-[#FFF0E0] hover:text-[#E65C00] transition-colors">
+                      <Building2 className="w-4 h-4 text-[#E65C00]" />
+                      <div>
+                        <div className="font-bold">Telugu Business</div>
+                        <div className="text-[10px] text-[#6B3A2A] normal-case">UK diaspora business directory</div>
+                      </div>
+                    </Link>
+                  )}
                   <Link href="/media" className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs text-[#3D1A00] hover:bg-[#FFF0E0] hover:text-[#E65C00] transition-colors">
                     <ImageIcon className="w-4 h-4 text-[#E65C00]" />
                     <div>
@@ -440,7 +443,9 @@ export default function Header({ previewMode = false }: HeaderProps = {}) {
               <Link href="/membership" onClick={() => setMobileMenuOpen(false)} className="block py-1 pl-3 text-[#3D1A00] hover:text-[#E65C00]">Membership</Link>
             )}
             <Link href="/sponsors" onClick={() => setMobileMenuOpen(false)} className="block py-1 pl-3 text-[#3D1A00] hover:text-[#E65C00]">Sponsors</Link>
-            <Link href="/telugu-business" onClick={() => setMobileMenuOpen(false)} className="block py-1 pl-3 text-[#3D1A00] hover:text-[#E65C00]">Telugu Business</Link>
+            {NAV_CONFIG.SHOW_TELUGU_BUSINESS && (
+              <Link href="/telugu-business" onClick={() => setMobileMenuOpen(false)} className="block py-1 pl-3 text-[#3D1A00] hover:text-[#E65C00]">Telugu Business</Link>
+            )}
             <Link href="/media" onClick={() => setMobileMenuOpen(false)} className="block py-1 pl-3 text-[#3D1A00] hover:text-[#E65C00]">Media &amp; Gallery</Link>
           </div>
 

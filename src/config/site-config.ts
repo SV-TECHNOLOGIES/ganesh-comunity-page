@@ -7,6 +7,7 @@ export interface SiteConfig {
   ENABLE_LEADERSHIP: boolean;
   ENABLE_MEMBERSHIP: boolean;
   ENABLE_MEMBERSHIP_REGISTRATION: boolean;
+  ENABLE_TELUGU_BUSINESS: boolean;
   ENABLE_MEMBER_PORTAL: boolean;
   ENABLE_LOGIN: boolean;
   ENABLE_SEARCH: boolean;
