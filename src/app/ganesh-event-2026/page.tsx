@@ -53,7 +53,7 @@ export default function GaneshEvent2026Page() {
               className="gold-button px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md"
             >
               <Flame className="w-3.5 h-3.5 fill-current text-white" />
-              <span>Book Pooja (£116)</span>
+              <span>Book Pooja / Seva</span>
             </button>
             <button
               onClick={() => openDonation('Event Donations')}

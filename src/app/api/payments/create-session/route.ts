@@ -32,6 +32,7 @@ export async function POST(request: Request) {
     eventId,
     eventName,
     donationType,
+    poojaCategory,
     poojaDate,
     poojaDay,
     poojaTitle,
@@ -133,6 +134,7 @@ export async function POST(request: Request) {
         eventId: eventId || '',
         eventName: safeEvent,
         donationType: safeType,
+        poojaCategory: poojaCategory || '',
         poojaDate: poojaDate || '',
         poojaDay: poojaDay || '',
         poojaTitle: poojaTitle || '',
@@ -161,6 +163,7 @@ export async function POST(request: Request) {
           eventId: eventId || null,
           eventName: safeEvent,
           donationType: safeType,
+          poojaCategory: poojaCategory ? String(poojaCategory).trim() : null,
           poojaDate: poojaDate || null,
           poojaDay: poojaDay || null,
           poojaTitle: poojaTitle || null,
@@ -178,6 +181,7 @@ export async function POST(request: Request) {
         customerName: safeCustomer,
         customerEmail: normalEmail,
         donationType: safeType,
+        poojaCategory: poojaCategory || null,
         eventName: safeEvent,
       });
     } catch (dbErr: unknown) {

@@ -56,6 +56,7 @@ export async function GET() {
           eventId: p.eventId,
           eventName: p.eventName,
           donationType: p.donationType,
+          poojaCategory: p.poojaCategory,
           poojaDate: p.poojaDate,
           poojaDay: p.poojaDay,
           poojaTitle: p.poojaTitle,

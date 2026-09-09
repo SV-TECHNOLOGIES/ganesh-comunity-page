@@ -29,6 +29,63 @@ import {
   useElements,
 } from '@stripe/react-stripe-js';
 
+// ── Sacred Pooja & Archana Categories ────────────────────────────────────────
+
+export interface PoojaCategoryOption {
+  id: string;
+  name: string;
+  type: 'pooja' | 'archana';
+  amount: number;
+  badge?: string;
+  tagline: string;
+  description: string;
+  inclusions: string;
+}
+
+export const POOJA_CATEGORIES: PoojaCategoryOption[] = [
+  // Pooja Categories
+  {
+    id: 'maha-yajaman',
+    name: 'Maha Yajaman',
+    type: 'pooja',
+    amount: 316,
+    badge: 'GRAND SEVA',
+    tagline: 'Grand Sanctum Seva & Full Family Sankalpam',
+    description: 'Lead the sacred ritual alongside Head Vedic Priests. Includes full family Sankalpam, VIP sanctum Darshan privileges, and Consecrated Maha Prasadam box.',
+    inclusions: 'Full Family Gotram & Nakshatram Sankalpam, Sanctum Seva, VIP Darshan, Consecrated Maha Prasadam & Vastram kit'
+  },
+  {
+    id: 'vishita-yajaman',
+    name: 'Vishita Yajaman',
+    type: 'pooja',
+    amount: 116,
+    badge: 'MOST POPULAR',
+    tagline: 'Special Yajamani Pooja & Sankalpam',
+    description: 'Personalized family Sankalpam by Vedic Priests during sacred Abhishekams and Arati, with consecrated Prasadam box.',
+    inclusions: 'Personalized Family Gotram & Nakshatram Sankalpam, Aarti Sanctum Darshan, Consecrated Festival Prasadam box'
+  },
+  {
+    id: 'yajaman',
+    name: 'Yajaman',
+    type: 'pooja',
+    amount: 51,
+    tagline: 'Devotee Sankalpam & Consecrated Prasadam',
+    description: 'Devotee Sankalpam with Gotram and Family Names recited during the chosen day’s Maha Pooja, plus sacred Prasadam.',
+    inclusions: 'Devotee Name & Gotram recited in daily Sankalpam, Consecrated Prasadam, Virtual Darshan access'
+  },
+  // Archana
+  {
+    id: 'daily-archana-7days',
+    name: '7 Days Daily Archana',
+    type: 'archana',
+    amount: 21,
+    badge: 'ALL 7 DAYS',
+    tagline: 'Continuous Daily Vedic Archana across all 7 Days',
+    description: 'Consecrated Ashtothara Sathanama Archana chanted daily across all 7 days of the Mahotsav in your family name for auspiciousness, health, and removal of obstacles.',
+    inclusions: 'Daily Vedic Archana for all 7 Days in family name, Sanctified Kumkuma & Prasadam blessings'
+  }
+];
+
 // ── 7 Sacred Pooja Days ──────────────────────────────────────────────────────
 
 export interface PoojaDateOption {
@@ -99,7 +156,16 @@ export const POOJA_DATES: PoojaDateOption[] = [
     title: 'Utsava Ganapati & Nimajjanam',
     theme: 'Celebration, Gratitude & Farewell to Bappa',
     blessing: 'Maha Visarjan Blessings, Victory & Eternal Divine Grace',
-    badge: 'MAHA VISARJAN'
+    
+  },
+  {
+    id: 'day-7',
+    date: '20th Sep',
+    day: 'Sunday',
+    title: 'Ganapati Yagam',
+    theme: 'Maha Ganapati Yagam',
+    blessing: 'Maha Visarjan Blessings, Victory & Eternal Divine Grace',
+    badge: 'MAHA YAGAM'
   }
 ];
 
@@ -259,13 +325,16 @@ export default function PoojaBookingModal({
   isOpen,
   onClose,
   initialDateId,
+  initialCategoryId,
 }: {
   isOpen: boolean;
   onClose: () => void;
   initialDateId?: string;
+  initialCategoryId?: string;
 }) {
   const { user, isLoggedIn, login } = useAuth();
 
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(initialCategoryId || 'vishita-yajaman');
   const [selectedDateId, setSelectedDateId] = useState<string>(initialDateId || 'day-1');
   const [devoteeName, setDevoteeName] = useState('');
   const [gotram, setGotram] = useState('');
@@ -305,7 +374,13 @@ export default function PoojaBookingModal({
     return dbCounts[dateStr] || 0;
   }, [dbCounts]);
 
-  // Sync initial date if passed
+  // Sync initial category or date if passed
+  useEffect(() => {
+    if (initialCategoryId) {
+      setSelectedCategoryId(initialCategoryId);
+    }
+  }, [initialCategoryId]);
+
   useEffect(() => {
     if (initialDateId) {
       setSelectedDateId(initialDateId);
@@ -415,25 +490,31 @@ export default function PoojaBookingModal({
     }
   }, [guestName, guestEmail, guestPhone, login]);
 
-  const selectedDateObj = POOJA_DATES.find((d) => d.id === selectedDateId) || POOJA_DATES[1];
-  const poojaAmount = 116;
+  const selectedCategory = POOJA_CATEGORIES.find((c) => c.id === selectedCategoryId) || POOJA_CATEGORIES[1];
+  const isArchana = selectedCategory.type === 'archana';
+  const selectedDateObj = POOJA_DATES.find((d) => d.id === selectedDateId) || POOJA_DATES[0];
+  const poojaAmount = selectedCategory.amount;
 
   const getCauseDescription = useCallback(() => {
-    let desc = `Pooja Booking: ${selectedDateObj.date} (${selectedDateObj.title}) - £116 Fixed | Devotee: ${devoteeName}`;
+    let desc = isArchana
+      ? `Archana Booking: 7 Days Daily Archana (£21) - All 7 Festival Days | Devotee: ${devoteeName}`
+      : `Pooja Booking: ${selectedCategory.name} (£${selectedCategory.amount}) - ${selectedDateObj.date} (${selectedDateObj.title}) | Devotee: ${devoteeName}`;
     if (gotram) desc += ` | Gotram: ${gotram}`;
     if (familyMembers) desc += ` | Priest Sankalpam: ${familyMembers}`;
     return desc;
-  }, [selectedDateObj, gotram, devoteeName, familyMembers]);
+  }, [isArchana, selectedCategory, selectedDateObj, gotram, devoteeName, familyMembers]);
 
   const handleDetailsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!devoteeName || !email) return;
 
-    // Double check limit before proceeding to pay
-    const count = getBookingCount(selectedDateObj.date);
-    if (count >= 10) {
-      setSessionError(`Sorry, ${selectedDateObj.date} is now fully booked. Please choose another date.`);
-      return;
+    // Double check limit before proceeding to pay (only for day-specific pooja categories)
+    if (!isArchana) {
+      const count = getBookingCount(selectedDateObj.date);
+      if (count >= 10) {
+        setSessionError(`Sorry, ${selectedDateObj.date} is now fully booked. Please choose another date.`);
+        return;
+      }
     }
 
     setSubmitting(true);
@@ -452,10 +533,11 @@ export default function PoojaBookingModal({
           paymentMethod: 'Stripe Card',
           eventId: 'evt-ganesh-chaturthi',
           eventName: 'London Ganesh Mahotsav 2026',
-          donationType: 'pooja',
-          poojaDate: selectedDateObj.date,
-          poojaDay: selectedDateObj.day,
-          poojaTitle: selectedDateObj.title,
+          donationType: isArchana ? 'archana' : 'pooja',
+          poojaCategory: selectedCategory.name,
+          poojaDate: isArchana ? 'All 7 Days (14-20 Sep)' : selectedDateObj.date,
+          poojaDay: isArchana ? 'Full Festival' : selectedDateObj.day,
+          poojaTitle: isArchana ? '7 Days Daily Archana' : selectedDateObj.title,
           gotram: gotram ? gotram.trim() : null,
           familyMembers: familyMembers ? familyMembers.trim() : null,
           specialWishes: specialWishes ? specialWishes.trim() : null,
@@ -487,7 +569,9 @@ export default function PoojaBookingModal({
       donorEmail: email,
       amount: poojaAmount,
       currency: 'GBP',
-      cause: `${selectedDateObj.date} ${selectedDateObj.title} Pooja Seva`,
+      cause: isArchana
+        ? `7 Days Daily Archana (£21)`
+        : `${selectedCategory.name} (£${selectedCategory.amount}) - ${selectedDateObj.date} ${selectedDateObj.title}`,
       paymentMethod: 'Card',
       date: new Date().toLocaleDateString('en-GB', {
         day: '2-digit',
@@ -553,13 +637,23 @@ export default function PoojaBookingModal({
                 <span className="font-mono font-bold text-[#E65C00]">{receipt.receiptNo}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#6B3A2A]">Selected Day:</span>
-                <span className="font-bold text-[#E65C00]">{selectedDateObj.date} ({selectedDateObj.day})</span>
+                <span className="text-[#6B3A2A]">Seva Category:</span>
+                <span className="font-black text-[#E65C00] bg-white px-2 py-0.5 rounded-md border border-[#E65C00]/20">
+                  {selectedCategory.name}
+                </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#6B3A2A]">Ritual Deity:</span>
-                <span className="font-semibold text-[#3D1A00]">{selectedDateObj.title}</span>
+                <span className="text-[#6B3A2A]">Timing / Day:</span>
+                <span className="font-bold text-[#3D1A00]">
+                  {isArchana ? 'All 7 Days (14th – 20th Sep)' : `${selectedDateObj.date} (${selectedDateObj.day})`}
+                </span>
               </div>
+              {!isArchana && (
+                <div className="flex justify-between">
+                  <span className="text-[#6B3A2A]">Ritual Deity:</span>
+                  <span className="font-semibold text-[#3D1A00]">{selectedDateObj.title}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-[#6B3A2A]">Devotee / Yajamani:</span>
                 <span className="font-semibold text-[#3D1A00]">{receipt.donorName}</span>
@@ -571,7 +665,7 @@ export default function PoojaBookingModal({
                 </div>
               )}
               <div className="flex justify-between border-t border-[#E65C00]/15 pt-2">
-                <span className="text-[#6B3A2A]">Pooja Seva Amount:</span>
+                <span className="text-[#6B3A2A]">Total Seva Paid:</span>
                 <span className="font-black text-base text-emerald-600">£{receipt.amount}.00 GBP</span>
               </div>
             </div>
@@ -599,8 +693,8 @@ export default function PoojaBookingModal({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-lg sm:text-xl font-black font-cinzel gold-foil-text">SACRED POOJA BOOKING</h2>
-                  <span className="bg-[#E65C00] text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase">£116 SEVA</span>
+                  <h2 className="text-lg sm:text-xl font-black font-cinzel gold-foil-text">SACRED POOJA &amp; ARCHANA</h2>
+                  <span className="bg-[#E65C00] text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase">£{selectedCategory.amount} SEVA</span>
                 </div>
                 <p className="text-xs text-[#6B3A2A]">Quick details — no account needed</p>
               </div>
@@ -705,10 +799,10 @@ export default function PoojaBookingModal({
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-lg sm:text-xl font-black font-cinzel text-[#3D1A00]">
-                    SACRED POOJA BOOKING
+                    SACRED POOJA &amp; ARCHANA
                   </h2>
                   <span className="bg-[#E65C00] text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase">
-                    £116 SEVA
+                    £{selectedCategory.amount} SEVA
                   </span>
                 </div>
                 <p className="text-xs text-[#6B3A2A]">
@@ -717,89 +811,196 @@ export default function PoojaBookingModal({
               </div>
             </div>
 
-            {/* Date Selection */}
+            {/* 1. Category Selection */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold text-[#E65C00] uppercase tracking-wider flex items-center gap-1.5 font-cinzel">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>1. Choose Pooja Category / Archana</span>
+                </label>
+                <span className="text-[10px] text-[#6B3A2A] font-semibold">Select your Seva</span>
+              </div>
+
+              {/* Pooja Categories */}
+              <div className="space-y-1.5">
+                <div className="text-[11px] font-black text-[#6B3A2A] uppercase tracking-wider flex items-center gap-1.5">
+                  <Flame className="w-3 h-3 text-[#E65C00]" />
+                  <span>Pooja Categories</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {POOJA_CATEGORIES.filter((c) => c.type === 'pooja').map((cat) => {
+                    const isSelected = selectedCategoryId === cat.id;
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => setSelectedCategoryId(cat.id)}
+                        className={`p-3 rounded-2xl text-left transition-all border relative flex flex-col justify-between ${
+                          isSelected
+                            ? 'bg-gradient-to-r from-[#E65C00] to-[#FF7A00] text-white border-[#E65C00] shadow-md ring-2 ring-[#E65C00]/30'
+                            : 'bg-white hover:bg-[#FFF8F0] border-[#E65C00]/25 hover:border-[#E65C00]'
+                        }`}
+                      >
+                        {cat.badge && (
+                          <span className={`absolute top-2 right-2 text-[8px] font-black px-1.5 py-0.5 rounded-md uppercase ${
+                            isSelected ? 'bg-white text-[#E65C00]' : 'bg-[#E65C00]/10 text-[#E65C00]'
+                          }`}>
+                            {cat.badge}
+                          </span>
+                        )}
+                        <div>
+                          <div className={`text-base font-black font-cinzel ${isSelected ? 'text-white' : 'text-[#E65C00]'}`}>
+                            £{cat.amount}
+                          </div>
+                          <h4 className={`text-xs font-bold mt-0.5 ${isSelected ? 'text-white' : 'text-[#3D1A00]'}`}>
+                            {cat.name}
+                          </h4>
+                          <p className={`text-[10px] line-clamp-2 mt-1 leading-tight ${isSelected ? 'text-white/90' : 'text-[#6B3A2A]'}`}>
+                            {cat.tagline}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Archana */}
+              <div className="space-y-1.5 pt-1">
+                <div className="text-[11px] font-black text-[#6B3A2A] uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles className="w-3 h-3 text-[#E65C00]" />
+                  <span>Archana</span>
+                </div>
+                <div className="grid grid-cols-1 gap-2">
+                  {POOJA_CATEGORIES.filter((c) => c.type === 'archana').map((cat) => {
+                    const isSelected = selectedCategoryId === cat.id;
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => setSelectedCategoryId(cat.id)}
+                        className={`p-3 rounded-2xl text-left transition-all border relative flex items-center justify-between gap-3 ${
+                          isSelected
+                            ? 'bg-gradient-to-r from-[#E65C00] to-[#FF7A00] text-white border-[#E65C00] shadow-md ring-2 ring-[#E65C00]/30'
+                            : 'bg-white hover:bg-[#FFF8F0] border-[#E65C00]/25 hover:border-[#E65C00]'
+                        }`}
+                      >
+                        <div className="space-y-0.5 flex-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className={`text-xs font-bold ${isSelected ? 'text-white' : 'text-[#3D1A00]'}`}>
+                              {cat.name}
+                            </h4>
+                            {cat.badge && (
+                              <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-md uppercase ${
+                                isSelected ? 'bg-white text-[#E65C00]' : 'bg-[#E65C00]/10 text-[#E65C00]'
+                              }`}>
+                                {cat.badge}
+                              </span>
+                            )}
+                          </div>
+                          <p className={`text-[10px] leading-tight ${isSelected ? 'text-white/90' : 'text-[#6B3A2A]'}`}>
+                            {cat.tagline}
+                          </p>
+                        </div>
+                        <div className={`text-base font-black font-cinzel shrink-0 ${isSelected ? 'text-white' : 'text-[#E65C00]'}`}>
+                          £{cat.amount}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Date Selection */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-xs font-bold text-[#E65C00] uppercase tracking-wider flex items-center gap-1.5 font-cinzel">
                   <Calendar className="w-3.5 h-3.5" />
-                  <span>1. Select Festival Pooja Date</span>
+                  <span>2. Festival Timing &amp; Date</span>
                 </label>
-                <span className="text-[10px] text-[#6B3A2A] font-semibold">7 Divine Days</span>
+                <span className="text-[10px] text-[#6B3A2A] font-semibold">
+                  {isArchana ? 'All 7 Days Included' : '6 Sacred Festival Days'}
+                </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
-                {POOJA_DATES.map((item) => {
-                  const isSelected = selectedDateId === item.id;
-                  const count = getBookingCount(item.date);
-                  const isFullyBooked = count >= 10;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      disabled={isFullyBooked}
-                      onClick={() => !isFullyBooked && setSelectedDateId(item.id)}
-                      className={`p-3 rounded-2xl text-left transition-all border relative flex flex-col justify-between ${
-                        isFullyBooked
-                          ? 'bg-slate-100 border-slate-200 opacity-60 cursor-not-allowed'
-                          : isSelected
-                          ? 'bg-gradient-to-r from-[#E65C00] to-[#FF7A00] border-[#E65C00] shadow-md ring-1 ring-[#E65C00]'
-                          : 'bg-white hover:bg-[#FFF8F0] border-[#E65C00]/20 hover:border-[#E65C00]'
-                      }`}
-                    >
-                      {isFullyBooked ? (
-                        <span className="absolute top-2 right-2 text-[8px] font-black px-1.5 py-0.5 rounded-md uppercase bg-red-600 text-white">
-                          FULLY BOOKED
-                        </span>
-                      ) : item.badge ? (
-                        <span className={`absolute top-2 right-2 text-[8px] font-black px-1.5 py-0.5 rounded-md uppercase ${
-                          isSelected ? 'bg-white text-[#E65C00]' : 'bg-[#E65C00] text-white'
-                        }`}>
-                          {item.badge}
-                        </span>
-                      ) : (
-                        <span className={`absolute top-2 right-2 text-[8px] font-bold px-1.5 py-0.5 rounded-md ${
-                          isSelected ? 'bg-white/20 text-white' : 'bg-[#E65C00]/10 text-[#E65C00]'
-                        }`}>
-                          {10 - count} slots left
-                        </span>
-                      )}
-                      <div>
-                        <div className="flex items-baseline gap-1.5">
-                          <span className={`text-xs font-black font-cinzel ${isFullyBooked ? 'text-slate-400 line-through' : isSelected ? 'text-white' : 'text-[#3D1A00]'}`}>
-                            {item.date}
-                          </span>
-                          <span className={`text-[10px] font-medium ${isFullyBooked ? 'text-slate-400' : 'text-[#6B3A2A]'}`}>
-                            ({item.day})
-                          </span>
-                        </div>
-                        <h4 className={`text-xs font-bold mt-0.5 leading-snug ${isFullyBooked ? 'text-slate-400' : isSelected ? 'text-white' : 'text-[#3D1A00]'}`}>
-                          {item.title}
-                        </h4>
-                        <p className="text-[10px] text-[#6B3A2A] line-clamp-1 mt-0.5">
-                          {isFullyBooked ? 'Bookings Closed' : item.theme}
-                        </p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Selected Day Banner */}
-              <div className="mt-2 bg-[#FFF0E0] border border-[#E65C00]/25 rounded-xl p-2.5 text-[11px] flex items-center justify-between shadow-sm">
-                <div>
-                  <span className="text-[#6B3A2A]">Selected Ritual: </span>
-                  <strong className="text-[#E65C00]">{selectedDateObj.date} · {selectedDateObj.title}</strong>
-                  <div className="text-[10px] text-[#6B3A2A] italic">{selectedDateObj.blessing}</div>
+              {isArchana ? (
+                <div className="bg-[#FFF0E0] border border-[#E65C00]/30 rounded-2xl p-3 flex items-start gap-2.5 shadow-sm">
+                  <Sparkles className="w-4 h-4 text-[#E65C00] shrink-0 mt-0.5" />
+                  <div className="space-y-0.5">
+                    <h4 className="text-xs font-bold text-[#3D1A00]">
+                      7 Days Continuous Daily Archana (14th Sep – 20th Sep 2026)
+                    </h4>
+                    <p className="text-[11px] text-[#6B3A2A] leading-relaxed">
+                      Your family Gotram and names will be invoked daily in the Vedic Ashtothara Sathanama Archana across all 7 days of the Mahotsav.
+                    </p>
+                  </div>
                 </div>
-                <span className="text-xs font-black text-[#E65C00] font-cinzel shrink-0">£116.00</span>
-              </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-52 overflow-y-auto pr-1">
+                  {POOJA_DATES.map((item) => {
+                    const isSelected = selectedDateId === item.id;
+                    const count = getBookingCount(item.date);
+                    const isFullyBooked = count >= 10;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        disabled={isFullyBooked}
+                        onClick={() => !isFullyBooked && setSelectedDateId(item.id)}
+                        className={`p-2.5 rounded-xl text-left transition-all border relative flex flex-col justify-between ${
+                          isFullyBooked
+                            ? 'bg-slate-100 border-slate-200 opacity-60 cursor-not-allowed'
+                            : isSelected
+                            ? 'bg-gradient-to-r from-[#E65C00] to-[#FF7A00] border-[#E65C00] shadow-md ring-1 ring-[#E65C00]'
+                            : 'bg-white hover:bg-[#FFF8F0] border-[#E65C00]/20 hover:border-[#E65C00]'
+                        }`}
+                      >
+                        {isFullyBooked ? (
+                          <span className="absolute top-2 right-2 text-[8px] font-black px-1.5 py-0.5 rounded-md uppercase bg-red-600 text-white">
+                            FULLY BOOKED
+                          </span>
+                        ) : item.badge ? (
+                          <span className={`absolute top-2 right-2 text-[8px] font-black px-1.5 py-0.5 rounded-md uppercase ${
+                            isSelected ? 'bg-white text-[#E65C00]' : 'bg-[#E65C00] text-white'
+                          }`}>
+                            {item.badge}
+                          </span>
+                        ) : (
+                          <span className={`absolute top-2 right-2 text-[8px] font-bold px-1.5 py-0.5 rounded-md ${
+                            isSelected ? 'bg-white/20 text-white' : 'bg-[#E65C00]/10 text-[#E65C00]'
+                          }`}>
+                            {10 - count} slots left
+                          </span>
+                        )}
+                        <div>
+                          <div className="flex items-baseline gap-1.5">
+                            <span className={`text-xs font-black font-cinzel ${isFullyBooked ? 'text-slate-400 line-through' : isSelected ? 'text-white' : 'text-[#3D1A00]'}`}>
+                              {item.date}
+                            </span>
+                            <span className={`text-[10px] font-medium ${isFullyBooked ? 'text-slate-400' : 'text-[#6B3A2A]'}`}>
+                              ({item.day})
+                            </span>
+                          </div>
+                          <h4 className={`text-xs font-bold mt-0.5 leading-snug ${isFullyBooked ? 'text-slate-400' : isSelected ? 'text-white' : 'text-[#3D1A00]'}`}>
+                            {item.title}
+                          </h4>
+                          <p className="text-[10px] text-[#6B3A2A] line-clamp-1 mt-0.5">
+                            {isFullyBooked ? 'Bookings Closed' : item.theme}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
-            {/* Devotee Details */}
+            {/* 3. Devotee Details */}
             <div className="space-y-3 pt-1">
               <label className="block text-xs font-bold text-[#E65C00] uppercase tracking-wider flex items-center gap-1.5 font-cinzel">
                 <User className="w-3.5 h-3.5" />
-                <span>2. Sankalpam &amp; Devotee Information</span>
+                <span>3. Sankalpam &amp; Devotee Information</span>
               </label>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -878,14 +1079,17 @@ export default function PoojaBookingModal({
               </div>
             </div>
 
-            {/* Inclusions Note */}
-            <div className="bg-[#FFF0E0] p-3 rounded-xl border border-[#E65C00]/25 text-[11px] text-[#6B3A2A] space-y-1">
-              <div className="font-bold text-[#E65C00] flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Pooja Seva Includes:</span>
+            {/* Selected Summary & Inclusions */}
+            <div className="bg-[#FFF0E0] p-3 rounded-xl border border-[#E65C00]/25 text-[11px] text-[#6B3A2A] space-y-1.5 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div className="font-bold text-[#E65C00] flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>{selectedCategory.name} Seva Includes:</span>
+                </div>
+                <span className="text-xs font-black text-[#E65C00] font-cinzel shrink-0">£{selectedCategory.amount}.00</span>
               </div>
               <p className="text-[10px] leading-relaxed">
-                Personalized Archana with your Gotram/Names chanted by Head Vedic Priests, special sanctum Darshan badge, and consecrated Maha Prasadam box.
+                {selectedCategory.inclusions}
               </p>
             </div>
 
@@ -915,7 +1119,10 @@ export default function PoojaBookingModal({
               ) : (
                 <>
                   <Flame className="w-4 h-4 fill-current text-white" />
-                  <span>Proceed to Pay £116 for {selectedDateObj.date}</span>
+                  <span>
+                    Proceed to Pay £{selectedCategory.amount} for {selectedCategory.name}
+                    {!isArchana ? ` (${selectedDateObj.date})` : ''}
+                  </span>
                 </>
               )}
             </button>
@@ -935,7 +1142,11 @@ export default function PoojaBookingModal({
               amount={poojaAmount}
               devoteeName={devoteeName}
               devoteeEmail={email}
-              cause={`${selectedDateObj.date} ${selectedDateObj.title} Pooja Seva (£116)`}
+              cause={
+                isArchana
+                  ? `7 Days Daily Archana (£21)`
+                  : `${selectedCategory.name} (£${selectedCategory.amount}) - ${selectedDateObj.date} ${selectedDateObj.title}`
+              }
               onSuccess={handlePaymentSuccess}
               onBack={() => { setStep('details'); setClientSecret(null); }}
             />

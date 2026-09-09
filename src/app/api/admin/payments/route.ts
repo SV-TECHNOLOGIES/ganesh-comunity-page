@@ -34,6 +34,7 @@ export async function GET(request: Request) {
       whereConditions.push({
         OR: [
           { donationType: { contains: type, mode: 'insensitive' } },
+          { poojaCategory: { contains: type, mode: 'insensitive' } },
           { description: { contains: type, mode: 'insensitive' } },
         ],
       });
@@ -47,6 +48,7 @@ export async function GET(request: Request) {
           { customerEmail: { contains: search, mode: 'insensitive' } },
           { customerPhone: { contains: search, mode: 'insensitive' } },
           { primaryDevoteeName: { contains: search, mode: 'insensitive' } },
+          { poojaCategory: { contains: search, mode: 'insensitive' } },
           { gotram: { contains: search, mode: 'insensitive' } },
           { familyMembers: { contains: search, mode: 'insensitive' } },
           { eventName: { contains: search, mode: 'insensitive' } },

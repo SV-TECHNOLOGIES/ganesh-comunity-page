@@ -40,6 +40,7 @@ interface PaymentItem {
   eventId?: string | null;
   eventName?: string | null;
   donationType?: string | null;
+  poojaCategory?: string | null;
   poojaDate?: string | null;
   poojaDay?: string | null;
   poojaTitle?: string | null;
@@ -202,11 +203,12 @@ export default function AdminPaymentsPage() {
       const exportList: PaymentItem[] = json.success && Array.isArray(json.data) ? json.data : payments;
 
       const csvRows = [
-        'Payment ID,Member ID,Event,Donation Type,Customer Name,Primary Devotee,Email,Phone,Pooja Date,Pooja Day,Pooja Title,Gotram,Priest Sankalpam,Special Wishes,Description,Amount (£),Currency,Payment Method,Status,Date',
+        'Payment ID,Member ID,Event,Donation Type,Pooja Category,Customer Name,Primary Devotee,Email,Phone,Pooja Date,Pooja Day,Pooja Title,Gotram,Priest Sankalpam,Special Wishes,Description,Amount (£),Currency,Payment Method,Status,Date',
       ];
       exportList.forEach((p) => {
         const eventName = (p.eventName || 'London Ganesh Mahotsav 2026').replace(/"/g, '""');
         const dType = (p.donationType || 'Donation').toUpperCase();
+        const pCategory = (p.poojaCategory || '').replace(/"/g, '""');
         const pDate = p.poojaDate || '';
         const pDay = p.poojaDay || '';
         const pTitle = (p.poojaTitle || '').replace(/"/g, '""');
@@ -219,7 +221,7 @@ export default function AdminPaymentsPage() {
         const mId = p.memberId || '';
 
         csvRows.push(
-          `"${p.id}","${mId}","${eventName}","${dType}","${cName}","${devName}","${p.customerEmail}","${p.customerPhone || ''}","${pDate}","${pDay}","${pTitle}","${pGotram}","${pFamily}","${pWishes}","${pDesc}",${p.amount},"${p.currency}","${p.paymentMethod}","${p.status}","${p.createdAt}"`
+          `"${p.id}","${mId}","${eventName}","${dType}","${pCategory}","${cName}","${devName}","${p.customerEmail}","${p.customerPhone || ''}","${pDate}","${pDay}","${pTitle}","${pGotram}","${pFamily}","${pWishes}","${pDesc}",${p.amount},"${p.currency}","${p.paymentMethod}","${p.status}","${p.createdAt}"`
         );
       });
       const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
@@ -615,9 +617,16 @@ export default function AdminPaymentsPage() {
 
                             {/* Event & Donation Type */}
                             <td className="p-4 space-y-1">
-                              <span className="inline-block bg-[#FFF0E0] text-[#E65C00] border border-[#E65C00]/30 font-black px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider">
-                                {dType}
-                              </span>
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                <span className="inline-block bg-[#FFF0E0] text-[#E65C00] border border-[#E65C00]/30 font-black px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider">
+                                  {dType}
+                                </span>
+                                {p.poojaCategory && (
+                                  <span className="inline-block bg-[#E65C00] text-white font-black px-2 py-0.5 rounded-full text-[9px] uppercase tracking-wider shadow-sm">
+                                    {p.poojaCategory}
+                                  </span>
+                                )}
+                              </div>
                               <span className="text-[11px] text-[#3D1A00] font-semibold block">
                                 {p.eventName || 'London Ganesh Mahotsav 2026'}
                               </span>
@@ -943,6 +952,15 @@ export default function AdminPaymentsPage() {
                   <span className="text-[#6B3A2A] font-semibold">Phone / WhatsApp:</span>
                   <span className="font-mono text-[#3D1A00] text-right">
                     {selectedPaymentDetail.customerPhone}
+                  </span>
+                </div>
+              )}
+
+              {selectedPaymentDetail.poojaCategory && (
+                <div className="flex justify-between border-b border-[#E65C00]/10 pb-2">
+                  <span className="text-[#6B3A2A] font-semibold">Pooja / Seva Category:</span>
+                  <span className="font-black text-[#E65C00] bg-[#FFF0E0] px-2.5 py-0.5 rounded-full border border-[#E65C00]/30 text-xs text-right">
+                    {selectedPaymentDetail.poojaCategory}
                   </span>
                 </div>
               )}

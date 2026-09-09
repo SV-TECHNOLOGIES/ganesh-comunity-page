@@ -129,6 +129,7 @@ export async function POST(req: NextRequest) {
                 eventId: meta.eventId || null,
                 eventName: meta.eventName || null,
                 donationType: meta.donationType ? String(meta.donationType).toLowerCase().trim() : null,
+                poojaCategory: meta.poojaCategory ? String(meta.poojaCategory).trim() : null,
                 poojaDate: meta.poojaDate || null,
                 poojaDay: meta.poojaDay || null,
                 poojaTitle: meta.poojaTitle || null,

@@ -389,7 +389,7 @@ export default function Ganesha3DHero({
                 className="gold-button px-8 py-3.5 rounded-full text-sm font-black uppercase tracking-wider flex items-center gap-2.5 hover:scale-105 transition-all"
               >
                 <Flame className="w-5 h-5 fill-current text-white" />
-                <span>Book Pooja (£116)</span>
+                <span>Book Pooja / Seva</span>
               </button>
 
               <button

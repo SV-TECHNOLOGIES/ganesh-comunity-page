@@ -139,6 +139,7 @@ model Payment {
   donationType          String?  // e.g. "pooja", "anadanam", "event donation", "membership", "general"
 
   // ── Sacred Pooja & Devotee Sankalpam Details ───────────────────────────
+  poojaCategory         String?  // e.g. "Maha Yajaman", "Vishita Yajaman", "Yajaman", "7 Days Daily Archana"
   poojaDate             String?  // e.g. "13th Sep"
   poojaDay              String?  // e.g. "Sunday"
   poojaTitle            String?  // e.g. "Ganapathi Agamana"

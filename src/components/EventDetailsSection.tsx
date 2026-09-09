@@ -71,7 +71,7 @@ export default function EventDetailsSection({
               </h3>
             </div>
             <span className="text-xs text-[#6B3A2A] font-semibold">
-              Each pooja includes personalized family Sankalpam &amp; Prasadam box (£116)
+              Personalized family Sankalpam &amp; consecrated Prasadam (Sevas from £21 to £316)
             </span>
           </div>
 
@@ -143,7 +143,7 @@ export default function EventDetailsSection({
                     }`}
                   >
                     <Flame className="w-3.5 h-3.5 fill-current text-white" />
-                    <span>{isFullyBooked ? 'Fully Booked' : 'Book Pooja (£116)'}</span>
+                    <span>{isFullyBooked ? 'Fully Booked' : 'Book Pooja / Seva'}</span>
                   </button>
                 </div>
               );
