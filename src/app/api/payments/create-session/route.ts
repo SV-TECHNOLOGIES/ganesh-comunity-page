@@ -119,12 +119,32 @@ export async function POST(request: Request) {
       apiVersion: '2026-07-29.dahlia',
     });
 
+    // ── Sanitize description for Stripe / Payment Processor ─────────────────
+    // Remove "donation" references to comply with merchant rules and keep as event payments
+    let cleanDescription = (description || 'London Ganesh Mahotsav Event Payment').trim();
+    cleanDescription = cleanDescription
+      .replace(/donations/gi, 'Event Payments')
+      .replace(/fund/gi,'Event Payment')
+      .replace(/donation/gi, 'Event Payment')
+      .replace(/Annadanam/gi, '')
+      .replace(/contributions/gi, 'Event Payments')
+      .replace(/contribution/gi, 'Event Payment');
+
+    if (!cleanDescription) {
+      cleanDescription = 'London Ganesh Mahotsav Event Payment';
+    }
+
+    const cleanDonationType = safeType
+      .replace(/event donation/gi, 'event payment')
+      .replace(/fund/gi,'Event Payment')
+      .replace(/donation/gi, 'event payment');
+
     // ── Create Stripe PaymentIntent ───────────────────────────────────────────
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(numAmount * 100), // Stripe uses pence
       currency: 'gbp',
       automatic_payment_methods: { enabled: true },
-      description: description || 'MITRA Community Contribution',
+      description: cleanDescription,
       metadata: {
         customerName: safeCustomer,
         customerEmail: normalEmail,
@@ -133,7 +153,7 @@ export async function POST(request: Request) {
         memberId: finalMemberId || '',
         eventId: eventId || '',
         eventName: safeEvent,
-        donationType: safeType,
+        donationType: cleanDonationType,
         poojaCategory: poojaCategory || '',
         poojaDate: poojaDate || '',
         poojaDay: poojaDay || '',

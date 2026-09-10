@@ -14,6 +14,8 @@ export async function GET() {
         OR: [
           { donationType: 'pooja' },
           { poojaDate: { not: null } },
+          { poojaCategory: { not: null } },
+          { description: { contains: 'Pooja Event Payment' } },
           { description: { contains: 'Pooja Booking' } },
           { description: { contains: 'Pooja Seva' } }
         ]
