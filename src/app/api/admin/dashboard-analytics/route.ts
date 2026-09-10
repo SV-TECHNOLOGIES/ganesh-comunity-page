@@ -26,38 +26,46 @@ const FESTIVAL_DAYS = [
     date: '15th Sep',
     dateLabel: '15 Sep (Tue)',
     day: 'Tuesday',
-    title: 'Vidya & Arogya Ganapati',
-    theme: 'Wisdom, Education & Radiant Health'
+    title: 'Vidya Ganapati',
+    theme: 'Wisdom, Education, Knowledge & Learning'
   },
   {
     id: 'day-4',
     date: '16th Sep',
     dateLabel: '16 Sep (Wed)',
     day: 'Wednesday',
-    title: 'Lakshmi Ganapati',
-    theme: 'Prosperity, Abundance & Success'
+    title: 'Arogya Ganapati',
+    theme: 'Radiant Health, Healing & Wellbeing'
   },
   {
     id: 'day-5',
     date: '17th Sep',
     dateLabel: '17 Sep (Thu)',
     day: 'Thursday',
-    title: 'Korikala Ganapati',
-    theme: 'Wishes, Aspirations & Fulfillment'
+    title: 'Lakshmi Ganapati',
+    theme: 'Prosperity, Abundance & Success'
   },
   {
     id: 'day-6',
     date: '18th Sep',
     dateLabel: '18 Sep (Fri)',
     day: 'Friday',
-    title: 'Bhakti Ganapati',
-    theme: 'Devotion, Peace & Spiritual Strength'
+    title: 'Korikala Ganapati',
+    theme: 'Wishes, Aspirations & Fulfillment'
   },
   {
     id: 'day-7',
     date: '19th Sep',
     dateLabel: '19 Sep (Sat)',
     day: 'Saturday',
+    title: 'Bhakti Ganapati',
+    theme: 'Devotion, Peace & Spiritual Strength'
+  },
+  {
+    id: 'day-8',
+    date: '20th Sep',
+    dateLabel: '20 Sep (Sun)',
+    day: 'Sunday',
     title: 'Utsava Ganapati & Nimajjanam',
     theme: 'Grand Visarjan, Victory & Grace'
   }

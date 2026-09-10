@@ -121,51 +121,50 @@ export const POOJA_DATES: PoojaDateOption[] = [
     id: 'day-2',
     date: '15th Sep',
     day: 'Tuesday',
-    title: 'Vidya & Arogya Ganapati',
-    theme: 'For Wisdom, Education, Health & Wellbeing',
-    blessing: 'Academic Success, Mental Clarity, Vitality & Radiant Health',
+    title: 'Vidya Ganapati',
+    theme: 'For Wisdom, Education, Knowledge & Learning',
+    blessing: 'Academic Success, Mental Clarity, Intellect & Saraswati Kataksham',
   },
   {
     id: 'day-3',
     date: '16th Sep',
     day: 'Wednesday',
-    title: 'Lakshmi Ganapati',
-    theme: 'For Prosperity, Abundance & Success',
-    blessing: 'Financial Growth, Business Auspiciousness & Abundance',
+    title: 'Arogya Ganapati',
+    theme: 'For Radiant Health, Healing & Wellbeing',
+    blessing: 'Ayushya Abhivrudhi, Vitality, Radiant Health & Disease Protection',
   },
   {
     id: 'day-4',
     date: '17th Sep',
     day: 'Thursday',
-    title: 'Korikala Ganapati',
-    theme: 'For Wishes, Aspirations & Fulfillment',
-    blessing: 'Sankalpa Siddhi, Career Milestones & Desire Fulfillment',
+    title: 'Lakshmi Ganapati',
+    theme: 'For Prosperity, Abundance & Success',
+    blessing: 'Financial Growth, Business Auspiciousness & Abundance',
   },
   {
     id: 'day-5',
     date: '18th Sep',
     day: 'Friday',
-    title: 'Bhakti Ganapati',
-    theme: 'For Devotion, Peace & Spiritual Strength',
-    blessing: 'Inner Serenity, Family Harmony & Spiritual Elevation',
+    title: 'Korikala Ganapati',
+    theme: 'For Wishes, Aspirations & Fulfillment',
+    blessing: 'Sankalpa Siddhi, Career Milestones & Desire Fulfillment',
   },
   {
     id: 'day-6',
     date: '19th Sep',
     day: 'Saturday',
-    title: 'Utsava Ganapati & Nimajjanam',
-    theme: 'Celebration, Gratitude & Farewell to Bappa',
-    blessing: 'Maha Visarjan Blessings, Victory & Eternal Divine Grace',
-    
+    title: 'Bhakti Ganapati',
+    theme: 'For Devotion, Peace & Spiritual Strength',
+    blessing: 'Inner Serenity, Family Harmony & Spiritual Elevation',
   },
   {
     id: 'day-7',
     date: '20th Sep',
     day: 'Sunday',
-    title: 'Ganapati Yagam',
-    theme: 'Maha Ganapati Yagam',
+    title: 'Utsava Ganapati & Nimajjanam',
+    theme: 'Celebration, Gratitude, Maha Visarjan & Farewell to Bappa',
     blessing: 'Maha Visarjan Blessings, Victory & Eternal Divine Grace',
-    badge: 'MAHA YAGAM'
+    badge: 'MAHA VISARJAN'
   }
 ];
 
@@ -920,7 +919,7 @@ export default function PoojaBookingModal({
                   <span>2. Festival Timing &amp; Date</span>
                 </label>
                 <span className="text-[10px] text-[#6B3A2A] font-semibold">
-                  {isArchana ? 'All 7 Days Included' : '6 Sacred Festival Days'}
+                  {isArchana ? 'All 7 Days Included' : '7 Sacred Festival Days'}
                 </span>
               </div>
 

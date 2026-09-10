@@ -31,7 +31,8 @@ export async function GET() {
       '16th Sep',
       '17th Sep',
       '18th Sep',
-      '19th Sep'
+      '19th Sep',
+      '20th Sep'
     ];
 
     // Initialize counts for each of the 7 days

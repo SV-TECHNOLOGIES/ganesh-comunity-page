@@ -20,11 +20,12 @@ interface EventRSVPModalProps {
 const FESTIVAL_DATES = [
   { id: '13-sep', date: '13 Sep (Sun)', title: 'Ganapathi Agamana & Sthapana' },
   { id: '14-sep', date: '14 Sep (Mon)', title: 'Maha Ganapati Chaturthi' },
-  { id: '15-sep', date: '15 Sep (Tue)', title: 'Vidya & Arogya Ganapati' },
-  { id: '16-sep', date: '16 Sep (Wed)', title: 'Lakshmi Ganapati' },
-  { id: '17-sep', date: '17 Sep (Thu)', title: 'Korikala Ganapati' },
-  { id: '18-sep', date: '18 Sep (Fri)', title: 'Bhakti Ganapati' },
-  { id: '19-sep', date: '19 Sep (Sat)', title: 'Utsava Ganapati & Visarjan' },
+  { id: '15-sep', date: '15 Sep (Tue)', title: 'Vidya Ganapati' },
+  { id: '16-sep', date: '16 Sep (Wed)', title: 'Arogya Ganapati' },
+  { id: '17-sep', date: '17 Sep (Thu)', title: 'Lakshmi Ganapati' },
+  { id: '18-sep', date: '18 Sep (Fri)', title: 'Korikala Ganapati' },
+  { id: '19-sep', date: '19 Sep (Sat)', title: 'Bhakti Ganapati' },
+  { id: '20-sep', date: '20 Sep (Sun)', title: 'Utsava Ganapati & Visarjan' },
 ];
 
 export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPModalProps) {
