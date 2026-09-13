@@ -1,10 +1,20 @@
 import { NextResponse } from 'next/server';
 import { uploadFileViaFTP, UploadUseCase } from '@/lib/ftp-storage';
+import { getAuthenticatedUser } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function POST(request: Request) {
+  // Check authentication
+  const user = getAuthenticatedUser(request);
+  if (!user) {
+    return NextResponse.json(
+      { success: false, error: 'Unauthorized: You must be logged in to upload files.' },
+      { status: 401 }
+    );
+  }
+
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
