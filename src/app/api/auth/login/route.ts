@@ -76,7 +76,7 @@ export async function POST(request: Request) {
     if (member && member.passwordHash) {
       // Support bcrypt hash and legacy plain-text password
       const bcryptMatch = await verifyPassword(password, member.passwordHash).catch(() => false);
-      const legacyMatch = member.passwordHash === password || password === 'pass123';
+      const legacyMatch = member.passwordHash === password;
       memberMatched = bcryptMatch || legacyMatch;
     }
 
