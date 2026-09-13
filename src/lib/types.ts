@@ -188,3 +188,18 @@ export interface TeluguBusiness {
   createdAt?: string | Date;
   updatedAt?: string | Date;
 }
+
+export interface SponsorItem {
+  id: string;
+  name: string;
+  tier: string;
+  logoUrl: string;
+  websiteUrl?: string | null;
+  order: number;
+  active?: boolean;
+  accent?: string | null;
+  gradient?: string | null;
+  blackLogoBg?: boolean;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+}

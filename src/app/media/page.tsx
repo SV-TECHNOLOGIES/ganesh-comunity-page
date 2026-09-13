@@ -3,26 +3,25 @@
 import { useState, useEffect, useMemo, Suspense } from 'react';
 import Image from 'next/image';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { 
-  Image as ImageIcon, 
-  Video, 
-  BookOpen, 
-  Download, 
-  Play, 
-  X, 
-  Calendar, 
-  MapPin, 
-  ArrowLeft, 
-  ChevronRight, 
+import {
+  Image as ImageIcon,
+  Video,
+  BookOpen,
+  Download,
+  Play,
+  X,
+  Calendar,
+  MapPin,
+  ArrowLeft,
+  ChevronRight,
   ChevronLeft,
-  Sparkles, 
-  Film, 
-  Eye, 
+  Sparkles,
+  Film,
+  Eye,
   Loader2,
   Share2,
   Check
 } from 'lucide-react';
-import { MEDIA_DATA } from '@/data/media';
 
 interface EventAlbum {
   id: string;
@@ -156,7 +155,7 @@ function MediaContent() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
-      
+
       {/* Top Main Header */}
       {!selectedEventId && (
         <div className="text-center max-w-3xl mx-auto space-y-3">
@@ -173,39 +172,10 @@ function MediaContent() {
         </div>
       )}
 
-      {/* Navigation Switcher: Events Media vs MITRA Patrika */}
-      {!selectedEventId && (
-        <div className="flex justify-center border-b border-slate-200 dark:border-slate-800 pb-4 gap-3">
-          <button
-            onClick={() => setTopTab('events')}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-2xl text-xs font-bold transition-all ${
-              topTab === 'events'
-                ? 'bg-mitra-red text-white shadow-lg shadow-mitra-red/20'
-                : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
-            }`}
-          >
-            <ImageIcon className="w-4 h-4" />
-            <span>Event Galleries ({events.length})</span>
-          </button>
-
-          <button
-            onClick={() => setTopTab('patrika')}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-2xl text-xs font-bold transition-all ${
-              topTab === 'patrika'
-                ? 'bg-mitra-navy text-mitra-gold border border-mitra-gold/40 shadow-lg'
-                : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
-            }`}
-          >
-            <BookOpen className="w-4 h-4" />
-            <span>MITRA Patrika &amp; Souvenirs</span>
-          </button>
-        </div>
-      )}
-
       {/* VIEW 1: OPENED EVENT GALLERY VIEW */}
       {selectedEventId && currentEvent ? (
         <div className="space-y-8 animate-fadeIn">
-          
+
           {/* Breadcrumbs / Back button */}
           <div className="flex items-center justify-between">
             <button
@@ -286,22 +256,20 @@ function MediaContent() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setEventMediaFilter('ALL')}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                  eventMediaFilter === 'ALL'
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${eventMediaFilter === 'ALL'
                     ? 'bg-mitra-red text-white shadow-md'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                }`}
+                  }`}
               >
                 All Media ({currentEventMedia.length})
               </button>
 
               <button
                 onClick={() => setEventMediaFilter('IMAGE')}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                  eventMediaFilter === 'IMAGE'
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${eventMediaFilter === 'IMAGE'
                     ? 'bg-emerald-600 text-white shadow-md'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                }`}
+                  }`}
               >
                 <ImageIcon className="w-3.5 h-3.5" />
                 <span>Photos ({currentEvent.photosCount})</span>
@@ -309,11 +277,10 @@ function MediaContent() {
 
               <button
                 onClick={() => setEventMediaFilter('VIDEO')}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                  eventMediaFilter === 'VIDEO'
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${eventMediaFilter === 'VIDEO'
                     ? 'bg-amber-500 text-slate-950 shadow-md'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                }`}
+                  }`}
               >
                 <Video className="w-3.5 h-3.5" />
                 <span>Videos ({currentEvent.videosCount})</span>
@@ -447,8 +414,7 @@ function MediaContent() {
           )}
 
         </div>
-      ) : topTab === 'events' ? (
-        
+      ) : (
         /* VIEW 2: GRID OF EVENTS (Showing major main featured image) */
         <div className="space-y-6">
           {loading ? (
@@ -542,39 +508,6 @@ function MediaContent() {
               ))}
             </div>
           )}
-        </div>
-      ) : (
-
-        /* VIEW 3: MITRA PATRIKA & SOUVENIR MAGAZINES */
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {MEDIA_DATA.filter((m) => m.category === 'MITRA Patrika' || m.category === 'MITRA Souvenir').map((pub) => (
-            <div
-              key={pub.id}
-              className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-md flex gap-6 items-center"
-            >
-              <div className="relative w-28 h-36 rounded-xl overflow-hidden shadow-md border border-mitra-gold shrink-0 bg-slate-950">
-                <img
-                  src={pub.coverImage}
-                  alt={pub.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="space-y-2 flex-1">
-                <span className="text-[10px] font-bold bg-mitra-navy text-mitra-gold px-2 py-0.5 rounded">
-                  {pub.category}
-                </span>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">{pub.title}</h3>
-                <p className="text-xs text-slate-500 line-clamp-2">{pub.description}</p>
-                <button
-                  onClick={() => alert(`Opening digital edition for ${pub.title}...`)}
-                  className="bg-mitra-red hover:bg-rose-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow transition-colors"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Read / Download PDF</span>
-                </button>
-              </div>
-            </div>
-          ))}
         </div>
       )}
 

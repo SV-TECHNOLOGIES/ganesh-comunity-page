@@ -21,38 +21,7 @@ interface GalleryItem {
 }
 
 const fallbackImages: GalleryItem[] = [
-  {
-    id: 'fb-1',
-    type: 'IMAGE',
-    url: '/assets/poster.jpg',
-    src: '/assets/poster.jpg',
-    title: 'Maha Ganapathi Official Event Poster',
-    category: 'Official Poster',
-  },
-  {
-    id: 'fb-2',
-    type: 'IMAGE',
-    url: '/assets/organizers-poster.jpg',
-    src: '/assets/organizers-poster.jpg',
-    title: 'MITRA UK & Organizers Announcement',
-    category: 'Organizers & Brand',
-  },
-  {
-    id: 'fb-3',
-    type: 'IMAGE',
-    url: '/assets/poster.jpg',
-    src: '/assets/poster.jpg',
-    title: 'Slough Langley Sanctum Reveal Composite',
-    category: 'Divine Composite',
-  },
-  {
-    id: 'fb-4',
-    type: 'IMAGE',
-    url: '/assets/organizers-poster.jpg',
-    src: '/assets/organizers-poster.jpg',
-    title: 'Biryanis and More! & ELE Entertainments',
-    category: 'Sponsor Partners',
-  },
+
 ];
 
 export default function MediaTeaserSection({
