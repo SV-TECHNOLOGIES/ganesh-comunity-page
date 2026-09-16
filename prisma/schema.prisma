@@ -23,6 +23,11 @@ model Event {
   rsvpCount   Int         @default(0)
   featured    Boolean     @default(false)
   rsvps       EventRSVP[]
+<<<<<<< Updated upstream
+=======
+  mediaItems  MediaItem[]
+  configs     Config[]
+>>>>>>> Stashed changes
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 }
@@ -239,5 +244,22 @@ model TeluguBusiness {
   @@index([status])
   @@index([category])
   @@index([city])
+}
+
+model Config {
+  id         String   @id @default(cuid())
+  configKey  String   @unique // Deterministic unique key (e.g. "global:home.activeHomeEventId" or "evt-123:event.hero.heroType")
+  prefix     String   // e.g. "home", "featuredEvent", "event"
+  preference String   // e.g. "home.activeHomeEventId", "featuredEvent.hero.heroType", "event.hero.heroType"
+  value      String   @db.Text
+  dataType   String   @default("string") // "string" | "boolean" | "number" | "json"
+  eventId    String?
+  event      Event?   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([prefix])
+  @@index([eventId])
+  @@index([preference])
 }
 

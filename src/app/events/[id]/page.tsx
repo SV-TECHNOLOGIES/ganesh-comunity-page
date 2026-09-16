@@ -17,11 +17,7 @@ import {
   Download, 
   ArrowLeft,
 } from 'lucide-react';
-import Ganesha3DHero from '@/components/Ganesha3DHero';
-import RitualCountdown from '@/components/RitualCountdown';
-import EventDetailsSection from '@/components/EventDetailsSection';
-import IdolSpecsCard from '@/components/IdolSpecsCard';
-import MediaTeaserSection from '@/components/MediaTeaserSection';
+import EventLandingTemplate from '@/components/EventLandingTemplate';
 import NotifyMeModal from '@/components/NotifyMeModal';
 import DonationModal from '@/components/DonationModal';
 
@@ -39,13 +35,53 @@ export default function EventDetailPage() {
   useEffect(() => {
     fetch('/api/events')
       .then((res) => res.json())
-      .then((resData) => {
+      .then(async (resData) => {
+        let found: EventItem | null = null;
         if (resData.success && Array.isArray(resData.data)) {
+<<<<<<< Updated upstream
           const found = resData.data.find((e: EventItem) => e.id === id || e.title.toLowerCase().includes('ganesh'));
           if (found) {
             setEvent(found);
             setRsvpCount(found.rsvpCount);
           }
+=======
+          found = resData.data.find((e: EventItem) => e.id === id) ||
+            resData.data.find((e: EventItem) => e.id.toLowerCase() === id.toLowerCase()) || null;
+        }
+
+        // If not found in DB events, check template config storage
+        if (!found) {
+          try {
+            const resTpl = await fetch(`/api/events/hero-config?eventId=${encodeURIComponent(id)}`);
+            const tplJson = await resTpl.json();
+            if (tplJson.success && tplJson.data) {
+              const tpl = tplJson.data;
+              found = {
+                id: tpl.id,
+                title: tpl.title,
+                category: 'Cultural Events',
+                date: tpl.targetDate ? tpl.targetDate.slice(0, 10) : '2027-01-01',
+                time: '10:00 AM',
+                venue: 'London, United Kingdom',
+                address: 'Slough / London, United Kingdom',
+                ticketPrice: 0,
+                status: 'Upcoming',
+                description: tpl.hero.tagline || tpl.title,
+                bannerUrl: tpl.hero.bannerImageUrl || '/assets/poster.jpg',
+                capacity: 1000,
+                rsvpCount: 250,
+                featured: true,
+              };
+            }
+          } catch {}
+        }
+
+        if (found) {
+          setEvent(found);
+          setRsvpCount(found.rsvpCount || 0);
+        } else {
+          setEvent(null);
+>>>>>>> Stashed changes
         }
       })
       .catch(() => {});
@@ -61,7 +97,7 @@ export default function EventDetailPage() {
   }
 
   const jsonLd = generateEventJsonLd(event);
-  const isGaneshEvent = id === 'evt-ganesh-chaturthi' || id === 'evt-101' || event.title.toLowerCase().includes('ganesh');
+  const isTemplateEvent = id.startsWith('evt-') || (event.id && event.id.startsWith('evt-'));
 
   const handleRSVP = async () => {
     if (rsvped) return;
@@ -102,14 +138,15 @@ END:VCALENDAR`;
     link.click();
   };
 
-  // If viewing Ganesh Chaturthi event, render the full Home Page experience with 3D Ganesha & Puja booking!
-  if (isGaneshEvent) {
+  // If viewing any template-enabled event, render the full Landing Template experience!
+  if (isTemplateEvent) {
     return (
-      <div className="bg-[#FFF8F0] text-[#3D1A00] min-h-screen">
+      <>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+<<<<<<< Updated upstream
 
         {/* Back Link Bar */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2 flex justify-between items-center">
@@ -141,6 +178,10 @@ END:VCALENDAR`;
         <NotifyMeModal isOpen={notifyModalOpen} onClose={() => setNotifyModalOpen(false)} />
         <DonationModal isOpen={donateModalOpen} onClose={() => setDonateModalOpen(false)} />
       </div>
+=======
+        <EventLandingTemplate eventId={event.id || id} />
+      </>
+>>>>>>> Stashed changes
     );
   }
 

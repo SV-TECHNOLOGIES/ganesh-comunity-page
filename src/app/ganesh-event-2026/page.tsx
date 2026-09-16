@@ -1,20 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import Ganesha3DHero from '@/components/Ganesha3DHero';
-import RitualCountdown from '@/components/RitualCountdown';
-import StorySection from '@/components/StorySection';
-import IdolSpecsCard from '@/components/IdolSpecsCard';
-import EventDetailsSection from '@/components/EventDetailsSection';
-import MediaTeaserSection from '@/components/MediaTeaserSection';
-import OfferingPlaques from '@/components/OfferingPlaques';
-import SponsorRibbonBand from '@/components/SponsorRibbonBand';
-import PoojaBookingModal from '@/components/PoojaBookingModal';
-import DonationModal from '@/components/DonationModal';
-import Link from 'next/link';
-import { ArrowLeft, Flame, Heart } from 'lucide-react';
+import EventLandingTemplate from '@/components/EventLandingTemplate';
 
 export default function GaneshEvent2026Page() {
+<<<<<<< Updated upstream
   const [poojaModalOpen, setPoojaModalOpen] = useState(false);
   const [selectedPoojaDateId, setSelectedPoojaDateId] = useState<string | undefined>(undefined);
   const [donateModalOpen, setDonateModalOpen] = useState(false);
@@ -112,4 +101,7 @@ export default function GaneshEvent2026Page() {
       />
     </div>
   );
+=======
+  return <EventLandingTemplate eventId="evt-ganesh-chaturthi" />;
+>>>>>>> Stashed changes
 }
