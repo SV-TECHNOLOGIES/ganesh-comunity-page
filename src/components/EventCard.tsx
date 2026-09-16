@@ -134,7 +134,7 @@ export default function EventCard({ event, onRSVP }: { event: EventItem; onRSVP?
                   className="gold-button flex-1 py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow"
                 >
                   <HeartHandshake className="w-3.5 h-3.5 fill-current text-white animate-pulse" />
-                  <span>Donation</span>
+                  <span>Make a Booking</span>
                 </button>
                 <button
                   onClick={() => setPoojaModalOpen(true)}

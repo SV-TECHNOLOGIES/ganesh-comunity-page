@@ -60,7 +60,7 @@ export default function GaneshEvent2026Page() {
               className="maroon-button px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md border border-[#E65C00]/30"
             >
               <Heart className="w-3.5 h-3.5 fill-current text-[#FF9A3C]" />
-              <span>Make Donation</span>
+              <span>Make a Booking</span>
             </button>
           </div>
         </div>

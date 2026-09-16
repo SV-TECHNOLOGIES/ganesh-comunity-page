@@ -211,7 +211,7 @@ export const sendGuestWelcomeEmail = async (
       Namaste <strong style="color: #C2410C;">${fullName}</strong> 🙏,
     </p>
     <p style="color: #4A3B32; font-size: 13.5px; line-height: 1.7; margin: 0 0 22px;">
-      Your <strong>MITRA UK</strong> membership account has been created so you can access your Pooja bookings, donation receipts, and festival passes seamlessly.
+      Your <strong>MITRA UK</strong> membership account has been created so you can access your Pooja bookings, seva booking receipts, and festival passes seamlessly.
     </p>
 
     <!-- Credentials Card (Light Theme) -->
