@@ -92,7 +92,7 @@ export async function POST(request: Request) {
         .replace(/\{\{\s*memberId\s*\}\}/gi, memberId);
 
       // Replace inline markdown images ![alt](url)
-      personalizedMessage = personalizedMessage.replace(/!\[(.*?)\]\((.*?)\)/g, (_match, alt, url) => {
+      personalizedMessage = personalizedMessage.replace(/!\[(.*?)\]\((.*?)\)/g, (_match: any, alt: any, url: string) => {
         const fullImgUrl = url.startsWith('http') ? url : `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
         return `<div style="text-align: center; margin: 18px 0;"><img src="${fullImgUrl}" alt="${alt || 'Image'}" style="max-width: 100%; height: auto; border-radius: 12px; border: 1px solid #EAD8C7;" /></div>`;
       });

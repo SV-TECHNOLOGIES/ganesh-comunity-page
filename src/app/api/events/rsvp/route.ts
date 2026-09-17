@@ -35,10 +35,12 @@ export async function POST(request: Request) {
       );
     }
 
+    const totalTickets = Number(ticketsCount) || 0;
+
     const normalEmail = attendeeEmail.toLowerCase().trim();
     const safeName = attendeeName.trim();
     const safePhone = attendeePhone ? attendeePhone.trim() : '';
-    const adults = Number(adultsCount) || 1;
+    const adults = Number(adultsCount) || 0;
     const children = Number(childrenCount) || 0;
     const rawDates: string[] = Array.isArray(selectedDates) ? selectedDates : [];
     

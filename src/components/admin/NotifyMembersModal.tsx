@@ -442,7 +442,7 @@ export default function NotifyMembersModal({
                         <span className="font-bold text-[11px] truncate flex-1">{tmpl.name}</span>
                         <div className="flex items-center gap-1.5 shrink-0">
                           {tmpl.imageUrl && (
-                            <ImageIcon className="w-3 h-3 text-amber-400" title="Includes Image" />
+                            <ImageIcon className="w-3 h-3 text-amber-400" aria-label="Includes Image" />
                           )}
                           <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-md uppercase ${
                             tmpl.isCustom 
