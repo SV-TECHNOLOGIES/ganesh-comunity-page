@@ -180,13 +180,13 @@ export function getPoojaDateStatus(dateStr: string, currentBookingCount: number 
   const dayNum = parseInt(dateStr.replace(/\D/g, ''), 10);
 
   // 1. 20th Sep is explicitly disabled for Pooja booking (Visarjan day)
-  if (dayNum === 20 || dateStr.toLowerCase().includes('20th')) {
-    return {
-      disabled: true,
-      reason: 'visarjan',
-      statusLabel: 'VISARJAN - CLOSED',
-    };
-  }
+  // if (dayNum === 20 || dateStr.toLowerCase().includes('20th')) {
+  //   return {
+  //     disabled: false,
+  //     reason: 'visarjan',
+  //     statusLabel: 'VISARJAN - CLOSED',
+  //   };
+  // }
 
   // 2. Disable past dates (festival is in September 2026)
   const now = new Date();
@@ -393,7 +393,7 @@ export default function PoojaBookingModal({
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>(
     initialCategoryId && initialCategoryId !== 'maha-yajaman' ? initialCategoryId : 'vishita-yajaman'
   );
-  const [selectedDateId, setSelectedDateId] = useState<string>(initialDateId || 'day-4');
+  const [selectedDateId, setSelectedDateId] = useState<string>(initialDateId || 'day-7');
   const [devoteeName, setDevoteeName] = useState('');
   const [gotram, setGotram] = useState('');
   const [familyMembers, setFamilyMembers] = useState('');
@@ -1063,7 +1063,7 @@ export default function PoojaBookingModal({
                           <span className={`absolute top-2 right-2 text-[8px] font-bold px-1.5 py-0.5 rounded-md ${
                             isSelected ? 'bg-white/20 text-white' : 'bg-[#E65C00]/10 text-[#E65C00]'
                           }`}>
-                            {10 - count} slots left
+                            {3 - count} slots left
                           </span>
                         )}
                         <div>

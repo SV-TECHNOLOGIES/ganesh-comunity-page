@@ -58,7 +58,7 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
   
   // Date selection state (default to first available upcoming date)
   const [selectedDates, setSelectedDates] = useState<string[]>(() => {
-    const first = AVAILABLE_FESTIVAL_DATES[0];
+    const first = AVAILABLE_FESTIVAL_DATES[AVAILABLE_FESTIVAL_DATES.length-1];
     return first ? [first.date] : [];
   });
   
