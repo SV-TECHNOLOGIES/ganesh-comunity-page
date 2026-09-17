@@ -40,8 +40,31 @@ export async function POST(request: Request) {
     const safePhone = attendeePhone ? attendeePhone.trim() : '';
     const adults = Number(adultsCount) || 1;
     const children = Number(childrenCount) || 0;
-    const totalTickets = Number(ticketsCount) || (adults + children);
-    const datesArray: string[] = Array.isArray(selectedDates) ? selectedDates : ['14 Sep (Mon)'];
+    const rawDates: string[] = Array.isArray(selectedDates) ? selectedDates : [];
+    
+    // Disallow past festival dates
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth(); // 8 is September
+    const currentDay = now.getDate();
+
+    const datesArray = rawDates.filter((dateStr) => {
+      const dayNum = parseInt(dateStr.replace(/\D/g, ''), 10);
+      if (isNaN(dayNum)) return true;
+      if (currentYear > 2026) return false;
+      if (currentYear === 2026) {
+        if (currentMonth > 8) return false;
+        if (currentMonth === 8 && dayNum < currentDay) return false;
+      }
+      return true;
+    });
+
+    if (datesArray.length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'Please select at least one upcoming date for Darshan. Past dates cannot be booked.' },
+        { status: 400 }
+      );
+    }
     const travelOrigin = travellingFrom ? String(travellingFrom).trim() : null;
 
     // ── 1. Create or Update Event in DB ─────────────────────────────────────

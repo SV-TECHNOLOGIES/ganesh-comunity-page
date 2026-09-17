@@ -28,6 +28,26 @@ const FESTIVAL_DATES = [
   { id: '20-sep', date: '20 Sep (Sun)', title: 'Utsava Ganapati & Visarjan' },
 ];
 
+function isFestivalDatePast(dateStr: string): boolean {
+  const dayNum = parseInt(dateStr.replace(/\D/g, ''), 10);
+  if (isNaN(dayNum)) return false;
+
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth(); // 0-indexed, 8 is September
+  const currentDay = now.getDate();
+
+  if (currentYear > 2026) return true;
+  if (currentYear === 2026) {
+    if (currentMonth > 8) return true;
+    if (currentMonth === 8 && dayNum < currentDay) return true;
+  }
+  return false;
+}
+
+// Only upcoming and current dates are shown
+const AVAILABLE_FESTIVAL_DATES = FESTIVAL_DATES.filter((d) => !isFestivalDatePast(d.date));
+
 export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPModalProps) {
   const { user, login } = useAuth();
 
@@ -36,8 +56,11 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
   const [attendeePhone, setAttendeePhone] = useState(user?.phone || '');
   const [travellingFrom, setTravellingFrom] = useState('');
   
-  // Date selection state (supports multiple dates)
-  const [selectedDates, setSelectedDates] = useState<string[]>(['14 Sep (Mon)']);
+  // Date selection state (default to first available upcoming date)
+  const [selectedDates, setSelectedDates] = useState<string[]>(() => {
+    const first = AVAILABLE_FESTIVAL_DATES[0];
+    return first ? [first.date] : [];
+  });
   
   // Adults & Children passes count
   const [adultsCount, setAdultsCount] = useState<number>(1);
@@ -60,6 +83,7 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
   const totalTickets = adultsCount + childrenCount;
 
   const toggleDate = (dateStr: string) => {
+    if (isFestivalDatePast(dateStr)) return;
     setSelectedDates((prev) =>
       prev.includes(dateStr)
         ? prev.filter((d) => d !== dateStr)
@@ -68,17 +92,18 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
   };
 
   const selectAllDates = () => {
-    if (selectedDates.length === FESTIVAL_DATES.length) {
-      setSelectedDates(['14 Sep (Mon)']);
+    if (selectedDates.length === AVAILABLE_FESTIVAL_DATES.length) {
+      setSelectedDates([]);
     } else {
-      setSelectedDates(FESTIVAL_DATES.map((d) => d.date));
+      setSelectedDates(AVAILABLE_FESTIVAL_DATES.map((d) => d.date));
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedDates.length === 0) {
-      alert('Please select at least one date for free Darshan.');
+    const validDates = selectedDates.filter((d) => !isFestivalDatePast(d));
+    if (validDates.length === 0) {
+      alert('Please select at least one upcoming date for free Darshan.');
       return;
     }
     if (totalTickets < 1) {
@@ -101,7 +126,7 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
           ticketsCount: totalTickets,
           adultsCount,
           childrenCount,
-          selectedDates,
+          selectedDates: validDates,
         }),
       });
 
@@ -158,7 +183,7 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
                 </span>
                 <span className="flex items-center gap-1">
                   <Clock className="w-3.5 h-3.5 text-[#E65C00]" />
-                  <span>Mon–Fri: 6-9 PM | Sat: 11 AM-3 PM</span>
+                  <span>Mon–Fri: 6-9 PM | Sat: 11 AM-3 PM | Sun: 11 AM-5 PM</span>
                 </span>
                 <span className="flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5 text-[#E65C00]" />
@@ -174,39 +199,62 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="block text-[#6B3A2A] font-bold">
-                    Select Darshan Date(s) (13th to 19th Sep) *
+                    Select Darshan Date(s) (13th to 20th Sep) *
                   </label>
                   <button
                     type="button"
                     onClick={selectAllDates}
                     className="text-[11px] font-bold text-[#E65C00] hover:underline"
                   >
-                    {selectedDates.length === FESTIVAL_DATES.length ? 'Clear All' : 'Select All 7 Days'}
+                    {selectedDates.length === AVAILABLE_FESTIVAL_DATES.length
+                      ? 'Clear All'
+                      : `Select All Available (${AVAILABLE_FESTIVAL_DATES.length} Days)`}
                   </button>
                 </div>
                 
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {FESTIVAL_DATES.map((item) => {
-                    const isSelected = selectedDates.includes(item.date);
+                    const isPast = isFestivalDatePast(item.date);
+                    const isSelected = !isPast && selectedDates.includes(item.date);
                     return (
                       <button
                         key={item.id}
                         type="button"
+                        disabled={isPast}
                         onClick={() => toggleDate(item.date)}
+                        title={isPast ? 'This festival date has passed' : undefined}
                         className={`p-2.5 rounded-xl border text-left transition-all flex items-start gap-2 ${
-                          isSelected
+                          isPast
+                            ? 'bg-slate-100/70 border-slate-200 text-slate-400 cursor-not-allowed opacity-60 select-none'
+                            : isSelected
                             ? 'bg-[#FFF0E0] border-[#E65C00] text-[#E65C00] ring-1 ring-[#E65C00] shadow-sm'
                             : 'bg-white border-[#E65C00]/25 text-[#3D1A00] hover:border-[#E65C00]/60'
                         }`}
                       >
                         <div className={`w-4 h-4 rounded-md shrink-0 flex items-center justify-center mt-0.5 border ${
-                          isSelected ? 'bg-[#E65C00] border-[#E65C00] text-white' : 'border-[#6B3A2A]/40'
+                          isPast
+                            ? 'border-slate-300 bg-slate-200/50 text-slate-400'
+                            : isSelected
+                            ? 'bg-[#E65C00] border-[#E65C00] text-white'
+                            : 'border-[#6B3A2A]/40 bg-white'
                         }`}>
                           {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                          {isPast && <span className="text-[9px] leading-none font-bold text-slate-400">✕</span>}
                         </div>
-                        <div className="min-w-0">
-                          <p className="font-bold text-xs leading-tight">{item.date}</p>
-                          <p className="text-[9px] text-[#6B3A2A] truncate mt-0.5">{item.title}</p>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-1">
+                            <p className={`font-bold text-xs leading-tight ${isPast ? 'line-through text-slate-400' : ''}`}>
+                              {item.date}
+                            </p>
+                            {isPast && (
+                              <span className="text-[8px] uppercase tracking-wider font-bold bg-slate-200 text-slate-500 px-1 py-0.5 rounded leading-none">
+                                Past
+                              </span>
+                            )}
+                          </div>
+                          <p className={`text-[9px] truncate mt-0.5 ${isPast ? 'text-slate-400' : 'text-[#6B3A2A]'}`}>
+                            {item.title}
+                          </p>
                         </div>
                       </button>
                     );

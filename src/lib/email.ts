@@ -44,7 +44,7 @@ interface EmailLayoutOptions {
   isAlert?: boolean;
 }
 
-function renderEmailLayout({
+export function renderEmailLayout({
   pageTitle,
   badgeText = 'London Ganesh Mahotsav 2026',
   children,
