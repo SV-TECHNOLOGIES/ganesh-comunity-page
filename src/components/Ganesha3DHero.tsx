@@ -8,17 +8,23 @@ import { Sparkles, Flame, Heart, RotateCcw, ExternalLink, Ticket } from 'lucide-
 
 interface Ganesha3DHeroProps {
   onBookPoojaClick?: () => void;
+  onPoojaClick?: () => void;
   onDonateClick?: () => void;
   onNotifyClick?: () => void;
   onRSVPClick?: () => void;
+  onRegisterClick?: () => void;
 }
 
 export default function Ganesha3DHero({
   onBookPoojaClick,
+  onPoojaClick,
   onDonateClick,
   onNotifyClick,
   onRSVPClick,
+  onRegisterClick,
 }: Ganesha3DHeroProps) {
+  const handlePooja = onBookPoojaClick || onPoojaClick;
+  const handleRSVP = onRSVPClick || onRegisterClick;
   const mountRef = useRef<HTMLDivElement>(null);
   const [modelLoaded, setModelLoaded] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(15);
@@ -383,12 +389,12 @@ export default function Ganesha3DHero({
 
         {/* Action CTAs */}
         <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
-          {onBookPoojaClick || onDonateClick || onRSVPClick ? (
+          {handlePooja || onDonateClick || handleRSVP ? (
             // ── Event page: show enabled action buttons ───────────────
             <>
-              {onRSVPClick && (
+              {handleRSVP && (
                 <button
-                  onClick={onRSVPClick}
+                  onClick={handleRSVP}
                   className="gold-button px-8 py-3.5 rounded-full text-sm font-black uppercase tracking-wider flex items-center gap-2.5 hover:scale-105 transition-all shadow-xl"
                 >
                   <Ticket className="w-5 h-5 text-white" />
@@ -396,9 +402,9 @@ export default function Ganesha3DHero({
                 </button>
               )}
 
-              {onBookPoojaClick && (
+              {handlePooja && (
                 <button
-                  onClick={onBookPoojaClick}
+                  onClick={handlePooja}
                   className="gold-button px-8 py-3.5 rounded-full text-sm font-black uppercase tracking-wider flex items-center gap-2.5 hover:scale-105 transition-all shadow-xl"
                 >
                   <Flame className="w-5 h-5 fill-current text-white" />

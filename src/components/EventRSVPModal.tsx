@@ -28,6 +28,8 @@ import {
 } from '@stripe/react-stripe-js';
 import confetti from 'canvas-confetti';
 
+import { CustomFieldDefinition } from '@/lib/types';
+
 interface EventRSVPModalProps {
   event: {
     id: string;
@@ -42,6 +44,9 @@ interface EventRSVPModalProps {
     enforceCapacityLimit?: boolean;
     enableRsvp?: boolean;
     availableDates?: string[];
+    adultCapacity?: number;
+    childCapacity?: number;
+    customFields?: CustomFieldDefinition[];
   };
   onClose: () => void;
   onSuccess?: () => void;

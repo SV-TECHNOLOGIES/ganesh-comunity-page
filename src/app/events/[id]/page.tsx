@@ -132,9 +132,9 @@ END:VCALENDAR`;
         {/* 1. HERO — 3D VEILED GANESHA & REVEAL EXPERIENCE */}
         <Ganesha3DHero 
           onNotifyClick={() => setNotifyModalOpen(true)}
-          onRegisterClick={event.enableRsvp !== false ? () => setRsvpModalOpen(true) : undefined}
+          onRSVPClick={event.enableRsvp !== false ? () => setRsvpModalOpen(true) : undefined}
           onDonateClick={event.enableSupportPayment !== false ? () => setDonateModalOpen(true) : undefined}
-          onPoojaClick={event.enablePooja !== false ? () => setPoojaModalOpen(true) : undefined}
+          onBookPoojaClick={event.enablePooja !== false ? () => setPoojaModalOpen(true) : undefined}
         />
 
         {/* 2. RITUAL COUNTDOWN CLOCK */}
