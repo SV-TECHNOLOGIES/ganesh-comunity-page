@@ -5,6 +5,34 @@ import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
+export const maxDuration = 300;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function sendEmailWithRetry(
+  to: string,
+  subject: string,
+  html: string,
+  maxAttempts: number = 3,
+  delayMs: number = 1000
+): Promise<boolean> {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    // Wait 1 sec before sending / retrying
+    await sleep(delayMs);
+
+    try {
+      const sent = await sendEmail(to, subject, html);
+      if (sent) {
+        return true;
+      }
+      console.warn(`[NOTIFY] Attempt ${attempt}/${maxAttempts} failed to send email to ${to}`);
+    } catch (err) {
+      console.error(`[NOTIFY] Attempt ${attempt}/${maxAttempts} encountered error for ${to}:`, err);
+    }
+  }
+  return false;
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -70,11 +98,11 @@ export async function POST(request: Request) {
     let sentCount = 0;
     let failedCount = 0;
 
-    // Send emails (batch with Promise.allSettled)
-    const emailPromises = members.map(async (member) => {
+    // Send emails sequentially with retry mechanism (3 attempts, 1s delay)
+    for (const member of members) {
       if (!member.email || !member.email.includes('@')) {
         failedCount++;
-        return;
+        continue;
       }
 
       const memberName = member.fullName || 'Valued Devotee';
@@ -150,15 +178,14 @@ export async function POST(request: Request) {
         footerNote: 'You received this official notice as a registered member of MITRA UK.',
       });
 
-      const sent = await sendEmail(memberEmail, subject.trim(), fullHtml);
+      console.log(`[NOTIFY] Dispatching to ${memberEmail}...`);
+      const sent = await sendEmailWithRetry(memberEmail, subject.trim(), fullHtml, 3, 1000);
       if (sent) {
         sentCount++;
       } else {
         failedCount++;
       }
-    });
-
-    await Promise.allSettled(emailPromises);
+    }
 
     await logger.info(
       'admin/members/notify',

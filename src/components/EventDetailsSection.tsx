@@ -1,17 +1,19 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { MapPin, Calendar, Clock, Download, ExternalLink, Sparkles, Flame, Heart, Utensils, Star, CheckCircle } from 'lucide-react';
+import { MapPin, Calendar, Clock, Download, ExternalLink, Sparkles, Flame, Heart, Utensils, Star, CheckCircle, Ticket } from 'lucide-react';
 import { POOJA_DATES, getPoojaDateStatus } from '@/components/PoojaBookingModal';
 
 interface EventDetailsSectionProps {
   onOpenPoojaBooking?: (dateId?: string) => void;
   onOpenDonation?: (cat?: 'Annadanam' | 'Event Donations') => void;
+  onOpenRSVP?: () => void;
 }
 
 export default function EventDetailsSection({
   onOpenPoojaBooking,
   onOpenDonation,
+  onOpenRSVP,
 }: EventDetailsSectionProps) {
   const [dbCounts, setDbCounts] = useState<Record<string, number>>({});
 
@@ -163,7 +165,7 @@ export default function EventDetailsSection({
                           : status.reason === 'visarjan'
                           ? 'Visarjan Day'
                           : 'Fully Booked'
-                        : 'Book Pooja / Seva'}
+                        : 'Make Event Payment'}
                     </span>
                   </button>
                 </div>
@@ -185,6 +187,16 @@ export default function EventDetailsSection({
           </div>
 
           <div className="flex flex-wrap gap-3">
+            {onOpenRSVP && (
+              <button
+                onClick={onOpenRSVP}
+                className="gold-button px-6 py-3 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-md hover:scale-105 transition-all"
+              >
+                <Ticket className="w-4 h-4 text-white" />
+                <span>Register / RSVP Now</span>
+              </button>
+            )}
+
             <a
               href="https://maps.google.com/?q=Langley+Road+SL3+8GW+Slough+UK"
               target="_blank"

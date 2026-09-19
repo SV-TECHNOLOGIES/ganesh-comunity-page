@@ -4,18 +4,20 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { Sparkles, Flame, Heart, RotateCcw, ExternalLink } from 'lucide-react';
+import { Sparkles, Flame, Heart, RotateCcw, ExternalLink, Ticket } from 'lucide-react';
 
 interface Ganesha3DHeroProps {
   onBookPoojaClick?: () => void;
   onDonateClick?: () => void;
   onNotifyClick?: () => void;
+  onRSVPClick?: () => void;
 }
 
 export default function Ganesha3DHero({
   onBookPoojaClick,
   onDonateClick,
   onNotifyClick,
+  onRSVPClick,
 }: Ganesha3DHeroProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const [modelLoaded, setModelLoaded] = useState(false);
@@ -382,14 +384,24 @@ export default function Ganesha3DHero({
         {/* Action CTAs */}
         <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
           {onBookPoojaClick && onDonateClick ? (
-            // ── Event page: show Pooja + Donate buttons ──────────────────────
+            // ── Event page: show RSVP + Pooja + Donate buttons ───────────────
             <>
+              {onRSVPClick && (
+                <button
+                  onClick={onRSVPClick}
+                  className="gold-button px-8 py-3.5 rounded-full text-sm font-black uppercase tracking-wider flex items-center gap-2.5 hover:scale-105 transition-all shadow-xl"
+                >
+                  <Ticket className="w-5 h-5 text-white" />
+                  <span>Register / RSVP Now</span>
+                </button>
+              )}
+
               <button
                 onClick={onBookPoojaClick}
                 className="gold-button px-8 py-3.5 rounded-full text-sm font-black uppercase tracking-wider flex items-center gap-2.5 hover:scale-105 transition-all"
               >
                 <Flame className="w-5 h-5 fill-current text-white" />
-                <span>Book Pooja / Seva</span>
+                <span>Make Event Payment</span>
               </button>
 
               <button

@@ -11,14 +11,16 @@ import OfferingPlaques from '@/components/OfferingPlaques';
 import SponsorRibbonBand from '@/components/SponsorRibbonBand';
 import PoojaBookingModal from '@/components/PoojaBookingModal';
 import DonationModal from '@/components/DonationModal';
+import EventRSVPModal from '@/components/EventRSVPModal';
 import Link from 'next/link';
-import { ArrowLeft, Flame, Heart } from 'lucide-react';
+import { ArrowLeft, Flame, Heart, Ticket } from 'lucide-react';
 
 export default function GaneshEvent2026Page() {
   const [poojaModalOpen, setPoojaModalOpen] = useState(false);
   const [selectedPoojaDateId, setSelectedPoojaDateId] = useState<string | undefined>(undefined);
   const [donateModalOpen, setDonateModalOpen] = useState(false);
   const [donationCategory, setDonationCategory] = useState<'Annadanam' | 'Event Donations'>('Annadanam');
+  const [rsvpModalOpen, setRsvpModalOpen] = useState(false);
 
   const openPoojaBooking = (dateId?: string) => {
     setSelectedPoojaDateId(dateId);
@@ -28,6 +30,19 @@ export default function GaneshEvent2026Page() {
   const openDonation = (cat: 'Annadanam' | 'Event Donations' = 'Annadanam') => {
     setDonationCategory(cat);
     setDonateModalOpen(true);
+  };
+
+  const openRSVP = () => {
+    setRsvpModalOpen(true);
+  };
+
+  const ganeshEvent = {
+    id: 'evt-ganesh-chaturthi',
+    title: 'London Ganesh Mahotsav 2026',
+    date: '13-20 Sep 2026',
+    time: '09:00 AM - 09:00 PM',
+    venue: 'E Block, Slough & Langley College, Slough, SL3 8GW',
+    ticketPrice: 0,
   };
 
   return (
@@ -49,11 +64,18 @@ export default function GaneshEvent2026Page() {
               LONDON GANESH MAHOTSAV 2026
             </span>
             <button
+              onClick={openRSVP}
+              className="gold-button px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md"
+            >
+              <Ticket className="w-3.5 h-3.5 text-white" />
+              <span>Register / RSVP Now</span>
+            </button>
+            <button
               onClick={() => openPoojaBooking()}
               className="gold-button px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md"
             >
               <Flame className="w-3.5 h-3.5 fill-current text-white" />
-              <span>Book Pooja / Seva</span>
+              <span>Make Event Payment</span>
             </button>
             <button
               onClick={() => openDonation('Event Donations')}
@@ -68,11 +90,13 @@ export default function GaneshEvent2026Page() {
 
       {/* 1. HERO — 3D GANESHA SANCTUM WITH BOOK POOJA & MAKE DONATION CTAS */}
       <Ganesha3DHero 
+        onRSVPClick={openRSVP}
         onBookPoojaClick={() => openPoojaBooking()}
         onDonateClick={() => openDonation('Event Donations')}
       />
 
       <EventDetailsSection 
+        onOpenRSVP={openRSVP}
         onOpenPoojaBooking={openPoojaBooking}
         onOpenDonation={openDonation}
       />
@@ -110,6 +134,13 @@ export default function GaneshEvent2026Page() {
         onClose={() => setDonateModalOpen(false)} 
         initialCategory={donationCategory}
       />
+
+      {rsvpModalOpen && (
+        <EventRSVPModal
+          event={ganeshEvent}
+          onClose={() => setRsvpModalOpen(false)}
+        />
+      )}
     </div>
   );
 }
