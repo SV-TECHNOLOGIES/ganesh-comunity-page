@@ -1,6 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
-const prisma = new PrismaClient();
+export const dynamic = 'force-dynamic';
 
 const SEED_SPONSORS = [
   {
@@ -173,8 +174,8 @@ const SEED_SPONSORS = [
   },
 ];
 
-async function main() {
-  console.log('🌱 Starting MITRA & Slough Mahotsav database seeding...');
+export async function runDatabaseSeed() {
+  console.log('🌱 Starting MITRA database seed via API...');
 
   // 1. Seed Events
   await prisma.event.deleteMany({});
@@ -194,11 +195,6 @@ async function main() {
         capacity: 5000,
         rsvpCount: 1420,
         ticketPrice: 0,
-        childTicketPrice: 0,
-        enableRsvp: true,
-        enableSupportPayment: true,
-        enablePooja: true,
-        enforceCapacityLimit: false,
         featured: true,
       },
       {
@@ -215,11 +211,6 @@ async function main() {
         capacity: 800,
         rsvpCount: 340,
         ticketPrice: 15,
-        childTicketPrice: 5,
-        enableRsvp: true,
-        enableSupportPayment: true,
-        enablePooja: true,
-        enforceCapacityLimit: false,
         featured: true,
       },
       {
@@ -236,11 +227,6 @@ async function main() {
         capacity: 650,
         rsvpCount: 120,
         ticketPrice: 10,
-        childTicketPrice: 0,
-        enableRsvp: true,
-        enableSupportPayment: true,
-        enablePooja: false,
-        enforceCapacityLimit: false,
         featured: false,
       },
       {
@@ -257,16 +243,49 @@ async function main() {
         capacity: 250,
         rsvpCount: 85,
         ticketPrice: 20,
-        childTicketPrice: 10,
-        enableRsvp: true,
-        enableSupportPayment: true,
-        enablePooja: false,
-        enforceCapacityLimit: true,
         featured: false,
       },
     ],
   });
-  console.log('✅ Events seeded');
+
+  // Update new custom columns via raw SQL
+  try {
+    await prisma.$executeRawUnsafe(`
+      UPDATE "Event" SET 
+        "childTicketPrice" = 0,
+        "enableRsvp" = true,
+        "enableSupportPayment" = true,
+        "enablePooja" = true,
+        "enforceCapacityLimit" = false
+      WHERE id = 'evt-ganesh-chaturthi';
+
+      UPDATE "Event" SET 
+        "childTicketPrice" = 5,
+        "enableRsvp" = true,
+        "enableSupportPayment" = true,
+        "enablePooja" = true,
+        "enforceCapacityLimit" = false
+      WHERE id = 'evt-diwali-2026';
+
+      UPDATE "Event" SET 
+        "childTicketPrice" = 0,
+        "enableRsvp" = true,
+        "enableSupportPayment" = true,
+        "enablePooja" = false,
+        "enforceCapacityLimit" = false
+      WHERE id = 'evt-ugadi-2027';
+
+      UPDATE "Event" SET 
+        "childTicketPrice" = 10,
+        "enableRsvp" = true,
+        "enableSupportPayment" = true,
+        "enablePooja" = false,
+        "enforceCapacityLimit" = true
+      WHERE id = 'evt-badminton-cup';
+    `);
+  } catch (sqlErr) {
+    console.warn('[SEED RAW SQL WARNING]:', sqlErr);
+  }
 
   // 2. Seed Sponsors
   await prisma.sponsor.deleteMany({});
@@ -284,9 +303,8 @@ async function main() {
       blackLogoBg: sp.blackLogoBg,
     })),
   });
-  console.log('✅ Sponsors seeded');
 
-  // 2.5 Seed Site Settings
+  // 3. Seed Site Settings
   await prisma.siteSettings.upsert({
     where: { id: 'default-settings' },
     update: {},
@@ -306,9 +324,8 @@ async function main() {
       enableTracking: true,
     },
   });
-  console.log('✅ Site Settings seeded');
 
-  // 3. Seed Members
+  // 4. Seed Members
   await prisma.member.deleteMany({});
   await prisma.member.createMany({
     data: [
@@ -356,9 +373,8 @@ async function main() {
       },
     ],
   });
-  console.log('✅ Members seeded');
 
-  // 4. Seed Charity Cases
+  // 5. Seed Charity Cases
   await prisma.charityCase.deleteMany({});
   await prisma.charityCase.createMany({
     data: [
@@ -394,13 +410,11 @@ async function main() {
       },
     ],
   });
-  console.log('✅ Charity Cases seeded');
 
-  // 5. Seed Media Items
+  // 6. Seed Media Items
   await prisma.mediaItem.deleteMany({});
   await prisma.mediaItem.createMany({
     data: [
-      // London Ganesh Mahotsav 2026
       {
         id: 'med-gn-1',
         title: 'Maha Ganapathi Sanctum & 6ft Eco-Friendly Murti Darshan',
@@ -449,8 +463,6 @@ async function main() {
         isFeatured: false,
         displayOrder: 4,
       },
-
-      // Highlights & Cultural Recitals tagged to London Ganesh Mahotsav 2026
       {
         id: 'med-gn-5',
         title: 'Ugadi Sangeetha Vibhavari Classical Orchestra',
@@ -487,8 +499,6 @@ async function main() {
         isFeatured: false,
         displayOrder: 7,
       },
-
-      // Publications
       {
         id: 'med-pub-1',
         title: 'MITRA Patrika — Mahotsav Special Edition 2026 (Digital PDF)',
@@ -513,39 +523,6 @@ async function main() {
       },
     ],
   });
-  console.log('✅ Media Items seeded');
-
-  // 6. Seed Blog / News
-  await prisma.blogPost.deleteMany({});
-  await prisma.blogPost.createMany({
-    data: [
-      {
-        id: 'news-1',
-        slug: 'maha-ganapathi-slough-mahotsav-2026',
-        title: 'MITRA UK Announce London’s Largest Maha Ganapathi Mahotsav 2026',
-        excerpt: 'Step inside the sanctum on 14th September 2026 in Langley, Slough as we unveil the 6ft eco-friendly Maha Ganapathi idol.',
-        content: `MITRA UK in association with ELE Entertainments and presented by Biryanis and more! is proud to announce the biggest Maha Ganapathi Mahotsav in the United Kingdom, taking place on 14th September 2026 in Langley, Slough.`,
-        category: 'Mahotsav News',
-        author: 'MITRA Media Cell',
-        date: '2026-08-25',
-        coverImage: '/assets/poster.jpg',
-        tags: ['Ganesh Chaturthi', 'Slough', 'Mahotsav', 'MITRA UK'],
-      },
-      {
-        id: 'news-2',
-        slug: 'guinness-world-record-recognition',
-        title: 'MITRA Recognized by Parliament for Guinness World Record Cultural Achievement',
-        excerpt: 'Members of the UK Parliament praise MITRA for fostering cultural integration and promoting South Asian classical arts.',
-        content: `In a historic parliamentary motion, the Mana Indian Telugu Roots Abroad was commended for organizing the largest synchronized Kuchipudi ensemble outside India, bringing together over 500 performers from across Europe.`,
-        category: 'Achievements',
-        author: 'MITRA PR Officer',
-        date: '2025-11-05',
-        coverImage: '/assets/poster.jpg',
-        tags: ['Guinness World Record', 'Parliament', 'Achievement'],
-      },
-    ],
-  });
-  console.log('✅ Blog Posts seeded');
 
   // 7. Seed Admin User
   await prisma.adminUser.deleteMany({});
@@ -557,63 +534,8 @@ async function main() {
       role: 'SuperAdmin',
     },
   });
-  // 8. Seed Payments linked to Members
-  await prisma.payment.deleteMany({});
-  await prisma.payment.createMany({
-    data: [
-      {
-        id: 'pay-201',
-        amount: 51.0,
-        currency: 'GBP',
-        status: 'Completed',
-        customerName: 'Mahesh Babu G',
-        customerEmail: 'member@mitra.org.uk',
-        customerPhone: '+44 7890 123456',
-        description: 'Donation — Ganesh Mahotsav 2026 Seva Fund',
-        paymentMethod: 'Stripe Card',
-        stripePaymentIntentId: 'pi_3Mxt5k2eZvKYlo2C01a2b3c4',
-      },
-      {
-        id: 'pay-202',
-        amount: 25.0,
-        currency: 'GBP',
-        status: 'Completed',
-        customerName: 'Mahesh Babu G',
-        customerEmail: 'member@mitra.org.uk',
-        customerPhone: '+44 7890 123456',
-        description: 'Pooja Booking — Ganesh Chaturthi Morning Slot',
-        paymentMethod: 'Stripe ApplePay',
-        stripePaymentIntentId: 'pi_3Mxt9x2eZvKYlo2C05d6e7f8',
-      },
-      {
-        id: 'pay-103',
-        amount: 100.0,
-        currency: 'GBP',
-        status: 'Completed',
-        customerName: 'Priyanka Reddy',
-        customerEmail: 'priyanka.reddy@example.co.uk',
-        customerPhone: '+44 7700 987654',
-        description: 'Life Membership Plan Registration',
-        paymentMethod: 'Stripe Card',
-        stripePaymentIntentId: 'pi_3Myu122eZvKYlo2C09g0h1i2',
-      },
-      {
-        id: 'pay-101',
-        amount: 250.0,
-        currency: 'GBP',
-        status: 'Completed',
-        customerName: 'Srinivas & Lakshmi Prasad',
-        customerEmail: 'sl.prasad@example.co.uk',
-        customerPhone: '+44 7890 123456',
-        description: 'Slough Mahotsav Patron Sponsorship & Diya Seva',
-        paymentMethod: 'Stripe Card',
-        stripePaymentIntentId: 'pi_3Mxt5k2eZvKYlo2C01a2b3c9',
-      },
-    ],
-  });
-  console.log('✅ Payments seeded with Member links');
 
-  // 10. Seed Telugu Businesses
+  // 8. Seed Telugu Businesses
   await prisma.teluguBusiness.deleteMany({});
   await prisma.teluguBusiness.createMany({
     data: [
@@ -680,123 +602,26 @@ async function main() {
         specialOffer: 'Zero Broker Fee on First-Time Buyer Applications for Registered MITRA Members',
         adminNotes: 'FCA registered broker.',
       },
-      {
-        id: 'tb-4',
-        businessName: 'Apex Telugu Legal & Immigration Associates',
-        ownerName: 'Advocate Rajeshwar Sharma',
-        category: 'Legal & Immigration',
-        tagline: 'Expert UK Visa, ILR, British Citizenship & Business Law Specialists',
-        description: 'Trusted legal advisory for Skilled Worker visas, Global Talent, Sponsor Licences, Family Visas, and property conveyance with transparent fees and multilingual support.',
-        logoUrl: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=300&auto=format&fit=crop&q=80',
-        coverUrl: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?w=800&auto=format&fit=crop&q=80',
-        email: 'enquiries@apeximmigrationuk.com',
-        phone: '+44 20 8123 4567',
-        whatsapp: '442081234567',
-        website: 'https://apeximmigrationuk.com',
-        address: 'Wembley Point, 1 Harrow Road',
-        city: 'London',
-        postcode: 'HA9 6DE',
-        status: 'Approved',
-        isFeatured: false,
-        specialOffer: 'Free Initial 20-min Visa Evaluation Consultation',
-        adminNotes: 'Solicitors Regulation Authority registered.',
-      },
-      {
-        id: 'tb-5',
-        businessName: 'Kala Vignana Telugu Wedding Photography & Cinematic Films',
-        ownerName: 'Praneeth Royal',
-        category: 'Event Management & Photography',
-        tagline: 'Capturing Timeless Indian Weddings, Half-Saree Ceremonies & Cultural Events',
-        description: 'Cinematic 4K coverage, traditional rituals storytelling, drone videography, and luxury photo albums for UK Telugu and Indian weddings across the UK & Europe.',
-        logoUrl: 'https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=300&auto=format&fit=crop&q=80',
-        coverUrl: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800&auto=format&fit=crop&q=80',
-        email: 'shoot@kalavignanafilms.co.uk',
-        phone: '+44 7456 789012',
-        whatsapp: '447456789012',
-        website: 'https://kalavignanafilms.co.uk',
-        address: 'Broad Street',
-        city: 'Birmingham',
-        postcode: 'B1 2HF',
-        status: 'Approved',
-        isFeatured: false,
-        specialOffer: 'Free Drone Highlight Reel with Full-Day Wedding Photography Package',
-        adminNotes: 'Official photographer for UK Telugu cultural summits.',
-      },
-      {
-        id: 'tb-6',
-        businessName: 'Swagath Supermarket & Telugu Spice Bazaar',
-        ownerName: 'Anil Kumar Chintala',
-        category: 'Retail & Groceries',
-        tagline: 'Fresh Andhra Vegetables, Sweets, Spices & Festival Pooja Samagri',
-        description: 'Your one-stop destination for authentic Telugu pickles (Avakaya, Gongura), fresh curry leaves, Sona Masoori rice brands, daily snacks, and festival ritual materials.',
-        logoUrl: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=300&auto=format&fit=crop&q=80',
-        coverUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&auto=format&fit=crop&q=80',
-        email: 'orders@swagathmarket.co.uk',
-        phone: '+44 1753 520011',
-        whatsapp: '441753520011',
-        website: 'https://swagathmarket.co.uk',
-        address: '112 High Street',
-        city: 'Slough',
-        postcode: 'SL1 1TT',
-        status: 'Approved',
-        isFeatured: false,
-        specialOffer: '5% Off on Purchases Over £50 with MITRA Loyalty Card',
-        adminNotes: 'Convenient store with home delivery options.',
-      },
-      {
-        id: 'tb-7',
-        businessName: 'Thrive Tax & Chartered Accountants',
-        ownerName: 'Sudheer Babu FCA',
-        category: 'Accounting & Tax Services',
-        tagline: 'Company Accounts, Contractor Tax Solutions, Self-Assessment & VAT',
-        description: 'Providing comprehensive accounting, payroll, IR35 tax advisory, and HMRC compliance services to IT contractors, small businesses, and medical professionals across the UK.',
-        logoUrl: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=300&auto=format&fit=crop&q=80',
-        coverUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop&q=80',
-        email: 'contact@thrivetax.co.uk',
-        phone: '+44 118 950 1234',
-        whatsapp: '441189501234',
-        website: 'https://thrivetax.co.uk',
-        address: 'Reading Bridge House, George Street',
-        city: 'Reading',
-        postcode: 'RG1 8LS',
-        status: 'Approved',
-        isFeatured: false,
-        specialOffer: '1 Month Free Accounting Service for New Incorporations',
-        adminNotes: 'ICAEW certified accountant.',
-      },
-      {
-        id: 'tb-8',
-        businessName: 'Siri Dental & Aesthetic Clinic',
-        ownerName: 'Dr. Swapna Chandolu BDS',
-        category: 'Healthcare & Dental',
-        tagline: 'Gentle Family Dentistry, Invisalign, Teeth Whitening & Smile Makeovers',
-        description: 'State-of-the-art dental care with modern digital scanning, cosmetic veneers, emergency dental care, and kids oral health programs in a warm, welcoming clinic.',
-        logoUrl: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=300&auto=format&fit=crop&q=80',
-        coverUrl: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=800&auto=format&fit=crop&q=80',
-        email: 'smile@siridental.co.uk',
-        phone: '+44 20 8574 3322',
-        whatsapp: '442085743322',
-        website: 'https://siridental.co.uk',
-        address: '45 South Road, Southall',
-        city: 'London',
-        postcode: 'UB1 1SW',
-        status: 'Approved',
-        isFeatured: false,
-        specialOffer: 'Free Consultation for Invisalign & Smile Aligners',
-        adminNotes: 'CQC registered private practice.',
-      },
     ],
   });
-  console.log('✅ Telugu Businesses seeded');
 
-  console.log('🚀 Seeding completed successfully!');
+  return {
+    success: true,
+    message: 'Database seeded successfully with events, sponsors, site settings, members, and businesses.',
+  };
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+export async function GET() {
+  try {
+    const result = await runDatabaseSeed();
+    return NextResponse.json(result);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to seed database';
+    console.error('[API SEED ERROR]:', error);
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  }
+}
+
+export async function POST() {
+  return GET();
+}

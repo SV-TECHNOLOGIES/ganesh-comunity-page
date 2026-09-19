@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { hashPassword, signToken } from '@/lib/auth';
-import { sendGuestWelcomeEmail } from '@/lib/email';
+import { sendGuestWelcomeEmail, sendEmail, renderEmailLayout } from '@/lib/email';
 
 function generateTempPassword(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
@@ -26,6 +26,11 @@ export async function POST(request: Request) {
       adultsCount,
       childrenCount,
       selectedDates,
+      totalAmount,
+      supportAmount = 0,
+      paymentStatus,
+      paymentIntentId,
+      customResponses = {},
     } = await request.json();
 
     if (!eventId || !attendeeName || !attendeeEmail) {
@@ -36,43 +41,158 @@ export async function POST(request: Request) {
     }
 
     const totalTickets = Number(ticketsCount) || 0;
-
     const normalEmail = attendeeEmail.toLowerCase().trim();
     const safeName = attendeeName.trim();
     const safePhone = attendeePhone ? attendeePhone.trim() : '';
     const adults = Number(adultsCount) || 0;
     const children = Number(childrenCount) || 0;
     const rawDates: string[] = Array.isArray(selectedDates) ? selectedDates : [];
-    
-    // Disallow past festival dates
+    const travelOrigin = travellingFrom ? String(travellingFrom).trim() : null;
+
+    // ── 1. Fetch Event and Validate Customization & Capacity ───────────────
+    let eventRecord = await prisma.event.findUnique({
+      where: { id: eventId },
+    });
+
+    if (!eventRecord && (eventId === 'evt-ganesh-chaturthi' || eventId === 'evt-101')) {
+      eventRecord = await prisma.event.findFirst({
+        where: { title: { contains: 'Ganesh', mode: 'insensitive' } },
+      });
+    }
+
+    if (!eventRecord) {
+      return NextResponse.json(
+        { success: false, error: 'Event not found in system.' },
+        { status: 404 }
+      );
+    }
+
+    // Filter past dates if it's the Ganesh festival specific dates
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth(); // 8 is September
     const currentDay = now.getDate();
 
-    const datesArray = rawDates.filter((dateStr) => {
-      const dayNum = parseInt(dateStr.replace(/\D/g, ''), 10);
-      if (isNaN(dayNum)) return true;
-      if (currentYear > 2026) return false;
-      if (currentYear === 2026) {
-        if (currentMonth > 8) return false;
-        if (currentMonth === 8 && dayNum < currentDay) return false;
+    let datesArray = rawDates.filter((dateStr) => {
+      if (dateStr.toLowerCase().includes('sep')) {
+        const dayNum = parseInt(dateStr.replace(/\D/g, ''), 10);
+        if (isNaN(dayNum)) return true;
+        if (currentYear > 2026) return false;
+        if (currentYear === 2026 && currentMonth === 8 && dayNum < currentDay) return false;
       }
       return true;
     });
 
     if (datesArray.length === 0) {
+      if (rawDates.length > 0) {
+        return NextResponse.json(
+          { success: false, error: 'Please select an upcoming date. Past dates cannot be booked.' },
+          { status: 400 }
+        );
+      }
+      datesArray = [eventRecord.date || 'General Admission'];
+    }
+
+    if (eventRecord && eventRecord.enableRsvp === false) {
       return NextResponse.json(
-        { success: false, error: 'Please select at least one upcoming date for Darshan. Past dates cannot be booked.' },
+        { success: false, error: 'Registration / RSVP is currently disabled for this event.' },
         { status: 400 }
       );
     }
-    const travelOrigin = travellingFrom ? String(travellingFrom).trim() : null;
 
-    // ── 1. Create or Update Event in DB ─────────────────────────────────────
-    let eventRecord = await prisma.event.findUnique({
-      where: { id: eventId },
-    }).catch(() => null);
+    const capacity = eventRecord ? (eventRecord.capacity || 5000) : 5000;
+    const currentRsvps = eventRecord ? (eventRecord.rsvpCount || 0) : 0;
+    const newTotalRsvps = currentRsvps + totalTickets;
+
+    // Check total capacity limit enforcement
+    if (eventRecord && eventRecord.enforceCapacityLimit && newTotalRsvps > capacity) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Event capacity reached (${capacity} attendees max). Registrations are now closed.`,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Check separate adult capacity limit
+    if (eventRecord && eventRecord.enforceCapacityLimit && eventRecord.adultCapacity && eventRecord.adultCapacity > 0) {
+      const adultAgg = await prisma.eventRSVP.aggregate({
+        where: { eventId: eventRecord.id },
+        _sum: { adultsCount: true },
+      });
+      const currentAdults = adultAgg._sum.adultsCount || 0;
+      if (currentAdults + adults > eventRecord.adultCapacity) {
+        const remainingAdults = Math.max(0, eventRecord.adultCapacity - currentAdults);
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Adult capacity limit reached (${eventRecord.adultCapacity} adults max). Only ${remainingAdults} adult slot${remainingAdults === 1 ? '' : 's'} remaining.`,
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Check separate child capacity limit
+    if (eventRecord && eventRecord.enforceCapacityLimit && eventRecord.childCapacity && eventRecord.childCapacity > 0) {
+      const childAgg = await prisma.eventRSVP.aggregate({
+        where: { eventId: eventRecord.id },
+        _sum: { childrenCount: true },
+      });
+      const currentChildren = childAgg._sum.childrenCount || 0;
+      if (currentChildren + children > eventRecord.childCapacity) {
+        const remainingChildren = Math.max(0, eventRecord.childCapacity - currentChildren);
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Child capacity limit reached (${eventRecord.childCapacity} children max). Only ${remainingChildren} child slot${remainingChildren === 1 ? '' : 's'} remaining.`,
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Check capacity alert threshold (e.g. last 10 slots or fewer left)
+    const threshold = Number(process.env.CAPACITY_ALERT_THRESHOLD) || 10;
+    const remainingSlots = capacity - newTotalRsvps;
+
+    if (eventRecord && remainingSlots <= threshold && !eventRecord.capacityAlertSent) {
+      const notifyRecipient = process.env.NOTIFY_MAIL || process.env.REPORT_MAIL || process.env.SMTP_USER;
+      if (notifyRecipient) {
+        const alertSubject = `🚨 Event Capacity Warning: "${eventRecord.title}" has ${remainingSlots <= 0 ? 'reached full capacity' : `only ${remainingSlots} slots remaining`}`;
+        const alertHtml = renderEmailLayout({
+          pageTitle: 'Event Capacity Alert',
+          badgeText: 'Capacity Threshold Alert',
+          isAlert: true,
+          children: `
+            <h2 style="color: #991B1B; font-family: 'Cinzel', Georgia, serif; font-size: 18px; margin: 0 0 12px;">
+              Event Capacity Warning
+            </h2>
+            <p style="color: #2D231E; font-size: 14px; margin: 0 0 16px;">
+              The event <strong>${eventRecord.title}</strong> is approaching or has reached its capacity limit.
+            </p>
+            <div style="background: #FFF8F0; border: 1.5px solid #FDBA74; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+              <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
+                <tr><td style="padding: 6px 0; color: #6B5E55;">Configured Capacity:</td><td style="font-weight: 700; color: #2D231E;">${capacity}</td></tr>
+                <tr><td style="padding: 6px 0; color: #6B5E55;">Total Registered:</td><td style="font-weight: 700; color: #C2410C;">${newTotalRsvps}</td></tr>
+                <tr><td style="padding: 6px 0; color: #6B5E55;">Remaining Slots:</td><td style="font-weight: 700; color: #DC2626;">${Math.max(0, remainingSlots)}</td></tr>
+                <tr><td style="padding: 6px 0; color: #6B5E55;">Capacity Limit Enforced:</td><td style="font-weight: 700;">${eventRecord.enforceCapacityLimit ? 'YES (Further registrations will be blocked)' : 'NO (Registrations will continue)'}</td></tr>
+              </table>
+            </div>
+          `,
+        });
+
+        sendEmail(notifyRecipient, alertSubject, alertHtml).catch((e) =>
+          console.error('[CAPACITY ALERT EMAIL ERROR]:', e)
+        );
+      }
+
+      await prisma.event.update({
+        where: { id: eventId },
+        data: { capacityAlertSent: true },
+      }).catch(() => {});
+    }
 
     if (!eventRecord) {
       eventRecord = await prisma.event.create({
@@ -98,6 +218,9 @@ export async function POST(request: Request) {
     }
 
     // ── 2. Create Event RSVP in DB ──────────────────────────────────────────
+    const parsedAmount = Number(totalAmount) || 0;
+    const finalPaymentStatus = paymentStatus || (parsedAmount > 0 ? 'Completed' : 'Free');
+
     let rsvp;
     try {
       rsvp = await prisma.eventRSVP.create({
@@ -111,6 +234,11 @@ export async function POST(request: Request) {
           adultsCount: adults,
           childrenCount: children,
           selectedDates: datesArray,
+          totalAmount: parsedAmount,
+          supportAmount: Number(supportAmount) || 0,
+          paymentStatus: finalPaymentStatus,
+          paymentIntentId: paymentIntentId ? String(paymentIntentId) : null,
+          customResponses: customResponses || {},
         },
       });
     } catch (e) {
@@ -126,6 +254,11 @@ export async function POST(request: Request) {
         adultsCount: adults,
         childrenCount: children,
         selectedDates: datesArray,
+        totalAmount: parsedAmount,
+        supportAmount: Number(supportAmount) || 0,
+        paymentStatus: finalPaymentStatus,
+        paymentIntentId: paymentIntentId ? String(paymentIntentId) : null,
+        customResponses: customResponses || {},
         createdAt: new Date(),
       };
     }

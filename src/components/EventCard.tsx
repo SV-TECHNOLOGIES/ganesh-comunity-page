@@ -103,13 +103,15 @@ export default function EventCard({ event, onRSVP }: { event: EventItem; onRSVP?
                   Past Event Archived
                 </span>
               ) : (
-                <button
-                  onClick={() => setModalOpen(true)}
-                  className="gold-button flex-1 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow"
-                >
-                  <Ticket className="w-4 h-4 text-white" />
-                  <span>Register / RSVP Now</span>
-                </button>
+                event.enableRsvp !== false && (
+                  <button
+                    onClick={() => setModalOpen(true)}
+                    className="gold-button flex-1 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow"
+                  >
+                    <Ticket className="w-4 h-4 text-white" />
+                    <span>Register / RSVP Now</span>
+                  </button>
+                )
               )}
 
               <button
@@ -127,22 +129,26 @@ export default function EventCard({ event, onRSVP }: { event: EventItem; onRSVP?
             </div>
 
             {/* Donation & Book Pooja Row */}
-            {event.status !== 'Past' && (
+            {event.status !== 'Past' && (event.enableSupportPayment !== false || event.enablePooja !== false) && (
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setDonationModalOpen(true)}
-                  className="gold-button flex-1 py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow"
-                >
-                  <HeartHandshake className="w-3.5 h-3.5 fill-current text-white animate-pulse" />
-                  <span>Event Support Payment</span>
-                </button>
-                <button
-                  onClick={() => setPoojaModalOpen(true)}
-                  className="gold-button flex-1 py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow"
-                >
-                  <Flame className="w-3.5 h-3.5 fill-current text-white animate-pulse" />
-                  <span>Book Pooja</span>
-                </button>
+                {event.enableSupportPayment !== false && (
+                  <button
+                    onClick={() => setDonationModalOpen(true)}
+                    className="gold-button flex-1 py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow"
+                  >
+                    <HeartHandshake className="w-3.5 h-3.5 fill-current text-white animate-pulse" />
+                    <span>Event Support Payment</span>
+                  </button>
+                )}
+                {event.enablePooja !== false && (
+                  <button
+                    onClick={() => setPoojaModalOpen(true)}
+                    className="gold-button flex-1 py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow"
+                  >
+                    <Flame className="w-3.5 h-3.5 fill-current text-white animate-pulse" />
+                    <span>Book Pooja</span>
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -155,12 +161,8 @@ export default function EventCard({ event, onRSVP }: { event: EventItem; onRSVP?
       {modalOpen && (
         <EventRSVPModal
           event={{
-            id: event.id,
-            title: event.title,
-            date: event.date,
-            time: event.time,
-            venue: event.venue,
-            ticketPrice: event.ticketPrice,
+            ...event,
+            rsvpCount: count,
           }}
           onClose={() => setModalOpen(false)}
           onSuccess={() => {

@@ -148,26 +148,28 @@ export default function EventDetailsSection({
                   </div>
 
                   {/* Card Action */}
-                  <button
-                    disabled={isUnavailable}
-                    onClick={() => !isUnavailable && onOpenPoojaBooking?.(dayItem.id)}
-                    className={`w-full py-2.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm ${
-                      isUnavailable
-                        ? 'bg-slate-300 text-slate-500 border border-slate-400/30 cursor-not-allowed'
-                        : 'gold-button'
-                    }`}
-                  >
-                    <Flame className="w-3.5 h-3.5 fill-current text-white" />
-                    <span>
-                      {isUnavailable
-                        ? status.reason === 'past'
-                          ? 'Date Passed'
-                          : status.reason === 'visarjan'
-                          ? 'Visarjan Day'
-                          : 'Fully Booked'
-                        : 'Make Event Payment'}
-                    </span>
-                  </button>
+                  {onOpenPoojaBooking ? (
+                    <button
+                      disabled={isUnavailable}
+                      onClick={() => !isUnavailable && onOpenPoojaBooking?.(dayItem.id)}
+                      className={`w-full py-2.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm ${
+                        isUnavailable
+                          ? 'bg-slate-300 text-slate-500 border border-slate-400/30 cursor-not-allowed'
+                          : 'gold-button'
+                      }`}
+                    >
+                      <Flame className="w-3.5 h-3.5 fill-current text-white" />
+                      <span>
+                        {isUnavailable
+                          ? status.reason === 'past'
+                            ? 'Date Passed'
+                            : status.reason === 'visarjan'
+                            ? 'Visarjan Day'
+                            : 'Fully Booked'
+                          : 'Make Event Payment'}
+                      </span>
+                    </button>
+                  ) : null}
                 </div>
               );
             })}
