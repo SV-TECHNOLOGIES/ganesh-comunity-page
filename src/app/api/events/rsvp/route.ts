@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { hashPassword, signToken } from '@/lib/auth';
-import { sendGuestWelcomeEmail, sendEmail, renderEmailLayout } from '@/lib/email';
+import { sendGuestWelcomeEmail, sendEmail, renderEmailLayout, sendEventRegistrationConfirmationEmail } from '@/lib/email';
 
 function generateTempPassword(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
@@ -57,6 +57,17 @@ export async function POST(request: Request) {
     if (!eventRecord && (eventId === 'evt-ganesh-chaturthi' || eventId === 'evt-101')) {
       eventRecord = await prisma.event.findFirst({
         where: { title: { contains: 'Ganesh', mode: 'insensitive' } },
+      });
+    }
+
+    if (!eventRecord && (eventId === 'evt-bathukamma-2026' || eventId.toLowerCase().includes('bathukamma') || eventId.toLowerCase().includes('grays'))) {
+      eventRecord = await prisma.event.findFirst({
+        where: {
+          OR: [
+            { title: { contains: 'Bathukamma', mode: 'insensitive' } },
+            { title: { contains: 'Grays', mode: 'insensitive' } },
+          ],
+        },
       });
     }
 
@@ -195,18 +206,23 @@ export async function POST(request: Request) {
     }
 
     if (!eventRecord) {
+      const isBathukammaId = eventId.toLowerCase().includes('bathukamma') || eventId.toLowerCase().includes('grays');
       eventRecord = await prisma.event.create({
         data: {
           id: eventId,
-          title: 'London Ganesh Mahotsav 2026',
+          title: isBathukammaId ? 'MITRA Grays Bathukamma 2026' : 'London Ganesh Mahotsav 2026',
           category: 'Cultural Events',
-          date: '13 to 19 September 2026',
-          time: 'Monday – Saturday: 6:00 PM – 9:00 PM | Sunday: 11:00 AM – 5:00 PM',
-          venue: 'E Block, SLOUGH & LANGLEY COLLEGE',
-          address: 'Langley Road, SL3 8GW',
-          description: 'London’s largest Maha Ganapathi Mahotsav.',
-          bannerUrl: '/assets/organizers-poster.jpg',
-          capacity: 5000,
+          date: isBathukammaId ? '2026-10-18' : '13 to 19 September 2026',
+          time: isBathukammaId ? '4:30 PM onwards' : 'Monday – Saturday: 6:00 PM – 9:00 PM | Sunday: 11:00 AM – 5:00 PM',
+          venue: isBathukammaId ? 'Thurrock Rugby Football Club' : 'E Block, SLOUGH & LANGLEY COLLEGE',
+          address: isBathukammaId ? 'Oakfield, Long Lane, Grays, Essex, RM16 2QH' : 'Langley Road, SL3 8GW',
+          description: isBathukammaId
+            ? 'Get ready for a wonderful evening celebrating flowers, culture and togetherness, with family fun, DJ, food and traditional Bathukamma celebrations.'
+            : 'London’s largest Maha Ganapathi Mahotsav.',
+          bannerUrl: isBathukammaId
+            ? 'https://images.unsplash.com/photo-1545232979-fbf34fe37b38?auto=format&fit=crop&q=80&w=1200'
+            : '/assets/organizers-poster.jpg',
+          capacity: isBathukammaId ? 600 : 5000,
           rsvpCount: totalTickets,
         },
       }).catch(() => null);
@@ -262,8 +278,29 @@ export async function POST(request: Request) {
         createdAt: new Date(),
       };
     }
+ 
+     // ── 2.5 Send Registration & Payment Confirmation Email ──────────────────
+     sendEventRegistrationConfirmationEmail({
+       recipientEmail: normalEmail,
+       recipientName: safeName,
+       eventName: eventRecord?.title || 'MITRA Grays Bathukamma 2026',
+       eventDate: eventRecord?.date || 'Sunday, 18 October 2026',
+       eventTime: eventRecord?.time || '4:30 PM onwards',
+       eventVenue: eventRecord?.venue || 'Thurrock Rugby Football Club',
+       eventAddress: eventRecord?.address || 'Oakfield, Long Lane, Grays, Essex, RM16 2QH',
+       totalAmount: parsedAmount,
+       supportAmount: Number(supportAmount) || 0,
+       ticketsCount: totalTickets,
+       adultsCount: adults,
+       childrenCount: children,
+       selectedDates: datesArray,
+       paymentIntentId: paymentIntentId ? String(paymentIntentId) : undefined,
+       rsvpId: rsvp.id,
+     }).catch((emailErr) => {
+       console.error('[RSVP CONFIRMATION EMAIL ERROR]:', emailErr);
+     });
 
-    // ── 3. Automatic Guest Login & Member Account Creation ──────────────────
+     // ── 3. Automatic Guest Login & Member Account Creation ──────────────────
     let member = await prisma.member.findUnique({
       where: { email: normalEmail },
     }).catch(() => null);

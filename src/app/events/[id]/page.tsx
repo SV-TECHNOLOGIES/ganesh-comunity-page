@@ -11,12 +11,14 @@ import {
   Clock, 
   MapPin, 
   Download, 
-  ArrowLeft,
-  Loader2,
-  Heart,
-  Sparkles,
-  Ticket,
+  ArrowLeft, 
+  Loader2, 
+  Heart, 
+  Sparkles, 
+  Ticket, 
   AlertTriangle,
+  Share2,
+  Check,
 } from 'lucide-react';
 import Ganesha3DHero from '@/components/Ganesha3DHero';
 import RitualCountdown from '@/components/RitualCountdown';
@@ -38,6 +40,23 @@ export default function EventDetailPage() {
   const [donateModalOpen, setDonateModalOpen] = useState(false);
   const [rsvpModalOpen, setRsvpModalOpen] = useState(false);
   const [poojaModalOpen, setPoojaModalOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = () => {
+    if (typeof window !== 'undefined') {
+      navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleWhatsAppShare = () => {
+    if (typeof window !== 'undefined' && event) {
+      const shareUrl = window.location.href;
+      const text = `🌸 *${event.title}*\n📅 ${event.date} • ${event.time}\n📍 ${event.venue}\n\nJoin us! Event passes & details:\n${shareUrl}`;
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+    }
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -379,6 +398,31 @@ END:VCALENDAR`;
                 <Download className="w-3.5 h-3.5 text-mitra-gold" />
                 <span>Add to iCal / Outlook (.ICS)</span>
               </button>
+
+              {/* WhatsApp Share & Copy Link */}
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  onClick={handleWhatsAppShare}
+                  className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center justify-center gap-2"
+                  title="Share Event on WhatsApp"
+                >
+                  <img src="/assets/whatsapp.png" alt="WhatsApp" className="w-4 h-4 object-contain brightness-0 invert" />
+                  <span>Share on WhatsApp</span>
+                </button>
+
+                <button
+                  onClick={handleCopyLink}
+                  className="p-2.5 bg-[#FFF0E0] hover:bg-[#E65C00]/10 text-[#E65C00] border border-[#E65C00]/25 rounded-xl text-xs transition-colors relative flex items-center justify-center"
+                  title="Copy Event Link"
+                >
+                  {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4" />}
+                  {copied && (
+                    <span className="absolute -top-8 right-0 bg-[#E65C00] text-white text-[10px] px-2 py-1 rounded border border-[#E65C00]/30 shadow whitespace-nowrap">
+                      Link Copied!
+                    </span>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>

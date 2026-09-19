@@ -25,6 +25,16 @@ export default function EventCard({ event, onRSVP }: { event: EventItem; onRSVP?
     }
   };
 
+  const handleWhatsAppShare = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (typeof window !== 'undefined') {
+      const shareUrl = `${window.location.origin}/events/${event.id}`;
+      const text = `🌸 *${event.title}*\n📅 ${event.date} • ${event.time}\n📍 ${event.venue}\n\nJoin us! Event passes & details:\n${shareUrl}`;
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+    }
+  };
+
   return (
     <>
       <div className="bg-white rounded-3xl overflow-hidden border border-[#E65C00]/20 shadow-md hover:shadow-[0_12px_40px_rgba(230,92,0,0.15)] hover:-translate-y-1 transition-all duration-300 flex flex-col group">
@@ -115,9 +125,17 @@ export default function EventCard({ event, onRSVP }: { event: EventItem; onRSVP?
               )}
 
               <button
+                onClick={handleWhatsAppShare}
+                className="p-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300/60 rounded-xl text-xs transition-colors flex items-center justify-center shrink-0"
+                title="Share Event on WhatsApp"
+              >
+                <img src="/assets/whatsapp.png" alt="WhatsApp" className="w-4 h-4 object-contain" />
+              </button>
+
+              <button
                 onClick={handleShare}
                 className="p-2.5 bg-[#FFF0E0] hover:bg-[#E65C00]/10 text-[#E65C00] border border-[#E65C00]/25 rounded-xl text-xs transition-colors relative"
-                title="Share Event Link"
+                title="Copy Event Link"
               >
                 <Share2 className="w-4 h-4" />
                 {copied && (
