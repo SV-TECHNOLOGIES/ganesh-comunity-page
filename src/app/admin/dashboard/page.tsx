@@ -104,6 +104,9 @@ interface DashboardData {
   success: boolean;
   source: string;
   timestamp: string;
+  selectedEventId?: string;
+  selectedEventTitle?: string | null;
+  events?: { id: string; title: string; date: string; category?: string }[];
   kpiSummary: KPISummary;
   dailyBreakdown: DailyBreakdownItem[];
   donationBreakdown: DonationBreakdownItem[];
@@ -119,6 +122,7 @@ export default function AdminDashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState<string>('all');
   const [feedFilter, setFeedFilter] = useState<'all' | 'payment' | 'rsvp' | 'member'>('all');
   const [lastRefreshedAt, setLastRefreshedAt] = useState<string>('');
 
@@ -127,7 +131,10 @@ export default function AdminDashboardPage() {
     else setLoading(true);
 
     try {
-      const res = await fetch('/api/admin/dashboard-analytics', {
+      const url = selectedEventId && selectedEventId !== 'all'
+        ? `/api/admin/dashboard-analytics?eventId=${encodeURIComponent(selectedEventId)}`
+        : '/api/admin/dashboard-analytics';
+      const res = await fetch(url, {
         cache: 'no-store',
       });
       const json = await res.json();
@@ -141,7 +148,7 @@ export default function AdminDashboardPage() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [selectedEventId]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -260,6 +267,24 @@ export default function AdminDashboardPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
+          {/* Event Selector Dropdown */}
+          <div className="flex items-center gap-2 bg-slate-950 border border-mitra-gold/40 rounded-xl px-3 py-1.5 shadow-md">
+            <Calendar className="w-4 h-4 text-mitra-gold shrink-0" />
+            <span className="text-[11px] font-bold text-slate-400 hidden sm:inline">Event:</span>
+            <select
+              value={selectedEventId}
+              onChange={(e) => setSelectedEventId(e.target.value)}
+              className="bg-transparent text-white text-xs font-black focus:outline-none max-w-[220px] truncate cursor-pointer"
+            >
+              <option value="all" className="bg-slate-900 text-white">All Events (Global View)</option>
+              {(data?.events || []).map((ev) => (
+                <option key={ev.id} value={ev.id} className="bg-slate-900 text-white">
+                  {ev.title} {ev.date ? `(${ev.date})` : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <button
             onClick={() => fetchDashboardData(true)}
             disabled={refreshing || loading}
@@ -296,6 +321,34 @@ export default function AdminDashboardPage() {
           </Link>
         </div>
       </div>
+
+      {/* Active Event Filter Banner */}
+      {selectedEventId !== 'all' && (
+        <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/20 to-orange-500/10 border-2 border-mitra-gold/50 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg animate-in fade-in">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-mitra-gold/20 text-mitra-gold rounded-xl border border-mitra-gold/40 shrink-0">
+              <Calendar className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-[10px] uppercase font-extrabold tracking-wider text-amber-400 block">
+                Filtered Event View
+              </span>
+              <h3 className="text-sm sm:text-base font-black text-white">
+                {data?.selectedEventTitle || (data?.events || []).find((e) => e.id === selectedEventId)?.title || selectedEventId}
+              </h3>
+              <p className="text-[11px] text-slate-300">
+                Displaying conversions, revenue, pooja sevas, passes, and transactions exclusively for this event.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setSelectedEventId('all')}
+            className="self-start sm:self-auto bg-slate-900 hover:bg-slate-800 text-mitra-gold font-bold px-3.5 py-1.5 rounded-xl text-xs border border-mitra-gold/40 transition-colors shadow"
+          >
+            Show All Events
+          </button>
+        </div>
+      )}
 
       {/* ── 2. CORE KPI CARDS GRID (ALL REAL DATABASE METRICS) ─────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">

@@ -71,8 +71,10 @@ const FESTIVAL_DAYS = [
   }
 ];
 
-export async function GET() {
+export async function GET(request: Request) {
   const timestamp = new Date().toISOString();
+  const { searchParams } = new URL(request.url);
+  const eventId = searchParams.get('eventId')?.trim() || 'all';
 
   try {
     // 1. Parallel Database Queries across all core entities
@@ -110,6 +112,32 @@ export async function GET() {
       prisma.charityCase.count().catch(() => 0),
     ]);
 
+    // ── 1b. EVENT FILTERING ──────────────────────────────────────────────────
+    const targetEvent = allEvents.find((e) => e.id === eventId);
+    const targetTitle = targetEvent?.title?.toLowerCase() || '';
+
+    const filteredPayments = eventId && eventId !== 'all'
+      ? allPayments.filter((p) => {
+          if (p.eventId === eventId) return true;
+          if (targetTitle) {
+            const pEvent = (p.eventName || '').toLowerCase();
+            const pDesc = (p.description || '').toLowerCase();
+            return pEvent.includes(targetTitle) || pDesc.includes(targetTitle);
+          }
+          return false;
+        })
+      : allPayments;
+
+    const filteredRSVPs = eventId && eventId !== 'all'
+      ? allRSVPs.filter((r) => {
+          if (r.eventId === eventId) return true;
+          if (targetTitle && r.event?.title) {
+            return r.event.title.toLowerCase().includes(targetTitle);
+          }
+          return false;
+        })
+      : allRSVPs;
+
     // ── 2. REAL USERS DEDUPLICATION & METRICS ──────────────────────────────────
     const uniqueUserEmails = new Set<string>();
     const userRoleCounts: Record<string, number> = {};
@@ -117,7 +145,7 @@ export async function GET() {
     let activeMembersCount = 0;
 
     allMembers.forEach((m) => {
-      if (m.email) uniqueUserEmails.add(m.email.trim().toLowerCase());
+      if (eventId === 'all' && m.email) uniqueUserEmails.add(m.email.trim().toLowerCase());
       const role = m.role || 'Member';
       userRoleCounts[role] = (userRoleCounts[role] || 0) + 1;
       const tier = m.tier || 'Annual Member';
@@ -125,11 +153,11 @@ export async function GET() {
       if ((m.status || '').toLowerCase() === 'active') activeMembersCount++;
     });
 
-    allRSVPs.forEach((r) => {
+    filteredRSVPs.forEach((r) => {
       if (r.attendeeEmail) uniqueUserEmails.add(r.attendeeEmail.trim().toLowerCase());
     });
 
-    allPayments.forEach((p) => {
+    filteredPayments.forEach((p) => {
       if (p.customerEmail) uniqueUserEmails.add(p.customerEmail.trim().toLowerCase());
     });
 
@@ -161,7 +189,7 @@ export async function GET() {
       general: { count: 0, revenue: 0 },
     };
 
-    allPayments.forEach((p) => {
+    filteredPayments.forEach((p) => {
       const amt = Number(p.amount) || 0;
       const st = (p.status || '').toLowerCase();
       totalRevenue += amt;
@@ -207,13 +235,13 @@ export async function GET() {
     });
 
     // ── 4. RSVP & FREE POOJA METRICS ──────────────────────────────────────────
-    const totalRSVPsCount = allRSVPs.length;
+    const totalRSVPsCount = filteredRSVPs.length;
     let totalPassesIssued = 0;
     let totalAdultsCount = 0;
     let totalChildrenCount = 0;
     const locationCounts: Record<string, number> = {};
 
-    allRSVPs.forEach((r) => {
+    filteredRSVPs.forEach((r) => {
       const passes = r.ticketsCount || (r.adultsCount + r.childrenCount) || 1;
       const adults = r.adultsCount ?? 1;
       const children = r.childrenCount ?? 0;
@@ -248,7 +276,7 @@ export async function GET() {
       let childrenCount = 0;
 
       // Check Paid Poojas matching this day
-      allPayments.forEach((p) => {
+      filteredPayments.forEach((p) => {
         if ((p.status || '').toLowerCase() === 'completed') {
           const pDate = (p.poojaDate || '').toLowerCase();
           const pDay = (p.poojaDay || '').toLowerCase();
@@ -270,7 +298,7 @@ export async function GET() {
       });
 
       // Check Free RSVP Registrations matching this day
-      allRSVPs.forEach((r) => {
+      filteredRSVPs.forEach((r) => {
         const passes = r.ticketsCount || (r.adultsCount + r.childrenCount) || 1;
         const adults = r.adultsCount ?? 1;
         const children = r.childrenCount ?? 0;
@@ -329,8 +357,8 @@ export async function GET() {
 
     const liveFeed: LiveFeedItem[] = [];
 
-    // Add Payments
-    allPayments.slice(0, 15).forEach((p) => {
+    // Add Payments from filtered set
+    filteredPayments.slice(0, 15).forEach((p) => {
       const isCompleted = (p.status || '').toLowerCase() === 'completed';
       const isPooja = Boolean(p.poojaTitle) || (p.donationType || '').toLowerCase() === 'pooja';
       liveFeed.push({
@@ -356,8 +384,8 @@ export async function GET() {
       });
     });
 
-    // Add RSVPs
-    allRSVPs.slice(0, 15).forEach((r) => {
+    // Add RSVPs from filtered set
+    filteredRSVPs.slice(0, 15).forEach((r) => {
       const passes = r.ticketsCount || (r.adultsCount + r.childrenCount) || 1;
       const datesStr = (r.selectedDates || []).slice(0, 2).join(', ');
       liveFeed.push({
@@ -379,26 +407,28 @@ export async function GET() {
       });
     });
 
-    // Add Members
-    allMembers.slice(0, 10).forEach((m) => {
-      liveFeed.push({
-        id: `mem-${m.id}`,
-        type: 'member',
-        title: m.fullName,
-        subtitle: `${m.tier || 'Annual Member'} · Role: ${m.role || 'Member'}`,
-        badge: 'MEMBER JOINED',
-        badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
-        amount: m.tier || 'Member',
-        details: m.email,
-        timestamp: new Date(m.createdAt).toLocaleString('en-GB', {
-          day: '2-digit',
-          month: 'short',
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
-        rawDate: new Date(m.createdAt).toISOString(),
+    // Add Members only when viewing all events
+    if (eventId === 'all') {
+      allMembers.slice(0, 10).forEach((m) => {
+        liveFeed.push({
+          id: `mem-${m.id}`,
+          type: 'member',
+          title: m.fullName,
+          subtitle: `${m.tier || 'Annual Member'} · Role: ${m.role || 'Member'}`,
+          badge: 'MEMBER JOINED',
+          badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
+          amount: m.tier || 'Member',
+          details: m.email,
+          timestamp: new Date(m.createdAt).toLocaleString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          rawDate: new Date(m.createdAt).toISOString(),
+        });
       });
-    });
+    }
 
     // Sort live feed by actual date descending
     liveFeed.sort((a, b) => new Date(b.rawDate).getTime() - new Date(a.rawDate).getTime());
@@ -461,8 +491,17 @@ export async function GET() {
         ],
         topLocations,
         memberTiers: Object.entries(memberTierCounts).map(([tier, count]) => ({ tier, count })),
-        recentPayments: allPayments.slice(0, 8),
-        recentRSVPs: allRSVPs.slice(0, 8),
+        selectedEventId: eventId,
+        selectedEventTitle: targetEvent?.title || null,
+        events: allEvents.map((e) => ({
+          id: e.id,
+          title: e.title,
+          date: e.date,
+          category: e.category,
+          status: e.status,
+        })),
+        recentPayments: filteredPayments.slice(0, 8),
+        recentRSVPs: filteredRSVPs.slice(0, 8),
         recentMembers: allMembers.slice(0, 8),
         liveFeed: liveFeed.slice(0, 20),
       },
