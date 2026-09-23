@@ -1,75 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getEventSchedule } from '@/lib/event-schedule';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-
-const FESTIVAL_DAYS = [
-  {
-    id: 'day-1',
-    date: '13th Sep',
-    dateLabel: '13 Sep (Sun)',
-    day: 'Sunday',
-    title: 'Ganapathi Agamana',
-    theme: 'Mandapam Preparation & Agamana'
-  },
-  {
-    id: 'day-2',
-    date: '14th Sep',
-    dateLabel: '14 Sep (Mon)',
-    day: 'Monday',
-    title: 'Maha Ganapati Prathista',
-    theme: 'Ganesh Chaturthi The Grand Beginning'
-  },
-  {
-    id: 'day-3',
-    date: '15th Sep',
-    dateLabel: '15 Sep (Tue)',
-    day: 'Tuesday',
-    title: 'Vidya Ganapati',
-    theme: 'Wisdom, Education, Knowledge & Learning'
-  },
-  {
-    id: 'day-4',
-    date: '16th Sep',
-    dateLabel: '16 Sep (Wed)',
-    day: 'Wednesday',
-    title: 'Arogya Ganapati',
-    theme: 'Radiant Health, Healing & Wellbeing'
-  },
-  {
-    id: 'day-5',
-    date: '17th Sep',
-    dateLabel: '17 Sep (Thu)',
-    day: 'Thursday',
-    title: 'Lakshmi Ganapati',
-    theme: 'Prosperity, Abundance & Success'
-  },
-  {
-    id: 'day-6',
-    date: '18th Sep',
-    dateLabel: '18 Sep (Fri)',
-    day: 'Friday',
-    title: 'Korikala Ganapati',
-    theme: 'Wishes, Aspirations & Fulfillment'
-  },
-  {
-    id: 'day-7',
-    date: '19th Sep',
-    dateLabel: '19 Sep (Sat)',
-    day: 'Saturday',
-    title: 'Bhakti Ganapati',
-    theme: 'Devotion, Peace & Spiritual Strength'
-  },
-  {
-    id: 'day-8',
-    date: '20th Sep',
-    dateLabel: '20 Sep (Sun)',
-    day: 'Sunday',
-    title: 'Utsava Ganapati & Nimajjanam',
-    theme: 'Grand Visarjan, Victory & Grace'
-  }
-];
 
 export async function GET(request: Request) {
   const timestamp = new Date().toISOString();
@@ -266,8 +200,11 @@ export async function GET(request: Request) {
     const totalFreePoojas = totalRSVPsCount; // Free Community Pooja & Darshan RSVP bookings
     const totalFreePasses = totalPassesIssued; // Free devotee passes
 
-    // ── 5. 7-DAY FESTIVAL DAY BREAKDOWN (PAID VS FREE POOJAS) ─────────────────
-    const dailyBreakdown = FESTIVAL_DAYS.map((fd) => {
+    // ── 5. EVENT DAILY SCHEDULE BREAKDOWN (ONLY VISIBLE WHEN SINGLE EVENT SELECTED) ──
+    const isSingleEvent = Boolean(eventId && eventId !== 'all' && targetEvent);
+    const eventScheduleList = isSingleEvent ? getEventSchedule(targetEvent) : [];
+
+    const dailyBreakdown = eventScheduleList.map((fd) => {
       let paidCount = 0;
       let paidRevenue = 0;
       let freeBookingsCount = 0;
@@ -275,21 +212,26 @@ export async function GET(request: Request) {
       let adultsCount = 0;
       let childrenCount = 0;
 
+      const fdDate = (fd.date || '').toLowerCase();
+      const fdLabel = (fd.dateLabel || fd.date || '').toLowerCase();
+      const fdTitle = (fd.title || '').toLowerCase();
+      const fdDay = (fd.day || '').toLowerCase();
+      const fdId = (fd.id || '').toLowerCase();
+
       // Check Paid Poojas matching this day
       filteredPayments.forEach((p) => {
         if ((p.status || '').toLowerCase() === 'completed') {
           const pDate = (p.poojaDate || '').toLowerCase();
           const pDay = (p.poojaDay || '').toLowerCase();
           const pTitle = (p.poojaTitle || '').toLowerCase();
-          const fdDate = fd.date.toLowerCase();
-          const fdTitle = fd.title.toLowerCase();
+          const pDesc = (p.description || '').toLowerCase();
 
           if (
-            pDate.includes(fdDate) ||
-            pDate.includes(fd.dateLabel.toLowerCase()) ||
-            pTitle.includes(fdTitle) ||
-            pTitle.includes(fd.title.toLowerCase()) ||
-            (p.description || '').toLowerCase().includes(fdDate)
+            (pDate && (pDate.includes(fdDate) || pDate.includes(fdLabel))) ||
+            (fdDay && pDay && pDay.includes(fdDay)) ||
+            (pTitle && (pTitle.includes(fdTitle) || fdTitle.includes(pTitle))) ||
+            (fdDate && pDesc.includes(fdDate)) ||
+            (fdLabel && pDesc.includes(fdLabel))
           ) {
             paidCount++;
             paidRevenue += Number(p.amount) || 0;
@@ -304,15 +246,17 @@ export async function GET(request: Request) {
         const children = r.childrenCount ?? 0;
         const dates = Array.isArray(r.selectedDates) && r.selectedDates.length > 0
           ? r.selectedDates
-          : ['14 Sep (Mon)'];
+          : [];
 
         const matchesDay = dates.some((d) => {
           const dLower = d.toLowerCase();
           return (
-            dLower.includes(fd.date.toLowerCase()) ||
-            dLower.includes(fd.dateLabel.toLowerCase()) ||
-            dLower.includes(fd.day.toLowerCase()) ||
-            dLower.includes(fd.id)
+            (fdDate && dLower.includes(fdDate)) ||
+            (fdLabel && dLower.includes(fdLabel)) ||
+            (fdDay && dLower.includes(fdDay)) ||
+            (fdId && dLower.includes(fdId)) ||
+            dLower === fdDate ||
+            dLower === fdLabel
           );
         });
 
@@ -327,10 +271,10 @@ export async function GET(request: Request) {
       return {
         id: fd.id,
         date: fd.date,
-        dateLabel: fd.dateLabel,
-        day: fd.day,
+        dateLabel: fd.dateLabel || fd.date,
+        day: fd.day || '',
         title: fd.title,
-        theme: fd.theme,
+        theme: fd.theme || '',
         paidCount,
         paidRevenue,
         freeBookingsCount,

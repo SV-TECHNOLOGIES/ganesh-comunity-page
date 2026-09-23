@@ -258,12 +258,7 @@ export default function AdminDashboardPage() {
               </span>
             )}
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white font-cinzel">
-            EXECUTIVE CMS &amp; CONVERSIONS ANALYTICS
-          </h1>
-          <p className="text-xs text-slate-400 font-medium">
-            Live database intelligence tracking RSVP passes, Sacred Pooja Sevas, Stripe bookings, and devotee registrations.
-          </p>
+          
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
@@ -357,7 +352,7 @@ export default function AdminDashboardPage() {
         <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-2 hover:border-mitra-gold/50 transition-all shadow-md group">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              Total Real Users &amp; Devotees
+              Total Users 
             </span>
             <div className="p-2 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20 group-hover:bg-blue-500 group-hover:text-black transition-colors">
               <Users className="w-4 h-4" />
@@ -526,69 +521,73 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* 7-Day Auspicious Festival Day Schedule Table */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              <CalendarDays className="w-4 h-4 text-mitra-gold" />
-              <span>7-Day Auspicious Festival Daily Schedule &amp; Bookings Matrix</span>
-            </h3>
-            <span className="text-[11px] text-slate-400 font-mono">
-              London Ganesh Mahotsav 2026
-            </span>
-          </div>
+        {/* Auspicious Festival Day Schedule Table: ONLY visible when an event is selected */}
+        {selectedEventId !== 'all' && (data?.dailyBreakdown || []).length > 0 && (
+          <div className="space-y-3 animate-in fade-in">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                <CalendarDays className="w-4 h-4 text-mitra-gold" />
+                <span>
+                  {data?.selectedEventTitle || 'Event'} Daily Schedule &amp; Bookings Matrix
+                </span>
+              </h3>
+              <span className="text-[11px] text-mitra-gold font-mono bg-mitra-gold/10 px-2 py-0.5 rounded-full border border-mitra-gold/20">
+                {data?.dailyBreakdown?.length} Configured Days
+              </span>
+            </div>
 
-          <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/60">
-            <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-900 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800 font-mono">
-                <tr>
-                  <th className="p-3.5">Festival Date &amp; Day</th>
-                  <th className="p-3.5">Sacred Deity &amp; Ritual</th>
-                  <th className="p-3.5 text-center text-amber-400">Paid Pooja Sevas (£116)</th>
-                  <th className="p-3.5 text-center text-amber-400">Paid Seva Revenue</th>
-                  <th className="p-3.5 text-center text-purple-400">Free RSVP Bookings</th>
-                  <th className="p-3.5 text-center text-purple-400">Free Passes Issued</th>
-                  <th className="p-3.5 text-right text-emerald-400">Total Day Footfall</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/60 font-sans">
-                {(data?.dailyBreakdown || []).map((day) => (
-                  <tr key={day.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="p-3.5 whitespace-nowrap">
-                      <span className="font-bold text-white block">{day.date}</span>
-                      <span className="text-[11px] text-slate-400 font-medium">({day.day})</span>
-                    </td>
-                    <td className="p-3.5">
-                      <span className="font-bold text-mitra-gold block">{day.title}</span>
-                      <span className="text-[10px] text-slate-400 line-clamp-1">{day.theme}</span>
-                    </td>
-                    <td className="p-3.5 text-center font-mono">
-                      {day.paidCount > 0 ? (
-                        <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold px-2.5 py-1 rounded-full text-xs inline-block">
-                          {day.paidCount} Sevas
-                        </span>
-                      ) : (
-                        <span className="text-slate-600 font-semibold">0</span>
-                      )}
-                    </td>
-                    <td className="p-3.5 text-center font-mono font-bold text-amber-400">
-                      {day.paidRevenue > 0 ? `£${day.paidRevenue.toFixed(2)}` : '£0.00'}
-                    </td>
-                    <td className="p-3.5 text-center font-mono font-semibold text-purple-300">
-                      {day.freeBookingsCount}
-                    </td>
-                    <td className="p-3.5 text-center font-mono font-bold text-purple-400">
-                      {day.freePasses} passes
-                    </td>
-                    <td className="p-3.5 text-right font-mono font-black text-emerald-400 text-sm whitespace-nowrap">
-                      {day.totalDevotees} Devotees
-                    </td>
+            <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/60">
+              <table className="w-full text-left text-xs text-slate-300">
+                <thead className="bg-slate-900 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800 font-mono">
+                  <tr>
+                    <th className="p-3.5">Festival Date &amp; Day</th>
+                    <th className="p-3.5">Sacred Deity &amp; Ritual</th>
+                    <th className="p-3.5 text-center text-amber-400">Paid Pooja Sevas (£116)</th>
+                    <th className="p-3.5 text-center text-amber-400">Paid Seva Revenue</th>
+                    <th className="p-3.5 text-center text-purple-400">Free RSVP Bookings</th>
+                    <th className="p-3.5 text-center text-purple-400">Free Passes Issued</th>
+                    <th className="p-3.5 text-right text-emerald-400">Total Day Footfall</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60 font-sans">
+                  {(data?.dailyBreakdown || []).map((day) => (
+                    <tr key={day.id} className="hover:bg-slate-800/40 transition-colors">
+                      <td className="p-3.5 whitespace-nowrap">
+                        <span className="font-bold text-white block">{day.date}</span>
+                        {day.day && <span className="text-[11px] text-slate-400 font-medium">({day.day})</span>}
+                      </td>
+                      <td className="p-3.5">
+                        <span className="font-bold text-mitra-gold block">{day.title}</span>
+                        {day.theme && <span className="text-[10px] text-slate-400 line-clamp-1">{day.theme}</span>}
+                      </td>
+                      <td className="p-3.5 text-center font-mono">
+                        {day.paidCount > 0 ? (
+                          <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold px-2.5 py-1 rounded-full text-xs inline-block">
+                            {day.paidCount} Sevas
+                          </span>
+                        ) : (
+                          <span className="text-slate-600 font-semibold">0</span>
+                        )}
+                      </td>
+                      <td className="p-3.5 text-center font-mono font-bold text-amber-400">
+                        {day.paidRevenue > 0 ? `£${day.paidRevenue.toFixed(2)}` : '£0.00'}
+                      </td>
+                      <td className="p-3.5 text-center font-mono font-semibold text-purple-300">
+                        {day.freeBookingsCount}
+                      </td>
+                      <td className="p-3.5 text-center font-mono font-bold text-purple-400">
+                        {day.freePasses} passes
+                      </td>
+                      <td className="p-3.5 text-right font-mono font-black text-emerald-400 text-sm whitespace-nowrap">
+                        {day.totalDevotees} Devotees
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        )}
 
       </div>
 
