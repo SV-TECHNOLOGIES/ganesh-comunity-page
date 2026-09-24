@@ -1,7 +1,7 @@
 /**
  * Next.js Instrumentation Hook
  * Runs once when the Next.js server instance starts up.
- * Ensures the background Email Queue worker is initialized.
+ * Ensures server-side hooks and background workers are initialized.
  */
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
@@ -10,9 +10,10 @@ export async function register() {
       const { initRequestAnalyticsServerHook } = await import('@/lib/request-analytics');
       initRequestAnalyticsServerHook();
 
-      // 2. Background Email Queue Worker
-      const { startEmailQueueWorker } = await import('@/lib/email-queue');
-      // startEmailQueueWorker();
+      // 2. Start Background Pending Payments & RSVPs Cleanup Worker (24h cutoff, hourly interval)
+      const { startPendingPaymentsWorker } = await import('@/lib/pending-payments-cleanup');
+      startPendingPaymentsWorker();
+
       console.log('[INSTRUMENTATION] Background workers & Request Analytics registered successfully.');
     } catch (err) {
       console.error('[INSTRUMENTATION] Failed initializing server hooks:', err);
