@@ -111,3 +111,29 @@ The file [`src/data/event-hero-config.json`](file:///Users/venkey/Documents/svr/
 4. **[`next.config.js`](file:///Users/venkey/Documents/svr/UKTA/next.config.js)**:
    - Added automated startup cleanup that removes `src/data/event-hero-config.json` from the filesystem.
 
+---
+
+## 6. HTTP Request Response Time Logging & Analytics
+
+A real-time request timing and analytics system has been implemented across the application:
+
+1. **[`src/lib/request-analytics.ts`](file:///Users/venkey/Documents/svr/UKTA/src/lib/request-analytics.ts)**:
+   - Hooks into the Node.js `http.Server` to calculate exact duration from incoming request arrival to response completion (`res.on('finish')`).
+   - Automatically attaches `Server-Timing: total;dur=${durationMs}` and `X-Response-Time: ${durationMs}ms` headers to outgoing responses.
+   - Debounced batching queue (`flushLogQueue`) flushes logs asynchronously into PostgreSQL `SystemLog` table via `prisma.systemLog.createMany`, preventing DB write bottlenecks.
+   - Filters out high-frequency static asset noise (`/_next/static/*`, images, fonts, `.glb`) so only genuine API and page traffic is logged.
+
+2. **[`src/instrumentation.ts`](file:///Users/venkey/Documents/svr/UKTA/src/instrumentation.ts)**:
+   - Next.js server hook registers `initRequestAnalyticsServerHook()` on startup in the Node.js runtime.
+
+3. **[`src/app/api/admin/logs/route.ts`](file:///Users/venkey/Documents/svr/UKTA/src/app/api/admin/logs/route.ts)**:
+   - Flushes in-flight request queues before querying.
+   - Computes real-time analytics: Average response time (ms), fastest/slowest response times, HTTP status code distribution (2xx, 3xx, 4xx, 5xx), and slowest endpoints leaderboard.
+
+4. **[`src/app/admin/logs/page.tsx`](file:///Users/venkey/Documents/svr/UKTA/src/app/admin/logs/page.tsx)**:
+   - **Average Response Time KPI**: displays live latency with performance grade (`<100ms Excellent`, `<300ms Good`, `>300ms Attention`).
+   - **Performance Analytics Inspector**: collapsible breakdown featuring top slowest endpoints, status code distributions, and min/max response times.
+   - **Row Header Duration Badges**: every HTTP log row displays method (`GET`, `POST`, etc.), status code (`200`, `404`, `500`), and response time (`⏱️ 24ms`).
+   - **Expanded Timing Inspector**: visual latency meter bar, route path, client IP, and user-agent metadata.
+
+
