@@ -598,16 +598,26 @@ export default function AdminEventsPage() {
       const json = await res.json();
       const exportList: RSVPRecord[] = json.success && Array.isArray(json.data) ? json.data : rsvps;
 
-      let csvContent = 'RSVP ID,Event Title,Attendee Name,Email Address,Phone Number,Travelling From,Adults,Children,Total Passes,Selected Dates,Member Account,Registered At\n';
+      let csvContent = 'RSVP ID,Event Title,Attendee Name,Email Address,Phone Number,Travelling From,Adults,Children,Total Passes,Selected Dates,Option Fields,Member Account,Registered At\n';
 
       exportList.forEach((r) => {
         const datesStr = (r.selectedDates || []).join(' | ').replace(/"/g, '""');
-        const eventName = (r.event?.title || 'London Ganesh Mahotsav').replace(/"/g, '""');
+        const eventName = (r.event?.title || 'MITRA Community Event').replace(/"/g, '""');
         const originStr = (r.travellingFrom || '').replace(/"/g, '""');
         const isMem = r.isMember ? 'Yes (Member)' : 'No (Guest)';
         const createdStr = new Date(r.createdAt).toLocaleString('en-GB');
 
-        csvContent += `"${r.id}","${eventName}","${r.attendeeName}","${r.attendeeEmail}","${r.attendeePhone}","${originStr}",${r.adultsCount || 1},${r.childrenCount || 0},${r.ticketsCount || 1},"${datesStr}","${isMem}","${createdStr}"\n`;
+        const optionsStr = r.customResponses && Object.keys(r.customResponses).length > 0
+          ? Object.entries(r.customResponses).map(([k, v]) => {
+              const matchingEvt = events.find((e) => e.id === r.eventId) || r.event;
+              const fDef = (matchingEvt?.customFields as any)?.find((f: any) => f.id === k);
+              const label = fDef?.label || k;
+              const valDisplay = typeof v === 'boolean' ? (v ? 'Yes' : 'No') : String(v ?? '');
+              return `${label}: ${valDisplay}`;
+            }).join(' | ').replace(/"/g, '""')
+          : 'None';
+
+        csvContent += `"${r.id}","${eventName}","${r.attendeeName}","${r.attendeeEmail}","${r.attendeePhone}","${originStr}",${r.adultsCount || 1},${r.childrenCount || 0},${r.ticketsCount || 1},"${datesStr}","${optionsStr}","${isMem}","${createdStr}"\n`;
       });
 
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -632,7 +642,7 @@ export default function AdminEventsPage() {
       const json = await res.json();
       const eventRsvps: RSVPRecord[] = json.success && Array.isArray(json.data) ? json.data : [];
 
-      let csvContent = 'RSVP ID,Event Title,Attendee Name,Email Address,Phone Number,Travelling From,Adults,Children,Total Passes,Selected Dates,Member Account,Registered At\n';
+      let csvContent = 'RSVP ID,Event Title,Attendee Name,Email Address,Phone Number,Travelling From,Adults,Children,Total Passes,Selected Dates,Option Fields,Member Account,Registered At\n';
 
       if (eventRsvps.length > 0) {
         eventRsvps.forEach((r) => {
@@ -640,10 +650,20 @@ export default function AdminEventsPage() {
           const originStr = (r.travellingFrom || '').replace(/"/g, '""');
           const isMem = r.isMember ? 'Yes (Member)' : 'No (Guest)';
           const createdStr = new Date(r.createdAt).toLocaleString('en-GB');
-          csvContent += `"${r.id}","${event.title}","${r.attendeeName}","${r.attendeeEmail}","${r.attendeePhone}","${originStr}",${r.adultsCount || 1},${r.childrenCount || 0},${r.ticketsCount || 1},"${datesStr}","${isMem}","${createdStr}"\n`;
+
+          const optionsStr = r.customResponses && Object.keys(r.customResponses).length > 0
+            ? Object.entries(r.customResponses).map(([k, v]) => {
+                const fDef = (event.customFields as any)?.find((f: any) => f.id === k);
+                const label = fDef?.label || k;
+                const valDisplay = typeof v === 'boolean' ? (v ? 'Yes' : 'No') : String(v ?? '');
+                return `${label}: ${valDisplay}`;
+              }).join(' | ').replace(/"/g, '""')
+            : 'None';
+
+          csvContent += `"${r.id}","${event.title}","${r.attendeeName}","${r.attendeeEmail}","${r.attendeePhone}","${originStr}",${r.adultsCount || 1},${r.childrenCount || 0},${r.ticketsCount || 1},"${datesStr}","${optionsStr}","${isMem}","${createdStr}"\n`;
         });
       } else {
-        csvContent += `"${event.id}","${event.title}","Summary Record","","","",,,${event.rsvpCount},"${event.date}","",""\n`;
+        csvContent += `"${event.id}","${event.title}","Summary Record","","","",,,${event.rsvpCount},"${event.date}","None","",""\n`;
       }
 
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -1471,8 +1491,9 @@ export default function AdminEventsPage() {
                   <th className="p-4">Attendee Details</th>
                   <th className="p-4">Contact Info</th>
                   <th className="p-4">Member Status</th>
-                  <th className="p-4">Selected Darshan Dates</th>
+                  <th className="p-4">Selected Dates</th>
                   <th className="p-4">Pass Breakdown</th>
+                  <th className="p-4">Option Fields</th>
                   <th className="p-4">Registered At</th>
                   <th className="p-4 text-right">Actions</th>
                 </tr>
@@ -1480,7 +1501,7 @@ export default function AdminEventsPage() {
               <tbody className="divide-y divide-slate-800">
                 {loadingRsvps ? (
                   <tr>
-                    <td colSpan={7} className="p-8 text-center text-slate-400">
+                    <td colSpan={8} className="p-8 text-center text-slate-400">
                       <div className="flex items-center justify-center gap-2">
                         <RefreshCw className="w-4 h-4 animate-spin text-mitra-gold" />
                         <span>Loading attendee registrations from database...</span>
@@ -1489,7 +1510,7 @@ export default function AdminEventsPage() {
                   </tr>
                 ) : rsvps.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="p-8 text-center text-slate-500 font-sans">
+                    <td colSpan={8} className="p-8 text-center text-slate-500 font-sans">
                       No RSVP registrations found matching the criteria in PostgreSQL.
                     </td>
                   </tr>
@@ -1539,7 +1560,7 @@ export default function AdminEventsPage() {
                         )}
                       </td>
 
-                      {/* Selected Darshan Dates */}
+                      {/* Selected Dates */}
                       <td className="p-4">
                         <div className="flex flex-wrap gap-1 max-w-xs">
                           {rsvp.selectedDates && rsvp.selectedDates.length > 0 ? (
@@ -1561,7 +1582,7 @@ export default function AdminEventsPage() {
                               );
                             })
                           ) : (
-                            <span className="text-slate-500 text-[11px]">14 Sep (Mon)</span>
+                            <span className="text-slate-500 text-[11px]">General Admission</span>
                           )}
                         </div>
                       </td>
@@ -1584,18 +1605,27 @@ export default function AdminEventsPage() {
                             Paid: £{rsvp.totalAmount.toFixed(2)} ({rsvp.paymentStatus || 'Completed'})
                           </div>
                         )}
-                        {rsvp.customResponses && Object.keys(rsvp.customResponses).length > 0 && (
-                          <div className="pt-1 flex flex-wrap gap-1">
-                            {Object.entries(rsvp.customResponses).map(([key, val]) => (
-                              <span
-                                key={key}
-                                className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700"
-                                title={`${key}: ${String(val)}`}
-                              >
-                                {String(val)}
-                              </span>
-                            ))}
+                      </td>
+
+                      {/* Option Fields Data */}
+                      <td className="p-4">
+                        {rsvp.customResponses && Object.keys(rsvp.customResponses).length > 0 ? (
+                          <div className="space-y-1.5 min-w-[150px] max-w-xs">
+                            {Object.entries(rsvp.customResponses).map(([key, val]) => {
+                              const matchingEvent = events.find((e) => e.id === rsvp.eventId) || rsvp.event;
+                              const fieldDef = (matchingEvent?.customFields as any)?.find((f: any) => f.id === key);
+                              const label = fieldDef?.label || key;
+                              const displayVal = typeof val === 'boolean' ? (val ? 'Yes' : 'No') : String(val ?? '—');
+                              return (
+                                <div key={key} className="bg-slate-900 border border-slate-800 rounded-lg p-1.5 text-[11px] shadow-sm">
+                                  <span className="text-slate-400 block text-[10px] font-semibold leading-tight">{label}:</span>
+                                  <span className="text-amber-300 font-bold break-words leading-tight">{displayVal}</span>
+                                </div>
+                              );
+                            })}
                           </div>
+                        ) : (
+                          <span className="text-slate-500 text-[11px] italic">None</span>
                         )}
                       </td>
 
