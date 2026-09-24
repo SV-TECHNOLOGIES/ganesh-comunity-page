@@ -59,7 +59,7 @@ const DEFAULT_CONFIG: EventHeroConfig = {
 
 export default function EventHero({
   config: userConfig,
-  eventSlug = 'ganesh-event-2026',
+  eventSlug = 'events/evt-ganesh-chaturthi',
   mode = 'event',
   onBookPoojaClick,
   onDonateClick,
@@ -68,6 +68,14 @@ export default function EventHero({
 }: EventHeroProps) {
   const cfg: EventHeroConfig = { ...DEFAULT_CONFIG, ...userConfig };
   const isHomeMode = mode === 'home';
+
+  // Guaranteed public event URL (e.g. /events/<eventId>, e.g. /events/cmu8fbb720000141sx0p856rb)
+  const resolvedEventHref = (() => {
+    if (!eventSlug) return '/events/evt-ganesh-chaturthi';
+    const clean = eventSlug.replace(/^\/+/, '');
+    if (clean === 'ganesh-event-2026') return '/events/evt-ganesh-chaturthi';
+    return clean.startsWith('events/') ? `/${clean}` : `/events/${clean}`;
+  })();
 
   // Background aura, particles, and corner motifs flags
   const shouldShowParticles = cfg.showParticles === true || (cfg.showParticles !== false && cfg.proceduralFallback !== 'none');
@@ -403,7 +411,7 @@ export default function EventHero({
         {isHomeMode ? (
           <>
             <Link
-              href={`/${eventSlug}`}
+              href={resolvedEventHref}
               className="maroon-button px-8 py-3.5 rounded-full text-sm font-black uppercase tracking-wider flex items-center gap-2.5 shadow-xl hover:scale-105 transition-all border border-[#E65C00]/30"
             >
               <ExternalLink className="w-5 h-5 text-[#FF9A3C]" />

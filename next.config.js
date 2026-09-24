@@ -36,6 +36,15 @@ const nextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: '/ganesh-event-2026',
+        destination: '/events/evt-ganesh-chaturthi',
+        permanent: false,
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

@@ -71,3 +71,20 @@ npx prisma generate
 # 3. Seed preferences and demo template events into the new DB
 npx tsx scripts/seed-preferences.ts
 ```
+
+---
+
+## 4. Home Page `eventSlug` Routing Update (`/events/<eventId>`)
+
+All links from the featured hero on the home page and throughout navigation now resolve to `https://www.mitrauk.com/events/<eventId>` (e.g. `/events/cmu8fbb720000141sx0p856rb` or `/events/evt-ganesh-chaturthi`):
+
+1. **[`src/lib/config-preferences.ts`](file:///Users/venkey/Documents/svr/UKTA/src/lib/config-preferences.ts)**:
+   - `reconstructEventConfig` automatically resolves `eventSlug` as `events/${eventId}` for both database events (e.g. `events/cmu8fbb720000141sx0p856rb`) and template events.
+2. **[`src/app/page.tsx`](file:///Users/venkey/Documents/svr/UKTA/src/app/page.tsx)**:
+   - Computes `targetEventSlug` directly from `activeEventConfig?.id` so that the home page hero CTA always navigates to `/events/${activeEventConfig.id}`.
+3. **[`src/components/EventHero.tsx`](file:///Users/venkey/Documents/svr/UKTA/src/components/EventHero.tsx)**:
+   - Added `resolvedEventHref` helper ensuring that the "View Event" button in home mode always routes cleanly to `/events/${cleanSlug}` without double slashes.
+4. **[`src/app/events/[id]/page.tsx`](file:///Users/venkey/Documents/svr/UKTA/src/app/events/[id]/page.tsx)**:
+   - Enabled template hero rendering for all database event IDs (including CUIDs like `cmu8fbb720000141sx0p856rb`) when customized in the Admin Panel.
+5. **[`next.config.js`](file:///Users/venkey/Documents/svr/UKTA/next.config.js)** & Header components:
+   - Added server-side 307 redirect from `/ganesh-event-2026` to `/events/evt-ganesh-chaturthi`, unifying all event URLs under `/events/<eventId>`.

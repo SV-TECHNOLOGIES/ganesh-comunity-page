@@ -26,12 +26,22 @@ export default function HomePage() {
       });
   }, []);
 
+  // Compute target eventSlug URL to point to /events/<eventId> (e.g. /events/cmu8fbb720000141sx0p856rb)
+  const featuredEventId = activeEventConfig?.id;
+  const targetEventSlug = featuredEventId
+    ? `events/${featuredEventId}`
+    : (activeEventConfig?.eventSlug
+        ? (activeEventConfig.eventSlug.startsWith('events/')
+            ? activeEventConfig.eventSlug
+            : `events/${activeEventConfig.eventSlug.replace(/^\/+/, '')}`)
+        : 'events/evt-ganesh-chaturthi');
+
   return (
     <div className="bg-[#FFF8F0] text-[#3D1A00] min-h-screen">
       {/* 1. HERO — Dynamically featured Event Hero (3D Model / Image / Video) configured via Admin Panel */}
       <EventHero
         config={activeEventConfig?.hero}
-        eventSlug={activeEventConfig?.eventSlug || 'ganesh-event-2026'}
+        eventSlug={targetEventSlug}
         mode="home"
         onNotifyClick={() => setNotifyModalOpen(true)}
       />
