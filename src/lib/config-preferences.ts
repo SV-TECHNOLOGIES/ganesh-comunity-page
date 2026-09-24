@@ -139,7 +139,14 @@ function reconstructEventConfig(
   return {
     id: eventId,
     title: prefs['event.hero.title'] || eventTitle || 'MITRA UK Event',
-    eventSlug: prefs['event.eventSlug'] || eventId,
+    eventSlug: (() => {
+      const slug = prefs['event.eventSlug'];
+      if (!slug || slug === eventId || slug === 'ganesh-event-2026') {
+        return `events/${eventId}`;
+      }
+      const clean = slug.replace(/^\/+/, '');
+      return clean.startsWith('events/') ? clean : `events/${clean}`;
+    })(),
     targetDate: prefs['event.targetDate'],
     hero,
     sections: prefs['event.sections'] || {

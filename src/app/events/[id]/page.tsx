@@ -59,6 +59,8 @@ export default function EventDetailPage() {
     }
   };
 
+  const [templateConfig, setTemplateConfig] = useState<any>(null);
+
   useEffect(() => {
     setLoading(true);
     fetch('/api/events')
@@ -68,18 +70,21 @@ export default function EventDetailPage() {
         if (resData.success && Array.isArray(resData.data)) {
           found = resData.data.find((e: EventItem) => e.id === id) ||
             resData.data.find((e: EventItem) => e.id.toLowerCase() === id.toLowerCase()) ||
-            resData.data.find((e: EventItem) => (id === 'evt-ganesh-chaturthi' || id === 'evt-101') && e.title.toLowerCase().includes('ganesh')) || null;
+            resData.data.find((e: EventItem) => (id === 'evt-ganesh-chaturthi' || id === 'evt-101' || id === 'ganesh-event-2026') && e.title.toLowerCase().includes('ganesh')) || null;
         }
 
-        // If not found in DB events, check template config storage
-        if (!found) {
-          try {
-            const resTpl = await fetch(`/api/config/preferences?eventId=${encodeURIComponent(id)}`);
-            const tplJson = await resTpl.json();
-            if (tplJson.success && (tplJson.templateConfig || tplJson.data)) {
-              const tpl = tplJson.templateConfig || tplJson.data;
+        // Check template config storage for custom hero/landing preferences in DB
+        try {
+          const resTpl = await fetch(`/api/config/preferences?eventId=${encodeURIComponent(id)}`);
+          const tplJson = await resTpl.json();
+          if (tplJson.success && (tplJson.templateConfig || tplJson.preferences)) {
+            const tpl = tplJson.templateConfig;
+            if (tpl && (tpl.hero?.heroType || tpl.hero?.title || Object.keys(tplJson.preferences || {}).length > 0)) {
+              setTemplateConfig(tpl);
+            }
+            if (!found && tpl) {
               found = {
-                id: tpl.id,
+                id: tpl.id || id,
                 title: tpl.title,
                 category: 'Cultural Events',
                 date: tpl.targetDate ? tpl.targetDate.slice(0, 10) : '2027-01-01',
@@ -95,8 +100,8 @@ export default function EventDetailPage() {
                 featured: true,
               };
             }
-          } catch {}
-        }
+          }
+        } catch {}
 
         if (found) {
           setEvent(found);
@@ -131,7 +136,7 @@ export default function EventDetailPage() {
   }
 
   const jsonLd = generateEventJsonLd(event);
-  const isTemplateEvent = id.startsWith('evt-') || (event.id && event.id.startsWith('evt-'));
+  const isTemplateEvent = !!templateConfig || id.startsWith('evt-') || (event.id && event.id.startsWith('evt-'));
 
   const handleICSDownload = () => {
     const icsData = `BEGIN:VCALENDAR
@@ -236,7 +241,7 @@ END:VCALENDAR`;
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <EventLandingTemplate eventId={event.id || id} />
+        <EventLandingTemplate eventId={event.id || id} config={templateConfig || undefined} />
       </>
     );
   }

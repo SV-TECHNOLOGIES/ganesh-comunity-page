@@ -120,7 +120,7 @@ export default function HomeVariantHeritage() {
 
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
               <Link
-                href="/ganesh-event-2026"
+                href="/events/evt-ganesh-chaturthi"
                 className="gold-button px-7 py-3 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-lg hover:scale-105 transition-all"
               >
                 <Camera className="w-4 h-4" />
@@ -199,7 +199,7 @@ export default function HomeVariantHeritage() {
 
               <div className="pt-3 border-t border-[#E65C00]/15 flex items-center justify-between text-xs">
                 <span className="text-[#3D1A00] font-bold text-[11px]">Mahotsav Archive</span>
-                <Link href="/ganesh-event-2026" className="text-[#E65C00] font-bold flex items-center gap-1 hover:underline">
+                <Link href="/events/evt-ganesh-chaturthi" className="text-[#E65C00] font-bold flex items-center gap-1 hover:underline">
                   <span>View Photos</span>
                   <ArrowRight className="w-3 h-3" />
                 </Link>

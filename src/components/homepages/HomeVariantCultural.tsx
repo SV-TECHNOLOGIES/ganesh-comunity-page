@@ -109,7 +109,7 @@ export default function HomeVariantCultural() {
               </div>
             </div>
             <Link
-              href="/ganesh-event-2026"
+              href="/events/evt-ganesh-chaturthi"
               className="maroon-button px-5 py-2 rounded-full text-xs font-bold shrink-0 flex items-center gap-1.5"
             >
               <span>View Recap</span>
