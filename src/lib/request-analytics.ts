@@ -186,7 +186,7 @@ export function initRequestAnalyticsServerHook() {
       }
     }
 
-    return originalEmit.apply(this, [event, ...args]);
+    return (originalEmit as any).apply(this, [event, ...args]);
   };
 
   console.log('[REQUEST ANALYTICS] Real-time HTTP response-time logging hook initialized.');
