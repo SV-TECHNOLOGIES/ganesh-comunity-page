@@ -1,116 +1,73 @@
-# Walkthrough: Database Config Table & Preferences Architecture
+# Walkthrough: Merge Conflict Resolution & Database Migration Setup
 
-We migrated the hero and event template configurations into a dedicated PostgreSQL database table (`Config`) managed via Prisma Migrate, created typed preference constant variables, built dedicated preference endpoints, and integrated them across the application.
+## 1. Resolved Merge Conflicts
+
+All 5 conflicted files from pulling `main` into `new-landing-design` were resolved without removing any production fields:
+
+### 1. `prisma/schema.prisma`
+- **Preserved all `main` fields on `Event`**:
+  - `childTicketPrice`, `enableRsvp`, `enableSupportPayment`, `enablePooja`
+  - `enforceCapacityLimit`, `capacityAlertSent`, `adultCapacity`, `childCapacity`
+  - `availableDates`, `eventSchedule`, `mapUrl`, `customFields`
+  - `mediaItems MediaItem[]`
+- **Maintained Config relation**: Added `configs Config[]` to `Event`.
+- **Maintained all models**: Kept both `Config` (for preferences/templates) and `EmailQueue` (from `main`).
+
+### 2. `src/components/EventDetailsSection.tsx`
+- Preserved `event?: EventItem | null` from `main` along with dynamic schedule days generation and date fetching.
+- Preserved custom schedule display and theme styling props.
+- Unified RSVP callbacks (`onOpenRSVP` and `onOpenRsvp`) so both components and modals trigger correctly.
+
+### 3. `src/app/events/[id]/page.tsx`
+- **Ganesh Chaturthi Event**: Preserved the dedicated production experience from `main` (`Ganesha3DHero`, `RitualCountdown`, `EventDetailsSection`, `IdolSpecsCard`, `MediaTeaserSection`, `EventRSVPModal`, `PoojaBookingModal`, `DonationModal`).
+- **Template Events (`evt-*`)**: Renders `<EventLandingTemplate eventId={event.id || id} />` for all multi-variant template events (Diwali, Ugadi, Summit, Cricket Fest, Film Carnival).
+- **Standard Events**: Preserves all production fields (`childTicketPrice`, capacity limit warnings, ICS downloads, etc.).
+
+### 4. `src/app/ganesh-event-2026/page.tsx`
+- Completely preserved the production layout and state management from `main` with all modals, booking buttons, and form states.
+
+### 5. `src/app/admin/layout.tsx`
+- Kept all navigation items from `main` (including `Email Queue Worker`, `Telugu Business Directory`, `Site Settings`, etc.).
+- Maintained the admin link: `{ label: 'Event Hero & Templates', href: '/admin/event-hero', icon: Sparkles, roleAccess: ['Super Admin', 'Events Coordinator'] }`.
 
 ---
 
-## 1. Database Migration & Schema
+## 2. Database Migration Status
 
-### `Config` Model in `prisma/schema.prisma`
-```prisma
-model Config {
-  id         String   @id @default(cuid())
-  configKey  String   @unique // Format: "global:${preference}" or "${eventId}:${preference}"
-  prefix     String   // e.g. "home", "featuredEvent", "event"
-  preference String   // e.g. "home.activeHomeEventId", "event.hero.heroType"
-  value      String   @db.Text
-  dataType   String   @default("string") // "string" | "boolean" | "number" | "json"
-  eventId    String?
-  event      Event?   @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+All 17 migrations in [`prisma/migrations`](file:///Users/venkey/Documents/svr/UKTA/prisma/migrations) are intact and ordered chronologically:
+1. `20260827115451_initial_migration`
+2. `20260829142352_updated_rsvp`
+3. `20260829145421_added_new_field_in_event_rsvp`
+4. `20260829175245_added_new_fields_in_payment`
+5. `20260829190033_removed_the_constraint`
+6. `20260831155508_added_leadership_details`
+7. `20260901170900_adding_logs_to_db`
+8. `20260909172500_add_pooja_category_to_payment`
+9. `20260912100800_add_media_event_relation`
+10. `20260913110000_add_home_and_event_featured_media`
+11. `20260913170000_add_site_settings_and_sponsor_gradients`
+12. `20260914181000_add_config_table` *(Creates Config table)*
+13. `20260919100830_add_event_config` *(TeluguBusiness + Event flags)*
+14. `20260919104500_add_available_dates` *(Event.availableDates)*
+15. `20260919130000_add_rsvp_custom_fields_and_capacities` *(Capacities, mapUrl, customFields)*
+16. `20260921185859_added_email_queue` *(Creates EmailQueue table)*
+17. `20260923120000_add_event_schedule` *(Event.eventSchedule)*
 
-  @@index([prefix])
-  @@index([eventId])
-  @@index([preference])
-}
+No additional migration files are needed because every table and column in `schema.prisma` is already covered by these 17 migrations.
+
+---
+
+## 3. Next Steps (Terminal Commands)
+
+Run the following commands in your terminal:
+
+```bash
+# 1. Apply all 17 migrations to the new database schema (mitra_website)
+npx prisma migrate deploy
+
+# 2. Regenerate the Prisma Client
+npx prisma generate
+
+# 3. Seed preferences and demo template events into the new DB
+npx tsx scripts/seed-preferences.ts
 ```
-
-- **Migration**: [20260914181000_add_config_table](file:///Users/venkey/Documents/svr/UKTA/prisma/migrations/20260914181000_add_config_table/migration.sql)
-- Successfully deployed via `npx prisma migrate deploy` and client generated via `npx prisma generate`.
-
----
-
-## 2. Preference Constants Registry
-
-All preferences and prefixes are declared as constant variables in:
-[src/constants/preferences.ts](file:///Users/venkey/Documents/svr/UKTA/src/constants/preferences.ts)
-
-### Prefixes
-- `PREFERENCE_PREFIX.HOME`: `'home'`
-- `PREFERENCE_PREFIX.FEATURED_EVENT`: `'featuredEvent'`
-- `PREFERENCE_PREFIX.EVENT`: `'event'`
-
-### Key Constants
-- `PREF_HOME_ACTIVE_EVENT_ID`: `'home.activeHomeEventId'`
-- `PREF_FEATURED_HERO_TYPE`: `'featuredEvent.hero.heroType'`
-- `PREF_FEATURED_HERO_VARIANT`: `'featuredEvent.hero.heroVariant'`
-- `PREF_EVENT_HERO_TYPE`: `'event.hero.heroType'`
-- `PREF_EVENT_HERO_VARIANT`: `'event.hero.heroVariant'`
-- `PREF_EVENT_MODEL_URL`: `'event.hero.modelUrl'`
-- `PREF_EVENT_MODEL_SCALE`: `'event.hero.modelScale'`
-- `PREF_EVENT_PROCEDURAL_FALLBACK`: `'event.hero.proceduralFallback'`
-- `PREF_EVENT_SHOW_PARTICLES`: `'event.hero.showParticles'`
-- `PREF_EVENT_SHOW_CORNER_MOTIFS`: `'event.hero.showCornerMotifs'`
-- `PREF_EVENT_SHOW_RADIAL_AURA`: `'event.hero.showRadialAura'`
-- `PREF_EVENT_BANNER_IMAGE_URL`: `'event.hero.bannerImageUrl'`
-- `PREF_EVENT_VIDEO_URL`: `'event.hero.videoUrl'`
-- `PREFERENCES` map grouping all preferences hierarchically.
-- `FIELD_DATA_TYPES` defining data types (`string`, `boolean`, `number`, `json`) for automatic serialisation and type conversion.
-- `buildConfigKey(preference, eventId)` helper to ensure deterministic keys for upserts.
-
----
-
-## 3. Preferences Service
-
-Created [src/lib/config-preferences.ts](file:///Users/venkey/Documents/svr/UKTA/src/lib/config-preferences.ts):
-- `getPreferencesForEvent(eventId)`: Fetches and auto-casts all preference rows for a given event, reconstructing the full typed `EventTemplateConfig` and `EventHeroConfig`.
-- `getFeaturedEventPreferences()`: Looks up `home.activeHomeEventId`, queries the featured event's preferences + global overlays, and returns the merged config.
-- `saveEventPreferences(eventId, config)`: Atomically upserts all fields into the `Config` table.
-- `setActiveHomeEventId(eventId)`: Sets which event is currently featured on the home page.
-- `setPreference(preference, value, eventId?, dataType?)`: General upsert utility.
-- `seedConfigFromHeroJson()`: Automatically seeds all configurations from `event-hero-config.json` into the `Config` table.
-
----
-
-## 4. API Endpoints
-
-### Dedicated Preferences API: `/api/config/preferences`
-- **GET `?eventId=<id>`**: Fetches all preferences for a specific event.
-  ```bash
-  curl -s "http://localhost:3000/api/config/preferences?eventId=evt-ganesh-chaturthi"
-  ```
-- **GET `?featured=true`**: Fetches all preferences for the currently featured event.
-  ```bash
-  curl -s "http://localhost:3000/api/config/preferences?featured=true"
-  ```
-- **POST `/api/config/preferences`**:
-  - Set active home event: `{ "action": "setActiveHomeEvent", "eventId": "evt-business-summit-2027" }`
-  - Update single preference: `{ "preference": "event.hero.tagline", "value": "...", "eventId": "evt-diwali-2026" }`
-  - Save entire event: `{ "eventId": "...", "config": { ... } }`
-
-### Updated Existing Endpoints:
-- [src/app/api/events/hero-config/route.ts](file:///Users/venkey/Documents/svr/UKTA/src/app/api/events/hero-config/route.ts): Now reads directly from the database `Config` table via `getPreferencesForEvent` and `getFeaturedEventPreferences`.
-- [src/app/api/admin/event-hero-config/route.ts](file:///Users/venkey/Documents/svr/UKTA/src/app/api/admin/event-hero-config/route.ts): Saves directly to the `Config` table with a backup write to the JSON file.
-
----
-
-## 5. UI Integration
-
-- [src/app/page.tsx](file:///Users/venkey/Documents/svr/UKTA/src/app/page.tsx): Updated to fetch the featured event from `/api/config/preferences?featured=true`.
-- [src/components/EventLandingTemplate.tsx](file:///Users/venkey/Documents/svr/UKTA/src/components/EventLandingTemplate.tsx): Updated to load event configuration from `/api/config/preferences?eventId=...`.
-
----
-
-## 6. Verification Results
-
-| Test Item | Command / URL | Result |
-| :--- | :--- | :--- |
-| **Prisma Migration** | `npx prisma migrate deploy` | 12 migrations applied, schema up to date |
-| **Database Seed** | `npx tsx scripts/seed-preferences.ts` | 134 records seeded across 6 events + home active event |
-| **TypeScript Compilation** | `npx tsc --noEmit` | Exit code 0, clean build |
-| **Featured Preferences API** | `GET /api/config/preferences?featured=true` | HTTP 200, returns active event and parsed preferences |
-| **Event Preferences API** | `GET /api/config/preferences?eventId=evt-diwali-2026` | HTTP 200, returns image-editorial preferences |
-| **Film Carnival API** | `GET /api/config/preferences?eventId=evt-film-carnival-2027` | HTTP 200, returns video-cinema preferences |
-| **Mutation API** | `POST /api/config/preferences` | Atomically upserts `configKey`, changes persist immediately |
-| **Page Rendering** | `http://localhost:3000/` & `/events/*` | HTTP 200 OK across all routes |

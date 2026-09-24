@@ -6,6 +6,7 @@ import {
   Sparkles, 
   Save, 
   Eye, 
+  EyeOff,
   Box, 
   Image as ImageIcon, 
   Video, 
@@ -25,7 +26,18 @@ import {
   Feather,
   Compass,
   RotateCw,
+  Monitor,
+  Tablet,
+  Smartphone,
+  Maximize2,
+  Minimize2,
+  X,
+  Lock,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from 'lucide-react';
+import EventHero from '@/components/EventHero';
+import { useAdminSidebar } from '@/app/admin/layout';
 import { EventTemplateConfig, EventHeroConfig, HeroType, EventHeroStorageConfig } from '@/types/event-template';
 
 interface EventItemOption {
@@ -146,6 +158,7 @@ const HERO_VARIANTS: Record<
 };
 
 export default function EventHeroAdminPage() {
+  const { sidebarOpen, toggleSidebar } = useAdminSidebar();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -157,6 +170,19 @@ export default function EventHeroAdminPage() {
 
   // Form state for current selected event
   const [currentConfig, setCurrentConfig] = useState<EventTemplateConfig | null>(null);
+
+  // Live Preview States
+  const [previewViewport, setPreviewViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
+  const [previewMode, setPreviewMode] = useState<'event' | 'home'>('event');
+  const [fullscreenPreview, setFullscreenPreview] = useState(false);
+  const [previewToast, setPreviewToast] = useState<string | null>(null);
+
+  const showToast = (message: string) => {
+    setPreviewToast(message);
+    setTimeout(() => {
+      setPreviewToast((curr) => (curr === message ? null : curr));
+    }, 3000);
+  };
 
   // Load storage config and DB events
   const loadData = async () => {
@@ -342,18 +368,32 @@ export default function EventHeroAdminPage() {
   }
 
   return (
-    <div className="space-y-8 max-w-6xl pb-16">
+    <div className="space-y-6 w-full max-w-[1700px] mx-auto pb-16">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-950 p-6 rounded-2xl border border-slate-800 shadow-xl">
-        <div>
-          <div className="flex items-center gap-2 text-mitra-gold text-xs font-bold uppercase tracking-wider">
-            <Sparkles className="w-4 h-4" />
-            <span>Experimental Template &amp; Hero Engine</span>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-950 p-5 rounded-2xl border border-slate-800 shadow-xl">
+        <div className="flex items-center gap-3">
+          {/* Sidebar Toggle Option */}
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-2 ${
+              !sidebarOpen
+                ? 'bg-amber-500/20 border-amber-500/60 text-amber-300 shadow-lg ring-1 ring-amber-500/40'
+                : 'bg-slate-900 border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800'
+            }`}
+            title={sidebarOpen ? 'Hide Left Navigation Sidebar' : 'Open Left Navigation Sidebar'}
+          >
+            {sidebarOpen ? <PanelLeftClose className="w-4 h-4 text-amber-400" /> : <PanelLeftOpen className="w-4 h-4 text-amber-400" />}
+            <span className="font-semibold">{sidebarOpen ? 'Hide Sidebar' : 'Open Sidebar'}</span>
+          </button>
+
+          <div>
+            <div className="flex items-center gap-2 text-mitra-gold text-xs font-bold uppercase tracking-wider">
+              <Sparkles className="w-4 h-4" />
+              <span>Event Hero Studio &amp; Template Engine</span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-black text-white mt-0.5">Event Hero &amp; Landing Page Manager</h1>
           </div>
-          <h1 className="text-2xl font-black text-white mt-1">Event Hero &amp; Landing Page Manager</h1>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Configure custom 3D models, image banners, theme colors, and select which event hero appears on the Public Home Page.
-          </p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -432,29 +472,237 @@ export default function EventHeroAdminPage() {
       </div>
 
       {currentConfig && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Main Controls Column */}
-          <div className="lg:col-span-8 space-y-6">
+        <div className="flex flex-col lg:flex-row gap-6 items-start w-full">
+          {/* CENTER: LIVE INTERACTIVE HERO PREVIEW */}
+          <div className="flex-1 min-w-0 w-full space-y-4 lg:sticky lg:top-4">
+            <div id="live-preview-section" className="bg-slate-950 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col">
+              {/* Preview Toolbar Header */}
+              <div className="p-3.5 bg-slate-900/90 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                    </span>
+                    <span className="text-xs font-black uppercase tracking-wider text-emerald-400">
+                      Live Preview
+                    </span>
+                  </div>
+                  <span className="text-slate-600 hidden sm:inline">|</span>
+                  <span className="text-xs font-bold text-slate-300 hidden sm:inline truncate max-w-[200px]">
+                    {currentConfig.title}
+                  </span>
+                  <span className="text-[10px] font-mono bg-amber-500/15 text-amber-300 px-2.5 py-0.5 rounded-full border border-amber-500/20 uppercase">
+                    {currentConfig.hero.heroType} &bull; {currentConfig.hero.heroVariant || 'default'}
+                  </span>
+                </div>
+
+                {/* Viewport & Mode Controls */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* Mode Selector */}
+                  <div className="flex items-center bg-slate-950 p-0.5 rounded-lg border border-slate-800 text-[11px]">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewMode('event')}
+                      className={`px-2.5 py-1 rounded-md font-bold transition-all ${
+                        previewMode === 'event'
+                          ? 'bg-amber-500 text-slate-950 shadow-sm'
+                          : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      Event View
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewMode('home')}
+                      className={`px-2.5 py-1 rounded-md font-bold transition-all ${
+                        previewMode === 'home'
+                          ? 'bg-amber-500 text-slate-950 shadow-sm'
+                          : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      Home View
+                    </button>
+                  </div>
+
+                  {/* Viewport Selector */}
+                  <div className="flex items-center bg-slate-950 p-0.5 rounded-lg border border-slate-800">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewViewport('desktop')}
+                      className={`p-1.5 rounded-md transition-all ${
+                        previewViewport === 'desktop'
+                          ? 'bg-amber-500 text-slate-950'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                      title="Desktop Full Width"
+                    >
+                      <Monitor className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewViewport('tablet')}
+                      className={`p-1.5 rounded-md transition-all ${
+                        previewViewport === 'tablet'
+                          ? 'bg-amber-500 text-slate-950'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                      title="Tablet 768px"
+                    >
+                      <Tablet className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewViewport('mobile')}
+                      className={`p-1.5 rounded-md transition-all ${
+                        previewViewport === 'mobile'
+                          ? 'bg-amber-500 text-slate-950'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                      title="Mobile 390px"
+                    >
+                      <Smartphone className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  {/* Fullscreen Button */}
+                  <button
+                    type="button"
+                    onClick={() => setFullscreenPreview(true)}
+                    className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-colors"
+                    title="Fullscreen Live Preview"
+                  >
+                    <Maximize2 className="w-3.5 h-3.5" />
+                  </button>
+
+                  {/* Open Live Public Link */}
+                  <Link
+                    href={`/${previewMode === 'home' ? '' : currentConfig.eventSlug}`}
+                    target="_blank"
+                    className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-colors"
+                    title="Open Live Public URL in New Tab"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5 text-amber-400" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* Simulated Browser Address Bar */}
+              <div className="bg-slate-950 px-4 py-2 border-b border-slate-800 flex items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80 inline-block" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
+                </div>
+                <div className="flex-1 max-w-md mx-auto bg-slate-900 border border-slate-800 rounded-lg px-3 py-1 flex items-center gap-2 text-[11px] text-slate-400 font-mono">
+                  <Lock className="w-3 h-3 text-emerald-400" />
+                  <span className="truncate">
+                    mitra.org.uk{previewMode === 'home' ? '' : `/${currentConfig.eventSlug}`}
+                  </span>
+                </div>
+                <div className="text-[10px] text-slate-500 uppercase tracking-wider font-mono hidden md:block">
+                  {previewViewport === 'desktop' ? '100% Canvas' : previewViewport === 'tablet' ? '768px Tablet' : '390px Mobile'}
+                </div>
+              </div>
+
+              {/* Preview Frame Canvas Content */}
+              <div className="relative bg-slate-900/40 p-2 sm:p-4 min-h-[520px] max-h-[calc(100vh-14rem)] overflow-y-auto flex items-center justify-center">
+                {/* Floating Action Toast */}
+                {previewToast && (
+                  <div className="absolute top-4 z-40 px-4 py-2 bg-emerald-950 border border-emerald-500 text-emerald-300 text-xs font-bold rounded-xl shadow-2xl flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+                    <Check className="w-4 h-4 text-emerald-400" />
+                    <span>{previewToast}</span>
+                  </div>
+                )}
+
+                {/* Viewport: Desktop */}
+                {previewViewport === 'desktop' && (
+                  <div className="w-full rounded-xl overflow-hidden shadow-inner border border-slate-800/80">
+                    <EventHero
+                      key={`${currentConfig.id}-${currentConfig.hero.heroType}-${currentConfig.hero.heroVariant || 'default'}-desktop`}
+                      config={currentConfig.hero}
+                      eventSlug={currentConfig.eventSlug}
+                      mode={previewMode}
+                      onBookPoojaClick={() => showToast('Preview: "Book Pooja / Seva" Triggered')}
+                      onDonateClick={() => showToast('Preview: "Make Donation" Triggered')}
+                      onRsvpClick={() => showToast('Preview: "Register / RSVP" Triggered')}
+                      onNotifyClick={() => showToast('Preview: "Notify Me" Triggered')}
+                    />
+                  </div>
+                )}
+
+                {/* Viewport: Tablet */}
+                {previewViewport === 'tablet' && (
+                  <div className="w-[768px] max-w-full rounded-2xl shadow-2xl border-4 border-slate-700 overflow-hidden shrink-0 bg-[#FFF8F0]">
+                    <div className="bg-slate-800 px-4 py-1.5 flex justify-between items-center text-[10px] text-slate-400 border-b border-slate-700">
+                      <span>Tablet Simulator</span>
+                      <span className="font-mono">768 × 1024</span>
+                    </div>
+                    <div className="overflow-hidden">
+                      <EventHero
+                        key={`${currentConfig.id}-${currentConfig.hero.heroType}-${currentConfig.hero.heroVariant || 'default'}-tablet`}
+                        config={currentConfig.hero}
+                        eventSlug={currentConfig.eventSlug}
+                        mode={previewMode}
+                        onBookPoojaClick={() => showToast('Preview: "Book Pooja / Seva" Triggered')}
+                        onDonateClick={() => showToast('Preview: "Make Donation" Triggered')}
+                        onRsvpClick={() => showToast('Preview: "Register / RSVP" Triggered')}
+                        onNotifyClick={() => showToast('Preview: "Notify Me" Triggered')}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Viewport: Mobile */}
+                {previewViewport === 'mobile' && (
+                  <div className="w-[390px] max-w-full rounded-[36px] shadow-2xl border-[6px] border-slate-700 overflow-hidden shrink-0 bg-[#FFF8F0] relative">
+                    {/* Mobile Dynamic Island */}
+                    <div className="bg-slate-900 px-6 py-2 flex justify-between items-center text-[10px] text-slate-400 border-b border-slate-800">
+                      <span className="font-semibold text-white">9:41</span>
+                      <div className="w-16 h-3.5 bg-black rounded-full" />
+                      <span>5G 100%</span>
+                    </div>
+                    <div className="overflow-hidden max-h-[640px] overflow-y-auto">
+                      <EventHero
+                        key={`${currentConfig.id}-${currentConfig.hero.heroType}-${currentConfig.hero.heroVariant || 'default'}-mobile`}
+                        config={currentConfig.hero}
+                        eventSlug={currentConfig.eventSlug}
+                        mode={previewMode}
+                        onBookPoojaClick={() => showToast('Preview: "Book Pooja / Seva" Triggered')}
+                        onDonateClick={() => showToast('Preview: "Make Donation" Triggered')}
+                        onRsvpClick={() => showToast('Preview: "Register / RSVP" Triggered')}
+                        onNotifyClick={() => showToast('Preview: "Notify Me" Triggered')}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT: CONFIGURATION FORM (Independent Scroll) */}
+          <div className="w-full lg:w-[460px] xl:w-[500px] shrink-0 space-y-5 lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto lg:pr-2 pb-12">
             {/* Home Feature Ribbon */}
-            <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 flex flex-wrap justify-between items-center gap-4">
-              <div className="flex items-center gap-3">
-                <div className={`p-2.5 rounded-xl ${isCurrentHomeHero ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-900 text-slate-500'}`}>
-                  <Home className="w-5 h-5" />
+            <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex justify-between items-center gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className={`p-2 rounded-xl ${isCurrentHomeHero ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-900 text-slate-500'}`}>
+                  <Home className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white">Feature on Public Home Page</h3>
-                  <p className="text-xs text-slate-400">
+                  <h3 className="text-xs font-bold text-white">Feature on Public Home</h3>
+                  <p className="text-[10px] text-slate-400">
                     {isCurrentHomeHero
-                      ? 'This event hero is currently displayed on the root website page.'
-                      : 'Make this event hero the centerpiece of the MITRA UK homepage.'}
+                      ? 'Currently featured on the website root page.'
+                      : 'Display this hero on the MITRA UK homepage.'}
                   </p>
                 </div>
               </div>
 
               <button
+                type="button"
                 onClick={handleSetAsHomeHero}
                 disabled={isCurrentHomeHero || saving}
-                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
+                className={`px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all flex items-center gap-1.5 ${
                   isCurrentHomeHero
                     ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 cursor-default'
                     : 'bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-md'
@@ -462,60 +710,60 @@ export default function EventHeroAdminPage() {
               >
                 {isCurrentHomeHero ? (
                   <>
-                    <Check className="w-4 h-4" />
-                    <span>Active on Home</span>
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Active</span>
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-4 h-4" />
-                    <span>Set as Home Hero</span>
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Set Active</span>
                   </>
                 )}
               </button>
             </div>
 
-            {/* 1. Hero Type Selector */}
-            <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-4">
+            {/* 1. Hero Type & Layout Variant Selector */}
+            <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-4">
               <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
                 1. Hero Display Style
               </label>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-2">
                 {(['3d-model', 'image', 'video'] as HeroType[]).map((type) => {
                   const isSelected = currentConfig.hero.heroType === type;
                   const Icon = type === '3d-model' ? Box : type === 'image' ? ImageIcon : Video;
-                  const label = type === '3d-model' ? '3D GLTF Model' : type === 'image' ? 'Image Banner' : 'Video Teaser';
+                  const label = type === '3d-model' ? '3D Model' : type === 'image' ? 'Image' : 'Video';
 
                   return (
                     <button
                       key={type}
                       type="button"
                       onClick={() => handleHeroTypeChange(type)}
-                      className={`p-4 rounded-xl border text-center transition-all flex flex-col items-center gap-2 ${
+                      className={`p-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5 ${
                         isSelected
                           ? 'bg-amber-500/15 border-amber-500 text-amber-300 shadow-md ring-1 ring-amber-500'
                           : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
                       }`}
                     >
-                      <Icon className="w-6 h-6" />
-                      <span className="text-xs font-bold">{label}</span>
+                      <Icon className="w-5 h-5" />
+                      <span className="text-[11px] font-bold">{label}</span>
                     </button>
                   );
                 })}
               </div>
 
               {/* Layout Variant Selector */}
-              <div className="pt-4 border-t border-slate-800/80 space-y-3">
+              <div className="pt-3 border-t border-slate-800/80 space-y-2.5">
                 <div className="flex justify-between items-center">
                   <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
-                    Layout Variant / Template Style
+                    Layout Variant Style
                   </label>
-                  <span className="text-[10px] text-amber-400 font-bold">
-                    Active: {currentConfig.hero.heroVariant || (currentConfig.hero.heroType === '3d-model' ? '3d-sanctum' : currentConfig.hero.heroType === 'image' ? 'image-split' : 'video-split')}
+                  <span className="text-[10px] text-amber-400 font-bold font-mono">
+                    {currentConfig.hero.heroVariant || (currentConfig.hero.heroType === '3d-model' ? '3d-sanctum' : currentConfig.hero.heroType === 'image' ? 'image-split' : 'video-split')}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {HERO_VARIANTS[currentConfig.hero.heroType].map((v) => {
                     const currentVariant = currentConfig.hero.heroVariant || (
                       currentConfig.hero.heroType === '3d-model' ? '3d-sanctum' :
@@ -530,24 +778,24 @@ export default function EventHeroAdminPage() {
                         key={v.id}
                         type="button"
                         onClick={() => updateHero('heroVariant', v.id)}
-                        className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between gap-2 ${
+                        className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between gap-1.5 ${
                           isSelected
                             ? 'bg-amber-500/15 border-amber-500 text-amber-300 shadow-md ring-1 ring-amber-500/50'
                             : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
                         }`}
                       >
-                        <div className="flex justify-between items-start gap-2">
-                          <div className="flex items-center gap-2">
-                            <Icon className={`w-4 h-4 ${isSelected ? 'text-amber-400' : 'text-slate-400'}`} />
-                            <span className="text-xs font-bold text-white">{v.name}</span>
+                        <div className="flex justify-between items-start gap-1">
+                          <div className="flex items-center gap-1.5">
+                            <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-amber-400' : 'text-slate-400'}`} />
+                            <span className="text-xs font-bold text-white leading-tight">{v.name}</span>
                           </div>
-                          <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase ${
+                          <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase shrink-0 ${
                             isSelected ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-400'
                           }`}>
                             {v.badge}
                           </span>
                         </div>
-                        <p className="text-[11px] text-slate-400 leading-tight">
+                        <p className="text-[10px] text-slate-400 leading-tight">
                           {v.desc}
                         </p>
                       </button>
@@ -558,68 +806,66 @@ export default function EventHeroAdminPage() {
 
               {/* Conditional Controls by Hero Type */}
               {currentConfig.hero.heroType === '3d-model' && (
-                <div className="pt-3 border-t border-slate-800/80 space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-400 block mb-1">
-                        3D Model URL (.glb / .gltf)
-                      </label>
-                      <input
-                        type="text"
-                        value={currentConfig.hero.modelUrl || ''}
-                        onChange={(e) => updateHero('modelUrl', e.target.value)}
-                        placeholder="/assets/idols/Lord Ganesh.glb"
-                        className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-400 block mb-1">
-                        Procedural Fallback (During Loading)
-                      </label>
-                      <select
-                        value={currentConfig.hero.proceduralFallback || 'ganesha'}
-                        onChange={(e) => updateHero('proceduralFallback', e.target.value)}
-                        className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
-                      >
-                        <option value="ganesha">Lord Ganesh Sanctum Murti</option>
-                        <option value="pedestal">Ornate Lotus Pedestal Only</option>
-                        <option value="none">None (Loading Spinner Only)</option>
-                      </select>
-                    </div>
+                <div className="pt-3 border-t border-slate-800/80 space-y-3">
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-400 block mb-1">
+                      3D Model URL (.glb / .gltf)
+                    </label>
+                    <input
+                      type="text"
+                      value={currentConfig.hero.modelUrl || ''}
+                      onChange={(e) => updateHero('modelUrl', e.target.value)}
+                      placeholder="/assets/idols/Lord Ganesh.glb"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500"
+                    />
                   </div>
 
-                  <div className="pt-2 border-t border-slate-800/60 space-y-2">
-                    <span className="text-[11px] font-bold text-slate-400 block">Background Visual Effects</span>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                      <label className="flex items-center gap-2 p-2 rounded-lg bg-slate-900 border border-slate-800 text-[11px] text-slate-300 cursor-pointer">
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-400 block mb-1">
+                      Procedural Fallback (During Loading)
+                    </label>
+                    <select
+                      value={currentConfig.hero.proceduralFallback || 'ganesha'}
+                      onChange={(e) => updateHero('proceduralFallback', e.target.value)}
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500"
+                    >
+                      <option value="ganesha">Lord Ganesh Sanctum Murti</option>
+                      <option value="pedestal">Ornate Lotus Pedestal Only</option>
+                      <option value="none">None (Loading Spinner Only)</option>
+                    </select>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-800/60 space-y-1.5">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Background Atmosphere</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+                      <label className="flex items-center gap-1.5 p-2 rounded-lg bg-slate-900 border border-slate-800 text-[10px] text-slate-300 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={currentConfig.hero.showParticles !== false && currentConfig.hero.proceduralFallback !== 'none'}
                           onChange={(e) => updateHero('showParticles', e.target.checked)}
                           className="w-3.5 h-3.5 rounded text-amber-500 accent-amber-500"
                         />
-                        <span>Floating Dust Particles</span>
+                        <span>Dust Particles</span>
                       </label>
 
-                      <label className="flex items-center gap-2 p-2 rounded-lg bg-slate-900 border border-slate-800 text-[11px] text-slate-300 cursor-pointer">
+                      <label className="flex items-center gap-1.5 p-2 rounded-lg bg-slate-900 border border-slate-800 text-[10px] text-slate-300 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={currentConfig.hero.showCornerMotifs !== false && currentConfig.hero.proceduralFallback !== 'none'}
                           onChange={(e) => updateHero('showCornerMotifs', e.target.checked)}
                           className="w-3.5 h-3.5 rounded text-amber-500 accent-amber-500"
                         />
-                        <span>Corner Lotus Motifs</span>
+                        <span>Lotus Motifs</span>
                       </label>
 
-                      <label className="flex items-center gap-2 p-2 rounded-lg bg-slate-900 border border-slate-800 text-[11px] text-slate-300 cursor-pointer">
+                      <label className="flex items-center gap-1.5 p-2 rounded-lg bg-slate-900 border border-slate-800 text-[10px] text-slate-300 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={currentConfig.hero.showRadialAura !== false && currentConfig.hero.proceduralFallback !== 'none'}
                           onChange={(e) => updateHero('showRadialAura', e.target.checked)}
                           className="w-3.5 h-3.5 rounded text-amber-500 accent-amber-500"
                         />
-                        <span>Radial Center Aura</span>
+                        <span>Radial Aura</span>
                       </label>
                     </div>
                   </div>
@@ -636,7 +882,7 @@ export default function EventHeroAdminPage() {
                     value={currentConfig.hero.bannerImageUrl || ''}
                     onChange={(e) => updateHero('bannerImageUrl', e.target.value)}
                     placeholder="/assets/poster.jpg or https://..."
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500"
                   />
                 </div>
               )}
@@ -650,56 +896,54 @@ export default function EventHeroAdminPage() {
                     type="text"
                     value={currentConfig.hero.videoUrl || ''}
                     onChange={(e) => updateHero('videoUrl', e.target.value)}
-                    placeholder="/assets/video/teaser.mp4 or https://..."
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                    placeholder="/assets/teaser.mp4 or https://..."
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500"
                   />
                 </div>
               )}
             </div>
 
-            {/* 2. Hero Copy & Titles */}
-            <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-4">
+            {/* 2. Devotional Content & Typography */}
+            <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-3.5">
               <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
-                2. Hero Typography &amp; Copy
+                2. Devotional Copy &amp; Typography
               </label>
 
               <div className="space-y-3">
                 <div>
                   <label className="text-[11px] font-bold text-slate-400 block mb-1">
-                    Presenter Badge Text
+                    Presenter Badge
                   </label>
                   <input
                     type="text"
                     value={currentConfig.hero.presenterBadge}
                     onChange={(e) => updateHero('presenterBadge', e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-[11px] font-bold text-slate-400 block mb-1">
-                      Main Heading (Foil / Gradient)
-                    </label>
-                    <input
-                      type="text"
-                      value={currentConfig.hero.title}
-                      onChange={(e) => updateHero('title', e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500 font-bold"
-                    />
-                  </div>
+                <div>
+                  <label className="text-[11px] font-bold text-slate-400 block mb-1">
+                    Main Heading (Title)
+                  </label>
+                  <input
+                    type="text"
+                    value={currentConfig.hero.title}
+                    onChange={(e) => updateHero('title', e.target.value)}
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500 font-bold"
+                  />
+                </div>
 
-                  <div>
-                    <label className="text-[11px] font-bold text-slate-400 block mb-1">
-                      Subtitle
-                    </label>
-                    <input
-                      type="text"
-                      value={currentConfig.hero.subtitle}
-                      onChange={(e) => updateHero('subtitle', e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
-                    />
-                  </div>
+                <div>
+                  <label className="text-[11px] font-bold text-slate-400 block mb-1">
+                    Subtitle
+                  </label>
+                  <input
+                    type="text"
+                    value={currentConfig.hero.subtitle}
+                    onChange={(e) => updateHero('subtitle', e.target.value)}
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500"
+                  />
                 </div>
 
                 <div>
@@ -710,98 +954,137 @@ export default function EventHeroAdminPage() {
                     type="text"
                     value={currentConfig.hero.tagline || ''}
                     onChange={(e) => updateHero('tagline', e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <label className="text-[10px] text-slate-400 block mb-1">Loading Text</label>
+                    <input
+                      type="text"
+                      value={currentConfig.hero.loadingText || ''}
+                      onChange={(e) => updateHero('loadingText', e.target.value)}
+                      placeholder="ENTERING SANCTUM..."
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-400 block mb-1">Scroll Cue Text</label>
+                    <input
+                      type="text"
+                      value={currentConfig.hero.scrollCueText || ''}
+                      onChange={(e) => updateHero('scrollCueText', e.target.value)}
+                      placeholder="Explore Event Schedule"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Action CTAs & Links */}
+            <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-3.5">
+              <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+                3. Action CTAs &amp; Links
+              </label>
+
+              <div className="space-y-3">
+                {/* Primary CTA */}
+                <div className="p-3 bg-slate-900/60 rounded-xl border border-slate-800 space-y-2">
+                  <span className="text-[11px] font-bold text-amber-400 uppercase">Primary Button</span>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[10px] text-slate-400 block mb-0.5">Label</label>
+                      <input
+                        type="text"
+                        value={currentConfig.hero.primaryCta.label}
+                        onChange={(e) =>
+                          updateHero('primaryCta', {
+                            ...currentConfig.hero.primaryCta,
+                            label: e.target.value,
+                          })
+                        }
+                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-slate-400 block mb-0.5">Action</label>
+                      <select
+                        value={currentConfig.hero.primaryCta.action}
+                        onChange={(e) =>
+                          updateHero('primaryCta', {
+                            ...currentConfig.hero.primaryCta,
+                            action: e.target.value,
+                          })
+                        }
+                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white"
+                      >
+                        <option value="pooja">Book Pooja / Seva</option>
+                        <option value="rsvp">Register / RSVP</option>
+                        <option value="donation">Make Donation</option>
+                        <option value="link">Custom URL</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Secondary CTA */}
+                <div className="p-3 bg-slate-900/60 rounded-xl border border-slate-800 space-y-2">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase">Secondary Button</span>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[10px] text-slate-400 block mb-0.5">Label</label>
+                      <input
+                        type="text"
+                        value={currentConfig.hero.secondaryCta.label}
+                        onChange={(e) =>
+                          updateHero('secondaryCta', {
+                            ...currentConfig.hero.secondaryCta,
+                            label: e.target.value,
+                          })
+                        }
+                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-slate-400 block mb-0.5">Action</label>
+                      <select
+                        value={currentConfig.hero.secondaryCta.action}
+                        onChange={(e) =>
+                          updateHero('secondaryCta', {
+                            ...currentConfig.hero.secondaryCta,
+                            action: e.target.value,
+                          })
+                        }
+                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white"
+                      >
+                        <option value="whatsapp">Join WhatsApp</option>
+                        <option value="donation">Make Donation</option>
+                        <option value="pooja">Book Pooja</option>
+                        <option value="link">Custom URL</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-slate-400 block mb-1">
+                    Community WhatsApp Invite Link
+                  </label>
+                  <input
+                    type="text"
+                    value={currentConfig.hero.whatsAppUrl || ''}
+                    onChange={(e) => updateHero('whatsAppUrl', e.target.value)}
+                    placeholder="https://chat.whatsapp.com/..."
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500"
                   />
                 </div>
               </div>
             </div>
 
-            {/* 3. Call To Action Configurator */}
-            <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-4">
-              <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
-                3. Action CTAs &amp; Links
-              </label>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Primary CTA */}
-                <div className="p-4 bg-slate-900/60 rounded-xl border border-slate-800 space-y-2">
-                  <span className="text-[11px] font-bold text-amber-400 uppercase">Primary Button</span>
-                  <div>
-                    <label className="text-[10px] text-slate-400 block mb-0.5">Label</label>
-                    <input
-                      type="text"
-                      value={currentConfig.hero.primaryCta.label}
-                      onChange={(e) =>
-                        updateHero('primaryCta', { ...currentConfig.hero.primaryCta, label: e.target.value })
-                      }
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-slate-400 block mb-0.5">Action Type</label>
-                    <select
-                      value={currentConfig.hero.primaryCta.action}
-                      onChange={(e) =>
-                        updateHero('primaryCta', { ...currentConfig.hero.primaryCta, action: e.target.value as any })
-                      }
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white"
-                    >
-                      <option value="pooja">Book Pooja Modal</option>
-                      <option value="rsvp">RSVP / Notify Modal</option>
-                      <option value="donation">Donation Modal</option>
-                      <option value="link">Custom URL</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Secondary CTA */}
-                <div className="p-4 bg-slate-900/60 rounded-xl border border-slate-800 space-y-2">
-                  <span className="text-[11px] font-bold text-amber-400 uppercase">Secondary Button</span>
-                  <div>
-                    <label className="text-[10px] text-slate-400 block mb-0.5">Label</label>
-                    <input
-                      type="text"
-                      value={currentConfig.hero.secondaryCta.label}
-                      onChange={(e) =>
-                        updateHero('secondaryCta', { ...currentConfig.hero.secondaryCta, label: e.target.value })
-                      }
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-slate-400 block mb-0.5">Action Type</label>
-                    <select
-                      value={currentConfig.hero.secondaryCta.action}
-                      onChange={(e) =>
-                        updateHero('secondaryCta', { ...currentConfig.hero.secondaryCta, action: e.target.value as any })
-                      }
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white"
-                    >
-                      <option value="donation">Donation Modal</option>
-                      <option value="pooja">Book Pooja Modal</option>
-                      <option value="whatsapp">Join WhatsApp Group</option>
-                      <option value="link">Custom URL</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[11px] font-bold text-slate-400 block mb-1">
-                  Community WhatsApp Invite Link
-                </label>
-                <input
-                  type="text"
-                  value={currentConfig.hero.whatsAppUrl || ''}
-                  onChange={(e) => updateHero('whatsAppUrl', e.target.value)}
-                  placeholder="https://chat.whatsapp.com/..."
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
-                />
-              </div>
-            </div>
-
-            {/* 4. Color Presets & Palette */}
-            <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-4">
+            {/* 4. Theme Color Palette */}
+            <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-3.5">
               <div className="flex items-center gap-2">
                 <Palette className="w-4 h-4 text-amber-400" />
                 <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
@@ -810,7 +1093,7 @@ export default function EventHeroAdminPage() {
               </div>
 
               {/* Quick Presets */}
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 {COLOR_PRESETS.map((preset) => (
                   <button
                     key={preset.name}
@@ -820,10 +1103,10 @@ export default function EventHeroAdminPage() {
                       updateHero('accentColor', preset.accent);
                       updateHero('backgroundColor', preset.bg);
                     }}
-                    className="px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-800 text-[11px] text-slate-300 flex items-center gap-2"
+                    className="px-2.5 py-1 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-800 text-[10px] text-slate-300 flex items-center gap-1.5 transition-colors"
                   >
                     <span
-                      className="w-3 h-3 rounded-full border border-white/20"
+                      className="w-2.5 h-2.5 rounded-full border border-white/20 shrink-0"
                       style={{ backgroundColor: preset.primary }}
                     />
                     <span>{preset.name}</span>
@@ -831,17 +1114,17 @@ export default function EventHeroAdminPage() {
                 ))}
               </div>
 
-              <div className="grid grid-cols-3 gap-3 pt-2">
+              <div className="grid grid-cols-3 gap-2.5 pt-2">
                 <div>
                   <label className="text-[10px] text-slate-400 block mb-1">Primary Color</label>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <input
                       type="color"
                       value={currentConfig.hero.primaryColor || '#E65C00'}
                       onChange={(e) => updateHero('primaryColor', e.target.value)}
-                      className="w-8 h-8 rounded border border-slate-700 bg-transparent cursor-pointer"
+                      className="w-7 h-7 rounded border border-slate-700 bg-transparent cursor-pointer shrink-0"
                     />
-                    <span className="text-xs text-slate-300 font-mono">
+                    <span className="text-[10px] text-slate-300 font-mono truncate">
                       {currentConfig.hero.primaryColor || '#E65C00'}
                     </span>
                   </div>
@@ -849,14 +1132,14 @@ export default function EventHeroAdminPage() {
 
                 <div>
                   <label className="text-[10px] text-slate-400 block mb-1">Accent Color</label>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <input
                       type="color"
                       value={currentConfig.hero.accentColor || '#CC4000'}
                       onChange={(e) => updateHero('accentColor', e.target.value)}
-                      className="w-8 h-8 rounded border border-slate-700 bg-transparent cursor-pointer"
+                      className="w-7 h-7 rounded border border-slate-700 bg-transparent cursor-pointer shrink-0"
                     />
-                    <span className="text-xs text-slate-300 font-mono">
+                    <span className="text-[10px] text-slate-300 font-mono truncate">
                       {currentConfig.hero.accentColor || '#CC4000'}
                     </span>
                   </div>
@@ -864,35 +1147,32 @@ export default function EventHeroAdminPage() {
 
                 <div>
                   <label className="text-[10px] text-slate-400 block mb-1">Background Tint</label>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <input
                       type="color"
                       value={currentConfig.hero.backgroundColor || '#FFF8F0'}
                       onChange={(e) => updateHero('backgroundColor', e.target.value)}
-                      className="w-8 h-8 rounded border border-slate-700 bg-transparent cursor-pointer"
+                      className="w-7 h-7 rounded border border-slate-700 bg-transparent cursor-pointer shrink-0"
                     />
-                    <span className="text-xs text-slate-300 font-mono">
+                    <span className="text-[10px] text-slate-300 font-mono truncate">
                       {currentConfig.hero.backgroundColor || '#FFF8F0'}
                     </span>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Sidebar Column: Section Toggles & Quick Links */}
-          <div className="lg:col-span-4 space-y-6">
-            {/* Landing Page Section Toggles */}
-            <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-4">
+            {/* 5. Landing Page Sections Toggles */}
+            <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-3">
               <div className="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-wider">
                 <Layers className="w-4 h-4 text-amber-400" />
                 <span>Landing Page Sections</span>
               </div>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Toggle which sections render on this event&apos;s full landing template:
+              <p className="text-[10px] text-slate-400">
+                Toggle visible sections on this event&apos;s full template page:
               </p>
 
-              <div className="space-y-3 pt-2">
+              <div className="space-y-2 pt-1">
                 {[
                   { key: 'showCountdown', label: 'Countdown Timer' },
                   { key: 'showEventDetails', label: 'Event Schedule & Timings' },
@@ -906,7 +1186,7 @@ export default function EventHeroAdminPage() {
                   return (
                     <label
                       key={key}
-                      className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 cursor-pointer"
+                      className="flex items-center justify-between p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 cursor-pointer"
                     >
                       <span className="text-xs text-slate-200 font-medium">{label}</span>
                       <input
@@ -923,33 +1203,227 @@ export default function EventHeroAdminPage() {
               </div>
             </div>
 
-            {/* Quick Preview & Navigation */}
-            <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-4">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
-                Live Verification
-              </span>
+            {/* Quick Actions Footer */}
+            <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={saving}
+                className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all disabled:opacity-50"
+              >
+                {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                <span>Save All Changes</span>
+              </button>
 
-              <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
                 <Link
                   href="/"
                   target="_blank"
-                  className="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-bold text-slate-200 flex items-center justify-between transition-colors"
+                  className="py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-[11px] font-bold text-slate-200 flex items-center justify-center gap-1.5 transition-colors"
                 >
-                  <span>Preview Home Page</span>
-                  <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                  <Home className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Public Home</span>
                 </Link>
 
                 <Link
                   href={`/${currentConfig.eventSlug}`}
                   target="_blank"
-                  className="w-full py-2.5 px-4 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-xs font-bold text-amber-300 flex items-center justify-between transition-colors"
+                  className="py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-[11px] font-bold text-slate-200 flex items-center justify-center gap-1.5 transition-colors"
                 >
-                  <span>Preview Event Landing</span>
                   <ExternalLink className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Event Landing</span>
                 </Link>
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Fullscreen Live Preview Modal */}
+      {fullscreenPreview && currentConfig && (
+        <div className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex flex-col animate-in fade-in duration-200">
+          {/* Fullscreen Header Bar */}
+          <div className="h-14 px-6 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                </span>
+                <span className="text-xs font-black uppercase tracking-wider text-emerald-400">
+                  Live Fullscreen Preview
+                </span>
+              </div>
+              <span className="text-slate-600 hidden sm:inline">|</span>
+              <span className="text-xs font-bold text-white hidden sm:inline">{currentConfig.title}</span>
+              <span className="text-[10px] font-mono bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/30 uppercase">
+                {currentConfig.hero.heroType} &bull; {currentConfig.hero.heroVariant || 'default'}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {/* Mode Toggle */}
+              <div className="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setPreviewMode('event')}
+                  className={`px-3 py-1 rounded-lg font-bold transition-all ${
+                    previewMode === 'event'
+                      ? 'bg-amber-500 text-slate-950 shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  Event Landing
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewMode('home')}
+                  className={`px-3 py-1 rounded-lg font-bold transition-all ${
+                    previewMode === 'home'
+                      ? 'bg-amber-500 text-slate-950 shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  Home Hero
+                </button>
+              </div>
+
+              {/* Viewport Switcher */}
+              <div className="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setPreviewViewport('desktop')}
+                  className={`p-1.5 rounded-lg transition-all ${
+                    previewViewport === 'desktop' ? 'bg-amber-500 text-slate-950' : 'text-slate-400 hover:text-white'
+                  }`}
+                  title="Desktop View"
+                >
+                  <Monitor className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewViewport('tablet')}
+                  className={`p-1.5 rounded-lg transition-all ${
+                    previewViewport === 'tablet' ? 'bg-amber-500 text-slate-950' : 'text-slate-400 hover:text-white'
+                  }`}
+                  title="Tablet View"
+                >
+                  <Tablet className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewViewport('mobile')}
+                  className={`p-1.5 rounded-lg transition-all ${
+                    previewViewport === 'mobile' ? 'bg-amber-500 text-slate-950' : 'text-slate-400 hover:text-white'
+                  }`}
+                  title="Mobile View"
+                >
+                  <Smartphone className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Close Button */}
+              <button
+                type="button"
+                onClick={() => setFullscreenPreview(false)}
+                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1.5 border border-slate-700 transition-all"
+              >
+                <X className="w-4 h-4" />
+                <span>Exit Fullscreen</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Fullscreen Body */}
+          <div className="flex-1 overflow-y-auto bg-slate-950 relative">
+            {previewToast && (
+              <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-emerald-950 border border-emerald-500 text-emerald-300 text-xs font-bold rounded-xl shadow-2xl flex items-center gap-2 animate-in fade-in">
+                <Check className="w-4 h-4 text-emerald-400" />
+                <span>{previewToast}</span>
+              </div>
+            )}
+
+            {previewViewport === 'desktop' && (
+              <div className="w-full min-h-full">
+                <EventHero
+                  key={`fs-${currentConfig.id}-${currentConfig.hero.heroType}-${currentConfig.hero.heroVariant || 'default'}-desktop`}
+                  config={currentConfig.hero}
+                  eventSlug={currentConfig.eventSlug}
+                  mode={previewMode}
+                  onBookPoojaClick={() => showToast('Preview: "Book Pooja / Seva" Clicked!')}
+                  onDonateClick={() => showToast('Preview: "Make Donation" Clicked!')}
+                  onRsvpClick={() => showToast('Preview: "Register / RSVP" Clicked!')}
+                  onNotifyClick={() => showToast('Preview: "Notify Me" Clicked!')}
+                />
+              </div>
+            )}
+
+            {previewViewport === 'tablet' && (
+              <div className="py-8 px-4 flex justify-center">
+                <div className="w-[768px] max-w-full bg-[#FFF8F0] rounded-2xl shadow-2xl border-4 border-slate-700 overflow-hidden">
+                  <EventHero
+                    key={`fs-${currentConfig.id}-${currentConfig.hero.heroType}-${currentConfig.hero.heroVariant || 'default'}-tablet`}
+                    config={currentConfig.hero}
+                    eventSlug={currentConfig.eventSlug}
+                    mode={previewMode}
+                    onBookPoojaClick={() => showToast('Preview: "Book Pooja / Seva" Clicked!')}
+                    onDonateClick={() => showToast('Preview: "Make Donation" Clicked!')}
+                    onRsvpClick={() => showToast('Preview: "Register / RSVP" Clicked!')}
+                    onNotifyClick={() => showToast('Preview: "Notify Me" Clicked!')}
+                  />
+                </div>
+              </div>
+            )}
+
+            {previewViewport === 'mobile' && (
+              <div className="py-8 px-4 flex justify-center">
+                <div className="w-[390px] max-w-full bg-[#FFF8F0] rounded-[36px] shadow-2xl border-[6px] border-slate-700 overflow-hidden">
+                  <EventHero
+                    key={`fs-${currentConfig.id}-${currentConfig.hero.heroType}-${currentConfig.hero.heroVariant || 'default'}-mobile`}
+                    config={currentConfig.hero}
+                    eventSlug={currentConfig.eventSlug}
+                    mode={previewMode}
+                    onBookPoojaClick={() => showToast('Preview: "Book Pooja / Seva" Clicked!')}
+                    onDonateClick={() => showToast('Preview: "Make Donation" Clicked!')}
+                    onRsvpClick={() => showToast('Preview: "Register / RSVP" Clicked!')}
+                    onNotifyClick={() => showToast('Preview: "Notify Me" Clicked!')}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Floating Quick Jump & Preview Pill */}
+      {currentConfig && (
+        <div className="fixed bottom-6 right-6 z-40 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              const el = document.getElementById('live-preview-section');
+              if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+            className="px-4 py-2.5 rounded-full bg-slate-900/95 hover:bg-slate-800 text-amber-400 border border-amber-500/40 shadow-2xl backdrop-blur-md text-xs font-bold flex items-center gap-2 transition-all hover:scale-105"
+            title="Scroll to Live Preview"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <Eye className="w-3.5 h-3.5 text-amber-400" />
+            <span>Live Preview</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setFullscreenPreview(true)}
+            className="p-2.5 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-2xl transition-all hover:scale-105"
+            title="Open Fullscreen Preview"
+          >
+            <Maximize2 className="w-4 h-4" />
+          </button>
         </div>
       )}
     </div>

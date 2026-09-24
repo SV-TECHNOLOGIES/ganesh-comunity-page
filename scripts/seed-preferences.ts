@@ -52,7 +52,8 @@ async function main() {
 
   // 2. Seed events
   let totalSaved = 1;
-  for (const [eventId, eventConfig] of Object.entries(data.events as Record<string, any>)) {
+  const events = data.events || {};
+  for (const [eventId, eventConfig] of Object.entries(events as Record<string, any>)) {
     // Ensure event in DB
     const existing = await prisma.event.findUnique({ where: { id: eventId } });
     if (!existing) {
