@@ -192,10 +192,14 @@ export default function DonationModal({
   isOpen,
   onClose,
   initialCategory = 'Annadanam',
+  eventId,
+  eventName,
 }: {
   isOpen: boolean;
   onClose: () => void;
   initialCategory?: Category;
+  eventId?: string;
+  eventName?: string;
 }) {
   const { user, isLoggedIn, login } = useAuth();
 
@@ -335,8 +339,8 @@ export default function DonationModal({
           customerEmail: donorEmail,
           description: getCauseName(),
           paymentMethod: 'Stripe Card',
-          eventId: 'evt-ganesh-chaturthi',
-          eventName: 'London Ganesh Mahotsav 2026',
+          eventId: eventId || 'general',
+          eventName: eventName || 'MITRA Community Contribution',
           donationType: category.toLowerCase().includes('annadanam') ? 'anadanam' : 'event donation',
         }),
       });

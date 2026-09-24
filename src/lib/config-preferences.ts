@@ -147,14 +147,32 @@ function reconstructEventConfig(
     })(),
     targetDate: prefs['event.targetDate'],
     hero,
-    sections: prefs['event.sections'] || {
-      showCountdown: true,
-      showEventDetails: true,
-      showStory: true,
-      showSpecs: true,
-      showMediaGallery: true,
-      showOfferings: true,
-      showSponsors: true,
+    sections: prefs['event.sections'] || (
+      (eventId === 'evt-ganesh-chaturthi' || eventId.toLowerCase().includes('ganesh'))
+        ? {
+            showCountdown: true,
+            showEventDetails: true,
+            showStory: true,
+            showSpecs: true,
+            showMediaGallery: true,
+            showOfferings: true,
+            showSponsors: true,
+          }
+        : {
+            showCountdown: false,
+            showEventDetails: false,
+            showStory: false,
+            showSpecs: false,
+            showMediaGallery: false,
+            showOfferings: false,
+            showSponsors: false,
+          }
+    ),
+    mediaTeaser: prefs['event.mediaTeaser'] || {
+      videoUrl: prefs['event.hero.videoUrl'] || '/assets/teaser-reel.mp4',
+      sectionTitle: 'TEASER REEL & EVENT POSTERS',
+      subtitle: 'Experience the official event teaser video reel and high-resolution event artwork from our media assets.',
+      posterUrl: prefs['event.hero.bannerImageUrl'] || '/assets/poster.jpg',
     },
     story: prefs['event.story'],
     specs: prefs['event.specs'],
@@ -241,6 +259,9 @@ export async function saveEventPreferences(eventId: string, config: Partial<Even
   }
   if (config.sections !== undefined) {
     ops.push(setPreference(PREFERENCES.event.sections, config.sections, eventId));
+  }
+  if (config.mediaTeaser !== undefined) {
+    ops.push(setPreference(PREFERENCES.event.mediaTeaser, config.mediaTeaser, eventId));
   }
   if (config.story !== undefined) {
     ops.push(setPreference(PREFERENCES.event.story, config.story, eventId));

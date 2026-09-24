@@ -389,16 +389,22 @@ export default function EventHero({
 
   // CTA Click Helper
   const handleCtaClick = (cta: typeof cfg.primaryCta) => {
-    if (cta.action === 'pooja' && onBookPoojaClick) {
+    const action = cta?.action;
+    const label = (cta?.label || '').toLowerCase();
+    const isRsvp = action === 'rsvp' || label.includes('register') || label.includes('rsvp');
+
+    if (action === 'pooja' && onBookPoojaClick) {
       onBookPoojaClick();
-    } else if (cta.action === 'donation' && onDonateClick) {
+    } else if (action === 'donation' && onDonateClick) {
       onDonateClick();
-    } else if (cta.action === 'rsvp' && onRsvpClick) {
+    } else if (isRsvp && onRsvpClick) {
       onRsvpClick();
-    } else if (cta.action === 'whatsapp' && cfg.whatsAppUrl) {
+    } else if (action === 'whatsapp' && cfg.whatsAppUrl) {
       window.open(cfg.whatsAppUrl, '_blank');
-    } else if (cta.linkUrl) {
+    } else if (cta?.linkUrl) {
       window.location.href = cta.linkUrl;
+    } else if (onRsvpClick) {
+      onRsvpClick();
     }
   };
 
