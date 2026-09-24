@@ -149,44 +149,44 @@ export default function AdminLogsPage() {
     switch (level) {
       case 'HTTP':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-cyan-950/80 text-cyan-300 border border-cyan-500/40">
-            <Globe className="w-3 h-3" /> HTTP
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-sky-50 text-sky-800 border border-sky-300 shadow-xs">
+            <Globe className="w-3 h-3 text-sky-600" /> HTTP
           </span>
         );
       case 'PAYMENT_FAILURE':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-red-950/80 text-red-400 border border-red-500/40">
-            <AlertTriangle className="w-3 h-3" /> PAYMENT FAILED
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-800 border border-rose-300 shadow-xs">
+            <AlertTriangle className="w-3 h-3 text-rose-600" /> PAYMENT FAILED
           </span>
         );
       case 'ERROR':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-rose-950/80 text-rose-300 border border-rose-500/40">
-            <AlertCircle className="w-3 h-3" /> ERROR
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-red-50 text-red-800 border border-red-300 shadow-xs">
+            <AlertCircle className="w-3 h-3 text-red-600" /> ERROR
           </span>
         );
       case 'PAYMENT_SUCCESS':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-950/80 text-emerald-400 border border-emerald-500/40">
-            <CheckCircle2 className="w-3 h-3" /> PAYMENT OK
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-xs">
+            <CheckCircle2 className="w-3 h-3 text-emerald-600" /> PAYMENT OK
           </span>
         );
       case 'WARN':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-amber-950/80 text-amber-300 border border-amber-500/40">
-            <AlertTriangle className="w-3 h-3" /> WARN
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-300 shadow-xs">
+            <AlertTriangle className="w-3 h-3 text-amber-600" /> WARN
           </span>
         );
       case 'DEBUG':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-800 text-slate-300 border border-slate-700">
-            <Terminal className="w-3 h-3" /> DEBUG
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-stone-100 text-stone-700 border border-stone-300 shadow-xs">
+            <Terminal className="w-3 h-3 text-stone-600" /> DEBUG
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-sky-950/80 text-sky-300 border border-sky-500/40">
-            <Info className="w-3 h-3" /> INFO
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-800 border border-blue-200 shadow-xs">
+            <Info className="w-3 h-3 text-blue-600" /> INFO
           </span>
         );
     }
@@ -194,16 +194,16 @@ export default function AdminLogsPage() {
 
   const getDurationBadge = (durationMs?: number) => {
     if (typeof durationMs !== 'number') return null;
-    let colorClass = 'bg-emerald-950/90 text-emerald-300 border-emerald-500/40';
+    let colorClass = 'bg-emerald-50 text-emerald-800 border-emerald-300';
     if (durationMs > 500) {
-      colorClass = 'bg-rose-950/90 text-rose-300 border-rose-500/50';
+      colorClass = 'bg-rose-50 text-rose-800 border-rose-300';
     } else if (durationMs > 200) {
-      colorClass = 'bg-amber-950/90 text-amber-300 border-amber-500/40';
+      colorClass = 'bg-amber-50 text-amber-900 border-amber-300';
     }
 
     return (
-      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono font-black border ${colorClass} shadow-sm`}>
-        <Timer className="w-3 h-3" />
+      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono font-bold border ${colorClass} shadow-xs`}>
+        <Timer className="w-3 h-3 opacity-80" />
         <span>{durationMs}ms</span>
       </span>
     );
@@ -211,17 +211,17 @@ export default function AdminLogsPage() {
 
   const getHttpStatusBadge = (status?: number) => {
     if (typeof status !== 'number') return null;
-    let colorClass = 'bg-emerald-950 text-emerald-400 border-emerald-500/40';
+    let colorClass = 'bg-emerald-50 text-emerald-800 border-emerald-300';
     if (status >= 500) {
-      colorClass = 'bg-rose-950 text-rose-300 border-rose-500/50';
+      colorClass = 'bg-rose-50 text-rose-800 border-rose-300';
     } else if (status >= 400) {
-      colorClass = 'bg-amber-950 text-amber-300 border-amber-500/40';
+      colorClass = 'bg-amber-50 text-amber-900 border-amber-300';
     } else if (status >= 300) {
-      colorClass = 'bg-blue-950 text-blue-300 border-blue-500/40';
+      colorClass = 'bg-blue-50 text-blue-800 border-blue-300';
     }
 
     return (
-      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-black border ${colorClass}`}>
+      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-bold border ${colorClass} shadow-xs`}>
         {status}
       </span>
     );
@@ -231,15 +231,15 @@ export default function AdminLogsPage() {
     if (!method) return null;
     const m = method.toUpperCase();
     const colors: Record<string, string> = {
-      GET: 'bg-sky-950/90 text-sky-300 border-sky-500/40',
-      POST: 'bg-emerald-950/90 text-emerald-300 border-emerald-500/40',
-      PUT: 'bg-amber-950/90 text-amber-300 border-amber-500/40',
-      PATCH: 'bg-amber-950/90 text-amber-300 border-amber-500/40',
-      DELETE: 'bg-rose-950/90 text-rose-300 border-rose-500/40',
+      GET: 'bg-sky-50 text-sky-800 border-sky-300',
+      POST: 'bg-emerald-50 text-emerald-800 border-emerald-300',
+      PUT: 'bg-amber-50 text-amber-900 border-amber-300',
+      PATCH: 'bg-amber-50 text-amber-900 border-amber-300',
+      DELETE: 'bg-rose-50 text-rose-800 border-rose-300',
     };
-    const c = colors[m] || 'bg-slate-900 text-slate-300 border-slate-700';
+    const c = colors[m] || 'bg-stone-50 text-stone-700 border-stone-300';
     return (
-      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-black border ${c}`}>
+      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-bold border ${c} shadow-xs`}>
         {m}
       </span>
     );
@@ -254,16 +254,16 @@ export default function AdminLogsPage() {
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-12">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E65C00]/20 pb-6">
         <div>
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400">
+            <div className="p-2 rounded-xl bg-[#FFF0E0] border border-[#E65C00]/30 text-[#E65C00]">
               <Activity className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-extrabold text-white tracking-tight">Request Analytics &amp; System Logs</h1>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Real-time request duration monitoring, response time analytics, and automated <strong className="text-amber-300 font-semibold">7-Day Retention</strong>.
+              <h1 className="text-2xl font-black text-[#3D1A00] tracking-tight">Request Analytics &amp; System Logs</h1>
+              <p className="text-xs text-[#6B3A2A] mt-0.5">
+                Real-time request duration monitoring, response time analytics, and automated <strong className="text-[#E65C00] font-bold">7-Day Retention</strong>.
               </p>
             </div>
           </div>
@@ -274,11 +274,11 @@ export default function AdminLogsPage() {
             onClick={() => setShowAnalyticsPanel(!showAnalyticsPanel)}
             className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors border ${
               showAnalyticsPanel
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-700'
+                ? 'bg-[#FFF0E0] text-[#E65C00] border-[#E65C00]/40 shadow-xs'
+                : 'bg-white hover:bg-[#FFF5EB] text-[#6B3A2A] border-[#E65C00]/25'
             }`}
           >
-            <BarChart3 className="w-3.5 h-3.5 text-amber-400" />
+            <BarChart3 className="w-3.5 h-3.5 text-[#E65C00]" />
             <span>Performance Analytics</span>
           </button>
 
@@ -286,18 +286,18 @@ export default function AdminLogsPage() {
             onClick={() => setAutoRefresh(!autoRefresh)}
             className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors border ${
               autoRefresh
-                ? 'bg-emerald-950/60 text-emerald-300 border-emerald-500/30'
-                : 'bg-slate-800 text-slate-400 border-slate-700'
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-300 shadow-xs'
+                : 'bg-white hover:bg-[#FFF5EB] text-[#6B3A2A] border-[#E65C00]/25'
             }`}
           >
-            <Zap className={`w-3.5 h-3.5 ${autoRefresh ? 'text-emerald-400' : ''}`} />
+            <Zap className={`w-3.5 h-3.5 ${autoRefresh ? 'text-emerald-600' : ''}`} />
             <span>Auto-Refresh: {autoRefresh ? 'ON' : 'OFF'}</span>
           </button>
 
           <button
             onClick={fetchLogs}
             disabled={loading}
-            className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl transition-colors disabled:opacity-50"
+            className="p-2 bg-white hover:bg-[#FFF5EB] text-[#3D1A00] border border-[#E65C00]/25 rounded-xl transition-colors disabled:opacity-50 shadow-xs"
             title="Refresh Logs"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -306,7 +306,7 @@ export default function AdminLogsPage() {
           <button
             onClick={handlePrune}
             disabled={pruning}
-            className="px-4 py-2 bg-gradient-to-r from-red-700 to-rose-700 hover:from-red-600 hover:to-rose-600 text-white text-xs font-bold rounded-xl border border-red-500/40 shadow-lg flex items-center gap-1.5 transition-all disabled:opacity-50"
+            className="px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white text-xs font-bold rounded-xl border border-red-500/30 shadow-md flex items-center gap-1.5 transition-all disabled:opacity-50"
           >
             <Trash2 className="w-3.5 h-3.5" />
             <span>{pruning ? 'Purging...' : 'Purge Logs > 7 Days'}</span>
@@ -315,8 +315,8 @@ export default function AdminLogsPage() {
       </div>
 
       {pruneResult && (
-        <div className="p-3 bg-emerald-950/90 border border-emerald-500/50 rounded-xl text-xs font-bold text-emerald-200 flex items-center gap-2 animate-in fade-in duration-200">
-          <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+        <div className="p-3 bg-emerald-50 border border-emerald-300 rounded-xl text-xs font-bold text-emerald-900 flex items-center gap-2 animate-in fade-in duration-200 shadow-xs">
+          <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>{pruneResult}</span>
         </div>
       )}
@@ -324,15 +324,15 @@ export default function AdminLogsPage() {
       {/* KPI Overview Cards with Request Analytics */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {/* Average Response Time */}
-        <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-1">
-          <div className="flex items-center justify-between text-slate-400 text-xs font-bold uppercase tracking-wider">
+        <div className="bg-white border border-[#E65C00]/20 rounded-2xl p-4 space-y-1 shadow-sm">
+          <div className="flex items-center justify-between text-[#6B3A2A] text-xs font-bold uppercase tracking-wider">
             <span>Avg Response Time</span>
-            <Gauge className="w-4 h-4 text-cyan-400" />
+            <Gauge className="w-4 h-4 text-[#E65C00]" />
           </div>
-          <p className="text-2xl font-black text-cyan-300 font-mono">
+          <p className="text-2xl font-black text-[#3D1A00] font-mono">
             {avgResponseTime > 0 ? `${avgResponseTime}ms` : '—'}
           </p>
-          <p className="text-[11px] text-slate-500">
+          <p className="text-[11px] text-[#8C6D62]">
             {avgResponseTime <= 100
               ? '⚡ Excellent (< 100ms)'
               : avgResponseTime <= 300
@@ -342,71 +342,71 @@ export default function AdminLogsPage() {
         </div>
 
         {/* HTTP Requests Tracked */}
-        <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-1">
-          <div className="flex items-center justify-between text-slate-400 text-xs font-bold uppercase tracking-wider">
+        <div className="bg-white border border-[#E65C00]/20 rounded-2xl p-4 space-y-1 shadow-sm">
+          <div className="flex items-center justify-between text-[#6B3A2A] text-xs font-bold uppercase tracking-wider">
             <span>HTTP Requests</span>
-            <Server className="w-4 h-4 text-emerald-400" />
+            <Server className="w-4 h-4 text-emerald-600" />
           </div>
-          <p className="text-2xl font-black text-emerald-300 font-mono">{httpCount}</p>
-          <p className="text-[11px] text-slate-500">
+          <p className="text-2xl font-black text-[#3D1A00] font-mono">{httpCount}</p>
+          <p className="text-[11px] text-[#8C6D62]">
             Min: {stats.analytics?.minResponseTimeMs || 0}ms · Max: {stats.analytics?.maxResponseTimeMs || 0}ms
           </p>
         </div>
 
         {/* Payment Failures */}
-        <div className="bg-red-950/30 border border-red-500/30 rounded-2xl p-4 space-y-1">
-          <div className="flex items-center justify-between text-red-400 text-xs font-bold uppercase tracking-wider">
+        <div className="bg-rose-50/80 border border-rose-200 rounded-2xl p-4 space-y-1 shadow-sm">
+          <div className="flex items-center justify-between text-rose-800 text-xs font-bold uppercase tracking-wider">
             <span>Payment Failures</span>
-            <AlertTriangle className="w-4 h-4 text-red-400" />
+            <AlertTriangle className="w-4 h-4 text-rose-600" />
           </div>
-          <p className="text-2xl font-black text-red-300 font-mono">{paymentFailuresCount}</p>
-          <p className="text-[11px] text-red-400/80">Alerts sent to REPORT_MAIL</p>
+          <p className="text-2xl font-black text-rose-900 font-mono">{paymentFailuresCount}</p>
+          <p className="text-[11px] text-rose-700 font-medium">Alerts sent to REPORT_MAIL</p>
         </div>
 
         {/* System & HTTP Errors */}
-        <div className="bg-rose-950/20 border border-rose-500/20 rounded-2xl p-4 space-y-1">
-          <div className="flex items-center justify-between text-rose-300 text-xs font-bold uppercase tracking-wider">
+        <div className="bg-red-50/80 border border-red-200 rounded-2xl p-4 space-y-1 shadow-sm">
+          <div className="flex items-center justify-between text-red-800 text-xs font-bold uppercase tracking-wider">
             <span>Errors &amp; Exceptions</span>
-            <AlertCircle className="w-4 h-4 text-rose-400" />
+            <AlertCircle className="w-4 h-4 text-red-600" />
           </div>
-          <p className="text-2xl font-black text-rose-200 font-mono">{errorsCount}</p>
-          <p className="text-[11px] text-slate-500">5xx / DB / System errors</p>
+          <p className="text-2xl font-black text-red-900 font-mono">{errorsCount}</p>
+          <p className="text-[11px] text-red-700 font-medium">5xx / DB / System errors</p>
         </div>
       </div>
 
       {/* Collapsible Performance Analytics Inspector */}
       {showAnalyticsPanel && stats.analytics && (
-        <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-6 shadow-2xl animate-in fade-in duration-200">
-          <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
+        <div className="bg-white border border-[#E65C00]/20 rounded-2xl p-6 space-y-6 shadow-sm animate-in fade-in duration-200">
+          <div className="flex items-center justify-between border-b border-[#E65C00]/20 pb-4">
             <div className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-amber-400" />
-              <h2 className="text-base font-bold text-white">HTTP Request Duration &amp; Endpoint Analytics</h2>
+              <BarChart3 className="w-5 h-5 text-[#E65C00]" />
+              <h2 className="text-base font-bold text-[#3D1A00]">HTTP Request Duration &amp; Endpoint Analytics</h2>
             </div>
-            <span className="text-xs text-slate-400 font-mono">Sample: last 300 requests</span>
+            <span className="text-xs text-[#8C6D62] font-mono">Sample: last 300 requests</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Slowest Routes Table */}
             <div className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-amber-400" />
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#6B3A2A] flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-[#E65C00]" />
                 <span>Slowest Endpoints by Avg Response Time</span>
               </h3>
-              <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden divide-y divide-slate-800/60">
+              <div className="bg-[#FFF9F5] border border-[#E65C00]/20 rounded-xl overflow-hidden divide-y divide-[#E65C00]/15">
                 {stats.analytics.slowestRoutes?.length > 0 ? (
                   stats.analytics.slowestRoutes.map((item, idx) => (
                     <div key={idx} className="p-3 flex items-center justify-between text-xs">
                       <div className="min-w-0 pr-2">
-                        <p className="font-mono text-slate-200 truncate">{item.route}</p>
-                        <p className="text-[10px] text-slate-500">{item.count} total requests</p>
+                        <p className="font-mono text-[#3D1A00] font-medium truncate">{item.route}</p>
+                        <p className="text-[10px] text-[#8C6D62]">{item.count} total requests</p>
                       </div>
                       <span
                         className={`font-mono font-bold px-2 py-0.5 rounded text-[11px] shrink-0 border ${
                           item.avgMs > 400
-                            ? 'bg-rose-950 text-rose-300 border-rose-500/40'
+                            ? 'bg-rose-50 text-rose-800 border-rose-300'
                             : item.avgMs > 150
-                            ? 'bg-amber-950 text-amber-300 border-amber-500/40'
-                            : 'bg-emerald-950 text-emerald-300 border-emerald-500/40'
+                            ? 'bg-amber-50 text-amber-900 border-amber-300'
+                            : 'bg-emerald-50 text-emerald-800 border-emerald-300'
                         }`}
                       >
                         {item.avgMs}ms
@@ -414,58 +414,58 @@ export default function AdminLogsPage() {
                     </div>
                   ))
                 ) : (
-                  <div className="p-4 text-center text-slate-500 text-xs">No HTTP logs recorded yet</div>
+                  <div className="p-4 text-center text-[#8C6D62] text-xs">No HTTP logs recorded yet</div>
                 )}
               </div>
             </div>
 
             {/* Status Code & Speed Tiers */}
             <div className="space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <Gauge className="w-3.5 h-3.5 text-cyan-400" />
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#6B3A2A] flex items-center gap-1.5">
+                <Gauge className="w-3.5 h-3.5 text-[#E65C00]" />
                 <span>Response Time &amp; Status Code Summary</span>
               </h3>
 
               <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl space-y-1">
-                  <span className="text-slate-500 text-[10px] uppercase font-bold">Fastest Request</span>
-                  <p className="text-xl font-mono font-bold text-emerald-300">
+                <div className="bg-[#FFF9F5] border border-[#E65C00]/20 p-3 rounded-xl space-y-1">
+                  <span className="text-[#8C6D62] text-[10px] uppercase font-bold">Fastest Request</span>
+                  <p className="text-xl font-mono font-bold text-emerald-700">
                     {stats.analytics.minResponseTimeMs}ms
                   </p>
                 </div>
-                <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl space-y-1">
-                  <span className="text-slate-500 text-[10px] uppercase font-bold">Peak Slowest Request</span>
-                  <p className="text-xl font-mono font-bold text-rose-300">
+                <div className="bg-[#FFF9F5] border border-[#E65C00]/20 p-3 rounded-xl space-y-1">
+                  <span className="text-[#8C6D62] text-[10px] uppercase font-bold">Peak Slowest Request</span>
+                  <p className="text-xl font-mono font-bold text-rose-700">
                     {stats.analytics.maxResponseTimeMs}ms
                   </p>
                 </div>
               </div>
 
               {/* Status Code Breakdown */}
-              <div className="bg-slate-900 border border-slate-800 p-3.5 rounded-xl space-y-2">
-                <span className="text-slate-400 text-[11px] font-bold block">Status Code Distribution</span>
+              <div className="bg-[#FFF9F5] border border-[#E65C00]/20 p-3.5 rounded-xl space-y-2">
+                <span className="text-[#6B3A2A] text-[11px] font-bold block">Status Code Distribution</span>
                 <div className="grid grid-cols-4 gap-2 text-center text-xs">
-                  <div className="bg-emerald-950/60 border border-emerald-500/30 p-2 rounded-lg">
-                    <span className="text-[10px] text-emerald-400 font-bold block">2xx OK</span>
-                    <span className="text-base font-mono font-bold text-white">
+                  <div className="bg-emerald-50 border border-emerald-200 p-2 rounded-lg">
+                    <span className="text-[10px] text-emerald-800 font-bold block">2xx OK</span>
+                    <span className="text-base font-mono font-bold text-[#3D1A00]">
                       {stats.analytics.statusCounts?.['2xx'] || 0}
                     </span>
                   </div>
-                  <div className="bg-blue-950/60 border border-blue-500/30 p-2 rounded-lg">
-                    <span className="text-[10px] text-blue-400 font-bold block">3xx Redir</span>
-                    <span className="text-base font-mono font-bold text-white">
+                  <div className="bg-blue-50 border border-blue-200 p-2 rounded-lg">
+                    <span className="text-[10px] text-blue-800 font-bold block">3xx Redir</span>
+                    <span className="text-base font-mono font-bold text-[#3D1A00]">
                       {stats.analytics.statusCounts?.['3xx'] || 0}
                     </span>
                   </div>
-                  <div className="bg-amber-950/60 border border-amber-500/30 p-2 rounded-lg">
-                    <span className="text-[10px] text-amber-400 font-bold block">4xx Client</span>
-                    <span className="text-base font-mono font-bold text-white">
+                  <div className="bg-amber-50 border border-amber-200 p-2 rounded-lg">
+                    <span className="text-[10px] text-amber-800 font-bold block">4xx Client</span>
+                    <span className="text-base font-mono font-bold text-[#3D1A00]">
                       {stats.analytics.statusCounts?.['4xx'] || 0}
                     </span>
                   </div>
-                  <div className="bg-rose-950/60 border border-rose-500/30 p-2 rounded-lg">
-                    <span className="text-[10px] text-rose-400 font-bold block">5xx Error</span>
-                    <span className="text-base font-mono font-bold text-white">
+                  <div className="bg-rose-50 border border-rose-200 p-2 rounded-lg">
+                    <span className="text-[10px] text-rose-800 font-bold block">5xx Error</span>
+                    <span className="text-base font-mono font-bold text-[#3D1A00]">
                       {stats.analytics.statusCounts?.['5xx'] || 0}
                     </span>
                   </div>
@@ -477,9 +477,9 @@ export default function AdminLogsPage() {
       )}
 
       {/* Filter and Search Bar */}
-      <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row gap-3 items-center justify-between">
+      <div className="bg-white border border-[#E65C00]/20 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
         <div className="relative w-full md:w-80">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#8C6D62] absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Search by route, status, duration, IP, error..."
@@ -488,12 +488,12 @@ export default function AdminLogsPage() {
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
+            className="w-full bg-[#FFF9F5] border border-[#E65C00]/20 rounded-xl pl-9 pr-4 py-2 text-xs text-[#3D1A00] placeholder-[#8C6D62] focus:outline-none focus:border-[#E65C00] focus:bg-white"
           />
         </div>
 
         <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
-          <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+          <Filter className="w-3.5 h-3.5 text-[#E65C00] shrink-0" />
           {[
             { id: 'all', label: 'All Logs' },
             { id: 'HTTP', label: 'HTTP Requests', badge: stats.countsByLevel['HTTP'] || stats.analytics?.totalHttpRequests },
@@ -502,53 +502,62 @@ export default function AdminLogsPage() {
             { id: 'PAYMENT_SUCCESS', label: 'Payment OK', badge: paymentSuccessCount },
             { id: 'WARN', label: 'Warnings' },
             { id: 'INFO', label: 'Info' },
-          ].map((item) => (
-            <button
-              key={item.id}
-              onClick={() => {
-                setSelectedLevel(item.id);
-                setPage(1);
-              }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 border ${
-                selectedLevel === item.id
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm'
-                  : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
-              }`}
-            >
-              <span>{item.label}</span>
-              {item.badge !== undefined && item.badge > 0 && (
-                <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                    item.id === 'PAYMENT_FAILURE'
-                      ? 'bg-red-500/30 text-red-300'
-                      : item.id === 'HTTP'
-                      ? 'bg-cyan-500/30 text-cyan-300'
-                      : 'bg-slate-800 text-slate-300'
-                  }`}
-                >
-                  {item.badge}
-                </span>
-              )}
-            </button>
-          ))}
+          ].map((item) => {
+            const isSelected = selectedLevel === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setSelectedLevel(item.id);
+                  setPage(1);
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 border shadow-xs ${
+                  isSelected
+                    ? 'bg-gradient-to-r from-[#FF7A00] to-[#E65C00] text-white border-transparent'
+                    : 'bg-white text-[#6B3A2A] border-[#E65C00]/25 hover:bg-[#FFF5EB] hover:text-[#E65C00]'
+                }`}
+              >
+                <span>{item.label}</span>
+                {item.badge !== undefined && item.badge > 0 && (
+                  <span
+                    className={`text-[10px] px-1.5 py-0.5 rounded-full font-black ${
+                      isSelected
+                        ? 'bg-white/25 text-white'
+                        : item.id === 'PAYMENT_FAILURE'
+                        ? 'bg-rose-100 text-rose-800'
+                        : item.id === 'HTTP'
+                        ? 'bg-sky-100 text-sky-800'
+                        : item.id === 'ERROR'
+                        ? 'bg-red-100 text-red-800'
+                        : item.id === 'PAYMENT_SUCCESS'
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : 'bg-[#FFF0E0] text-[#E65C00]'
+                    }`}
+                  >
+                    {item.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Log Feed Table */}
-      <div className="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+      <div className="bg-white border border-[#E65C00]/20 rounded-2xl overflow-hidden shadow-sm">
         {loading && logs.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 space-y-2">
-            <RefreshCw className="w-6 h-6 animate-spin mx-auto text-amber-400" />
-            <p className="text-xs font-semibold">Loading system logs...</p>
+          <div className="p-12 text-center text-[#8C6D62] space-y-2">
+            <RefreshCw className="w-6 h-6 animate-spin mx-auto text-[#E65C00]" />
+            <p className="text-xs font-semibold text-[#3D1A00]">Loading system logs...</p>
           </div>
         ) : logs.length === 0 ? (
-          <div className="p-12 text-center text-slate-500 space-y-2">
-            <Activity className="w-8 h-8 mx-auto text-slate-600" />
-            <p className="text-sm font-bold text-slate-400">No logs found matching your filter</p>
-            <p className="text-xs">Logs older than 7 days are automatically pruned from the database.</p>
+          <div className="p-12 text-center text-[#8C6D62] space-y-2">
+            <Activity className="w-8 h-8 mx-auto text-[#8C6D62]" />
+            <p className="text-sm font-bold text-[#3D1A00]">No logs found matching your filter</p>
+            <p className="text-xs text-[#8C6D62]">Logs older than 7 days are automatically pruned from the database.</p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-800/80">
+          <div className="divide-y divide-[#E65C00]/15">
             {logs.map((log) => {
               const isExpanded = expandedLogId === log.id;
               const formattedDate = new Date(log.createdAt).toLocaleString('en-GB', {
@@ -565,18 +574,18 @@ export default function AdminLogsPage() {
               const httpStatus = details?.status;
 
               return (
-                <div key={log.id} className="hover:bg-slate-900/50 transition-colors">
+                <div key={log.id} className="hover:bg-[#FFF9F5] transition-colors">
                   {/* Row Header */}
                   <div
                     onClick={() => setExpandedLogId(isExpanded ? null : log.id)}
                     className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 cursor-pointer select-none"
                   >
                     <div className="flex items-start md:items-center gap-3 min-w-0">
-                      <button className="text-slate-500 hover:text-white mt-0.5 md:mt-0">
+                      <button className="text-[#8C6D62] hover:text-[#E65C00] mt-0.5 md:mt-0 transition-colors">
                         {isExpanded ? (
-                          <ChevronDown className="w-4 h-4 text-amber-400" />
+                          <ChevronDown className="w-4 h-4 text-[#E65C00]" />
                         ) : (
-                          <ChevronRight className="w-4 h-4" />
+                          <ChevronRight className="w-4 h-4 text-[#8C6D62]" />
                         )}
                       </button>
 
@@ -589,7 +598,7 @@ export default function AdminLogsPage() {
                       {/* Source tag if not HTTP */}
                       {!httpMethod && (
                         <div className="shrink-0">
-                          <span className="font-mono text-[11px] bg-slate-900 border border-slate-800 text-slate-400 px-2 py-0.5 rounded-md">
+                          <span className="font-mono text-[11px] bg-[#FFF5EB] border border-[#E65C00]/20 text-[#6B3A2A] px-2 py-0.5 rounded-md font-medium">
                             {log.source}
                           </span>
                         </div>
@@ -600,17 +609,17 @@ export default function AdminLogsPage() {
                         <div className="shrink-0">{getDurationBadge(durationMs)}</div>
                       )}
 
-                      <p className="text-xs font-medium text-slate-200 truncate max-w-xl">{log.message}</p>
+                      <p className="text-xs font-semibold text-[#3D1A00] truncate max-w-xl">{log.message}</p>
                     </div>
 
                     <div className="flex items-center gap-3 shrink-0 ml-7 md:ml-0">
-                      <span className="text-[11px] font-mono text-slate-500 whitespace-nowrap">{formattedDate}</span>
+                      <span className="text-[11px] font-mono text-[#8C6D62] whitespace-nowrap">{formattedDate}</span>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDelete(log.id);
                         }}
-                        className="text-slate-600 hover:text-red-400 p-1 transition-colors"
+                        className="text-[#8C6D62] hover:text-red-600 p-1 transition-colors"
                         title="Delete log"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -620,28 +629,28 @@ export default function AdminLogsPage() {
 
                   {/* Expanded Details & Timing Breakdown */}
                   {isExpanded && (
-                    <div className="px-6 pb-4 pt-1 bg-slate-900/80 border-t border-slate-800/60 space-y-3">
+                    <div className="px-6 pb-4 pt-2 bg-[#FFFDFB] border-t border-[#E65C00]/15 space-y-3">
                       {/* Response Time Breakdown Card if HTTP request */}
                       {durationMs !== undefined && (
-                        <div className="bg-slate-950 p-3 rounded-xl border border-cyan-500/20 space-y-2">
+                        <div className="bg-white p-3 rounded-xl border border-[#E65C00]/20 space-y-2 shadow-xs">
                           <div className="flex items-center justify-between text-xs">
-                            <span className="text-cyan-400 font-bold flex items-center gap-1.5">
+                            <span className="text-[#E65C00] font-bold flex items-center gap-1.5">
                               <Timer className="w-4 h-4" />
                               <span>Response Duration: {durationMs}ms</span>
                             </span>
-                            <span className="text-slate-400 font-mono text-[11px]">
+                            <span className="text-[#6B3A2A] font-mono text-[11px]">
                               Status: {httpStatus} · Method: {httpMethod}
                             </span>
                           </div>
                           {/* Duration Visual Bar */}
-                          <div className="w-full bg-slate-850 h-2 rounded-full overflow-hidden border border-slate-800">
+                          <div className="w-full bg-[#FFF0E0] h-2 rounded-full overflow-hidden border border-[#E65C00]/15">
                             <div
                               className={`h-full rounded-full transition-all ${
                                 durationMs > 500
                                   ? 'bg-rose-500'
                                   : durationMs > 200
                                   ? 'bg-amber-500'
-                                  : 'bg-emerald-400'
+                                  : 'bg-emerald-500'
                               }`}
                               style={{ width: `${Math.min(100, Math.max(8, (durationMs / 1000) * 100))}%` }}
                             />
@@ -650,17 +659,17 @@ export default function AdminLogsPage() {
                       )}
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-[11px] pt-1">
-                        <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-                          <span className="text-slate-500 block text-[10px] uppercase font-bold">Log ID</span>
-                          <span className="font-mono text-slate-300 break-all">{log.id}</span>
+                        <div className="bg-white p-2.5 rounded-lg border border-[#E65C00]/20 shadow-xs">
+                          <span className="text-[#8C6D62] block text-[10px] uppercase font-bold">Log ID</span>
+                          <span className="font-mono text-[#3D1A00] break-all">{log.id}</span>
                         </div>
-                        <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-                          <span className="text-slate-500 block text-[10px] uppercase font-bold">Timestamp (UTC)</span>
-                          <span className="font-mono text-slate-300">{new Date(log.createdAt).toISOString()}</span>
+                        <div className="bg-white p-2.5 rounded-lg border border-[#E65C00]/20 shadow-xs">
+                          <span className="text-[#8C6D62] block text-[10px] uppercase font-bold">Timestamp (UTC)</span>
+                          <span className="font-mono text-[#3D1A00]">{new Date(log.createdAt).toISOString()}</span>
                         </div>
-                        <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800">
-                          <span className="text-slate-500 block text-[10px] uppercase font-bold">IP &amp; Client</span>
-                          <span className="font-mono text-slate-300">
+                        <div className="bg-white p-2.5 rounded-lg border border-[#E65C00]/20 shadow-xs">
+                          <span className="text-[#8C6D62] block text-[10px] uppercase font-bold">IP &amp; Client</span>
+                          <span className="font-mono text-[#3D1A00]">
                             {log.ip || details?.ip || '127.0.0.1'} · {details?.userAgent ? details.userAgent.slice(0, 30) + '...' : 'Unknown'}
                           </span>
                         </div>
@@ -668,10 +677,10 @@ export default function AdminLogsPage() {
 
                       {log.details && (
                         <div className="space-y-1">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                          <span className="text-[10px] font-bold text-[#6B3A2A] uppercase tracking-wider block">
                             Structured Payload &amp; Request Metadata
                           </span>
-                          <pre className="bg-slate-950 border border-slate-800/80 rounded-xl p-3.5 text-[11px] font-mono text-amber-200/90 overflow-x-auto max-h-80 leading-relaxed">
+                          <pre className="bg-[#FFF9F5] border border-[#E65C00]/20 rounded-xl p-3.5 text-[11px] font-mono text-[#3D1A00] overflow-x-auto max-h-80 leading-relaxed shadow-xs">
                             {JSON.stringify(log.details, null, 2)}
                           </pre>
                         </div>
@@ -686,22 +695,22 @@ export default function AdminLogsPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="p-4 border-t border-slate-800 bg-slate-950 flex items-center justify-between text-xs">
-            <span className="text-slate-400">
-              Page <strong className="text-white">{page}</strong> of <strong className="text-white">{totalPages}</strong>
+          <div className="p-4 border-t border-[#E65C00]/20 bg-white flex items-center justify-between text-xs">
+            <span className="text-[#6B3A2A]">
+              Page <strong className="text-[#3D1A00]">{page}</strong> of <strong className="text-[#3D1A00]">{totalPages}</strong>
             </span>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
-                className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 disabled:opacity-40 hover:bg-slate-800 transition-colors"
+                className="px-3 py-1.5 rounded-lg bg-white border border-[#E65C00]/25 text-[#3D1A00] disabled:opacity-40 hover:bg-[#FFF5EB] transition-colors font-semibold shadow-xs"
               >
                 Previous
               </button>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages}
-                className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 disabled:opacity-40 hover:bg-slate-800 transition-colors"
+                className="px-3 py-1.5 rounded-lg bg-white border border-[#E65C00]/25 text-[#3D1A00] disabled:opacity-40 hover:bg-[#FFF5EB] transition-colors font-semibold shadow-xs"
               >
                 Next
               </button>

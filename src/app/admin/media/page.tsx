@@ -414,14 +414,14 @@ export default function AdminMediaPage() {
     <div className="space-y-8 max-w-7xl mx-auto pb-16">
       
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E65C00]/20 pb-6">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-mitra-red/10 border border-mitra-gold/20 text-mitra-gold text-xs font-bold mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFF0E0] border border-[#E65C00]/30 text-[#E65C00] text-xs font-bold mb-2">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Event Media & Gallery CMS</span>
           </div>
-          <h1 className="text-3xl font-black text-white">Media Manager</h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <h1 className="text-3xl font-black text-[#3D1A00]">Media Manager</h1>
+          <p className="text-xs text-[#6B3A2A] mt-1">
             Add event photos, teaser reels, and videos. Files upload directly via SiteGround FTP or link to external URLs.
           </p>
         </div>
@@ -431,15 +431,15 @@ export default function AdminMediaPage() {
             href="/media"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-700 hover:border-slate-500 text-slate-300 hover:text-white text-xs font-bold transition-colors bg-slate-900"
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-[#E65C00]/25 hover:border-[#E65C00]/50 text-[#3D1A00] hover:bg-[#FFF5EB] text-xs font-bold transition-colors bg-white shadow-xs"
           >
-            <Eye className="w-4 h-4 text-mitra-gold" />
+            <Eye className="w-4 h-4 text-[#E65C00]" />
             <span>View Public /media</span>
             <ExternalLink className="w-3 h-3 opacity-50" />
           </a>
           <button
             onClick={() => openCreateModal()}
-            className="flex items-center gap-2 bg-gradient-to-r from-mitra-red to-rose-700 hover:from-rose-600 hover:to-mitra-red text-white px-5 py-2.5 rounded-xl text-xs font-black shadow-lg shadow-mitra-red/20 transition-all transform active:scale-95"
+            className="flex items-center gap-2 bg-gradient-to-r from-[#FF7A00] to-[#E65C00] hover:from-[#E65C00] hover:to-[#CC4000] text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-md shadow-[#E65C00]/20 transition-all transform active:scale-95"
           >
             <Plus className="w-4 h-4" />
             <span>Add New Media</span>
@@ -449,62 +449,62 @@ export default function AdminMediaPage() {
 
       {/* KPI Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-slate-950 border border-slate-800 p-4 rounded-2xl">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Media</div>
-          <div className="text-2xl font-black text-white mt-1">{stats.totalMedia}</div>
-          <div className="text-[10px] text-slate-500 mt-0.5">Photos &amp; Video assets</div>
+        <div className="bg-white border border-[#E65C00]/20 p-4 rounded-2xl shadow-sm">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-[#6B3A2A]">Total Media</div>
+          <div className="text-2xl font-black text-[#3D1A00] mt-1">{stats.totalMedia}</div>
+          <div className="text-[10px] text-[#8C6D62] mt-0.5">Photos &amp; Video assets</div>
         </div>
 
-        <div className="bg-slate-950 border border-slate-800 p-4 rounded-2xl">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-            <ImageIcon className="w-3.5 h-3.5" />
+        <div className="bg-white border border-[#E65C00]/20 p-4 rounded-2xl shadow-sm">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
+            <ImageIcon className="w-3.5 h-3.5 text-emerald-600" />
             <span>Photos / Images</span>
           </div>
-          <div className="text-2xl font-black text-white mt-1">{stats.totalPhotos}</div>
-          <div className="text-[10px] text-slate-500 mt-0.5">Gallery pictures</div>
+          <div className="text-2xl font-black text-[#3D1A00] mt-1">{stats.totalPhotos}</div>
+          <div className="text-[10px] text-[#8C6D62] mt-0.5">Gallery pictures</div>
         </div>
 
-        <div className="bg-slate-950 border border-slate-800 p-4 rounded-2xl">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-            <Video className="w-3.5 h-3.5" />
+        <div className="bg-white border border-[#E65C00]/20 p-4 rounded-2xl shadow-sm">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5">
+            <Video className="w-3.5 h-3.5 text-amber-600" />
             <span>Videos & Reels</span>
           </div>
-          <div className="text-2xl font-black text-white mt-1">{stats.totalVideos}</div>
-          <div className="text-[10px] text-slate-500 mt-0.5">Teasers &amp; YouTube clips</div>
+          <div className="text-2xl font-black text-[#3D1A00] mt-1">{stats.totalVideos}</div>
+          <div className="text-[10px] text-[#8C6D62] mt-0.5">Teasers &amp; YouTube clips</div>
         </div>
 
-        <div className="bg-slate-950 border border-slate-800 p-4 rounded-2xl">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-mitra-gold flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5" />
+        <div className="bg-white border border-[#E65C00]/20 p-4 rounded-2xl shadow-sm">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-[#E65C00] flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5 text-[#E65C00]" />
             <span>Events Tagged</span>
           </div>
-          <div className="text-2xl font-black text-white mt-1">{stats.totalEventsCovered}</div>
-          <div className="text-[10px] text-slate-500 mt-0.5">Events with albums</div>
+          <div className="text-2xl font-black text-[#3D1A00] mt-1">{stats.totalEventsCovered}</div>
+          <div className="text-[10px] text-[#8C6D62] mt-0.5">Events with albums</div>
         </div>
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="bg-slate-950/70 border border-slate-800 p-4 rounded-2xl flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+      <div className="bg-white border border-[#E65C00]/20 p-4 rounded-2xl shadow-sm flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
         <div className="flex flex-wrap items-center gap-3 flex-1">
           {/* Search */}
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[#8C6D62] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search by title, caption, event..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:border-mitra-gold"
+              className="w-full bg-[#FFF9F5] border border-[#E65C00]/20 rounded-xl pl-9 pr-3 py-2 text-xs text-[#3D1A00] placeholder-[#8C6D62] focus:outline-none focus:border-[#E65C00] focus:bg-white"
             />
           </div>
 
           {/* Event Filter */}
           <div className="flex items-center gap-2">
-            <Filter className="w-3.5 h-3.5 text-mitra-gold" />
+            <Filter className="w-3.5 h-3.5 text-[#E65C00]" />
             <select
               value={selectedEventFilter}
               onChange={(e) => setSelectedEventFilter(e.target.value)}
-              className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-mitra-gold"
+              className="bg-[#FFF9F5] border border-[#E65C00]/20 rounded-xl px-3 py-2 text-xs text-[#3D1A00] focus:outline-none focus:border-[#E65C00] focus:bg-white"
             >
               <option value="all">All Events ({events.length})</option>
               {events.map((evt) => (
@@ -520,7 +520,7 @@ export default function AdminMediaPage() {
           <select
             value={selectedTypeFilter}
             onChange={(e) => setSelectedTypeFilter(e.target.value)}
-            className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-mitra-gold"
+            className="bg-[#FFF9F5] border border-[#E65C00]/20 rounded-xl px-3 py-2 text-xs text-[#3D1A00] focus:outline-none focus:border-[#E65C00] focus:bg-white"
           >
             <option value="all">All Types</option>
             <option value="IMAGE">Photos Only</option>
@@ -528,8 +528,8 @@ export default function AdminMediaPage() {
           </select>
         </div>
 
-        <div className="text-xs text-slate-400 shrink-0">
-          Showing <span className="font-bold text-white">{filteredItems.length}</span> of {mediaItems.length} items
+        <div className="text-xs text-[#6B3A2A] shrink-0">
+          Showing <span className="font-bold text-[#E65C00]">{filteredItems.length}</span> of {mediaItems.length} items
         </div>
       </div>
 
