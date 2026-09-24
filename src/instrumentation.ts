@@ -6,11 +6,16 @@
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     try {
+      // 1. Initialize HTTP response-time request analytics logger hook
+      const { initRequestAnalyticsServerHook } = await import('@/lib/request-analytics');
+      initRequestAnalyticsServerHook();
+
+      // 2. Background Email Queue Worker
       const { startEmailQueueWorker } = await import('@/lib/email-queue');
       // startEmailQueueWorker();
-      console.log('[INSTRUMENTATION] Background Email Queue Worker registered successfully.');
+      console.log('[INSTRUMENTATION] Background workers & Request Analytics registered successfully.');
     } catch (err) {
-      console.error('[INSTRUMENTATION] Failed initializing Email Queue Worker:', err);
+      console.error('[INSTRUMENTATION] Failed initializing server hooks:', err);
     }
   }
 }
