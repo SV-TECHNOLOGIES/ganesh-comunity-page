@@ -32,34 +32,34 @@ export interface EventHeroProps {
 }
 
 const DEFAULT_CONFIG: EventHeroConfig = {
-  heroType: '3d-model',
+  heroType: 'image',
   modelUrl: '/assets/idols/Lord Ganesh.glb',
   modelScale: 2.8,
   proceduralFallback: 'none',
   bannerImageUrl: '/assets/poster.jpg',
-  presenterBadge: 'Welcome to Mana Indian Telugu Roots Abroad (MITRA UK)',
-  title: 'THE BIGGEST MAHA GANAPATHI',
-  subtitle: 'LONDON GANESH MAHOTSAV 2026',
-  tagline: 'Streaming 3D Bappa Murti & Devotional Rays',
-  loadingText: 'ENTERING SANCTUM...',
-  scrollCueText: 'Scroll to Enter Sanctum',
+  presenterBadge: 'Welcome to MITRA UK',
+  title: 'MITRA UK',
+  subtitle: 'Mana Indian Telugu Roots Abroad',
+  tagline: '',
+  loadingText: 'LOADING...',
+  scrollCueText: 'Scroll to Explore',
   primaryColor: '#E65C00',
   accentColor: '#CC4000',
   backgroundColor: '#FFF8F0',
   primaryCta: {
-    label: 'Book Pooja / Seva',
-    action: 'pooja',
+    label: 'Register Now',
+    action: 'rsvp',
   },
   secondaryCta: {
-    label: 'Make Donation',
-    action: 'donation',
+    label: 'Learn More',
+    action: 'link',
   },
-  whatsAppUrl: 'https://chat.whatsapp.com/IVqirWWzM96IBNRfhSWGEd',
+  whatsAppUrl: '',
 };
 
 export default function EventHero({
   config: userConfig,
-  eventSlug = 'events/evt-ganesh-chaturthi',
+  eventSlug,
   mode = 'event',
   onBookPoojaClick,
   onDonateClick,
@@ -69,11 +69,10 @@ export default function EventHero({
   const cfg: EventHeroConfig = { ...DEFAULT_CONFIG, ...userConfig };
   const isHomeMode = mode === 'home';
 
-  // Guaranteed public event URL (e.g. /events/<eventId>, e.g. /events/cmu8fbb720000141sx0p856rb)
+  // Guaranteed public event URL — never fall back to old hardcoded slug
   const resolvedEventHref = (() => {
-    if (!eventSlug) return '/events/evt-ganesh-chaturthi';
+    if (!eventSlug) return '/events';
     const clean = eventSlug.replace(/^\/+/, '');
-    if (clean === 'ganesh-event-2026') return '/events/evt-ganesh-chaturthi';
     return clean.startsWith('events/') ? `/${clean}` : `/events/${clean}`;
   })();
 

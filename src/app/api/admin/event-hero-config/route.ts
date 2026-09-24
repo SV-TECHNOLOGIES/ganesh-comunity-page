@@ -41,7 +41,7 @@ export async function GET(req: Request) {
     }
 
     const storageData: EventHeroStorageConfig = {
-      activeHomeEventId: featured.activeHomeEventId,
+      activeHomeEventId: featured.activeHomeEventId || '',
       events: eventMap,
     };
 
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
     }
 
     const updatedData: EventHeroStorageConfig = {
-      activeHomeEventId: featured.activeHomeEventId,
+      activeHomeEventId: featured.activeHomeEventId || '',
       events: eventMap,
     };
 
