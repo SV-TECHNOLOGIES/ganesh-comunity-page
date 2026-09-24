@@ -1,10 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { MapPin, Calendar, Clock, Download, ExternalLink, Sparkles, Flame, Heart, Utensils, Star, CheckCircle } from 'lucide-react';
-import { POOJA_DATES } from '@/components/PoojaBookingModal';
+import React, { useState, useEffect, useMemo } from 'react';
+import { MapPin, Calendar, Clock, Download, ExternalLink, Sparkles, Flame, Heart, Utensils, Star, CheckCircle, Ticket } from 'lucide-react';
+import { POOJA_DATES, getPoojaDateStatus, PoojaDateOption } from '@/components/PoojaBookingModal';
+import { EventItem } from '@/lib/types';
+import { getEventSchedule } from '@/lib/event-schedule';
 
 interface EventDetailsSectionProps {
+  event?: EventItem | null;
   eventId?: string;
   eventTitle?: string;
   targetDate?: string;
@@ -14,6 +17,7 @@ interface EventDetailsSectionProps {
   onOpenPoojaBooking?: (dateId?: string) => void;
   onOpenDonation?: (cat?: 'Annadanam' | 'Event Donations') => void;
   onOpenRsvp?: () => void;
+  onOpenRSVP?: () => void;
 }
 
 const EVENT_SCHEDULES: Record<
@@ -87,6 +91,7 @@ const EVENT_SCHEDULES: Record<
 };
 
 export default function EventDetailsSection({
+  event,
   eventId = 'evt-ganesh-chaturthi',
   eventTitle,
   targetDate,
@@ -96,14 +101,72 @@ export default function EventDetailsSection({
   onOpenPoojaBooking,
   onOpenDonation,
   onOpenRsvp,
+  onOpenRSVP,
 }: EventDetailsSectionProps) {
+  const [activeEvent, setActiveEvent] = useState<EventItem | null>(event || null);
   const [dbCounts, setDbCounts] = useState<Record<string, number>>({});
+  const handleRsvp = onOpenRSVP || onOpenRsvp;
 
   const isGanesh = eventId === 'evt-ganesh-chaturthi' || eventTitle?.toLowerCase().includes('ganesh');
   const customSchedule = eventId ? EVENT_SCHEDULES[eventId] : null;
 
   useEffect(() => {
-    if (!isGanesh) return;
+    if (event) {
+      setActiveEvent(event);
+      return;
+    }
+    let isMounted = true;
+    const fetchEvent = async () => {
+      try {
+        const url = eventId ? `/api/events?id=${encodeURIComponent(eventId)}` : '/api/events';
+        const res = await fetch(url, { cache: 'no-store' });
+        const json = await res.json();
+        if (!isMounted) return;
+
+        if (json.success) {
+          if (eventId && json.data && !Array.isArray(json.data)) {
+            setActiveEvent(json.data);
+          } else if (Array.isArray(json.data)) {
+            const matched = eventId
+              ? json.data.find((e: any) => e.id === eventId)
+              : json.data.find(
+                  (e: any) =>
+                    e.id === 'evt-ganesh-chaturthi' ||
+                    e.title?.toLowerCase().includes('ganesh') ||
+                    e.enablePooja
+                ) || json.data[0];
+            if (matched) {
+              setActiveEvent(matched);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch event dates for EventDetailsSection:', err);
+      }
+    };
+    fetchEvent();
+    return () => {
+      isMounted = false;
+    };
+  }, [event, eventId]);
+
+  const scheduleDays: PoojaDateOption[] = useMemo(() => {
+    const s = getEventSchedule(activeEvent);
+    if (s && s.length > 0) {
+      return s.map((item, idx) => ({
+        id: item.id || `day-${idx + 1}`,
+        date: item.date || item.dateLabel || `Day ${idx + 1}`,
+        day: item.day || '',
+        title: item.title || `Day ${idx + 1}`,
+        theme: item.theme || '',
+        blessing: item.blessing || item.theme || '',
+        badge: item.badge,
+      }));
+    }
+    return POOJA_DATES;
+  }, [activeEvent]);
+
+  useEffect(() => {
     const fetchCounts = async () => {
       try {
         const res = await fetch('/api/payments/booking-counts', { cache: 'no-store' });
@@ -123,8 +186,8 @@ export default function EventDetailsSection({
   };
 
   const dailySchedule = [
-    { time: 'Mon – Fri: 6:00 PM – 9:00 PM', event: 'Evening Darshan & Maha Aarti', desc: 'Vedic chants, ritual sanctum offerings, cultural recitals, and Maha Mangala Aarti.' },
-    { time: 'Saturday: 11:00 AM – 3:00 PM', event: 'Weekend Darshan, Cultural Fest & Mahaprasadam', desc: 'Grand daytime Darshan, Kuchipudi classical dance, bhajans, and community food distribution.' },
+    { time: 'Mon – Sat: 6:00 PM – 9:00 PM', event: 'Evening Darshan & Maha Aarti', desc: 'Vedic chants, ritual sanctum offerings, cultural recitals, and Maha Mangala Aarti.' },
+    { time: 'Sunday: 11:00 AM – 5:00 PM', event: 'Weekend Darshan, Cultural Fest & Mahaprasadam', desc: 'Grand daytime Darshan, Kuchipudi classical dance, bhajans, and community food distribution.' },
   ];
 
   if (!isGanesh && customSchedule) {
@@ -206,9 +269,9 @@ export default function EventDetailsSection({
             </div>
 
             <div className="flex flex-wrap gap-3">
-              {onOpenRsvp && (
+              {handleRsvp && (
                 <button
-                  onClick={onOpenRsvp}
+                  onClick={handleRsvp}
                   className="px-6 py-3 rounded-full text-xs font-black uppercase tracking-wider text-white shadow-md transition-opacity hover:opacity-95"
                   style={{ backgroundColor: primaryColor }}
                 >
@@ -269,14 +332,15 @@ export default function EventDetailsSection({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {POOJA_DATES.map((dayItem, idx) => {
+            {scheduleDays.map((dayItem, idx) => {
               const count = getBookingCount(dayItem.date);
-              const isFullyBooked = count >= 10;
+              const status = getPoojaDateStatus(dayItem.date, count, dayItem.badge);
+              const isUnavailable = status.disabled;
               return (
                 <div
                   key={dayItem.id}
                   className={`temple-card rounded-3xl p-6 border-2 flex flex-col justify-between space-y-5 relative transition-all duration-300 hover:scale-[1.02] ${
-                    isFullyBooked
+                    isUnavailable
                       ? 'border-slate-300 bg-slate-50 opacity-70 shadow-none'
                       : dayItem.id === 'day-2'
                       ? 'border-[#E65C00] bg-gradient-to-b from-[#FFF0E0] to-white shadow-md'
@@ -289,14 +353,20 @@ export default function EventDetailsSection({
                       <span className="text-[11px] font-black uppercase text-[#E65C00] font-cinzel tracking-wider">
                         {dayItem.day}
                       </span>
-                      <h4 className={`text-xl font-black font-cinzel ${isFullyBooked ? 'text-slate-400 line-through' : 'text-[#3D1A00]'}`}>
+                      <h4 className={`text-xl font-black font-cinzel ${isUnavailable ? 'text-slate-400 line-through' : 'text-[#3D1A00]'}`}>
                         {dayItem.date}
                       </h4>
                     </div>
 
-                    {isFullyBooked ? (
-                      <span className="bg-red-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow">
-                        FULLY BOOKED
+                    {isUnavailable ? (
+                      <span className={`text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow ${
+                        status.reason === 'past'
+                          ? 'bg-slate-500'
+                          : status.reason === 'visarjan'
+                          ? 'bg-amber-600'
+                          : 'bg-red-600'
+                      }`}>
+                        {status.statusLabel}
                       </span>
                     ) : dayItem.badge ? (
                       <span className="bg-[#E65C00] text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow">
@@ -312,32 +382,48 @@ export default function EventDetailsSection({
                   {/* Day Details */}
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <Flame className={`w-4 h-4 shrink-0 ${isFullyBooked ? 'text-slate-400' : 'text-[#E65C00]'}`} />
-                      <h5 className={`text-base font-bold font-cinzel leading-tight ${isFullyBooked ? 'text-slate-400' : 'text-[#E65C00]'}`}>
+                      <Flame className={`w-4 h-4 shrink-0 ${isUnavailable ? 'text-slate-400' : 'text-[#E65C00]'}`} />
+                      <h5 className={`text-base font-bold font-cinzel leading-tight ${isUnavailable ? 'text-slate-400' : 'text-[#E65C00]'}`}>
                         {dayItem.title}
                       </h5>
                     </div>
-                    <p className={`text-xs font-semibold ${isFullyBooked ? 'text-slate-400' : 'text-[#3D1A00]'}`}>
+                    <p className={`text-xs font-semibold ${isUnavailable ? 'text-slate-400' : 'text-[#3D1A00]'}`}>
                       {dayItem.theme}
                     </p>
-                    <p className={`text-[11px] leading-relaxed italic ${isFullyBooked ? 'text-slate-400' : 'text-[#6B3A2A]'}`}>
-                      ✦ {isFullyBooked ? 'Daily booking limit reached.' : dayItem.blessing}
+                    <p className={`text-[11px] leading-relaxed italic ${isUnavailable ? 'text-slate-400' : 'text-[#6B3A2A]'}`}>
+                      ✦ {isUnavailable
+                        ? status.reason === 'past'
+                          ? 'Pooja date has passed.'
+                          : status.reason === 'visarjan'
+                          ? 'Maha Visarjan & Nimajjanam day. Bookings closed.'
+                          : 'Daily booking limit reached.'
+                        : dayItem.blessing}
                     </p>
                   </div>
 
                   {/* Card Action */}
-                  <button
-                    disabled={isFullyBooked}
-                    onClick={() => !isFullyBooked && onOpenPoojaBooking?.(dayItem.id)}
-                    className={`w-full py-2.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm ${
-                      isFullyBooked
-                        ? 'bg-slate-300 text-slate-500 border border-slate-400/30 cursor-not-allowed'
-                        : 'gold-button'
-                    }`}
-                  >
-                    <Flame className="w-3.5 h-3.5 fill-current text-white" />
-                    <span>{isFullyBooked ? 'Fully Booked' : 'Book Pooja / Seva'}</span>
-                  </button>
+                  {onOpenPoojaBooking ? (
+                    <button
+                      disabled={isUnavailable}
+                      onClick={() => !isUnavailable && onOpenPoojaBooking?.(dayItem.id)}
+                      className={`w-full py-2.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm ${
+                        isUnavailable
+                          ? 'bg-slate-300 text-slate-500 border border-slate-400/30 cursor-not-allowed'
+                          : 'gold-button'
+                      }`}
+                    >
+                      <Flame className="w-3.5 h-3.5 fill-current text-white" />
+                      <span>
+                        {isUnavailable
+                          ? status.reason === 'past'
+                            ? 'Date Passed'
+                            : status.reason === 'visarjan'
+                            ? 'Visarjan Day'
+                            : 'Fully Booked'
+                          : 'Make Event Payment'}
+                      </span>
+                    </button>
+                  ) : null}
                 </div>
               );
             })}
@@ -357,6 +443,16 @@ export default function EventDetailsSection({
           </div>
 
           <div className="flex flex-wrap gap-3">
+            {handleRsvp && (
+              <button
+                onClick={handleRsvp}
+                className="gold-button px-6 py-3 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-md hover:scale-105 transition-all"
+              >
+                <Ticket className="w-4 h-4 text-white" />
+                <span>Register / RSVP Now</span>
+              </button>
+            )}
+
             <a
               href="https://maps.google.com/?q=Langley+Road+SL3+8GW+Slough+UK"
               target="_blank"

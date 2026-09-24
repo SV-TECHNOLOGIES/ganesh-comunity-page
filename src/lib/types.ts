@@ -1,20 +1,51 @@
 export type Role = 'Super Admin' | 'Media Secretary' | 'Events Coordinator' | 'Membership Officer' | 'Charity Officer' | 'Committee Viewer';
 
+export interface CustomFieldDefinition {
+  id: string;
+  label: string;
+  type: 'text' | 'textarea' | 'select' | 'checkbox' | 'number';
+  required?: boolean;
+  placeholder?: string;
+  options?: string[]; // for select type
+}
+
 export interface EventItem {
   id: string;
   title: string;
-  category: 'Cultural Events' | 'Business Networking' | 'Sports' | 'Women Empowerment' | 'World Conferences';
+  category: 'Cultural Events' | 'Business Networking' | 'Sports' | 'Women Empowerment' | 'World Conferences' | string;
   date: string; // YYYY-MM-DD
   time: string;
   venue: string;
   address: string;
   description: string;
   bannerUrl: string;
-  status: 'Upcoming' | 'Past';
+  status: 'Upcoming' | 'Past' | string;
   capacity: number;
   rsvpCount: number;
-  ticketPrice: number; // 0 for free
+  ticketPrice: number; // 0 for free (adults)
+  childTicketPrice?: number; // 0 for free (children)
   featured?: boolean;
+  enableRsvp?: boolean;
+  enableSupportPayment?: boolean;
+  enablePooja?: boolean;
+  enforceCapacityLimit?: boolean;
+  adultCapacity?: number;
+  childCapacity?: number;
+  availableDates?: string[];
+  eventSchedule?: EventScheduleDay[];
+  mapUrl?: string;
+  customFields?: CustomFieldDefinition[];
+}
+
+export interface EventScheduleDay {
+  id: string;
+  date: string;
+  dateLabel?: string;
+  day?: string;
+  title: string;
+  theme?: string;
+  blessing?: string;
+  badge?: string;
 }
 
 export interface LeadershipMember {
@@ -42,6 +73,34 @@ export interface MediaAlbum {
   pdfUrl?: string;
   youtubeId?: string;
   description?: string;
+}
+
+export interface MediaItemData {
+  id: string;
+  title: string;
+  type: 'IMAGE' | 'VIDEO';
+  category?: string;
+  coverImage?: string | null;
+  url: string;
+  description?: string | null;
+  eventId?: string | null;
+  event?: EventItem | null;
+  isFeatured: boolean;
+  displayOrder: number;
+  isHomeFeatured?: boolean;
+  homeDisplayOrder?: number;
+  isEventFeatured?: boolean;
+  eventDisplayOrder?: number;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface EventWithMedia extends EventItem {
+  mediaItems?: MediaItemData[];
+  photosCount?: number;
+  videosCount?: number;
+  totalMediaCount?: number;
+  featuredMediaUrl?: string;
 }
 
 export interface CharityCase {
@@ -157,6 +216,21 @@ export interface TeluguBusiness {
   isFeatured: boolean;
   specialOffer?: string | null;
   adminNotes?: string | null;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+}
+
+export interface SponsorItem {
+  id: string;
+  name: string;
+  tier: string;
+  logoUrl: string;
+  websiteUrl?: string | null;
+  order: number;
+  active?: boolean;
+  accent?: string | null;
+  gradient?: string | null;
+  blackLogoBg?: boolean;
   createdAt?: string | Date;
   updatedAt?: string | Date;
 }
