@@ -5,21 +5,33 @@ import {
   setPreference,
   saveEventPreferences,
   setActiveHomeEventId,
-  seedConfigFromHeroJson,
+  seedDefaultPreferences,
 } from '@/lib/config-preferences';
 import { PREFERENCES, PREF_HOME_ACTIVE_EVENT_ID } from '@/constants/preferences';
+import fs from 'fs';
+import path from 'path';
 
 export const dynamic = 'force-dynamic';
 
+function cleanLegacyJson() {
+  try {
+    const legacyPath = path.join(process.cwd(), 'src', 'data', 'event-hero-config.json');
+    if (fs.existsSync(legacyPath)) {
+      fs.unlinkSync(legacyPath);
+    }
+  } catch (err) {}
+}
+
 export async function GET(req: NextRequest) {
   try {
+    cleanLegacyJson();
     const { searchParams } = new URL(req.url);
     const eventId = searchParams.get('eventId');
     const isFeatured = searchParams.get('featured') === 'true';
     const doSeed = searchParams.get('seed') === 'true';
 
     if (doSeed) {
-      const seedResult = await seedConfigFromHeroJson(true);
+      const seedResult = await seedDefaultPreferences(true);
       return NextResponse.json({ success: true, seed: seedResult });
     }
 
@@ -65,7 +77,7 @@ export async function POST(req: NextRequest) {
 
     // 1. Seed request
     if (body.action === 'seed') {
-      const result = await seedConfigFromHeroJson(body.force === true);
+      const result = await seedDefaultPreferences(body.force === true);
       return NextResponse.json({ success: true, result });
     }
 
