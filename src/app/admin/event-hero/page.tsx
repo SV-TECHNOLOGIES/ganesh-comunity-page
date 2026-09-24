@@ -35,6 +35,8 @@ import {
   Lock,
   PanelLeftClose,
   PanelLeftOpen,
+  Download,
+  Upload,
 } from 'lucide-react';
 import EventHero from '@/components/EventHero';
 import { useAdminSidebar } from '@/app/admin/layout';
@@ -45,6 +47,7 @@ interface EventItemOption {
   title: string;
   category?: string;
   date?: string;
+  bannerUrl?: string;
 }
 
 const COLOR_PRESETS = [
@@ -171,6 +174,10 @@ export default function EventHeroAdminPage() {
   // Form state for current selected event
   const [currentConfig, setCurrentConfig] = useState<EventTemplateConfig | null>(null);
 
+  // Upload states
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [uploadingTeaser, setUploadingTeaser] = useState(false);
+
   // Live Preview States
   const [previewViewport, setPreviewViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [previewMode, setPreviewMode] = useState<'event' | 'home'>('event');
@@ -227,6 +234,7 @@ export default function EventHeroAdminPage() {
     } else {
       // Create new draft config based on template
       const baseEvent = availableEvents.find((e) => e.id === id);
+      const isGaneshEvent = id === 'evt-ganesh-chaturthi' || id.toLowerCase().includes('ganesh');
       const newConfig: EventTemplateConfig = {
         id,
         title: baseEvent?.title || 'New Event Celebration',
@@ -234,7 +242,7 @@ export default function EventHeroAdminPage() {
         targetDate: baseEvent?.date ? `${baseEvent.date}T09:00:00.000Z` : new Date().toISOString(),
         hero: {
           heroType: 'image',
-          bannerImageUrl: '/assets/poster.jpg',
+          bannerImageUrl: baseEvent?.bannerUrl || '/assets/poster.jpg',
           presenterBadge: 'Welcome to Mana Indian Telugu Roots Abroad (MITRA UK)',
           title: baseEvent?.title.toUpperCase() || 'GRAND COMMUNITY FESTIVAL',
           subtitle: 'UK TELUGU CELEBRATION 2026',
@@ -248,18 +256,129 @@ export default function EventHeroAdminPage() {
           secondaryCta: { label: 'Join Community WhatsApp', action: 'whatsapp' },
           whatsAppUrl: 'https://chat.whatsapp.com/IVqirWWzM96IBNRfhSWGEd',
         },
-        sections: {
-          showCountdown: true,
-          showEventDetails: true,
-          showStory: true,
-          showSpecs: false,
-          showMediaGallery: true,
-          showOfferings: true,
-          showSponsors: true,
+        sections: isGaneshEvent
+          ? {
+              showCountdown: true,
+              showEventDetails: true,
+              showStory: true,
+              showSpecs: true,
+              showMediaGallery: true,
+              showOfferings: true,
+              showSponsors: true,
+            }
+          : {
+              showCountdown: false,
+              showEventDetails: false,
+              showStory: false,
+              showSpecs: false,
+              showMediaGallery: false,
+              showOfferings: false,
+              showSponsors: false,
+            },
+        mediaTeaser: {
+          videoUrl: '/assets/teaser-reel.mp4',
+          sectionTitle: 'TEASER REEL & EVENT POSTERS',
+          subtitle: 'Experience the official event teaser video reel and high-resolution event artwork from our media assets.',
+          posterUrl: baseEvent?.bannerUrl || '/assets/poster.jpg',
         },
       };
       setCurrentConfig(newConfig);
     }
+  };
+
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingBanner(true);
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      form.append('useCase', 'events');
+      form.append('identifier', `hero-banner-${selectedEventId}`);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: form,
+      });
+      const json = await res.json();
+      if (json.success && json.url) {
+        updateHero('bannerImageUrl', json.url);
+        showToast('Banner image uploaded successfully!');
+      } else {
+        alert(json.error || 'Failed to upload banner image');
+      }
+    } catch (err) {
+      console.error('Upload error:', err);
+      alert('Error uploading banner image');
+    } finally {
+      setUploadingBanner(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleUseEventPoster = async () => {
+    const evt = availableEvents.find((e) => e.id === selectedEventId);
+    if (evt && evt.bannerUrl) {
+      updateHero('bannerImageUrl', evt.bannerUrl);
+      showToast('Loaded poster URL from event record!');
+      return;
+    }
+    try {
+      const res = await fetch(`/api/events?id=${encodeURIComponent(selectedEventId)}`);
+      const json = await res.json();
+      if (json.success && json.data?.bannerUrl) {
+        updateHero('bannerImageUrl', json.data.bannerUrl);
+        showToast('Loaded poster URL from event record!');
+      } else {
+        alert('No poster URL found in database for this event.');
+      }
+    } catch (err) {
+      alert('Could not fetch event poster URL.');
+    }
+  };
+
+  const handleTeaserVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingTeaser(true);
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      form.append('useCase', 'events');
+      form.append('identifier', `teaser-video-${selectedEventId}`);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: form,
+      });
+      const json = await res.json();
+      if (json.success && json.url) {
+        updateMediaTeaser('videoUrl', json.url);
+        showToast('Teaser video uploaded successfully!');
+      } else {
+        alert(json.error || 'Failed to upload video');
+      }
+    } catch (err) {
+      console.error('Upload error:', err);
+      alert('Error uploading teaser video');
+    } finally {
+      setUploadingTeaser(false);
+      e.target.value = '';
+    }
+  };
+
+  const updateMediaTeaser = (field: string, val: any) => {
+    if (!currentConfig) return;
+    setCurrentConfig({
+      ...currentConfig,
+      mediaTeaser: {
+        ...(currentConfig.mediaTeaser || {
+          videoUrl: '/assets/teaser-reel.mp4',
+          sectionTitle: 'TEASER REEL & EVENT POSTERS',
+          subtitle: 'Experience the official event teaser video reel and high-resolution event artwork from our media assets.',
+          posterUrl: currentConfig.hero.bannerImageUrl || '/assets/poster.jpg',
+        }),
+        [field]: val,
+      },
+    });
   };
 
   // Set current event as featured on Home
@@ -874,16 +993,71 @@ export default function EventHeroAdminPage() {
 
               {currentConfig.hero.heroType === 'image' && (
                 <div className="pt-3 border-t border-slate-800/80 space-y-2">
-                  <label className="text-[11px] font-bold text-slate-400 block mb-1">
-                    Hero Banner Image URL
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold text-slate-400 block">
+                      Hero Banner Image URL
+                    </label>
+                    <span className="text-[10px] text-amber-400 font-medium">Hero Image &amp; Card</span>
+                  </div>
+
                   <input
                     type="text"
                     value={currentConfig.hero.bannerImageUrl || ''}
                     onChange={(e) => updateHero('bannerImageUrl', e.target.value)}
                     placeholder="/assets/poster.jpg or https://..."
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
                   />
+
+                  {/* Actions: Upload Image & Get Event Poster */}
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-[11px] transition-colors shadow">
+                      {uploadingBanner ? (
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Upload className="w-3.5 h-3.5" />
+                      )}
+                      <span>{uploadingBanner ? 'Uploading Image...' : 'Upload Image'}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleBannerUpload}
+                        disabled={uploadingBanner}
+                      />
+                    </label>
+
+                    <button
+                      type="button"
+                      onClick={handleUseEventPoster}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-[11px] transition-colors"
+                      title="Load the poster URL saved for this event in Events Database"
+                    >
+                      <Download className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Get Event Poster URL</span>
+                    </button>
+                  </div>
+
+                  {/* Thumbnail preview */}
+                  {currentConfig.hero.bannerImageUrl && (
+                    <div className="mt-2 p-2 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center gap-3">
+                      <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-slate-950 shrink-0 border border-slate-700">
+                        <img
+                          src={currentConfig.hero.bannerImageUrl}
+                          alt="Banner Preview"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/assets/poster.jpg';
+                          }}
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className="text-[10px] text-slate-400 font-medium block truncate">Current Image:</span>
+                        <span className="text-[10px] text-amber-300 font-mono block truncate">
+                          {currentConfig.hero.bannerImageUrl}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1163,10 +1337,13 @@ export default function EventHeroAdminPage() {
             </div>
 
             {/* 5. Landing Page Sections Toggles */}
-            <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-wider">
-                <Layers className="w-4 h-4 text-amber-400" />
-                <span>Landing Page Sections</span>
+            <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-wider">
+                  <Layers className="w-4 h-4 text-amber-400" />
+                  <span>Landing Page Sections</span>
+                </div>
+                <span className="text-[10px] text-slate-500 font-medium">Disabled by default for new events</span>
               </div>
               <p className="text-[10px] text-slate-400">
                 Toggle visible sections on this event&apos;s full template page:
@@ -1174,32 +1351,114 @@ export default function EventHeroAdminPage() {
 
               <div className="space-y-2 pt-1">
                 {[
-                  { key: 'showCountdown', label: 'Countdown Timer' },
-                  { key: 'showEventDetails', label: 'Event Schedule & Timings' },
-                  { key: 'showStory', label: 'Devotional / About Story' },
-                  { key: 'showSpecs', label: 'Idol Specifications / Specs' },
-                  { key: 'showMediaGallery', label: 'Media Teaser Gallery' },
-                  { key: 'showOfferings', label: 'Community Seva & Offerings' },
-                  { key: 'showSponsors', label: 'Sponsor Ribbon Band' },
-                ].map(({ key, label }) => {
+                  { key: 'showCountdown', label: 'Countdown Timer', isHardcodedGanesh: false },
+                  { key: 'showEventDetails', label: 'Event Schedule & Timings', isHardcodedGanesh: false },
+                  { key: 'showStory', label: 'Devotional / About Story (Ganesh)', isHardcodedGanesh: true },
+                  { key: 'showSpecs', label: 'Idol Specifications / Specs (Ganesh)', isHardcodedGanesh: true },
+                  { key: 'showMediaGallery', label: 'Media Teaser Gallery', isHardcodedGanesh: false },
+                  { key: 'showOfferings', label: 'Community Seva & Offerings', isHardcodedGanesh: true },
+                  { key: 'showSponsors', label: 'Sponsor Ribbon Band', isHardcodedGanesh: true },
+                ].map(({ key, label, isHardcodedGanesh }) => {
                   const isChecked = !!currentConfig.sections[key as keyof typeof currentConfig.sections];
                   return (
-                    <label
+                    <div
                       key={key}
-                      className="flex items-center justify-between p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 cursor-pointer"
+                      className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 space-y-1"
                     >
-                      <span className="text-xs text-slate-200 font-medium">{label}</span>
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={(e) =>
-                          updateSectionToggle(key as keyof typeof currentConfig.sections, e.target.checked)
-                        }
-                        className="w-4 h-4 rounded text-amber-500 accent-amber-500 cursor-pointer"
-                      />
-                    </label>
+                      <label className="flex items-center justify-between cursor-pointer">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-xs text-slate-200 font-medium">{label}</span>
+                          {isHardcodedGanesh && (
+                            <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 uppercase tracking-wider">
+                              Hardcoded for Ganesh Event
+                            </span>
+                          )}
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) =>
+                            updateSectionToggle(key as keyof typeof currentConfig.sections, e.target.checked)
+                          }
+                          className="w-4 h-4 rounded text-amber-500 accent-amber-500 cursor-pointer shrink-0"
+                        />
+                      </label>
+                      {isHardcodedGanesh && (
+                        <p className="text-[10px] text-slate-500">
+                          Contains Ganesh Mahotsav devotional content. Leave disabled for new generic events unless intended.
+                        </p>
+                      )}
+                    </div>
                   );
                 })}
+              </div>
+
+              {/* Teaser Reel & Media Gallery Controls */}
+              <div className="mt-4 pt-4 border-t border-slate-800/80 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">
+                    Teaser Reel &amp; Media Posters Controls
+                  </span>
+                  <span className="text-[10px] text-slate-400">Section Control</span>
+                </div>
+
+                <div className="space-y-3 bg-slate-900/60 p-3.5 rounded-xl border border-slate-800">
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 block mb-1">
+                      Teaser Section Title
+                    </label>
+                    <input
+                      type="text"
+                      value={currentConfig.mediaTeaser?.sectionTitle ?? 'TEASER REEL & EVENT POSTERS'}
+                      onChange={(e) => updateMediaTeaser('sectionTitle', e.target.value)}
+                      placeholder="TEASER REEL & EVENT POSTERS"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500 font-cinzel font-bold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 block mb-1">
+                      Teaser Reel Video URL (MP4 / WebM)
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={currentConfig.mediaTeaser?.videoUrl ?? '/assets/teaser-reel.mp4'}
+                        onChange={(e) => updateMediaTeaser('videoUrl', e.target.value)}
+                        placeholder="/assets/teaser-reel.mp4 or https://..."
+                        className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
+                      />
+                      <label className="cursor-pointer inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-[11px] transition-colors shrink-0 shadow">
+                        {uploadingTeaser ? (
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Video className="w-3.5 h-3.5" />
+                        )}
+                        <span>{uploadingTeaser ? 'Uploading...' : 'Upload Video'}</span>
+                        <input
+                          type="file"
+                          accept="video/mp4,video/webm,video/quicktime"
+                          className="hidden"
+                          onChange={handleTeaserVideoUpload}
+                          disabled={uploadingTeaser}
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 block mb-1">
+                      Teaser Section Subtitle
+                    </label>
+                    <input
+                      type="text"
+                      value={currentConfig.mediaTeaser?.subtitle ?? ''}
+                      onChange={(e) => updateMediaTeaser('subtitle', e.target.value)}
+                      placeholder="Experience the official event teaser video reel and high-resolution event artwork from our media assets."
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 

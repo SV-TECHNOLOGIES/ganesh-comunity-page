@@ -50,6 +50,9 @@ export default function HomePage() {
       ? (storedSlug.startsWith('events/') ? storedSlug : `events/${storedSlug.replace(/^\/+/, '')}`)
       : undefined;
 
+  const sections = getPreference('event.sections') || {};
+  const mediaTeaser = getPreference('event.mediaTeaser');
+
   return (
     <div className="bg-[#FFF8F0] text-[#3D1A00] min-h-screen">
       {/* 1. HERO — Dynamically featured Event Hero configured via Admin Panel */}
@@ -64,13 +67,21 @@ export default function HomePage() {
       <MitraCommunitySection />
 
       {/* 3. MEDIA & TEASER GALLERY */}
-      <MediaTeaserSection />
+      {sections.showMediaGallery && (
+        <MediaTeaserSection
+          eventId={activeHomeEventId || undefined}
+          videoUrl={mediaTeaser?.videoUrl || heroConfig?.videoUrl}
+          sectionTitle={mediaTeaser?.sectionTitle}
+          subtitle={mediaTeaser?.subtitle}
+          posterUrl={mediaTeaser?.posterUrl || heroConfig?.bannerImageUrl}
+        />
+      )}
 
       {/* 4. GET INVOLVED — OFFERING PLAQUES & SPONSOR EMAIL INQUIRY */}
-      <OfferingPlaques />
+      {sections.showOfferings && <OfferingPlaques />}
 
       {/* 5. BROUGHT TO YOU BY — SPONSOR RIBBON BAND */}
-      <SponsorRibbonBand />
+      {sections.showSponsors && <SponsorRibbonBand />}
 
       {/* MODAL FORMS */}
       <NotifyMeModal isOpen={notifyModalOpen} onClose={() => setNotifyModalOpen(false)} />

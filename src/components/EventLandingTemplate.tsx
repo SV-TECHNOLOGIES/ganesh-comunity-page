@@ -14,11 +14,13 @@ import SponsorRibbonBand from '@/components/SponsorRibbonBand';
 import PoojaBookingModal from '@/components/PoojaBookingModal';
 import DonationModal from '@/components/DonationModal';
 import NotifyMeModal from '@/components/NotifyMeModal';
+import EventRSVPModal from '@/components/EventRSVPModal';
 import { EventTemplateConfig } from '@/types/event-template';
 
 export interface EventLandingTemplateProps {
   eventId?: string;
   config?: EventTemplateConfig;
+  event?: any;
 }
 
 const DEFAULT_GANESH_CONFIG: EventTemplateConfig = {
@@ -65,6 +67,7 @@ const DEFAULT_GANESH_CONFIG: EventTemplateConfig = {
 export default function EventLandingTemplate({
   eventId = 'evt-ganesh-chaturthi',
   config: initialConfig,
+  event: initialEvent,
 }: EventLandingTemplateProps) {
   const [templateConfig, setTemplateConfig] = useState<EventTemplateConfig>(
     initialConfig || DEFAULT_GANESH_CONFIG
@@ -75,17 +78,19 @@ export default function EventLandingTemplate({
   const [donateModalOpen, setDonateModalOpen] = useState(false);
   const [donationCategory, setDonationCategory] = useState<'Annadanam' | 'Event Donations'>('Annadanam');
   const [notifyModalOpen, setNotifyModalOpen] = useState(false);
+  const [rsvpModalOpen, setRsvpModalOpen] = useState(false);
+  const [dbEvent, setDbEvent] = useState<any>(initialEvent || null);
+  const [rsvpCount, setRsvpCount] = useState<number>(initialEvent?.rsvpCount || 0);
 
   // Load custom template config from JSON storage if eventId is provided
   useEffect(() => {
     if (initialConfig) {
       setTemplateConfig(initialConfig);
       setLoading(false);
-      return;
     }
 
     if (eventId) {
-      if (eventId !== 'evt-ganesh-chaturthi') {
+      if (eventId !== 'evt-ganesh-chaturthi' && !initialConfig) {
         setLoading(true);
       }
       fetch(`/api/config/preferences?eventId=${encodeURIComponent(eventId)}`)
@@ -101,8 +106,20 @@ export default function EventLandingTemplate({
         .finally(() => {
           setLoading(false);
         });
+
+      if (!initialEvent) {
+        fetch(`/api/events?id=${encodeURIComponent(eventId)}`)
+          .then((res) => res.json())
+          .then((json) => {
+            if (json.success && json.data) {
+              setDbEvent(json.data);
+              setRsvpCount(json.data.rsvpCount || 0);
+            }
+          })
+          .catch(() => {});
+      }
     }
-  }, [eventId, initialConfig]);
+  }, [eventId, initialConfig, initialEvent]);
 
   const openPoojaBooking = (dateId?: string) => {
     setSelectedPoojaDateId(dateId);
@@ -115,7 +132,7 @@ export default function EventLandingTemplate({
   };
 
   const openRsvp = () => {
-    setNotifyModalOpen(true);
+    setRsvpModalOpen(true);
   };
 
   if (loading) {
@@ -193,22 +210,7 @@ export default function EventLandingTemplate({
         onNotifyClick={openRsvp}
       />
 
-      {/* 2. EVENT DETAILS & SCHEDULE */}
-      {sections.showEventDetails && (
-        <div id="event-details">
-          <EventDetailsSection
-            eventId={templateConfig.id}
-            eventTitle={templateConfig.title}
-            targetDate={templateConfig.targetDate}
-            primaryColor={hero.primaryColor}
-            accentColor={hero.accentColor}
-            backgroundColor={hero.backgroundColor}
-            onOpenPoojaBooking={openPoojaBooking}
-            onOpenDonation={openDonation}
-            onOpenRsvp={openRsvp}
-          />
-        </div>
-      )}
+      
 
       {/* 3. RITUAL COUNTDOWN CLOCK */}
       {sections.showCountdown && (
@@ -243,7 +245,13 @@ export default function EventLandingTemplate({
 
       {/* 6. MEDIA & TEASER GALLERY */}
       {sections.showMediaGallery && (
-        <MediaTeaserSection eventId={templateConfig.id} />
+        <MediaTeaserSection
+          eventId={templateConfig.id}
+          videoUrl={templateConfig.mediaTeaser?.videoUrl || hero.videoUrl}
+          sectionTitle={templateConfig.mediaTeaser?.sectionTitle}
+          subtitle={templateConfig.mediaTeaser?.subtitle}
+          posterUrl={templateConfig.mediaTeaser?.posterUrl || hero.bannerImageUrl}
+        />
       )}
 
       {/* 7. COMMUNITY OFFERINGS & PARTICIPATION */}
@@ -263,12 +271,39 @@ export default function EventLandingTemplate({
         isOpen={donateModalOpen}
         onClose={() => setDonateModalOpen(false)}
         initialCategory={donationCategory}
+        eventId={templateConfig.id}
+        eventName={templateConfig.title}
       />
 
       <NotifyMeModal
         isOpen={notifyModalOpen}
         onClose={() => setNotifyModalOpen(false)}
       />
+
+      {rsvpModalOpen && (
+        <EventRSVPModal
+          event={{
+            id: dbEvent?.id || templateConfig.id || eventId,
+            title: dbEvent?.title || templateConfig.title,
+            date: dbEvent?.date || (templateConfig.targetDate ? templateConfig.targetDate.slice(0, 10) : '2026-09-26'),
+            time: dbEvent?.time || '09:00 AM',
+            venue: dbEvent?.venue || 'London / United Kingdom',
+            ticketPrice: dbEvent?.ticketPrice ?? 0,
+            childTicketPrice: dbEvent?.childTicketPrice ?? 0,
+            capacity: dbEvent?.capacity ?? 500,
+            rsvpCount: rsvpCount,
+            enforceCapacityLimit: dbEvent?.enforceCapacityLimit ?? false,
+            enableRsvp: dbEvent?.enableRsvp ?? true,
+            availableDates: dbEvent?.availableDates || [],
+            eventSchedule: dbEvent?.eventSchedule || [],
+            adultCapacity: dbEvent?.adultCapacity ?? 0,
+            childCapacity: dbEvent?.childCapacity ?? 0,
+            customFields: dbEvent?.customFields || [],
+          }}
+          onClose={() => setRsvpModalOpen(false)}
+          onSuccess={() => setRsvpCount((prev) => prev + 1)}
+        />
+      )}
     </div>
   );
 }

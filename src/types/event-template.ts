@@ -64,6 +64,13 @@ export interface EventSectionToggles {
   showSponsors: boolean;
 }
 
+export interface EventMediaTeaserConfig {
+  videoUrl?: string;
+  sectionTitle?: string;
+  subtitle?: string;
+  posterUrl?: string;
+}
+
 export interface EventTemplateConfig {
   id: string;
   title: string;
@@ -71,6 +78,7 @@ export interface EventTemplateConfig {
   targetDate?: string; // ISO string for countdown
   hero: EventHeroConfig;
   sections: EventSectionToggles;
+  mediaTeaser?: EventMediaTeaserConfig;
   story?: {
     badge?: string;
     quote?: string;

@@ -200,11 +200,7 @@ END:VCALENDAR`;
         {/* 2. RITUAL COUNTDOWN CLOCK */}
         <RitualCountdown />
 
-        {/* 3. EVENT DETAILS, VENUE & POOJA BOOKING */}
-        <EventDetailsSection 
-          event={event}
-          onOpenPoojaBooking={event.enablePooja !== false ? () => setPoojaModalOpen(true) : undefined} 
-        />
+        
 
         {/* 4. IDOL SPECS PLAQUE */}
         <IdolSpecsCard />
@@ -241,7 +237,7 @@ END:VCALENDAR`;
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <EventLandingTemplate eventId={event.id || id} config={templateConfig || undefined} />
+        <EventLandingTemplate eventId={event.id || id} config={templateConfig || undefined} event={event} />
       </>
     );
   }

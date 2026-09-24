@@ -46,7 +46,7 @@ interface EmailLayoutOptions {
 
 export function renderEmailLayout({
   pageTitle,
-  badgeText = 'London Ganesh Mahotsav 2026',
+  badgeText = 'MITRA UK Community',
   children,
   footerNote = 'If you did not make this request, you can safely ignore this email.',
   isAlert = false,
@@ -410,9 +410,9 @@ export const sendEventRegistrationConfirmationEmail = async (
     recipientEmail,
     recipientName,
     eventName,
-    eventDate = 'Sunday, 18 October 2026',
-    eventTime = '4:30 PM onwards',
-    eventVenue = 'Thurrock Rugby Football Club, Oakfield, Long Lane, Grays, Essex, RM16 2QH',
+    eventDate = '',
+    eventTime = '',
+    eventVenue = '',
     eventAddress = '',
     totalAmount = 0,
     supportAmount = 0,
@@ -424,22 +424,15 @@ export const sendEventRegistrationConfirmationEmail = async (
     rsvpId,
   } = params;
 
-  const isBathukamma =
-    eventName.toLowerCase().includes('bathukamma') ||
-    eventName.toLowerCase().includes('grays');
-
-  const subject = isBathukamma
-    ? '🌸 Registration & Payment Confirmed — MITRA Grays Bathukamma 2026'
-    : `🎟️ Registration & Payment Confirmed — ${eventName}`;
-
-  const badgeText = isBathukamma ? 'MITRA Grays Bathukamma 2026' : eventName;
+  const subject = `🎟️ Registration & Payment Confirmed — ${eventName || 'MITRA UK Event'}`;
+  const badgeText = eventName || 'MITRA UK Event';
 
   // Render Venue & Schedule
-  const displayDate = isBathukamma ? 'Sunday, 18 October 2026' : (eventDate || 'Sunday, 18 October 2026');
-  const displayTime = isBathukamma ? '4:30 PM onwards' : (eventTime || '4:30 PM onwards');
-  const displayVenue = isBathukamma
-    ? 'Thurrock Rugby Football Club, Oakfield, Long Lane, Grays, Essex, RM16 2QH'
-    : `${eventVenue}${eventAddress ? `, ${eventAddress}` : ''}`;
+  const displayDate = eventDate || 'Date to be confirmed';
+  const displayTime = eventTime || 'Time to be confirmed';
+  const displayVenue = eventVenue
+    ? `${eventVenue}${eventAddress ? `, ${eventAddress}` : ''}`
+    : (eventAddress || 'Venue details to be announced');
 
   const body = `
     <!-- Top Welcome Message -->
@@ -448,11 +441,7 @@ export const sendEventRegistrationConfirmationEmail = async (
     </p>
 
     <p style="color: #2D231E; font-size: 14.5px; line-height: 1.7; margin: 0 0 22px;">
-      ${
-        isBathukamma
-          ? 'Thank you for registering and making your payment for <strong>MITRA Grays Bathukamma 2026</strong>. We’re delighted to confirm your registration and look forward to welcoming you and your family.'
-          : `Thank you for registering and making your payment for <strong>${eventName}</strong>. We’re delighted to confirm your registration and look forward to welcoming you and your family.`
-      }
+      Thank you for registering and making your payment for <strong>${eventName || 'MITRA UK Event'}</strong>. We’re delighted to confirm your registration and look forward to welcoming you and your family.
     </p>
 
     <!-- Event Schedule & Location Card -->
@@ -564,11 +553,7 @@ export const sendEventRegistrationConfirmationEmail = async (
 
     <!-- Celebration Note -->
     <p style="color: #2D231E; font-size: 14px; line-height: 1.7; margin: 0 0 16px;">
-      ${
-        isBathukamma
-          ? 'Get ready for a wonderful evening celebrating flowers, culture and togetherness, with family fun, DJ, food and traditional Bathukamma celebrations.'
-          : 'Get ready for a memorable cultural gathering with our vibrant diaspora community, wonderful traditions, authentic food, and festive celebrations.'
-      }
+      Get ready for a wonderful event celebrating culture, community and togetherness, with family fun, entertainment, delicious food and festive celebrations.
     </p>
 
     <p style="color: #2D231E; font-size: 14px; line-height: 1.7; margin: 0 0 24px;">
@@ -581,7 +566,7 @@ export const sendEventRegistrationConfirmationEmail = async (
         Warm regards,
       </p>
       <p style="color: #C2410C; font-size: 14px; font-weight: 800; margin: 0 0 2px;">
-        ${isBathukamma ? 'Team MITRA Grays' : 'Team MITRA UK'}
+        Team MITRA UK
       </p>
       <p style="color: #7C2D12; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin: 0;">
         Mana Indian Telugu Roots Abroad

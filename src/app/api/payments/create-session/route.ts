@@ -45,7 +45,7 @@ export async function POST(request: Request) {
   const normalEmail = customerEmail ? String(customerEmail).toLowerCase().trim() : '';
   const safeCustomer = customerName ? String(customerName).trim() : 'Unknown';
   const safeType = donationType ? String(donationType).toLowerCase().trim() : 'general';
-  const safeEvent = eventName || eventId || 'London Ganesh Mahotsav 2026';
+  const safeEvent = eventName || eventId || 'MITRA Community Event';
 
   if (!amount || !customerName || !customerEmail) {
     await logger.warn('payments/create-session', `Validation failed: Missing required fields for user "${safeCustomer}" <${normalEmail}>`, {

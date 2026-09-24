@@ -54,18 +54,12 @@ export async function POST(request: Request) {
       where: { id: eventId },
     });
 
-    if (!eventRecord && (eventId === 'evt-ganesh-chaturthi' || eventId === 'evt-101')) {
-      eventRecord = await prisma.event.findFirst({
-        where: { title: { contains: 'Ganesh', mode: 'insensitive' } },
-      });
-    }
-
-    if (!eventRecord && (eventId === 'evt-bathukamma-2026' || eventId.toLowerCase().includes('bathukamma') || eventId.toLowerCase().includes('grays'))) {
+    if (!eventRecord) {
       eventRecord = await prisma.event.findFirst({
         where: {
           OR: [
-            { title: { contains: 'Bathukamma', mode: 'insensitive' } },
-            { title: { contains: 'Grays', mode: 'insensitive' } },
+            { id: { equals: eventId, mode: 'insensitive' } },
+            { title: { contains: eventId.replace(/-/g, ' '), mode: 'insensitive' } },
           ],
         },
       });
@@ -205,33 +199,10 @@ export async function POST(request: Request) {
       }).catch(() => {});
     }
 
-    if (!eventRecord) {
-      const isBathukammaId = eventId.toLowerCase().includes('bathukamma') || eventId.toLowerCase().includes('grays');
-      eventRecord = await prisma.event.create({
-        data: {
-          id: eventId,
-          title: isBathukammaId ? 'MITRA Grays Bathukamma 2026' : 'London Ganesh Mahotsav 2026',
-          category: 'Cultural Events',
-          date: isBathukammaId ? '2026-10-18' : '13 to 19 September 2026',
-          time: isBathukammaId ? '4:30 PM onwards' : 'Monday – Saturday: 6:00 PM – 9:00 PM | Sunday: 11:00 AM – 5:00 PM',
-          venue: isBathukammaId ? 'Thurrock Rugby Football Club' : 'E Block, SLOUGH & LANGLEY COLLEGE',
-          address: isBathukammaId ? 'Oakfield, Long Lane, Grays, Essex, RM16 2QH' : 'Langley Road, SL3 8GW',
-          description: isBathukammaId
-            ? 'Get ready for a wonderful evening celebrating flowers, culture and togetherness, with family fun, DJ, food and traditional Bathukamma celebrations.'
-            : 'London’s largest Maha Ganapathi Mahotsav.',
-          bannerUrl: isBathukammaId
-            ? 'https://images.unsplash.com/photo-1545232979-fbf34fe37b38?auto=format&fit=crop&q=80&w=1200'
-            : '/assets/organizers-poster.jpg',
-          capacity: isBathukammaId ? 600 : 5000,
-          rsvpCount: totalTickets,
-        },
-      }).catch(() => null);
-    } else {
-      await prisma.event.update({
-        where: { id: eventId },
-        data: { rsvpCount: { increment: totalTickets } },
-      }).catch(() => {});
-    }
+    await prisma.event.update({
+      where: { id: eventRecord.id },
+      data: { rsvpCount: { increment: totalTickets } },
+    }).catch(() => {});
 
     // ── 2. Create Event RSVP in DB ──────────────────────────────────────────
     const parsedAmount = Number(totalAmount) || 0;
@@ -283,11 +254,11 @@ export async function POST(request: Request) {
      sendEventRegistrationConfirmationEmail({
        recipientEmail: normalEmail,
        recipientName: safeName,
-       eventName: eventRecord?.title || 'MITRA Grays Bathukamma 2026',
-       eventDate: eventRecord?.date || 'Sunday, 18 October 2026',
-       eventTime: eventRecord?.time || '4:30 PM onwards',
-       eventVenue: eventRecord?.venue || 'Thurrock Rugby Football Club',
-       eventAddress: eventRecord?.address || 'Oakfield, Long Lane, Grays, Essex, RM16 2QH',
+       eventName: eventRecord.title,
+       eventDate: eventRecord.date,
+       eventTime: eventRecord.time,
+       eventVenue: eventRecord.venue,
+       eventAddress: eventRecord.address || '',
        totalAmount: parsedAmount,
        supportAmount: Number(supportAmount) || 0,
        ticketsCount: totalTickets,

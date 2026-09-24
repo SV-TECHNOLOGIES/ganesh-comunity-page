@@ -30,7 +30,7 @@ export default function RitualCountdown({
 
   const targetTimestamp = propTargetDate
     ? new Date(propTargetDate).getTime()
-    : new Date('2026-09-14T00:00:00.000Z').getTime();
+    : new Date('2026-10-14T00:00:00.000Z').getTime();
 
   useEffect(() => {
     const updateCountdown = () => {
