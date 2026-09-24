@@ -361,7 +361,7 @@ export default function AdminPaymentsPage() {
         >
           <div className="flex justify-between items-center text-[#6B3A2A]">
             <span className="text-[11px] uppercase font-bold tracking-wider text-amber-700">
-              Pending / In-Flight
+              Pending
             </span>
             <div className="p-2 bg-amber-100/80 rounded-xl text-amber-600">
               <Clock className="w-4 h-4" />
@@ -376,7 +376,7 @@ export default function AdminPaymentsPage() {
                 {stats.pendingCount} Pending Bookings
               </span>
               <span className="text-[10px] text-amber-600/90 font-medium">
-                {statusFilter === 'Pending' ? '● Filter Active' : 'Click to filter'}
+                {statusFilter === 'Pending' ? '● Filter Active' : 'Filter'}
               </span>
             </div>
           </div>
@@ -390,7 +390,7 @@ export default function AdminPaymentsPage() {
           }`}
         >
           <div className="flex justify-between items-center text-[#6B3A2A]">
-            <span className="text-[11px] uppercase font-bold tracking-wider">Total Recorded Ledger</span>
+            <span className="text-[11px] uppercase font-bold tracking-wider">Total Recorded</span>
             <div className="p-2 bg-[#FFF0E0] rounded-xl text-[#E65C00]">
               <CreditCard className="w-4 h-4" />
             </div>
@@ -439,10 +439,10 @@ export default function AdminPaymentsPage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#E65C00]/15 pb-4">
               <div>
                 <h3 className="text-lg font-black font-cinzel text-[#3D1A00]">
-                  RECENT PAYMENTS &amp; SANKALPAM LEDGER
+                  Recent Payments
                 </h3>
                 <p className="text-xs text-[#6B3A2A] font-semibold">
-                  Detailed logs of devotee pooja bookings, Gotrams, priest Sankalpam family names, and seva payments.
+                  View and manage devotee pooja bookings and payment transactions.
                 </p>
               </div>
 
