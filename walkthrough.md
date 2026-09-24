@@ -88,3 +88,26 @@ All links from the featured hero on the home page and throughout navigation now 
    - Enabled template hero rendering for all database event IDs (including CUIDs like `cmu8fbb720000141sx0p856rb`) when customized in the Admin Panel.
 5. **[`next.config.js`](file:///Users/venkey/Documents/svr/UKTA/next.config.js)** & Header components:
    - Added server-side 307 redirect from `/ganesh-event-2026` to `/events/evt-ganesh-chaturthi`, unifying all event URLs under `/events/<eventId>`.
+
+---
+
+## 5. Complete Removal of `event-hero-config.json` & Pure Database Architecture
+
+The file [`src/data/event-hero-config.json`](file:///Users/venkey/Documents/svr/UKTA/src/data/event-hero-config.json) has been completely retired from the project:
+
+1. **[`src/lib/config-preferences.ts`](file:///Users/venkey/Documents/svr/UKTA/src/lib/config-preferences.ts)**:
+   - Removed `fs` and `path` imports entirely.
+   - Initial bootstrap configuration (`DEFAULT_GANESH_EVENT_CONFIG`) is embedded directly in TypeScript code.
+   - `seedDefaultPreferences()` seeds directly into the PostgreSQL `Config` table and `Event` table.
+   - All preference retrieval (`getPreferencesForEvent`, `getFeaturedEventPreferences`) and mutations (`saveEventPreferences`, `setActiveHomeEventId`) execute 100% against PostgreSQL via Prisma.
+
+2. **[`src/app/api/admin/event-hero-config/route.ts`](file:///Users/venkey/Documents/svr/UKTA/src/app/api/admin/event-hero-config/route.ts)**:
+   - Removed `readStorageConfig` and `writeStorageConfig` JSON file access.
+   - The `GET` and `POST` routes read and persist configurations directly to PostgreSQL.
+
+3. **[`scripts/seed-preferences.ts`](file:///Users/venkey/Documents/svr/UKTA/scripts/seed-preferences.ts)**:
+   - Updated to use in-memory TypeScript seed data rather than reading from a JSON file.
+
+4. **[`next.config.js`](file:///Users/venkey/Documents/svr/UKTA/next.config.js)**:
+   - Added automated startup cleanup that removes `src/data/event-hero-config.json` from the filesystem.
+

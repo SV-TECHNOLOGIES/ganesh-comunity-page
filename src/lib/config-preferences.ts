@@ -1,6 +1,4 @@
 import { prisma } from '@/lib/prisma';
-import fs from 'fs';
-import path from 'path';
 import {
   PREFERENCE_PREFIX,
   PREF_HOME_ACTIVE_EVENT_ID,
@@ -170,7 +168,7 @@ export async function getPreferencesForEvent(eventId: string) {
   // Check if seeded; if no configs exist at all, seed first
   const count = await prisma.config.count();
   if (count === 0) {
-    await seedConfigFromHeroJson();
+    await seedDefaultPreferences();
   }
 
   const rows = await prisma.config.findMany({
@@ -205,7 +203,7 @@ export async function getPreferencesForEvent(eventId: string) {
 export async function getFeaturedEventPreferences() {
   const count = await prisma.config.count();
   if (count === 0) {
-    await seedConfigFromHeroJson();
+    await seedDefaultPreferences();
   }
 
   // 1. Get active home event ID preference
@@ -316,59 +314,108 @@ export async function setActiveHomeEventId(eventId: string) {
   return await setPreference(PREF_HOME_ACTIVE_EVENT_ID, eventId, null, 'string');
 }
 
+const DEFAULT_GANESH_EVENT_CONFIG: EventTemplateConfig = {
+  id: 'evt-ganesh-chaturthi',
+  title: 'THE BIGGEST MAHA GANAPATHI',
+  eventSlug: 'events/evt-ganesh-chaturthi',
+  targetDate: '2026-09-14T00:00:00.000Z',
+  hero: {
+    heroType: '3d-model',
+    heroVariant: '3d-sanctum',
+    modelUrl: '/assets/idols/Lord Ganesh.glb',
+    modelScale: 2.8,
+    proceduralFallback: 'ganesha',
+    showParticles: true,
+    showCornerMotifs: true,
+    showRadialAura: true,
+    bannerImageUrl: '/assets/poster.jpg',
+    videoUrl: '',
+    presenterBadge: 'Welcome to Mana Indian Telugu Roots Abroad (MITRA UK)',
+    title: 'THE BIGGEST MAHA GANAPATHI',
+    subtitle: 'LONDON GANESH MAHOTSAV 2026',
+    tagline: 'Streaming 3D Bappa Murti & Devotional Rays',
+    loadingText: 'ENTERING SANCTUM...',
+    scrollCueText: 'Scroll to Enter Sanctum',
+    primaryColor: '#E65C00',
+    accentColor: '#CC4000',
+    backgroundColor: '#FFF8F0',
+    primaryCta: {
+      label: 'Book Pooja / Seva',
+      action: 'pooja',
+    },
+    secondaryCta: {
+      label: 'Make Donation',
+      action: 'donation',
+    },
+    whatsAppUrl: 'https://chat.whatsapp.com/IVqirWWzM96IBNRfhSWGEd',
+  },
+  sections: {
+    showCountdown: true,
+    showEventDetails: true,
+    showStory: true,
+    showSpecs: true,
+    showMediaGallery: true,
+    showOfferings: true,
+    showSponsors: true,
+  },
+  story: {
+    badge: 'THE DEVOTIONAL JOURNEY',
+    quote: '“From Lalbaugcha Raja in Mumbai to Khairatabad Ganesh in Hyderabad… now London\'s own iconic Ganesha arrives in Slough.”',
+    description: 'Organized by MITRA UK in association with ELE Entertainments and presented by Biryanis and more!, the Maha Ganapathi Mahotsav represents a historic cultural milestone for the UK diaspora. Step into the sanctum, offer your prayers, and experience the divine presence of Bappa in Great Britain.',
+    stats: [
+      { value: '5,000+', label: 'Expected Devotees' },
+      { value: '100%', label: 'Eco-Friendly Clay Murti' },
+      { value: 'Grand Aarti', label: 'Daily Vedic Celebrations' },
+    ],
+  },
+  specs: {
+    badge: 'IDOL SPECIFICATIONS & ARTISTRY',
+    title: 'THE MAHA GANAPATHI MURTI',
+    subtitle: 'Hand-sculpted by master artisans with traditional devotion, designed specifically for the historic Slough Mahotsav.',
+  },
+};
+
 /**
- * Seed initial preferences from event-hero-config.json into Config table
+ * Seed initial preferences into Config table directly in database
  */
-export async function seedConfigFromHeroJson(force = false) {
+export async function seedDefaultPreferences(force = false) {
   const count = await prisma.config.count();
   if (count > 0 && !force) {
     return { skipped: true, count };
   }
 
-  const jsonPath = path.join(process.cwd(), 'src', 'data', 'event-hero-config.json');
-  if (!fs.existsSync(jsonPath)) {
-    return { skipped: true, error: 'JSON file not found' };
-  }
-
-  const content = fs.readFileSync(jsonPath, 'utf8');
-  const data = JSON.parse(content);
-
   // 1. Seed active home event
-  const activeEventId = data.activeHomeEventId || 'evt-ganesh-chaturthi';
+  const activeEventId = 'evt-ganesh-chaturthi';
   await setActiveHomeEventId(activeEventId);
 
-  // 2. Seed each event
-  let seededEventsCount = 0;
-  if (data.events) {
-    for (const [eventId, eventConfig] of Object.entries(data.events)) {
-      // Ensure Event exists in Event table first to satisfy foreign key
-      const existing = await prisma.event.findUnique({ where: { id: eventId } });
-      if (!existing) {
-        await prisma.event.create({
-          data: {
-            id: eventId,
-            title: (eventConfig as any).title || eventId,
-            description: (eventConfig as any).story?.description || (eventConfig as any).hero?.subtitle || 'Community Event',
-            date: (eventConfig as any).targetDate ? String((eventConfig as any).targetDate).slice(0, 10) : new Date().toISOString().slice(0, 10),
-            category: 'cultural',
-            venue: 'Slough Community Centre',
-            address: 'Slough, UK',
-            bannerUrl: (eventConfig as any).hero?.bannerImageUrl || '/assets/poster.jpg',
-            status: 'Upcoming',
-          },
-        });
-      }
-
-      await saveEventPreferences(eventId, eventConfig as EventTemplateConfig);
-      seededEventsCount++;
-    }
+  // 2. Ensure Event exists in Event table first to satisfy foreign key
+  const existing = await prisma.event.findUnique({ where: { id: activeEventId } });
+  if (!existing) {
+    await prisma.event.create({
+      data: {
+        id: activeEventId,
+        title: DEFAULT_GANESH_EVENT_CONFIG.title,
+        description: DEFAULT_GANESH_EVENT_CONFIG.story?.description || DEFAULT_GANESH_EVENT_CONFIG.hero?.subtitle || 'Community Event',
+        date: DEFAULT_GANESH_EVENT_CONFIG.targetDate ? String(DEFAULT_GANESH_EVENT_CONFIG.targetDate).slice(0, 10) : new Date().toISOString().slice(0, 10),
+        category: 'cultural',
+        venue: 'Slough Community Centre',
+        address: 'Slough, UK',
+        bannerUrl: DEFAULT_GANESH_EVENT_CONFIG.hero?.bannerImageUrl || '/assets/poster.jpg',
+        status: 'Upcoming',
+      },
+    });
   }
+
+  await saveEventPreferences(activeEventId, DEFAULT_GANESH_EVENT_CONFIG);
 
   const totalConfigs = await prisma.config.count();
   return {
     success: true,
     activeHomeEventId: activeEventId,
-    seededEventsCount,
+    seededEventsCount: 1,
     totalConfigs,
   };
 }
+
+// Backward-compatible alias
+export const seedConfigFromHeroJson = seedDefaultPreferences;
