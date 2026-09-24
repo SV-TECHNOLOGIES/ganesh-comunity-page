@@ -130,7 +130,9 @@ function reconstructEventConfig(
     accentColor: prefs['event.hero.accentColor'] || '#CC4000',
     backgroundColor: prefs['event.hero.backgroundColor'] || '#FFF8F0',
     primaryCta: prefs['event.hero.primaryCta'] || { label: 'Register Now', action: 'rsvp' },
-    secondaryCta: prefs['event.hero.secondaryCta'] || { label: 'Learn More', action: 'link' },
+    secondaryCta: (prefs['event.hero.secondaryCta']?.label && prefs['event.hero.secondaryCta']?.label.trim().toLowerCase() !== 'learn more')
+      ? prefs['event.hero.secondaryCta']
+      : undefined,
     whatsAppUrl: prefs['event.hero.whatsAppUrl'] || '',
   };
 

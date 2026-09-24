@@ -50,10 +50,7 @@ const DEFAULT_CONFIG: EventHeroConfig = {
     label: 'Register Now',
     action: 'rsvp',
   },
-  secondaryCta: {
-    label: 'Learn More',
-    action: 'link',
-  },
+  secondaryCta: undefined,
   whatsAppUrl: '',
 };
 
@@ -447,17 +444,19 @@ export default function EventHero({
               <span>{cfg.primaryCta.label}</span>
             </button>
 
-            <button
-              onClick={() => handleCtaClick(cfg.secondaryCta)}
-              className="maroon-button px-8 py-3.5 rounded-full text-sm font-black uppercase tracking-wider flex items-center gap-2.5 shadow-xl hover:scale-105 transition-all border border-[#E65C00]/30"
-            >
-              {cfg.secondaryCta.action === 'donation' && <Heart className="w-5 h-5 text-[#FF9A3C] fill-current" />}
-              {cfg.secondaryCta.action === 'pooja' && <Flame className="w-5 h-5 text-[#FF9A3C] fill-current" />}
-              {cfg.secondaryCta.action === 'whatsapp' && (
-                <img src="/assets/whatsapp.png" alt="WhatsApp" className="w-5 h-5 object-contain" />
-              )}
-              <span>{cfg.secondaryCta.label}</span>
-            </button>
+            {cfg.secondaryCta?.label && cfg.secondaryCta.label.trim().toLowerCase() !== 'learn more' && (
+              <button
+                onClick={() => handleCtaClick(cfg.secondaryCta!)}
+                className="maroon-button px-8 py-3.5 rounded-full text-sm font-black uppercase tracking-wider flex items-center gap-2.5 shadow-xl hover:scale-105 transition-all border border-[#E65C00]/30"
+              >
+                {cfg.secondaryCta.action === 'donation' && <Heart className="w-5 h-5 text-[#FF9A3C] fill-current" />}
+                {cfg.secondaryCta.action === 'pooja' && <Flame className="w-5 h-5 text-[#FF9A3C] fill-current" />}
+                {cfg.secondaryCta.action === 'whatsapp' && (
+                  <img src="/assets/whatsapp.png" alt="WhatsApp" className="w-5 h-5 object-contain" />
+                )}
+                <span>{cfg.secondaryCta.label}</span>
+              </button>
+            )}
           </>
         )}
       </div>

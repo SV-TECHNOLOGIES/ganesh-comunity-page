@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Flame, Heart, Calendar, Loader2 } from 'lucide-react';
+import { ArrowLeft, Ticket, Loader2 } from 'lucide-react';
 import EventHero from '@/components/EventHero';
 import EventDetailsSection from '@/components/EventDetailsSection';
 import RitualCountdown from '@/components/RitualCountdown';
@@ -166,35 +166,13 @@ export default function EventLandingTemplate({
           </Link>
 
           <div className="flex items-center gap-4">
-            {sections.showCountdown && (
-              <a
-                href="#ritual-clock"
-                className="hidden sm:inline-flex items-center gap-1 text-[#6B3A2A] font-semibold hover:text-[#E65C00] transition-colors"
-              >
-                <Calendar className="w-3.5 h-3.5 text-[#E65C00]" />
-                <span>Countdown</span>
-              </a>
-            )}
-
-            {sections.showEventDetails && (
-              <a
-                href="#event-details"
-                className="inline-flex items-center gap-1 text-[#6B3A2A] font-semibold hover:text-[#E65C00] transition-colors"
-              >
-                <Flame className="w-3.5 h-3.5 text-[#E65C00]" />
-                <span>Schedule</span>
-              </a>
-            )}
-
-            {hero.secondaryCta && (
-              <button
-                onClick={() => openDonation('Annadanam')}
-                className="inline-flex items-center gap-1 bg-[#E65C00]/10 hover:bg-[#E65C00]/20 text-[#E65C00] px-3 py-1 rounded-full font-bold transition-colors"
-              >
-                <Heart className="w-3.5 h-3.5 fill-[#E65C00]" />
-                <span>{hero.secondaryCta.label}</span>
-              </button>
-            )}
+            <button
+              onClick={openRsvp}
+              className="gold-button px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md hover:scale-105 transition-all"
+            >
+              <Ticket className="w-3.5 h-3.5" />
+              <span>RSVP</span>
+            </button>
           </div>
         </div>
       </div>
