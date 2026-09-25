@@ -19,7 +19,7 @@ import {
   Video,
   Volume2
 } from 'lucide-react';
-import { EventHeroConfig } from '@/types/event-template';
+import { EventHeroConfig, HeroCTA } from '@/types/event-template';
 
 export interface EventHeroProps {
   config?: Partial<EventHeroConfig>;
@@ -385,7 +385,7 @@ export default function EventHero({
   );
 
   // CTA Click Helper
-  const handleCtaClick = (cta: typeof cfg.primaryCta) => {
+  const handleCtaClick = (cta?: HeroCTA | null) => {
     const action = cta?.action;
     const label = (cta?.label || '').toLowerCase();
     const isRsvp = action === 'rsvp' || label.includes('register') || label.includes('rsvp');
@@ -434,15 +434,17 @@ export default function EventHero({
           </>
         ) : (
           <>
-            <button
-              onClick={() => handleCtaClick(cfg.primaryCta)}
-              className="gold-button px-8 py-3.5 rounded-full text-sm font-black uppercase tracking-wider flex items-center gap-2.5 hover:scale-105 transition-all shadow-md"
-            >
-              {cfg.primaryCta.action === 'pooja' && <Flame className="w-5 h-5 fill-current text-white" />}
-              {cfg.primaryCta.action === 'rsvp' && <Calendar className="w-5 h-5 text-white" />}
-              {cfg.primaryCta.action === 'donation' && <Heart className="w-5 h-5 text-white" />}
-              <span>{cfg.primaryCta.label}</span>
-            </button>
+            {cfg.primaryCta && (
+              <button
+                onClick={() => handleCtaClick(cfg.primaryCta)}
+                className="gold-button px-8 py-3.5 rounded-full text-sm font-black uppercase tracking-wider flex items-center gap-2.5 hover:scale-105 transition-all shadow-md"
+              >
+                {cfg.primaryCta.action === 'pooja' && <Flame className="w-5 h-5 fill-current text-white" />}
+                {cfg.primaryCta.action === 'rsvp' && <Calendar className="w-5 h-5 text-white" />}
+                {cfg.primaryCta.action === 'donation' && <Heart className="w-5 h-5 text-white" />}
+                <span>{cfg.primaryCta.label}</span>
+              </button>
+            )}
 
             {cfg.secondaryCta?.label && cfg.secondaryCta.label.trim().toLowerCase() !== 'learn more' && (
               <button

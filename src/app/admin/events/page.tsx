@@ -65,6 +65,7 @@ interface RSVPRecord {
     title: string;
     date: string;
     venue: string;
+    customFields?: CustomFieldDefinition[];
   };
 }
 
@@ -610,7 +611,7 @@ export default function AdminEventsPage() {
         const optionsStr = r.customResponses && Object.keys(r.customResponses).length > 0
           ? Object.entries(r.customResponses).map(([k, v]) => {
               const matchingEvt = events.find((e) => e.id === r.eventId) || r.event;
-              const fDef = (matchingEvt?.customFields as any)?.find((f: any) => f.id === k);
+              const fDef = ((matchingEvt as any)?.customFields as any)?.find((f: any) => f.id === k);
               const label = fDef?.label || k;
               const valDisplay = typeof v === 'boolean' ? (v ? 'Yes' : 'No') : String(v ?? '');
               return `${label}: ${valDisplay}`;
@@ -1613,7 +1614,7 @@ export default function AdminEventsPage() {
                           <div className="space-y-1.5 min-w-[150px] max-w-xs">
                             {Object.entries(rsvp.customResponses).map(([key, val]) => {
                               const matchingEvent = events.find((e) => e.id === rsvp.eventId) || rsvp.event;
-                              const fieldDef = (matchingEvent?.customFields as any)?.find((f: any) => f.id === key);
+                              const fieldDef = ((matchingEvent as any)?.customFields as any)?.find((f: any) => f.id === key);
                               const label = fieldDef?.label || key;
                               const displayVal = typeof val === 'boolean' ? (val ? 'Yes' : 'No') : String(val ?? '—');
                               return (

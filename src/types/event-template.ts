@@ -49,8 +49,8 @@ export interface EventHeroConfig {
   accentColor?: string; // e.g. '#CC4000'
   backgroundColor?: string; // e.g. '#FFF8F0'
   // CTAs
-  primaryCta: HeroCTA;
-  secondaryCta: HeroCTA;
+  primaryCta?: HeroCTA;
+  secondaryCta?: HeroCTA;
   whatsAppUrl?: string;
 }
 

@@ -6,6 +6,16 @@ import { POOJA_DATES, getPoojaDateStatus, PoojaDateOption } from '@/components/P
 import { EventItem } from '@/lib/types';
 import { getEventSchedule } from '@/lib/event-schedule';
 
+export interface CustomScheduleConfig {
+  headerBadge?: string;
+  title?: string;
+  subtitle?: string;
+  items?: { time: string; event: string; desc: string }[];
+  venueName?: string;
+  venueAddress?: string;
+  mapsUrl?: string;
+}
+
 interface EventDetailsSectionProps {
   event?: EventItem | null;
   eventId?: string;
@@ -14,13 +24,12 @@ interface EventDetailsSectionProps {
   primaryColor?: string;
   accentColor?: string;
   backgroundColor?: string;
+  customSchedule?: CustomScheduleConfig | null;
   onOpenPoojaBooking?: (dateId?: string) => void;
   onOpenDonation?: (cat?: 'Annadanam' | 'Event Donations') => void;
   onOpenRsvp?: () => void;
   onOpenRSVP?: () => void;
 }
-
-
 
 export default function EventDetailsSection({
   event,
@@ -30,6 +39,7 @@ export default function EventDetailsSection({
   primaryColor = '#E65C00',
   accentColor = '#CC4000',
   backgroundColor = '#FFF8F0',
+  customSchedule = null,
   onOpenPoojaBooking,
   onOpenDonation,
   onOpenRsvp,
@@ -47,7 +57,6 @@ export default function EventDetailsSection({
     activeEvent?.title?.toLowerCase().includes('ganesh') ||
     eventTitle?.toLowerCase().includes('ganesh')
   );
-  const customSchedule =  null;
 
   useEffect(() => {
     if (event) {
