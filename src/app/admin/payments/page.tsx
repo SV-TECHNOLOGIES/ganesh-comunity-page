@@ -24,6 +24,7 @@ import {
   AlertTriangle,
   BadgePercent,
   Calendar,
+  Loader2,
 } from 'lucide-react';
 
 interface PaymentItem {
@@ -50,6 +51,7 @@ interface PaymentItem {
   specialWishes?: string | null;
   primaryDevoteeName?: string | null;
   createdAt: string;
+  hasRsvp?: boolean;
 }
 
 interface PaymentStats {
@@ -107,6 +109,7 @@ export default function AdminPaymentsPage() {
   const [exporting, setExporting] = useState(false);
   const [savingSettings, setSavingSettings] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  const [creatingRsvp, setCreatingRsvp] = useState(false);
 
   // Search & Filter state (applied at DB level)
   const [searchQuery, setSearchQuery] = useState('');
@@ -265,6 +268,34 @@ export default function AdminPaymentsPage() {
       alert('Failed to export CSV.');
     } finally {
       setExporting(false);
+    }
+  };
+
+  const handleCreateRsvp = async (payment: PaymentItem) => {
+    if (!payment.eventId) {
+      alert("This payment does not have an associated Event ID. Cannot create RSVP.");
+      return;
+    }
+    
+    setCreatingRsvp(true);
+    try {
+      const res = await fetch('/api/admin/payments/force-rsvp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentId: payment.id }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("RSVP Created successfully!");
+        setSelectedPaymentDetail({ ...payment, hasRsvp: true });
+        fetchPaymentsData(); // Refresh list to update hasRsvp flags
+      } else {
+        alert("Error: " + data.error);
+      }
+    } catch (e: any) {
+      alert("Error: " + e.message);
+    } finally {
+      setCreatingRsvp(false);
     }
   };
 
@@ -669,6 +700,7 @@ export default function AdminPaymentsPage() {
                       <th className="p-4">Amount (£)</th>
                       <th className="p-4">Method</th>
                       <th className="p-4">Status</th>
+                      <th className="p-4">RSVP</th>
                       <th className="p-4">Date</th>
                       <th className="p-4 text-right">Action</th>
                     </tr>
@@ -782,6 +814,25 @@ export default function AdminPaymentsPage() {
                                 <span className="bg-rose-50 text-rose-700 font-bold px-2.5 py-1 rounded-full text-[10px] border border-rose-500/30 flex items-center gap-1 max-w-fit whitespace-nowrap">
                                   <AlertTriangle className="w-3 h-3 text-rose-600" />
                                   <span>{p.status || 'Failed'}</span>
+                                </span>
+                              )}
+                            </td>
+
+                            {/* RSVP */}
+                            <td className="p-4">
+                              {p.hasRsvp ? (
+                                <span className="text-emerald-600 font-bold flex items-center gap-1 text-[11px] whitespace-nowrap">
+                                  <CheckCircle2 className="w-3.5 h-3.5" />
+                                  <span>Yes</span>
+                                </span>
+                              ) : p.eventId ? (
+                                <span className="text-rose-500 font-bold flex items-center gap-1 text-[11px] whitespace-nowrap" title="No RSVP Created">
+                                  <AlertTriangle className="w-3.5 h-3.5" />
+                                  <span>No</span>
+                                </span>
+                              ) : (
+                                <span className="text-gray-400 font-semibold text-[11px] whitespace-nowrap" title="Not an event payment">
+                                  N/A
                                 </span>
                               )}
                             </td>
@@ -1119,6 +1170,17 @@ export default function AdminPaymentsPage() {
                 </span>
               </div>
             </div>
+
+            {!selectedPaymentDetail.hasRsvp && selectedPaymentDetail.eventId && (
+              <button
+                onClick={() => handleCreateRsvp(selectedPaymentDetail)}
+                disabled={creatingRsvp}
+                className="w-full py-3 rounded-xl font-black uppercase tracking-wider text-xs bg-mitra-gold hover:bg-amber-500 text-mitra-navy transition-colors flex items-center justify-center gap-2 shadow-md"
+              >
+                {creatingRsvp ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                {creatingRsvp ? 'Creating RSVP...' : 'Force Create RSVP for Payment'}
+              </button>
+            )}
 
             <button
               onClick={() => setSelectedPaymentDetail(null)}

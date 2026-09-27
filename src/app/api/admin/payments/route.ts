@@ -139,6 +139,19 @@ export async function GET(request: Request) {
       });
     }
 
+    const paymentIdsToMatch = payments.map(p => p.stripePaymentIntentId || p.id).filter(Boolean);
+    const linkedRsvps = await prisma.eventRSVP.findMany({
+      where: { paymentIntentId: { in: paymentIdsToMatch } },
+      select: { paymentIntentId: true, id: true }
+    });
+    
+    const rsvpMap = new Set(linkedRsvps.map(r => r.paymentIntentId));
+    
+    const enrichedPayments = payments.map(p => ({
+      ...p,
+      hasRsvp: (p.stripePaymentIntentId && rsvpMap.has(p.stripePaymentIntentId)) || rsvpMap.has(p.id)
+    }));
+
     const effectiveLimit = limit === 0 ? totalFiltered : limit;
     const totalPages = effectiveLimit > 0 ? Math.max(1, Math.ceil(totalFiltered / effectiveLimit)) : 1;
 
@@ -146,7 +159,7 @@ export async function GET(request: Request) {
       {
         success: true,
         source: 'prisma',
-        data: payments,
+        data: enrichedPayments,
         pagination: {
           total: totalFiltered,
           page,
