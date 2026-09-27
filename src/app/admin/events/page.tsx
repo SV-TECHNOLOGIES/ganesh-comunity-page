@@ -42,6 +42,7 @@ import { isYouTubeUrl, getYouTubeThumbnailUrl } from '@/lib/youtube';
 import MultiDateSelector from '@/components/admin/MultiDateSelector';
 import CustomFieldBuilder from '@/components/admin/CustomFieldBuilder';
 import { CustomFieldDefinition, EventItem, EventScheduleDay } from '@/lib/types';
+import { AddEventForm } from './components/AddEventForm';
 
 interface RSVPRecord {
   id: string;
@@ -60,13 +61,7 @@ interface RSVPRecord {
   customResponses?: Record<string, any>;
   createdAt: string;
   isMember?: boolean;
-  event?: {
-    id: string;
-    title: string;
-    date: string;
-    venue: string;
-    customFields?: CustomFieldDefinition[];
-  };
+  event?: Pick<EventItem, 'id' | 'title' | 'date' | 'venue' | 'customFields'>;
 }
 
 interface DayAnalyticsItem {
@@ -127,31 +122,6 @@ export default function AdminEventsPage() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
 
-  // New Event Form State
-  const [title, setTitle] = useState('');
-  const [category, setCategory] = useState<EventItem['category']>('Cultural Events');
-  const [date, setDate] = useState('2026-09-14');
-  const [time, setTime] = useState('Monday – Saturday: 6:00 PM – 9:00 PM | Sunday: 11:00 AM – 5:00 PM');
-  const [venue, setVenue] = useState('E Block, SLOUGH & LANGLEY COLLEGE');
-  const [address, setAddress] = useState('Langley Road, SL3 8GW');
-  const [description, setDescription] = useState('');
-  const [bannerUrl, setBannerUrl] = useState('/assets/poster.jpg');
-  const [capacity, setCapacity] = useState(5000);
-  const [ticketPrice, setTicketPrice] = useState(0);
-  const [childTicketPrice, setChildTicketPrice] = useState(0);
-  const [enableRsvp, setEnableRsvp] = useState(true);
-  const [enableSupportPayment, setEnableSupportPayment] = useState(true);
-  const [enablePooja, setEnablePooja] = useState(true);
-  const [enforceCapacityLimit, setEnforceCapacityLimit] = useState(false);
-  const [adultCapacity, setAdultCapacity] = useState(0);
-  const [childCapacity, setChildCapacity] = useState(0);
-  const [mapUrl, setMapUrl] = useState('');
-  const [customFields, setCustomFields] = useState<CustomFieldDefinition[]>([]);
-  const [availableDates, setAvailableDates] = useState<string[]>([]);
-  const [eventSchedule, setEventSchedule] = useState<EventScheduleDay[]>([]);
-  const [uploadingBanner, setUploadingBanner] = useState(false);
-  const [uploadingSlot, setUploadingSlot] = useState<number | null>(null);
-
   // Edit Event & Featured Media State
   const [editingEvent, setEditingEvent] = useState<EventItem | null>(null);
   const [editTab, setEditTab] = useState<'details' | 'media'>('details');
@@ -186,6 +156,9 @@ export default function AdminEventsPage() {
   const [activeEventSlotPicker, setActiveEventSlotPicker] = useState<number | null>(null);
   const [eventMediaSearch, setEventMediaSearch] = useState('');
 
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [uploadingSlot, setUploadingSlot] = useState<number | null>(null);
+
   const handleUploadBanner = async (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -205,8 +178,6 @@ export default function AdminEventsPage() {
       if (json.success && json.url) {
         if (isEdit) {
           setEditFormData((prev) => ({ ...prev, bannerUrl: json.url }));
-        } else {
-          setBannerUrl(json.url);
         }
         setActionNotice('Banner image uploaded successfully!');
       } else {
@@ -220,7 +191,6 @@ export default function AdminEventsPage() {
       e.target.value = '';
     }
   };
-
   const handleUploadDirectToSlot = async (e: React.ChangeEvent<HTMLInputElement>, slotNum: number) => {
     const file = e.target.files?.[0];
     if (!file || !editingEvent) return;
@@ -445,56 +415,7 @@ export default function AdminEventsPage() {
     fetchRsvps();
   }, [fetchRsvps]);
 
-  const handleCreateEvent = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const newEvent: EventItem = {
-      id: `evt-${Date.now()}`,
-      title,
-      category,
-      date,
-      time,
-      venue,
-      address,
-      description,
-      bannerUrl,
-      status: 'Upcoming',
-      capacity: Number(capacity),
-      ticketPrice: Number(ticketPrice),
-      childTicketPrice: Number(childTicketPrice),
-      enableRsvp,
-      enableSupportPayment,
-      enablePooja,
-      enforceCapacityLimit,
-      adultCapacity: Number(adultCapacity) || 0,
-      childCapacity: Number(childCapacity) || 0,
-      mapUrl: mapUrl ? mapUrl.trim() : undefined,
-      customFields,
-      availableDates,
-      eventSchedule,
-      rsvpCount: 0,
-      featured: true,
-    };
 
-    setEvents((prev) => [newEvent, ...prev]);
-    setShowAddForm(false);
-    setAvailableDates([]);
-    setEventSchedule([]);
-    setAdultCapacity(0);
-    setChildCapacity(0);
-    setMapUrl('');
-    setCustomFields([]);
-
-    try {
-      await fetch('/api/admin/events', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newEvent),
-      });
-      fetchEvents();
-    } catch {}
-
-    alert(`New Event "${newEvent.title}" successfully created!`);
-  };
 
   const handleDeleteRSVP = async (rsvpId: string) => {
     if (!confirm('Are you sure you want to delete this RSVP record?')) return;
@@ -611,7 +532,7 @@ export default function AdminEventsPage() {
         const optionsStr = r.customResponses && Object.keys(r.customResponses).length > 0
           ? Object.entries(r.customResponses).map(([k, v]) => {
               const matchingEvt = events.find((e) => e.id === r.eventId) || r.event;
-              const fDef = ((matchingEvt as any)?.customFields as any)?.find((f: any) => f.id === k);
+              const fDef = matchingEvt?.customFields?.find((f) => f.id === k);
               const label = fDef?.label || k;
               const valDisplay = typeof v === 'boolean' ? (v ? 'Yes' : 'No') : String(v ?? '');
               return `${label}: ${valDisplay}`;
@@ -807,277 +728,14 @@ export default function AdminEventsPage() {
         <div className="space-y-6">
           {/* Add Event Form Modal / Expandable Card */}
           {showAddForm && (
-            <form onSubmit={handleCreateEvent} className="bg-slate-950 p-6 rounded-3xl border-2 border-mitra-gold space-y-4 text-xs">
-              <h2 className="text-base font-bold text-mitra-gold">Create New MITRA Event</h2>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">Event Title</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. London Ganesh Mahotsav 2026"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">Category</label>
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value as any)}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white"
-                  >
-                    <option value="Cultural Events">Cultural Events</option>
-                    <option value="Mahotsav &amp; Darshan">Mahotsav &amp; Darshan</option>
-                    <option value="Business Networking">Business Networking</option>
-                    <option value="Sports">Sports</option>
-                    <option value="Women Empowerment">Women Empowerment</option>
-                    <option value="World Conferences">World Conferences</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">Event Date</label>
-                  <input
-                    type="text"
-                    required
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">Timing Details</label>
-                  <input
-                    type="text"
-                    required
-                    value={time}
-                    onChange={(e) => setTime(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">Adult Ticket Price (£)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    required
-                    value={ticketPrice}
-                    onChange={(e) => setTicketPrice(Number(e.target.value))}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">Child Ticket Price (£)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    required
-                    value={childTicketPrice}
-                    onChange={(e) => setChildTicketPrice(Number(e.target.value))}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">Venue Location</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. E Block, SLOUGH & LANGLEY COLLEGE"
-                    value={venue}
-                    onChange={(e) => setVenue(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">Venue Address</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Langley Road, SL3 8GW"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">Venue Google Map / Embed URL</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. https://maps.google.com/..."
-                    value={mapUrl}
-                    onChange={(e) => setMapUrl(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white placeholder:text-slate-600 text-xs"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">Total Capacity</label>
-                  <input
-                    type="number"
-                    min="1"
-                    required
-                    value={capacity}
-                    onChange={(e) => setCapacity(Number(e.target.value))}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white"
-                  />
-                  <span className="text-[10px] text-slate-500">Overall attendee limit</span>
-                </div>
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">Adult Limit Booking</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={adultCapacity}
-                    onChange={(e) => setAdultCapacity(Number(e.target.value))}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white"
-                  />
-                  <span className="text-[10px] text-slate-500">0 = no separate limit</span>
-                </div>
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">Child Limit Booking</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={childCapacity}
-                    onChange={(e) => setChildCapacity(Number(e.target.value))}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white"
-                  />
-                  <span className="text-[10px] text-slate-500">0 = no separate limit</span>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-slate-300 font-bold mb-1">Banner Image URL</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. /assets/poster.jpg"
-                    value={bannerUrl}
-                    onChange={(e) => setBannerUrl(e.target.value)}
-                    className="flex-1 bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white"
-                  />
-                  <label className="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 transition-colors">
-                    <Upload className="w-3.5 h-3.5 text-mitra-gold" />
-                    <span>{uploadingBanner ? 'Uploading...' : 'Upload Image'}</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      disabled={uploadingBanner}
-                      onChange={(e) => handleUploadBanner(e, false)}
-                    />
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <MultiDateSelector
-                  dates={availableDates}
-                  onChange={setAvailableDates}
-                  schedule={eventSchedule}
-                  onScheduleChange={setEventSchedule}
-                  label="Select Darshan / Event Date(s) for RSVP & Schedule"
-                  helperText="Pick multiple individual dates or generate a date range. You can customize deities, sacred rituals, and themes for each date directly below."
-                />
-              </div>
-
-              <div>
-                <CustomFieldBuilder
-                  fields={customFields}
-                  onChange={setCustomFields}
-                />
-              </div>
-
-              {/* Feature Toggles & Capacity Limit */}
-              <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl space-y-3">
-                <span className="text-[11px] font-bold text-mitra-gold uppercase tracking-wider block">
-                  Action Buttons &amp; Registration Control
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <label className="flex items-center gap-2.5 bg-slate-950 p-2.5 rounded-xl border border-slate-800 cursor-pointer hover:border-mitra-gold/50 transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={enableRsvp}
-                      onChange={(e) => setEnableRsvp(e.target.checked)}
-                      className="w-4 h-4 rounded text-mitra-gold focus:ring-mitra-gold bg-slate-900 border-slate-700"
-                    />
-                    <div>
-                      <span className="text-xs font-bold text-white block">Enable "Register / RSVP Now"</span>
-                      <span className="text-[10px] text-slate-400">Allow devotee event registrations</span>
-                    </div>
-                  </label>
-
-                  <label className="flex items-center gap-2.5 bg-slate-950 p-2.5 rounded-xl border border-slate-800 cursor-pointer hover:border-mitra-gold/50 transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={enableSupportPayment}
-                      onChange={(e) => setEnableSupportPayment(e.target.checked)}
-                      className="w-4 h-4 rounded text-mitra-gold focus:ring-mitra-gold bg-slate-900 border-slate-700"
-                    />
-                    <div>
-                      <span className="text-xs font-bold text-white block">Enable "Event Support Payment"</span>
-                      <span className="text-[10px] text-slate-400">Show donation / support payment CTA</span>
-                    </div>
-                  </label>
-
-                  <label className="flex items-center gap-2.5 bg-slate-950 p-2.5 rounded-xl border border-slate-800 cursor-pointer hover:border-mitra-gold/50 transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={enablePooja}
-                      onChange={(e) => setEnablePooja(e.target.checked)}
-                      className="w-4 h-4 rounded text-mitra-gold focus:ring-mitra-gold bg-slate-900 border-slate-700"
-                    />
-                    <div>
-                      <span className="text-xs font-bold text-white block">Enable "Book Pooja"</span>
-                      <span className="text-[10px] text-slate-400">Allow devotees to book poojas/rituals</span>
-                    </div>
-                  </label>
-
-                  <label className="flex items-center gap-2.5 bg-slate-950 p-2.5 rounded-xl border border-slate-800 cursor-pointer hover:border-mitra-gold/50 transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={enforceCapacityLimit}
-                      onChange={(e) => setEnforceCapacityLimit(e.target.checked)}
-                      className="w-4 h-4 rounded text-mitra-gold focus:ring-mitra-gold bg-slate-900 border-slate-700"
-                    />
-                    <div>
-                      <span className="text-xs font-bold text-white block">Limit Registrations When Full</span>
-                      <span className="text-[10px] text-slate-400">Stop accepting RSVPs if capacity is reached</span>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-slate-300 font-bold mb-1">Description</label>
-                <textarea
-                  rows={3}
-                  required
-                  placeholder="Event description..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-white"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-mitra-red hover:bg-mitra-red-dark text-white font-bold py-3 rounded-xl transition-colors"
-              >
-                Publish Event Immediately
-              </button>
-            </form>
+            <AddEventForm 
+              onSuccess={() => {
+                setShowAddForm(false);
+                fetchEvents();
+              }}
+              onCancel={() => setShowAddForm(false)}
+              setActionNotice={setActionNotice}
+            />
           )}
 
           {/* Events List Table */}
@@ -1614,7 +1272,7 @@ export default function AdminEventsPage() {
                           <div className="space-y-1.5 min-w-[150px] max-w-xs">
                             {Object.entries(rsvp.customResponses).map(([key, val]) => {
                               const matchingEvent = events.find((e) => e.id === rsvp.eventId) || rsvp.event;
-                              const fieldDef = ((matchingEvent as any)?.customFields as any)?.find((f: any) => f.id === key);
+                              const fieldDef = matchingEvent?.customFields?.find((f) => f.id === key);
                               const label = fieldDef?.label || key;
                               const displayVal = typeof val === 'boolean' ? (val ? 'Yes' : 'No') : String(val ?? '—');
                               return (

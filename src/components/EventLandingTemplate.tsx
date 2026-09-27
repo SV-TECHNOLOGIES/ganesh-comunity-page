@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { ArrowLeft, Ticket, Loader2 } from 'lucide-react';
 import EventHero from '@/components/EventHero';
@@ -11,11 +12,23 @@ import IdolSpecsCard from '@/components/IdolSpecsCard';
 import MediaTeaserSection from '@/components/MediaTeaserSection';
 import OfferingPlaques from '@/components/OfferingPlaques';
 import SponsorRibbonBand from '@/components/SponsorRibbonBand';
-import PoojaBookingModal from '@/components/PoojaBookingModal';
-import DonationModal from '@/components/DonationModal';
-import NotifyMeModal from '@/components/NotifyMeModal';
-import EventRSVPModal from '@/components/EventRSVPModal';
 import { EventTemplateConfig } from '@/types/event-template';
+
+// Heavy modals: lazy-loaded on demand to reduce initial page bundle size
+const PoojaBookingModal = dynamic(() => import('@/components/PoojaBookingModal'), {
+  ssr: false,
+  loading: () => <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"><Loader2 className="w-8 h-8 text-orange-400 animate-spin" /></div>,
+});
+const DonationModal = dynamic(() => import('@/components/DonationModal'), {
+  ssr: false,
+  loading: () => <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"><Loader2 className="w-8 h-8 text-orange-400 animate-spin" /></div>,
+});
+const NotifyMeModal = dynamic(() => import('@/components/NotifyMeModal'), { ssr: false });
+const EventRSVPModal = dynamic(() => import('@/components/EventRSVPModal'), {
+  ssr: false,
+  loading: () => <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"><Loader2 className="w-8 h-8 text-orange-400 animate-spin" /></div>,
+});
+
 
 export interface EventLandingTemplateProps {
   eventId?: string;

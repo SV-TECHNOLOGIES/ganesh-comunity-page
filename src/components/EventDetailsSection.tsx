@@ -3,18 +3,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { MapPin, Calendar, Clock, Download, ExternalLink, Sparkles, Flame, Heart, Utensils, Star, CheckCircle, Ticket } from 'lucide-react';
 import { POOJA_DATES, getPoojaDateStatus, PoojaDateOption } from '@/components/PoojaBookingModal';
-import { EventItem } from '@/lib/types';
+import { EventItem, CustomScheduleConfig } from '@/lib/types';
 import { getEventSchedule } from '@/lib/event-schedule';
+import { useEvent, isGaneshEvent } from '@/hooks/useEvent';
 
-export interface CustomScheduleConfig {
-  headerBadge?: string;
-  title?: string;
-  subtitle?: string;
-  items?: { time: string; event: string; desc: string }[];
-  venueName?: string;
-  venueAddress?: string;
-  mapsUrl?: string;
-}
+
 
 interface EventDetailsSectionProps {
   event?: EventItem | null;
@@ -45,58 +38,13 @@ export default function EventDetailsSection({
   onOpenRsvp,
   onOpenRSVP,
 }: EventDetailsSectionProps) {
-  const [activeEvent, setActiveEvent] = useState<EventItem | null>(event || null);
+  // Replaces 40 lines of manual useState + useEffect fetch
+  const { event: activeEvent } = useEvent(eventId, event);
   const [dbCounts, setDbCounts] = useState<Record<string, number>>({});
   const handleRsvp = onOpenRSVP || onOpenRsvp;
 
-  const isGanesh = Boolean(
-    eventId === 'evt-ganesh-chaturthi' ||
-    eventId === 'ganesh-event-2026' ||
-    activeEvent?.id === 'evt-ganesh-chaturthi' ||
-    activeEvent?.id === 'ganesh-event-2026' ||
-    activeEvent?.title?.toLowerCase().includes('ganesh') ||
-    eventTitle?.toLowerCase().includes('ganesh')
-  );
-
-  useEffect(() => {
-    if (event) {
-      setActiveEvent(event);
-      return;
-    }
-    let isMounted = true;
-    const fetchEvent = async () => {
-      try {
-        const url = eventId ? `/api/events?id=${encodeURIComponent(eventId)}` : '/api/events';
-        const res = await fetch(url, { cache: 'no-store' });
-        const json = await res.json();
-        if (!isMounted) return;
-
-        if (json.success) {
-          if (eventId && json.data && !Array.isArray(json.data)) {
-            setActiveEvent(json.data);
-          } else if (Array.isArray(json.data)) {
-            const matched = eventId
-              ? json.data.find((e: any) => e.id === eventId)
-              : json.data.find(
-                  (e: any) =>
-                    e.id === 'evt-ganesh-chaturthi' ||
-                    e.title?.toLowerCase().includes('ganesh') ||
-                    e.enablePooja
-                ) || json.data[0];
-            if (matched) {
-              setActiveEvent(matched);
-            }
-          }
-        }
-      } catch (err) {
-        console.error('Failed to fetch event dates for EventDetailsSection:', err);
-      }
-    };
-    fetchEvent();
-    return () => {
-      isMounted = false;
-    };
-  }, [event, eventId]);
+  // Replaces the inline multi-condition isGanesh derivation
+  const isGanesh = isGaneshEvent(activeEvent || eventId, eventTitle);
 
   const scheduleDays: PoojaDateOption[] = useMemo(() => {
     const s = getEventSchedule(activeEvent);
