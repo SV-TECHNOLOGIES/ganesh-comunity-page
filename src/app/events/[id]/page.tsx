@@ -12,6 +12,7 @@ import {
   MapPin, 
   Download, 
   ArrowLeft, 
+  Image as ImageIcon,
   Loader2, 
   Heart, 
   Sparkles, 
@@ -197,6 +198,24 @@ END:VCALENDAR`;
           onBookPoojaClick={event.enablePooja !== false ? () => setPoojaModalOpen(true) : undefined}
         />
 
+        {/* MEDIA GALLERY LINK BANNER */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <Link href={`/media?event=${event.id}`} className="bg-gradient-to-r from-mitra-gold to-amber-500 rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between shadow-xl border-2 border-amber-300 gap-4 transform hover:scale-[1.01] transition-transform">
+            <div className="space-y-1 text-center sm:text-left">
+              <h3 className="text-xl font-black text-[#3D1A00] flex items-center justify-center sm:justify-start gap-2">
+                <ImageIcon className="w-6 h-6 text-amber-900" />
+                Official Event Media Gallery
+              </h3>
+              <p className="text-sm text-amber-900 font-bold">
+                Explore the official photos, videos, and highlights from this event!
+              </p>
+            </div>
+            <div className="shrink-0 bg-[#3D1A00] hover:bg-black text-white px-8 py-3 rounded-2xl font-black shadow-lg transition-colors flex items-center gap-2">
+              <span>Open Media Gallery</span>
+            </div>
+          </Link>
+        </div>
+
         {/* 2. RITUAL COUNTDOWN CLOCK */}
         <RitualCountdown />
 
@@ -281,6 +300,23 @@ END:VCALENDAR`;
           </p>
         </div>
       </div>
+
+      {/* Media Link Banner */}
+      <Link href={`/media?event=${event.id}`} className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between shadow-xl border border-slate-700/50 gap-4 group hover:border-mitra-gold/50 transition-colors">
+        <div className="space-y-1">
+          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-mitra-gold" />
+            Official Event Media Gallery
+          </h3>
+          <p className="text-sm text-slate-300">
+            View high-resolution photos, video reels, and highlights from this event.
+          </p>
+        </div>
+        <div className="shrink-0 bg-mitra-red hover:bg-[#c22026] text-white px-6 py-2.5 rounded-xl font-bold shadow-md transition-all flex items-center gap-2 group-hover:scale-105">
+          <ImageIcon className="w-4 h-4" />
+          <span>View Gallery</span>
+        </div>
+      </Link>
 
       {/* Main Content & RSVP Sidebar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
