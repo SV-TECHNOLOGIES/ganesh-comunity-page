@@ -120,49 +120,53 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check separate adult capacity limit
-    if (eventRecord && eventRecord.enforceCapacityLimit && eventRecord.adultCapacity && eventRecord.adultCapacity > 0) {
-      const adultAgg = await prisma.eventRSVP.aggregate({
-        where: { eventId: eventRecord.id },
-        _sum: { adultsCount: true },
-      });
-      const currentAdults = adultAgg._sum.adultsCount || 0;
-      if (currentAdults + adults > eventRecord.adultCapacity) {
-        const remainingAdults = Math.max(0, eventRecord.adultCapacity - currentAdults);
-        return NextResponse.json(
-          {
-            success: false,
-            error: `Adult capacity limit reached (${eventRecord.adultCapacity} adults max). Only ${remainingAdults} adult slot${remainingAdults === 1 ? '' : 's'} remaining.`,
-          },
-          { status: 400 }
-        );
-      }
-    }
+    // Check separate adult and child capacity limits in a single query
+    const checkAdults = eventRecord && eventRecord.enforceCapacityLimit && eventRecord.adultCapacity && eventRecord.adultCapacity > 0;
+    const checkChildren = eventRecord && eventRecord.enforceCapacityLimit && eventRecord.childCapacity && eventRecord.childCapacity > 0;
 
-    // Check separate child capacity limit
-    if (eventRecord && eventRecord.enforceCapacityLimit && eventRecord.childCapacity && eventRecord.childCapacity > 0) {
-      const childAgg = await prisma.eventRSVP.aggregate({
+    if (checkAdults || checkChildren) {
+      const agg = await prisma.eventRSVP.aggregate({
         where: { eventId: eventRecord.id },
-        _sum: { childrenCount: true },
+        _sum: { adultsCount: true, childrenCount: true },
       });
-      const currentChildren = childAgg._sum.childrenCount || 0;
-      if (currentChildren + children > eventRecord.childCapacity) {
-        const remainingChildren = Math.max(0, eventRecord.childCapacity - currentChildren);
-        return NextResponse.json(
-          {
-            success: false,
-            error: `Child capacity limit reached (${eventRecord.childCapacity} children max). Only ${remainingChildren} child slot${remainingChildren === 1 ? '' : 's'} remaining.`,
-          },
-          { status: 400 }
-        );
+
+      if (checkAdults) {
+        const currentAdults = agg._sum.adultsCount || 0;
+        if (currentAdults + adults > eventRecord.adultCapacity!) {
+          const remainingAdults = Math.max(0, eventRecord.adultCapacity! - currentAdults);
+          return NextResponse.json(
+            {
+              success: false,
+              error: `Adult capacity limit reached (${eventRecord.adultCapacity} adults max). Only ${remainingAdults} adult slot${remainingAdults === 1 ? '' : 's'} remaining.`,
+            },
+            { status: 400 }
+          );
+        }
+      }
+
+      if (checkChildren) {
+        const currentChildren = agg._sum.childrenCount || 0;
+        if (currentChildren + children > eventRecord.childCapacity!) {
+          const remainingChildren = Math.max(0, eventRecord.childCapacity! - currentChildren);
+          return NextResponse.json(
+            {
+              success: false,
+              error: `Child capacity limit reached (${eventRecord.childCapacity} children max). Only ${remainingChildren} child slot${remainingChildren === 1 ? '' : 's'} remaining.`,
+            },
+            { status: 400 }
+          );
+        }
       }
     }
 
     // Check capacity alert threshold (e.g. last 10 slots or fewer left)
     const threshold = Number(process.env.CAPACITY_ALERT_THRESHOLD) || 10;
     const remainingSlots = capacity - newTotalRsvps;
+    
+    let triggerAlert = false;
 
     if (eventRecord && remainingSlots <= threshold && !eventRecord.capacityAlertSent) {
+      triggerAlert = true;
       const notifyRecipient = process.env.NOTIFY_MAIL || process.env.REPORT_MAIL || process.env.SMTP_USER;
       if (notifyRecipient) {
         const alertSubject = `🚨 Event Capacity Warning: "${eventRecord.title}" has ${remainingSlots <= 0 ? 'reached full capacity' : `only ${remainingSlots} slots remaining`}`;
@@ -192,17 +196,20 @@ export async function POST(request: Request) {
           console.error('[CAPACITY ALERT EMAIL ERROR]:', e)
         );
       }
-
-      await prisma.event.update({
-        where: { id: eventId },
-        data: { capacityAlertSent: true },
-      }).catch(() => {});
     }
 
-    await prisma.event.update({
-      where: { id: eventRecord.id },
-      data: { rsvpCount: { increment: totalTickets } },
-    }).catch(() => {});
+    // Single update for RSVP count and capacity alert
+    if (eventRecord) {
+      const updateData: any = { rsvpCount: { increment: totalTickets } };
+      if (triggerAlert) {
+        updateData.capacityAlertSent = true;
+      }
+      
+      await prisma.event.update({
+        where: { id: eventRecord.id },
+        data: updateData,
+      }).catch(() => {});
+    }
 
     // ── 2. Create Event RSVP in DB ──────────────────────────────────────────
     const parsedAmount = Number(totalAmount) || 0;
