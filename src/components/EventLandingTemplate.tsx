@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { ArrowLeft, Ticket, Loader2 } from 'lucide-react';
+import { ArrowLeft, Ticket, Loader2, Image as ImageIcon } from 'lucide-react';
 import EventHero from '@/components/EventHero';
 import EventDetailsSection from '@/components/EventDetailsSection';
 import RitualCountdown from '@/components/RitualCountdown';
@@ -200,10 +200,24 @@ export default function EventLandingTemplate({
         onRsvpClick={openRsvp}
         onNotifyClick={openRsvp}
       />
-
-      
-
-      {/* 3. RITUAL COUNTDOWN CLOCK */}
+      {/* MEDIA GALLERY LINK BANNER */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <Link href={`/media?event=${templateConfig.id || eventId}`} className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between shadow-xl border border-slate-700/50 gap-4 group hover:border-mitra-gold/50 transition-colors">
+          <div className="space-y-1 text-center sm:text-left">
+            <h3 className="text-lg font-bold text-white flex items-center justify-center sm:justify-start gap-2">
+              <ImageIcon className="w-5 h-5 text-mitra-gold" />
+              Official Event Media Gallery
+            </h3>
+            <p className="text-sm text-slate-300">
+              View high-resolution photos, video reels, and highlights from this event.
+            </p>
+          </div>
+          <div className="shrink-0 bg-mitra-red hover:bg-[#c22026] text-white px-6 py-2.5 rounded-xl font-bold shadow-md transition-all flex items-center gap-2 group-hover:scale-105">
+            <ImageIcon className="w-4 h-4" />
+            <span>View Gallery</span>
+          </div>
+        </Link>
+      </div>      {/* 3. RITUAL COUNTDOWN CLOCK */}
       {sections.showCountdown && (
         <RitualCountdown
           targetDate={templateConfig.targetDate}

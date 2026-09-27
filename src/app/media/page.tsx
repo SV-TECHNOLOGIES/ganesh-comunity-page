@@ -217,52 +217,7 @@ function MediaContent() {
             </button>
           </div>
 
-          {/* Event Hero Header Card */}
-          <div className="relative rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-xl bg-slate-950 text-white min-h-[260px] flex flex-col justify-end p-6 sm:p-10">
-            <img
-              src={currentEvent.featuredMediaUrl || currentEvent.bannerUrl || '/assets/poster.jpg'}
-              alt={currentEvent.title}
-              className="absolute inset-0 w-full h-full object-cover opacity-35"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = '/assets/poster.jpg';
-              }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent" />
 
-            <div className="relative z-10 space-y-3 max-w-3xl">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="bg-mitra-red text-white text-[11px] font-black px-3 py-0.5 rounded-full uppercase tracking-wider shadow">
-                  {currentEvent.category}
-                </span>
-                {currentEvent.status && (
-                  <span className="bg-white/10 backdrop-blur-md text-mitra-gold border border-mitra-gold/30 text-[11px] font-bold px-3 py-0.5 rounded-full">
-                    {currentEvent.status}
-                  </span>
-                )}
-              </div>
-
-              <h2 className="text-2xl sm:text-4xl font-black text-white leading-tight">
-                {currentEvent.title}
-              </h2>
-
-              <div className="flex flex-wrap items-center gap-4 text-xs text-slate-300 pt-1 font-medium">
-                <span className="flex items-center gap-1.5 text-mitra-gold">
-                  <Calendar className="w-4 h-4" />
-                  <span>{currentEvent.date}</span>
-                </span>
-                <span className="flex items-center gap-1.5 text-slate-300">
-                  <MapPin className="w-4 h-4 text-rose-400" />
-                  <span>{currentEvent.venue}</span>
-                </span>
-              </div>
-
-              {currentEvent.description && (
-                <p className="text-xs sm:text-sm text-slate-300 line-clamp-2 pt-1">
-                  {currentEvent.description}
-                </p>
-              )}
-            </div>
-          </div>
 
           {/* Media Category Filter Tabs */}
           <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
