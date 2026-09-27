@@ -5,7 +5,7 @@ export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.mitrauk
 
 export function constructMetadata({
   title = 'Mana Indian Telugu Roots Abroad (MITRA) | Official Website',
-  description = 'The premier UK non-profit organization promoting Telugu language, culture, arts, community welfare, student counselling, and high-impact charitable programs across Great Britain.',
+  description = 'The premier UK Telugu Community promoting Telugu language, culture, arts, community welfare, student counselling, career guidance, and flagship Telugu events across UK',
   image = '/assets/organizers-poster.jpg',
   canonical = '/',
   noIndex = false,
