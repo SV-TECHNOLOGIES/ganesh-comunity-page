@@ -52,7 +52,7 @@ export function renderEmailLayout({
   isAlert = false,
 }: EmailLayoutOptions) {
   const currentYear = new Date().getFullYear();
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://mitra.org.uk';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.mitrauk.com';
   const logoUrl = `${baseUrl}/assets/poster.jpg`;
 
   const borderColor = isAlert ? 'rgba(239, 68, 68, 0.35)' : '#EAD8C7';
@@ -118,7 +118,7 @@ export function renderEmailLayout({
               MITRA UK · Mana Indian Telugu Roots Abroad
             </p>
             <p style="color: #6B5E55; font-size: 11px; margin: 0 0 8px;">
-              Slough &amp; London Community Hub · <a href="${baseUrl}" style="color: #EA580C; text-decoration: none; font-weight: 700;">mitra.org.uk</a>
+              Slough &amp; London Community Hub · <a href="${baseUrl}" style="color: #EA580C; text-decoration: none; font-weight: 700;">mitrauk.com</a>
             </p>
             <p style="color: #8C7E74; font-size: 10.5px; margin: 0; line-height: 1.5;">
               ${footerNote}<br/>
@@ -201,7 +201,7 @@ export const sendGuestWelcomeEmail = async (
   tempPassword: string
 ) => {
   const subject = '🙏 Welcome to MITRA UK — Your Account Login Details';
-  const loginUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://mitra.org.uk'}/login`;
+  const loginUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://mitrauk.com'}/login`;
 
   const body = `
     <h2 style="font-family: 'Cinzel', Georgia, serif; color: #8B1D0E; font-size: 18px; font-weight: 800; margin: 0 0 14px; text-transform: uppercase; letter-spacing: 0.8px;">
@@ -292,7 +292,7 @@ export const sendPaymentFailureAlert = async (details: PaymentFailureDetails) =>
   const timeStr = details.timestamp || new Date().toUTCString();
 
   const subject = `🚨 Payment Failure Alert: ${amountStr} ${currencyStr} from ${devoteeName}`;
-  const adminUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://mitra.org.uk'}/admin/payments`;
+  const adminUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://mitrauk.com'}/admin/payments`;
 
   const body = `
     <!-- Top Alert Box (Light Rose & Red) -->
