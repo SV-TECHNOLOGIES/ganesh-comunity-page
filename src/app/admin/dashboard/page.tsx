@@ -106,7 +106,7 @@ interface DashboardData {
   timestamp: string;
   selectedEventId?: string;
   selectedEventTitle?: string | null;
-  events?: { id: string; title: string; date: string; category?: string }[];
+  events?: { id: string; title: string; date: string; category?: string; enablePooja?: boolean }[];
   kpiSummary: KPISummary;
   dailyBreakdown: DailyBreakdownItem[];
   donationBreakdown: DonationBreakdownItem[];
@@ -242,6 +242,9 @@ export default function AdminDashboardPage() {
   const paidPoojaPercent = totalPoojasCombined > 0 ? Math.round((kpi.totalPaidPoojas / totalPoojasCombined) * 100) : 0;
   const freePoojaPercent = totalPoojasCombined > 0 ? 100 - paidPoojaPercent : 0;
 
+  const currentEvent = data?.events?.find(e => e.id === selectedEventId);
+  const isPoojaEnabled = selectedEventId === 'all' || currentEvent?.enablePooja !== false;
+
   return (
     <div className="space-y-8">
       {/* ── 1. HEADER & ACTION CONTROLS ────────────────────────────────────── */}
@@ -335,7 +338,7 @@ export default function AdminDashboardPage() {
           </div>
           <button
             onClick={() => setSelectedEventId('all')}
-            className="self-start sm:self-auto bg-slate-900 hover:bg-slate-800 text-mitra-gold font-bold px-3.5 py-1.5 rounded-xl text-xs border border-mitra-gold/40 transition-colors shadow"
+            className="self-start sm:self-auto bg-[#E65C00] hover:bg-[#FF7A00] text-white font-bold px-4 py-2 rounded-xl text-xs shadow-sm hover:shadow-md transition-all"
           >
             Show All Events
           </button>
@@ -375,6 +378,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* KPI 2: Poojas */}
+        {isPoojaEnabled && (
         <div className="bg-white p-5 rounded-2xl border border-[#E65C00]/20 space-y-2 hover:border-[#E65C00]/50 transition-all shadow-sm group">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#E65C00]">
@@ -405,6 +409,40 @@ export default function AdminDashboardPage() {
             <span className="text-[#E65C00] font-bold">{totalPoojasCombined} Total Bookings</span>
           </div>
         </div>
+        )}
+
+        {/* KPI 2 Alternate: Demographics (Adults vs Kids) */}
+        {!isPoojaEnabled && (
+        <div className="bg-white p-5 rounded-2xl border border-[#E65C00]/20 space-y-2 hover:border-[#E65C00]/50 transition-all shadow-sm group">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-purple-800">
+              Passes Breakdown
+            </span>
+            <div className="p-2 bg-purple-50 text-purple-600 rounded-xl border border-purple-200 shadow-xs">
+              <Users className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="space-y-0.5">
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl sm:text-3xl font-black text-purple-700">
+                {loading ? '...' : kpi.totalAdultsCount}
+                <span className="text-xs sm:text-sm font-bold text-slate-500 uppercase ml-1 tracking-wider">Adults</span>
+              </span>
+              <span className="text-lg text-slate-300 font-normal">·</span>
+              <span className="text-2xl sm:text-3xl font-black text-purple-700">
+                {loading ? '...' : kpi.totalChildrenCount}
+                <span className="text-xs sm:text-sm font-bold text-slate-500 uppercase ml-1 tracking-wider">Kids</span>
+              </span>
+            </div>
+            <p className="text-[11px] text-purple-700 font-bold">
+              {kpi.totalPassesIssued} Total Passes Issued
+            </p>
+          </div>
+          <div className="pt-2 border-t border-[#E65C00]/15 flex items-center justify-between text-[10px] text-[#8C6D62]">
+            <span>Attendee Demographics</span>
+          </div>
+        </div>
+        )}
 
         {/* KPI 3: Total Completed Revenue */}
         <div className="bg-white p-5 rounded-2xl border border-[#E65C00]/20 space-y-2 hover:border-[#E65C00]/50 transition-all shadow-sm group">
@@ -469,6 +507,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* ── 3. DEDICATED SECTION: PAID POOJAS VS FREE POOJAS COMPARISON ─────── */}
+      {isPoojaEnabled && (
       <div className="bg-white p-6 sm:p-7 rounded-3xl border border-[#E65C00]/25 space-y-6 shadow-sm relative overflow-hidden">
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E65C00]/20 pb-4">
@@ -592,6 +631,7 @@ export default function AdminDashboardPage() {
         )}
 
       </div>
+      )}
 
       {/* ── 4. TWO COLUMN SECTION: DONATION BREAKDOWN & ATTENDEE DEMOGRAPHICS ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
