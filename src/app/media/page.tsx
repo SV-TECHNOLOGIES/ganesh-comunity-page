@@ -56,6 +56,19 @@ interface MediaItem {
 
 import { getYouTubeEmbedUrl, getYouTubeThumbnailUrl, isYouTubeUrl } from '@/lib/youtube';
 
+const isExternalAlbum = (url: string) => {
+  if (!url) return false;
+  const lowerUrl = url.toLowerCase();
+  return lowerUrl.includes('photos.app.goo.gl') || 
+         lowerUrl.includes('photos.google.com') || 
+         lowerUrl.includes('drive.google.com') ||
+         lowerUrl.includes('dropbox.com') ||
+         lowerUrl.includes('onedrive') ||
+         lowerUrl.includes('sharepoint.com') ||
+         lowerUrl.includes('icloud.com');
+};
+
+
 function MediaContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -367,16 +380,23 @@ function MediaContent() {
                 }
 
                 // IMAGE CARD
+                const isExt = isExternalAlbum(item.url);
                 const photoIndex = eventPhotos.findIndex((p) => p.id === item.id);
                 return (
                   <div
                     key={item.id}
-                    onClick={() => setActivePhotoIndex(photoIndex >= 0 ? photoIndex : 0)}
+                    onClick={() => {
+                      if (isExt) {
+                        window.open(item.url, '_blank');
+                      } else {
+                        setActivePhotoIndex(photoIndex >= 0 ? photoIndex : 0);
+                      }
+                    }}
                     className="group cursor-pointer bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-md hover:shadow-xl hover:border-mitra-gold/50 transition-all flex flex-col"
                   >
                     <div className="relative aspect-[4/3] bg-slate-950 overflow-hidden shrink-0">
                       <img
-                        src={item.url || item.coverImage || '/assets/poster.jpg'}
+                        src={item.coverImage || (isExt ? '/assets/poster.jpg' : item.url) || '/assets/poster.jpg'}
                         alt={item.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         onError={(e) => {
@@ -396,7 +416,7 @@ function MediaContent() {
 
                       <div className="absolute bottom-3 left-3 right-3 text-white">
                         <span className="text-[10px] text-mitra-gold font-bold block">
-                          Click to enlarge
+                          {isExt ? 'Open External Album ↗' : 'Click to enlarge'}
                         </span>
                         <h4 className="text-xs font-bold truncate">{item.title}</h4>
                       </div>

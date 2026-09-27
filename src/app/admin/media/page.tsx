@@ -26,6 +26,18 @@ import {
 } from 'lucide-react';
 import { isYouTubeUrl, getYouTubeThumbnailUrl } from '@/lib/youtube';
 
+const isExternalAlbum = (url: string) => {
+  if (!url) return false;
+  const lowerUrl = url.toLowerCase();
+  return lowerUrl.includes('photos.app.goo.gl') || 
+         lowerUrl.includes('photos.google.com') || 
+         lowerUrl.includes('drive.google.com') ||
+         lowerUrl.includes('dropbox.com') ||
+         lowerUrl.includes('onedrive') ||
+         lowerUrl.includes('sharepoint.com') ||
+         lowerUrl.includes('icloud.com');
+};
+
 interface EventOption {
   id: string;
   title: string;
@@ -156,43 +168,52 @@ export default function AdminMediaPage() {
     setModalOpen(true);
   };
 
-  // FTP Upload Handler matching Add New Committee Member dialog box
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
 
     setUploadingImage(true);
     setUploadSuccessMsg('');
+    let uploadedUrls: string[] = [];
+    let successCount = 0;
 
-    try {
-      const body = new FormData();
-      body.append('file', file);
-      body.append('useCase', 'media_gallery');
-      body.append('identifier', formData.title || 'media_asset');
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      try {
+        const body = new FormData();
+        body.append('file', file);
+        body.append('useCase', 'media_gallery');
+        body.append('identifier', formData.title || `media_asset_${i}`);
 
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body,
-      });
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body,
+        });
 
-      const data = await res.json();
-      if (data.success && data.url) {
-        setFormData((prev) => ({
-          ...prev,
-          url: data.url,
-          coverImage: prev.coverImage || data.url,
-        }));
-        setUploadSuccessMsg(`Uploaded via ${data.storageType ? data.storageType.toUpperCase() : 'FTP'}: ${data.filename}`);
-      } else {
-        alert(data.error || 'Upload failed.');
+        const data = await res.json();
+        if (data.success && data.url) {
+          uploadedUrls.push(data.url);
+          successCount++;
+        }
+      } catch (err: any) {
+        console.error(`Error uploading file:`, err);
       }
-    } catch (err: any) {
-      alert(`Error uploading file: ${err?.message || 'Network error'}`);
-    } finally {
-      setUploadingImage(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+    }
+
+    if (uploadedUrls.length > 0) {
+      setFormData((prev) => ({
+        ...prev,
+        url: prev.url ? `${prev.url},\n${uploadedUrls.join(',\n')}` : uploadedUrls.join(',\n'),
+        coverImage: prev.coverImage || uploadedUrls[0],
+      }));
+      setUploadSuccessMsg(`Successfully uploaded ${successCount} file(s).`);
+    } else {
+      alert('Upload failed for all files.');
+    }
+
+    setUploadingImage(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -209,24 +230,37 @@ export default function AdminMediaPage() {
 
     setSubmitting(true);
     try {
-      const method = editingItem ? 'PUT' : 'POST';
-      const payload = editingItem ? { id: editingItem.id, ...formData } : formData;
+      const urls = formData.url.split(/[\n,]+/).map(u => u.trim()).filter(Boolean);
 
-      const res = await fetch('/api/admin/media', {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        setModalOpen(false);
-        fetchMedia();
+      if (editingItem || urls.length === 1) {
+        const payload = editingItem ? { id: editingItem.id, ...formData, url: urls[0] } : { ...formData, url: urls[0] };
+        const res = await fetch('/api/admin/media', {
+          method: editingItem ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
       } else {
-        alert(data.error || 'Failed to save media item.');
+        // Bulk create for new items
+        for (let i = 0; i < urls.length; i++) {
+          const payload = { ...formData, url: urls[i], coverImage: urls[i] };
+          if (urls.length > 1) payload.title = `${formData.title} - ${i + 1}`;
+          
+          const res = await fetch('/api/admin/media', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          const data = await res.json();
+          if (!data.success) throw new Error(data.error);
+        }
       }
+
+      setModalOpen(false);
+      fetchMedia();
     } catch (err: any) {
-      alert(`Network error saving media: ${err?.message || 'Please try again.'}`);
+      alert(`Error saving media: ${err?.message || 'Please try again.'}`);
     } finally {
       setSubmitting(false);
     }
@@ -596,20 +630,29 @@ export default function AdminMediaPage() {
               >
                 {/* Thumbnail / Media Preview */}
                 <div className="relative aspect-video bg-slate-900 overflow-hidden shrink-0 cursor-grab active:cursor-grabbing">
-                  <img
-                    src={item.coverImage || (isYouTubeUrl(item.url) ? getYouTubeThumbnailUrl(item.url, 'hq') : null) || item.url || '/assets/poster.jpg'}
-                    alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none"
-                    onError={(e) => {
-                      const ytThumb = isYouTubeUrl(item.url) ? getYouTubeThumbnailUrl(item.url, 'hq') : null;
-                      if (ytThumb && (e.target as HTMLImageElement).src !== ytThumb) {
-                        (e.target as HTMLImageElement).src = ytThumb;
-                      } else {
-                        (e.target as HTMLImageElement).src = '/assets/poster.jpg';
-                      }
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+                  {isExternalAlbum(item.url) ? (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-slate-800 text-slate-400">
+                      <ExternalLink className="w-8 h-8 mb-2 text-mitra-gold" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-center px-4">External Link<br/>(Google Drive/Photos)</span>
+                    </div>
+                  ) : (
+                    <>
+                      <img
+                        src={item.coverImage || (isYouTubeUrl(item.url) ? getYouTubeThumbnailUrl(item.url, 'hq') : null) || item.url || '/assets/poster.jpg'}
+                        alt={item.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none"
+                        onError={(e) => {
+                          const ytThumb = isYouTubeUrl(item.url) ? getYouTubeThumbnailUrl(item.url, 'hq') : null;
+                          if (ytThumb && (e.target as HTMLImageElement).src !== ytThumb) {
+                            (e.target as HTMLImageElement).src = ytThumb;
+                          } else {
+                            (e.target as HTMLImageElement).src = '/assets/poster.jpg';
+                          }
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+                    </>
+                  )}
 
                   {/* Drag Handle Indicator */}
                   <div 
@@ -869,24 +912,30 @@ export default function AdminMediaPage() {
                 <div className="flex items-center gap-3">
                   {/* Preview Thumbnail */}
                   <div className="w-16 h-16 rounded-xl overflow-hidden border-2 border-mitra-gold/60 bg-slate-950 shrink-0 flex items-center justify-center shadow-inner relative">
-                    <img
-                      src={
-                        formData.coverImage ||
-                        (isYouTubeUrl(formData.url) ? getYouTubeThumbnailUrl(formData.url, 'hq') : null) ||
-                        formData.url ||
-                        '/assets/poster.jpg'
-                      }
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const ytThumb = isYouTubeUrl(formData.url) ? getYouTubeThumbnailUrl(formData.url, 'hq') : null;
-                        if (ytThumb && (e.target as HTMLImageElement).src !== ytThumb) {
-                          (e.target as HTMLImageElement).src = ytThumb;
-                        } else {
-                          (e.target as HTMLImageElement).src = '/assets/poster.jpg';
+                    {isExternalAlbum(formData.url) ? (
+                      <div className="w-full h-full flex flex-col items-center justify-center bg-slate-800">
+                        <ExternalLink className="w-6 h-6 text-mitra-gold" />
+                      </div>
+                    ) : (
+                      <img
+                        src={
+                          formData.coverImage ||
+                          (isYouTubeUrl(formData.url) ? getYouTubeThumbnailUrl(formData.url, 'hq') : null) ||
+                          formData.url ||
+                          '/assets/poster.jpg'
                         }
-                      }}
-                    />
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const ytThumb = isYouTubeUrl(formData.url) ? getYouTubeThumbnailUrl(formData.url, 'hq') : null;
+                          if (ytThumb && (e.target as HTMLImageElement).src !== ytThumb) {
+                            (e.target as HTMLImageElement).src = ytThumb;
+                          } else {
+                            (e.target as HTMLImageElement).src = '/assets/poster.jpg';
+                          }
+                        }}
+                      />
+                    )}
                     {formData.type === 'VIDEO' && (
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none">
                         <Video className="w-5 h-5 text-mitra-gold" />
@@ -898,6 +947,7 @@ export default function AdminMediaPage() {
                     <input
                       type="file"
                       ref={fileInputRef}
+                      multiple
                       accept={formData.type === 'VIDEO' ? 'video/*,image/*' : 'image/*'}
                       onChange={handleFileUpload}
                       className="hidden"
@@ -919,7 +969,7 @@ export default function AdminMediaPage() {
                       ) : (
                         <>
                           <Upload className="w-3.5 h-3.5" />
-                          <span>Upload File from Device (FTP)</span>
+                          <span>Upload File(s) from Device (FTP)</span>
                         </>
                       )}
                     </label>
@@ -939,15 +989,15 @@ export default function AdminMediaPage() {
                 {/* Direct URL */}
                 <div>
                   <label className="block text-[11px] text-slate-400 mb-1">
-                    Direct Asset URL / YouTube / Web Link:
+                    Direct Asset URL / Google Drive / External Platform Link (comma separate for multiple):
                   </label>
                   <input
                     type="text"
                     required
                     placeholder={
                       formData.type === 'VIDEO'
-                        ? 'https://www.youtube.com/watch?v=... or https://youtu.be/... or https://media.mitrauk.com/.../video.mp4'
-                        : 'https://media.mitrauk.com/media/gallery/... or /assets/organizers-poster.jpg'
+                        ? 'https://www.youtube.com/watch?v=... or https://media.mitrauk.com/.../video.mp4'
+                        : 'https://drive.google.com/... or https://media.mitrauk.com/.../poster.jpg'
                     }
                     value={formData.url}
                     onChange={(e) => {
