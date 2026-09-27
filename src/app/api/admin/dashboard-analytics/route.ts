@@ -24,6 +24,7 @@ export async function GET(request: Request) {
         orderBy: { createdAt: 'desc' },
       }),
       prisma.eventRSVP.findMany({
+        where: { paymentStatus: { in: ['Completed', 'Free'] } },
         include: {
           event: {
             select: {

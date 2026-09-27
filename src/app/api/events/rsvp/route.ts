@@ -159,6 +159,9 @@ export async function POST(request: Request) {
       }
     }
 
+    const parsedAmount = Number(totalAmount) || 0;
+    const finalPaymentStatus = paymentStatus || (parsedAmount > 0 ? 'Pending' : 'Completed');
+
     // Check capacity alert threshold (e.g. last 10 slots or fewer left)
     const threshold = Number(process.env.CAPACITY_ALERT_THRESHOLD) || 10;
     const remainingSlots = capacity - newTotalRsvps;
@@ -199,7 +202,7 @@ export async function POST(request: Request) {
     }
 
     // Single update for RSVP count and capacity alert
-    if (eventRecord) {
+    if (eventRecord && finalPaymentStatus !== 'Pending') {
       const updateData: any = { rsvpCount: { increment: totalTickets } };
       if (triggerAlert) {
         updateData.capacityAlertSent = true;
@@ -212,8 +215,6 @@ export async function POST(request: Request) {
     }
 
     // ── 2. Create Event RSVP in DB ──────────────────────────────────────────
-    const parsedAmount = Number(totalAmount) || 0;
-    const finalPaymentStatus = paymentStatus || (parsedAmount > 0 ? 'Completed' : 'Free');
 
     let rsvp;
     try {
