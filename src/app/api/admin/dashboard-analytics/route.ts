@@ -444,6 +444,7 @@ export async function GET(request: Request) {
           date: e.date,
           category: e.category,
           status: e.status,
+          enablePooja: e.enablePooja,
         })),
         recentPayments: filteredPayments.slice(0, 8),
         recentRSVPs: filteredRSVPs.slice(0, 8),
