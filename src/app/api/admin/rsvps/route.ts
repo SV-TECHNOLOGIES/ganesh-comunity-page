@@ -20,7 +20,9 @@ export async function GET(request: Request) {
 
     // Base condition for the event (used for analytics calculation)
     const isSingleEventSelected = Boolean(eventId && eventId !== 'all');
-    const eventWhere: Prisma.EventRSVPWhereInput = isSingleEventSelected ? { eventId } : {};
+    const eventWhere: Prisma.EventRSVPWhereInput = isSingleEventSelected
+      ? { eventId, paymentStatus: { in: ['Completed', 'Free'] } }
+      : { paymentStatus: { in: ['Completed', 'Free'] } };
 
     // 1. Fetch Event details and Stats
     const targetEvent = isSingleEventSelected
@@ -88,6 +90,7 @@ export async function GET(request: Request) {
     } else {
       // No single event selected: use pure DB aggregate (fixes 1.7 double-query loading all records into memory)
       const agg = await prisma.eventRSVP.aggregate({
+        where: { paymentStatus: { in: ['Completed', 'Free'] } },
         _count: { id: true },
         _sum: { ticketsCount: true, adultsCount: true, childrenCount: true },
       });
@@ -106,7 +109,9 @@ export async function GET(request: Request) {
 
 
     // 2. Build Prisma Filter Where Clause for Attendee Table Query
-    const whereConditions: Prisma.EventRSVPWhereInput[] = [];
+    const whereConditions: Prisma.EventRSVPWhereInput[] = [
+      { paymentStatus: { in: ['Completed', 'Free'] } }
+    ];
 
     if (eventId && eventId !== 'all') {
       whereConditions.push({ eventId });
@@ -175,9 +180,13 @@ export async function GET(request: Request) {
       });
     }
 
-    // 5. Enrich RSVPs with Member account status
+    // 5. Enrich RSVPs with Member account status and Payment info
     const attendeeEmails = rsvps.map((r) => r.attendeeEmail.toLowerCase().trim()).filter(Boolean);
+    const paymentIntentIds = rsvps.map((r) => r.paymentIntentId).filter(Boolean) as string[];
+
     let memberEmailSet = new Set<string>();
+    let memberMap = new Map<string, any>();
+    let paymentMap = new Map<string, any>();
 
     if (attendeeEmails.length > 0) {
       try {
@@ -187,16 +196,43 @@ export async function GET(request: Request) {
           },
           select: { email: true, id: true, tier: true, status: true },
         });
-        existingMembers.forEach((m) => memberEmailSet.add(m.email.toLowerCase().trim()));
+
+        existingMembers.forEach((m) => {
+          memberEmailSet.add(m.email.toLowerCase().trim());
+          memberMap.set(m.email.toLowerCase().trim(), m);
+        });
       } catch (e) {
         console.warn('[ADMIN RSVPS] Error querying member status:', e);
       }
     }
 
-    const enrichedRsvps = rsvps.map((r) => ({
-      ...r,
-      isMember: memberEmailSet.has(r.attendeeEmail.toLowerCase().trim()),
-    }));
+    if (paymentIntentIds.length > 0) {
+      try {
+        const payments = await prisma.payment.findMany({
+          where: { stripePaymentIntentId: { in: paymentIntentIds } },
+          select: { id: true, stripePaymentIntentId: true, memberId: true },
+        });
+        payments.forEach((p) => {
+          if (p.stripePaymentIntentId) {
+            paymentMap.set(p.stripePaymentIntentId, p);
+          }
+        });
+      } catch (e) {
+        console.warn('[ADMIN RSVPS] Error querying payments:', e);
+      }
+    }
+
+    const enrichedRsvps = rsvps.map((r) => {
+      const email = r.attendeeEmail.toLowerCase().trim();
+      const payment = r.paymentIntentId ? paymentMap.get(r.paymentIntentId) : null;
+      return {
+        ...r,
+        isMember: memberEmailSet.has(email),
+        memberId: memberEmailSet.has(email) ? memberMap.get(email)?.id : null,
+        paymentId: payment ? payment.id : null,
+        paymentMemberId: payment ? payment.memberId : null,
+      };
+    });
 
     const effectiveLimit = limit === 0 ? totalFiltered : limit;
     const totalPages = effectiveLimit > 0 ? Math.max(1, Math.ceil(totalFiltered / effectiveLimit)) : 1;

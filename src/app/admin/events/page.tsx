@@ -61,6 +61,9 @@ interface RSVPRecord {
   customResponses?: Record<string, any>;
   createdAt: string;
   isMember?: boolean;
+  memberId?: string | null;
+  paymentId?: string | null;
+  paymentMemberId?: string | null;
   event?: Pick<EventItem, 'id' | 'title' | 'date' | 'venue' | 'customFields'>;
 }
 
@@ -109,6 +112,7 @@ export default function AdminEventsPage() {
   const [exportingRsvps, setExportingRsvps] = useState(false);
   const [convertingAll, setConvertingAll] = useState(false);
   const [convertingId, setConvertingId] = useState<string | null>(null);
+  const [mappingPaymentId, setMappingPaymentId] = useState<string | null>(null);
   const [actionNotice, setActionNotice] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   
@@ -461,6 +465,34 @@ export default function AdminEventsPage() {
       alert('Error converting RSVP to member.');
     } finally {
       setConvertingId(null);
+    }
+  };
+
+  // Map Payment to Member
+  const handleMapPaymentToMember = async (rsvpId: string) => {
+    setMappingPaymentId(rsvpId);
+    setActionNotice(null);
+
+    try {
+      const res = await fetch('/api/admin/rsvps/map-payment-member', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rsvpId }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setActionNotice(data.message);
+        fetchRsvps();
+        setTimeout(() => setActionNotice(null), 6000);
+      } else {
+        alert(data.error || 'Failed to map payment to member.');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Error mapping payment to member.');
+    } finally {
+      setMappingPaymentId(null);
     }
   };
 
@@ -1301,6 +1333,21 @@ export default function AdminEventsPage() {
 
                       {/* Actions: Send Login / Convert & Delete */}
                       <td className="p-4 text-right space-x-1.5 whitespace-nowrap">
+                        {/* Map Payment to Member Button */}
+                        {rsvp.isMember && rsvp.paymentId && !rsvp.paymentMemberId && (
+                          <button
+                            onClick={() => handleMapPaymentToMember(rsvp.id)}
+                            disabled={mappingPaymentId === rsvp.id}
+                            className="bg-sky-50 hover:bg-sky-100 text-sky-900 border border-sky-300 px-2.5 py-1.5 rounded-lg text-[11px] font-bold inline-flex items-center gap-1 transition-all shadow-sm"
+                            title="Map Payment to Member"
+                          >
+                            <KeyRound className={`w-3 h-3 text-sky-700 ${mappingPaymentId === rsvp.id ? 'animate-spin' : ''}`} />
+                            <span className="hidden sm:inline">
+                              {mappingPaymentId === rsvp.id ? 'Mapping...' : 'Link Payment'}
+                            </span>
+                          </button>
+                        )}
+
                         {/* Send Login / OTP Trigger Button */}
                         <button
                           onClick={() => handleConvertToMember(rsvp.id, rsvp.attendeeName)}
