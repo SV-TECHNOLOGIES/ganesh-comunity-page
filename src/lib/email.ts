@@ -154,8 +154,8 @@ export const sendOTP = async (to: string, code: string, type: 'REGISTER' | 'FORG
     <p style="color: #4A3B32; font-size: 13.5px; line-height: 1.7; margin: 0 0 24px;">
       ${
         isRegister
-          ? 'Thank you for registering with <strong>MITRA UK</strong>. Please enter the one-time verification code below to verify your email and activate your devotee account:'
-          : 'We received a request to reset your password for your <strong>MITRA UK</strong> devotee account. Please use the one-time verification code below to continue:'
+          ? 'Thank you for registering with <strong>MITRA UK</strong>. Please enter the one-time verification code below to verify your email and activate your MITRA account:'
+          : 'We received a request to reset your password for your <strong>MITRA UK</strong> MITRA account. Please use the one-time verification code below to continue:'
       }
     </p>
 
@@ -205,7 +205,7 @@ export const sendGuestWelcomeEmail = async (
 
   const body = `
     <h2 style="font-family: 'Cinzel', Georgia, serif; color: #8B1D0E; font-size: 18px; font-weight: 800; margin: 0 0 14px; text-transform: uppercase; letter-spacing: 0.8px;">
-      Devotee Account Created
+      MITRA Account Created
     </h2>
     <p style="color: #2D231E; font-size: 15px; margin: 0 0 14px;">
       Namaste <strong style="color: #C2410C;">${fullName}</strong> 🙏,
