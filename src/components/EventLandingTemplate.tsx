@@ -220,7 +220,7 @@ export default function EventLandingTemplate({
       </div>      {/* 3. RITUAL COUNTDOWN CLOCK */}
       {sections.showCountdown && (
         <RitualCountdown
-          targetDate={templateConfig.targetDate}
+          targetDate={dbEvent?.date||templateConfig.targetDate}
           eventTitle={templateConfig.title}
           primaryColor={hero.primaryColor}
           accentColor={hero.accentColor}
