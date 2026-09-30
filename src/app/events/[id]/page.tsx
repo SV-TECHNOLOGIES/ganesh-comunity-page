@@ -217,7 +217,7 @@ END:VCALENDAR`;
         </div>
 
         {/* 2. RITUAL COUNTDOWN CLOCK */}
-        <RitualCountdown />
+        <RitualCountdown targetDate={event.date}/>
 
         
 
