@@ -147,6 +147,7 @@ export default function MemberBroadcastPage() {
 
   // Members list for target count & live persona simulation
   const [members, setMembers] = useState<MemberRecord[]>([]);
+  const [eventsList, setEventsList] = useState<{id: string; title: string; rsvpCount: number}[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(true);
 
   // Save template dialog state
@@ -191,8 +192,14 @@ export default function MemberBroadcastPage() {
       if (data.success && Array.isArray(data.data)) {
         setMembers(data.data);
       }
+      
+      const eventsRes = await fetch('/api/admin/events');
+      const eventsData = await eventsRes.json();
+      if (eventsData.success && Array.isArray(eventsData.data)) {
+        setEventsList(eventsData.data);
+      }
     } catch (e) {
-      console.error('Failed to load members:', e);
+      console.error('Failed to load members or events:', e);
     } finally {
       setLoadingMembers(false);
     }
@@ -204,6 +211,17 @@ export default function MemberBroadcastPage() {
 
   // Filtered members count based on targetAudience
   const targetedRecipients = useMemo(() => {
+    if (targetAudience.startsWith('event_')) {
+      const eventId = targetAudience.replace('event_', '');
+      const event = eventsList.find(e => e.id === eventId);
+      // We don't have exact rsvp users here in client side, so we use rsvpCount for estimate
+      // Real resolution will happen server-side during dispatch.
+      // Let's create dummy objects so length matches.
+      return Array.from({ length: event?.rsvpCount || 0 }).map((_, i) => ({
+        id: `rsvp-${eventId}-${i}`,
+        email: 'event-registrant@example.com'
+      }));
+    }
     if (!members.length) return [];
     if (targetAudience === 'active') {
       return members.filter((m) => m.status?.toLowerCase() === 'active');
@@ -212,7 +230,7 @@ export default function MemberBroadcastPage() {
       return members.filter((m) => m.tier?.toLowerCase().includes(targetAudience.toLowerCase()));
     }
     return members;
-  }, [members, targetAudience]);
+  }, [members, targetAudience, eventsList]);
 
   // Combined templates
   const allTemplates: TemplateOption[] = [
@@ -754,6 +772,15 @@ export default function MemberBroadcastPage() {
                   <option value="Annual">Annual Members ({members.filter(m => m.tier?.toLowerCase().includes('annual')).length})</option>
                   <option value="Life">Life Members ({members.filter(m => m.tier?.toLowerCase().includes('life')).length})</option>
                   <option value="Patron">Patron / VIP Members ({members.filter(m => m.tier?.toLowerCase().includes('patron')).length})</option>
+                  {eventsList.length > 0 && (
+                    <optgroup label="Event Registrants (RSVPs)">
+                      {eventsList.map(e => (
+                        <option key={e.id} value={`event_${e.id}`}>
+                          Registered for: {e.title} ({e.rsvpCount || 0} Registrations)
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
                 </select>
                 <p className="text-[11px] text-slate-400 mt-1.5 flex items-center gap-1">
                   <Info className="w-3 h-3 text-slate-500 shrink-0" />
