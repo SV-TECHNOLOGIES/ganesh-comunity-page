@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useAdminGlobalEvent } from '../layout';
 import Link from 'next/link';
 import {
   Users,
@@ -122,7 +123,7 @@ export default function AdminDashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedEventId, setSelectedEventId] = useState<string>('all');
+  const { globalEventId: selectedEventId, setGlobalEventId: setSelectedEventId } = useAdminGlobalEvent();
   const [feedFilter, setFeedFilter] = useState<'all' | 'payment' | 'rsvp' | 'member'>('all');
   const [lastRefreshedAt, setLastRefreshedAt] = useState<string>('');
 

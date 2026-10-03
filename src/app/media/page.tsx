@@ -360,14 +360,20 @@ function MediaContent() {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-90 transition-opacity" />
 
-                      {item.isFeatured && (
-                        <div className="absolute top-3 left-3">
-                          <span className="inline-flex items-center gap-1 bg-mitra-gold text-mitra-navy text-[10px] font-black px-2.5 py-1 rounded-full shadow">
+                      <div className="absolute top-3 left-3 flex items-center gap-2">
+                        {isExt && (
+                          <span className="inline-flex items-center gap-1.5 bg-blue-600 text-white text-[10px] font-black px-2.5 py-1.5 rounded-full shadow-lg border border-blue-400 uppercase tracking-widest">
+                            <BookOpen className="w-3 h-3" />
+                            <span>Media Album</span>
+                          </span>
+                        )}
+                        {item.isFeatured && (
+                          <span className="inline-flex items-center gap-1 bg-mitra-gold text-mitra-navy text-[10px] font-black px-2.5 py-1.5 rounded-full shadow-lg">
                             <Sparkles className="w-3 h-3" />
                             <span>Featured Highlight</span>
                           </span>
-                        </div>
-                      )}
+                        )}
+                      </div>
 
                       <div className="absolute bottom-3 left-3 right-3 text-white">
                         <span className="text-[10px] text-mitra-gold font-bold block">

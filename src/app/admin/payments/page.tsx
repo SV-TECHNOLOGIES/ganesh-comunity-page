@@ -26,6 +26,7 @@ import {
   Calendar,
   Loader2,
 } from 'lucide-react';
+import { useAdminGlobalEvent } from '../layout';
 
 interface PaymentItem {
   id: string;
@@ -116,7 +117,7 @@ export default function AdminPaymentsPage() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [eventFilter, setEventFilter] = useState('all');
+  const { globalEventId: eventFilter, setGlobalEventId: setEventFilter } = useAdminGlobalEvent();
   const [availableEvents, setAvailableEvents] = useState<{ id: string; title: string; date: string }[]>([]);
   const [runningCleanup, setRunningCleanup] = useState(false);
   const [cleanupResultMsg, setCleanupResultMsg] = useState<string | null>(null);

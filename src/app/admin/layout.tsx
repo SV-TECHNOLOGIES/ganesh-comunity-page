@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, createContext, useContext } from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Role } from '@/lib/types';
@@ -42,12 +42,49 @@ export const AdminSidebarContext = createContext<AdminSidebarContextType>({
 
 export const useAdminSidebar = () => useContext(AdminSidebarContext);
 
+interface AdminGlobalEventContextType {
+  globalEventId: string;
+  setGlobalEventId: (id: string) => void;
+}
+
+export const AdminGlobalEventContext = createContext<AdminGlobalEventContextType>({
+  globalEventId: 'all',
+  setGlobalEventId: () => {},
+});
+
+export const useAdminGlobalEvent = () => useContext(AdminGlobalEventContext);
+
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [currentRole, setCurrentRole] = useState<Role>('Super Admin');
   const [loggingOut, setLoggingOut] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  
+  const [globalEventId, setGlobalEventIdState] = useState<string>('all');
+
+  // Load from DB on mount
+  useEffect(() => {
+    fetch('/api/config/preferences?featured=true')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.activeHomeEventId) {
+          setGlobalEventIdState(data.activeHomeEventId);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
+  const setGlobalEventId = (id: string) => {
+    setGlobalEventIdState(id);
+    if (id !== 'all') {
+      fetch('/api/config/preferences', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'setActiveHomeEvent', activeHomeEventId: id }),
+      }).catch(console.error);
+    }
+  };
 
   const toggleSidebar = () => setSidebarOpen((prev) => !prev);
 
@@ -85,6 +122,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   };
 
   return (
+    <AdminGlobalEventContext.Provider value={{ globalEventId, setGlobalEventId }}>
     <AdminSidebarContext.Provider value={{ sidebarOpen, setSidebarOpen, toggleSidebar }}>
       <div className="min-h-screen bg-[#FFF8F0] text-[#3D1A00] flex flex-col md:flex-row font-sans admin-theme">
         
@@ -226,6 +264,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
       </div>
     </AdminSidebarContext.Provider>
+    </AdminGlobalEventContext.Provider>
   );
 }
 

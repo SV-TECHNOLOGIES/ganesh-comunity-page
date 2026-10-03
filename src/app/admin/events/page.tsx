@@ -38,6 +38,7 @@ import {
   Film,
   Upload
 } from 'lucide-react';
+import { useAdminGlobalEvent } from '../layout';
 import { isYouTubeUrl, getYouTubeThumbnailUrl } from '@/lib/youtube';
 import MultiDateSelector from '@/components/admin/MultiDateSelector';
 import CustomFieldBuilder from '@/components/admin/CustomFieldBuilder';
@@ -119,7 +120,7 @@ export default function AdminEventsPage() {
   // Search & Filter state (applied at DB level)
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [selectedEventFilter, setSelectedEventFilter] = useState<string>('all');
+  const { globalEventId: selectedEventFilter, setGlobalEventId: setSelectedEventFilter } = useAdminGlobalEvent();
   const [selectedDateFilter, setSelectedDateFilter] = useState<string>('all');
 
   // Pagination state
