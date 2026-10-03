@@ -25,6 +25,7 @@ import {
   Check
 } from 'lucide-react';
 import { isYouTubeUrl, getYouTubeThumbnailUrl } from '@/lib/youtube';
+import { useAdminGlobalEvent } from '../layout';
 
 const isExternalAlbum = (url: string) => {
   if (!url) return false;
@@ -97,7 +98,7 @@ export default function AdminMediaPage() {
   });
 
   // Filters
-  const [selectedEventFilter, setSelectedEventFilter] = useState<string>('all');
+  const { globalEventId: selectedEventFilter, setGlobalEventId: setSelectedEventFilter } = useAdminGlobalEvent();
   const [selectedTypeFilter, setSelectedTypeFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
 

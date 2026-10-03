@@ -39,7 +39,7 @@ import {
   Upload,
 } from 'lucide-react';
 import EventHero from '@/components/EventHero';
-import { useAdminSidebar } from '@/app/admin/layout';
+import { useAdminGlobalEvent, useAdminSidebar } from '@/app/admin/layout';
 import { EventTemplateConfig, EventHeroConfig, HeroType, EventHeroStorageConfig } from '@/types/event-template';
 
 interface EventItemOption {
@@ -169,7 +169,7 @@ export default function EventHeroAdminPage() {
 
   const [storageData, setStorageData] = useState<EventHeroStorageConfig | null>(null);
   const [availableEvents, setAvailableEvents] = useState<EventItemOption[]>([]);
-  const [selectedEventId, setSelectedEventId] = useState<string>('evt-ganesh-chaturthi');
+  const { globalEventId: selectedEventId, setGlobalEventId: setSelectedEventId } = useAdminGlobalEvent();
 
   // Form state for current selected event
   const [currentConfig, setCurrentConfig] = useState<EventTemplateConfig | null>(null);
