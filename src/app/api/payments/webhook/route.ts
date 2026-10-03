@@ -181,7 +181,7 @@ export async function POST(req: NextRequest) {
               }
             } else {
               // will u have enougth info to create an RSVP create the RSVP 
-               const reportMail = process.env.REPORT_MAIL || 'info@mitra.org.uk';
+               const reportMail = process.env.REPORT_MAIL || 'info@mitrauk.com';
                await sendEmail(reportMail, `Missing RSVP for completed payment ${pi.id}`, `A payment succeeded for an RSVP, but the RSVP record was not found in the DB. Payment Intent ID: ${pi.id}`);
             }
           } catch (rsvpErr) {
