@@ -730,7 +730,7 @@ export default function EventHeroAdminPage() {
                 <div className="flex-1 max-w-md mx-auto bg-slate-900 border border-slate-800 rounded-lg px-3 py-1 flex items-center gap-2 text-[11px] text-slate-400 font-mono">
                   <Lock className="w-3 h-3 text-emerald-400" />
                   <span className="truncate">
-                    mitra.org.uk{previewMode === 'home' ? '' : `/${currentConfig.eventSlug}`}
+                    mitrauk.com{previewMode === 'home' ? '' : `/${currentConfig.eventSlug}`}
                   </span>
                 </div>
                 <div className="text-[10px] text-slate-500 uppercase tracking-wider font-mono hidden md:block">

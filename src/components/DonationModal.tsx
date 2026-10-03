@@ -72,7 +72,7 @@ function CheckoutForm({
       confirmParams: {
         return_url: typeof window !== 'undefined'
           ? `${window.location.origin}/donate?payment=success`
-          : 'https://mitra.org.uk/donate?payment=success',
+          : 'https://mitrauk.com/donate?payment=success',
         payment_method_data: {
           billing_details: {
             name: donorName,
