@@ -1019,12 +1019,13 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
 
                 <div>
                   <label className="block text-[#6B3A2A] font-bold mb-1">
-                    Travelling From (City/Town)
+                    Travelling From (City/Town) *
                   </label>
                   <div className="relative">
                     <MapPin className="w-3.5 h-3.5 text-[#E65C00] absolute left-3 top-3" />
                     <input
                       type="text"
+                      required
                       placeholder="e.g. Slough, Wembley, Reading"
                       value={travellingFrom}
                       onChange={(e) => setTravellingFrom(e.target.value)}

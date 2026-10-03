@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://mitra.org.uk';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://mitrauk.com';
     const resolvedImageUrl = imageUrl?.trim()
       ? (imageUrl.startsWith('http') ? imageUrl.trim() : `${baseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl.trim()}`)
       : null;

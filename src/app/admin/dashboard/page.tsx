@@ -676,7 +676,10 @@ export default function AdminDashboardPage() {
               Category Breakdown
             </span>
             <div className="space-y-2">
-              {(data?.donationBreakdown || []).map((cat, idx) => (
+              {(data?.donationBreakdown || [])
+                .filter((cat) => cat.revenue > 0 || cat.count > 0)
+                .filter((cat) => isPoojaEnabled || cat.type !== 'Paid Sacred Pooja Sevas')
+                .map((cat, idx) => (
                 <div
                   key={idx}
                   className="bg-[#FFF9F5] p-3 rounded-xl border border-[#E65C00]/15 flex items-center justify-between text-xs"
