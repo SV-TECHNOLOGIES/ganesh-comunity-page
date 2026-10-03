@@ -61,7 +61,7 @@ As a valued {{tier}} member (ID: {{id}}), you have access to personalized family
 
 May Lord Ganesha shower your family with health, happiness, and prosperity!`,
     buttonText: 'View Schedule & Book Seva',
-    buttonUrl: 'https://mitra.org.uk/ganesh-event-2026',
+    buttonUrl: 'https://mitrauk.com/ganesh-event-2026',
   },
   {
     id: 'community-notice',
@@ -79,7 +79,7 @@ Please review our latest association initiatives, community welfare drives, and 
 
 Should you have any suggestions or wish to volunteer, feel free to reply directly to this notice.`,
     buttonText: 'Visit MITRA Member Portal',
-    buttonUrl: 'https://mitra.org.uk/membership',
+    buttonUrl: 'https://mitrauk.com/membership',
   },
   {
     id: 'membership-pass',
@@ -97,7 +97,7 @@ This is a reminder that your digital membership pass is active under ID {{id}} (
 
 Click below to view your digital pass and review your member benefits.`,
     buttonText: 'Access Digital Pass',
-    buttonUrl: 'https://mitra.org.uk/membership',
+    buttonUrl: 'https://mitrauk.com/membership',
   },
   {
     id: 'blank-custom',
@@ -583,7 +583,7 @@ export default function MemberBroadcastPage() {
                   <div className="flex items-center gap-2">
                     <span className="text-slate-500 text-[11px] w-14 shrink-0">From:</span>
                     <span className="text-slate-300 font-semibold truncate">
-                      MITRA UK Announcements &lt;noreply@mitra.org.uk&gt;
+                      MITRA UK Announcements &lt;noreply@mitrauk.com&gt;
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -710,7 +710,7 @@ export default function MemberBroadcastPage() {
                         You received this official notice as a registered member of MITRA UK.
                       </p>
                       <p>
-                        MITRA UK Telugu Community · Slough &amp; London, United Kingdom · <span className="underline">mitra.org.uk</span>
+                        MITRA UK Telugu Community · Slough &amp; London, United Kingdom · <span className="underline">mitrauk.com</span>
                       </p>
                     </div>
 
@@ -1037,7 +1037,7 @@ export default function MemberBroadcastPage() {
                     type="url"
                     value={buttonUrl}
                     onChange={(e) => setButtonUrl(e.target.value)}
-                    placeholder="e.g. https://mitra.org.uk/ganesh-event-2026"
+                    placeholder="e.g. https://mitrauk.com/ganesh-event-2026"
                     className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-mitra-gold focus:outline-none"
                   />
                 </div>
