@@ -60,6 +60,8 @@ Content-Type: application/json
 | **Events** | `/api/admin/events` | `GET`, `POST`, `PUT`, `DELETE` | `page`, `limit`, `search`, `status` / event JSON |
 | **Event Hero** | `/api/admin/event-hero-config` | `GET`, `POST` | `eventId`, `tagline`, `heroBackgrounds`, etc. |
 | **RSVPs** | `/api/admin/rsvps` | `GET`, `POST`, `PATCH`, `DELETE` | `page`, `limit`, `eventId`, `search` / RSVP JSON |
+| **Gate Entry Scan** | `/api/admin/events/entry/scan` | `GET`, `POST` | `rsvpId`, `count`, `time`, `scannedBy`, `mode` |
+| **Gate Analytics** | `/api/admin/events/entry/analytics` | `GET` | `?eventId=all` (full/half/unscanned breakdown) |
 | **RSVP Convert** | `/api/admin/rsvps/convert-to-member` | `POST` | `rsvpId`, `generateCredentials` |
 | **RSVP Map Payment** | `/api/admin/rsvps/map-payment-member` | `POST` | `rsvpId`, `memberId`, `paymentId` |
 | **Payments** | `/api/admin/payments` | `GET` | `page`, `limit`, `status`, `search` |
@@ -163,7 +165,27 @@ curl -X POST "http://localhost:3000/api/admin/rsvps/convert-to-member" \
   }'
 ```
 
-### 3.4 Payments & Stripe Control
+### 3.4 Event Entry & QR Gate Check-in
+**Scan Devotee Ticket (Check-in entrance):**
+```bash
+curl -X POST "http://localhost:3000/api/admin/events/entry/scan" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rsvpId": "rsvp_cuid_123",
+    "count": 1,
+    "scannedBy": "Main Entrance Gate A",
+    "mode": "add"
+  }'
+```
+
+**Get Real-Time Gate Entry Analytics (Attended, About to Attend, Full/Half Scans):**
+```bash
+curl -X GET "http://localhost:3000/api/admin/events/entry/analytics?eventId=evt_ugadi_2026" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### 3.5 Payments & Stripe Control
 **Query Payments:**
 ```bash
 curl -X GET "http://localhost:3000/api/admin/payments?status=COMPLETED&page=1&limit=20" \

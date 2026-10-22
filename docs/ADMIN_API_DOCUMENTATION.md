@@ -343,7 +343,114 @@ Links an unassociated payment to an existing registered member record.
 
 ---
 
-### 3.7 Payments & Donations
+### 3.7 Event Entry Management & Gate Scanning
+Real-time QR verification, gate attendance check-in, and live entrance capacity tracking.
+
+#### `POST /api/admin/events/entry/scan`
+Record attendee entrance at the gate. Enforces that `scannedCount` never exceeds `ticketsCount`.
+- **Request Body**:
+```json
+{
+  "rsvpId": "cuid_rsvp_123",
+  "count": 1,
+  "time": "2026-09-13T10:15:00.000Z",
+  "scannedBy": "Slough Gate Team #1",
+  "mode": "add"
+}
+```
+*Notes on `mode`*:
+- `"add"` (default): Increments `scannedCount` by `count`.
+- `"set"`: Sets `scannedCount` to `count`.
+- `"reset"`: Resets `scannedCount` to 0, `isScanned` to `false`.
+
+- **Success Response (`200 OK`)**:
+```json
+{
+  "success": true,
+  "message": "All 2 ticket(s) fully verified and checked in.",
+  "scanStatus": "FULL_SCANNED",
+  "data": {
+    "id": "cuid_rsvp_123",
+    "eventId": "evt-ganesh-chaturthi",
+    "eventTitle": "London Ganesh Mahotsav 2026",
+    "attendeeName": "Srinivas Rao",
+    "ticketsCount": 2,
+    "scannedCount": 2,
+    "remainingTickets": 0,
+    "isScanned": true,
+    "scannedAt": "2026-09-13T10:15:00.000Z",
+    "scannedBy": "Slough Gate Team #1"
+  }
+}
+```
+
+- **Capacity Exceeded Response (`400 Bad Request`)**:
+```json
+{
+  "success": false,
+  "error": "Cannot scan more than total booked tickets (2). Currently scanned: 2, remaining capacity: 0. Attempted total: 3.",
+  "code": "EXCEEDS_TICKET_CAPACITY",
+  "ticketsCount": 2,
+  "scannedCount": 2,
+  "remainingTickets": 0
+}
+```
+
+#### `GET /api/admin/events/entry/scan?rsvpId=<RSVP_ID>`
+Pre-scan verification to inspect ticket details, remaining entry slots, and devotee contact info prior to check-in.
+
+#### `GET /api/admin/events/entry/analytics`
+Fetches real-time gate entry velocity, attended vs expected counts, and scan breakdowns.
+- **Query Parameters**:
+  - `eventId` (`string`, optional, default `"all"`): Filter by event ID.
+- **Response (`200 OK`)**:
+```json
+{
+  "success": true,
+  "data": {
+    "filter": {
+      "eventId": "evt-ganesh-chaturthi",
+      "eventTitle": "London Ganesh Mahotsav 2026",
+      "eventCapacity": 500
+    },
+    "summary": {
+      "totalRsvps": 120,
+      "totalTicketsExpected": 350,
+      "totalTicketsAttended": 210,
+      "totalTicketsRemaining": 140,
+      "attendancePercentage": "60.0%"
+    },
+    "scanClassification": {
+      "fullScanned": {
+        "count": 65,
+        "tickets": 130,
+        "description": "All tickets on booking are verified and checked in."
+      },
+      "halfScanned": {
+        "count": 15,
+        "attendedTickets": 20,
+        "remainingTickets": 10,
+        "description": "Partially checked in (some group members arrived, others pending)."
+      },
+      "notScanned": {
+        "count": 40,
+        "tickets": 130,
+        "description": "Registered devotees about to attend (zero scans so far)."
+      }
+    },
+    "attendeeDemographics": {
+      "totalAdultsExpected": 250,
+      "totalChildrenExpected": 100
+    },
+    "recentScans": [...],
+    "hourlyTimeline": [...]
+  }
+}
+```
+
+---
+
+### 3.8 Payments & Donations
 Audit checkout sessions, seva contributions, and gateway settings.
 
 #### `GET /api/admin/payments`

@@ -46,7 +46,6 @@ export async function GET(request: Request) {
       : {};
 
     const rsvpWhere: any = {
-      paymentStatus: { in: ['Completed', 'Free'] },
       ...(isFiltered
         ? {
             OR: [
