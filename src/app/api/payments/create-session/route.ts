@@ -40,7 +40,7 @@ async function getOrCreateStripeClient(): Promise<Stripe | null> {
   if (!cachedStripeInstance || cachedStripeKey !== stripeSecretKey) {
     cachedStripeKey = stripeSecretKey;
     cachedStripeInstance = new Stripe(stripeSecretKey, {
-      apiVersion: '2026-07-29.dahlia',
+      apiVersion: '2026-08-26.dahlia',
     });
   }
 
