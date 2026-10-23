@@ -1,6 +1,12 @@
-import * as ftp from 'basic-ftp';
-import { Readable } from 'stream';
+import type SftpClient from 'ssh2-sftp-client';
+import fs from 'fs';
 import path from 'path';
+import os from 'os';
+
+function getSftpClient(): SftpClient {
+  const SftpConstructor = (eval('require')('ssh2-sftp-client')) as typeof SftpClient;
+  return new SftpConstructor();
+}
 
 export type UploadUseCase =
   | 'leader_profile'
@@ -72,12 +78,14 @@ export const UPLOAD_PATH_MAP: Record<
 };
 
 function sanitizeSlug(input: string): string {
-  return input
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '')
-    .slice(0, 40) || 'upload';
+  return (
+    input
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '')
+      .slice(0, 40) || 'upload'
+  );
 }
 
 export interface UploadResult {
@@ -85,14 +93,73 @@ export interface UploadResult {
   url: string;
   relativePath: string;
   filename: string;
-  storageType: 'ftp';
+  storageType: 'ftp' | 'sftp';
   error?: string;
 }
 
 /**
- * Uploads a buffer via FTP using FTP_HOST, FTP_USER, FTP_PASSWORD.
+ * Loads the SSH private key from environment or local path:
+ * 1. SFTP_PRIVATE_KEY_BASE64 or FTP_PRIVATE_KEY_BASE64 (base64 string)
+ * 2. SFTP_PRIVATE_KEY or FTP_PRIVATE_KEY (raw PEM string, handles \n)
+ * 3. SFTP_KEY_PATH or FTP_KEY_PATH (file path, supports ~/)
+ * 4. Fallback ~/.ssh/siteground_key (standard SiteGround local key)
  */
-export async function uploadFileViaFTP(
+function loadPrivateKey(): Buffer | null {
+  // 1. Base64 encoded private key
+  const b64 = (process.env.SFTP_PRIVATE_KEY_BASE64 || process.env.FTP_PRIVATE_KEY_BASE64)
+    ?.trim()
+    .replace(/^["']|["']$/g, '');
+  if (b64) {
+    try {
+      return Buffer.from(b64, 'base64');
+    } catch (e) {
+      console.error('[SFTP] Failed to parse base64 private key:', e);
+    }
+  }
+
+  // 2. Raw PEM private key string
+  const rawKey = (process.env.SFTP_PRIVATE_KEY || process.env.FTP_PRIVATE_KEY)
+    ?.trim()
+    .replace(/^["']|["']$/g, '');
+  if (rawKey && rawKey.includes('PRIVATE KEY')) {
+    return Buffer.from(rawKey.replace(/\\n/g, '\n'), 'utf8');
+  }
+
+  // 3. Specified file path (expands ~/)
+  const keyPath = (process.env.SFTP_KEY_PATH || process.env.FTP_KEY_PATH)?.trim();
+  if (keyPath) {
+    const resolvedPath = keyPath.startsWith('~/')
+      ? path.join(os.homedir(), keyPath.slice(2))
+      : path.resolve(keyPath);
+    if (fs.existsSync(resolvedPath)) {
+      return fs.readFileSync(resolvedPath);
+    }
+  }
+
+  // 4. Default local development SiteGround SSH key
+  const defaultLocalKey = path.join(os.homedir(), '.ssh', 'siteground_key');
+  if (fs.existsSync(defaultLocalKey)) {
+    return fs.readFileSync(defaultLocalKey);
+  }
+
+  return null;
+}
+
+function failure(error: string): UploadResult {
+  return {
+    success: false,
+    url: '',
+    relativePath: '',
+    filename: '',
+    storageType: 'sftp',
+    error,
+  };
+}
+
+/**
+ * Uploads a buffer via SFTP (SSH key or password auth) — SiteGround uses port 18765.
+ */
+export async function uploadFileViaSFTP(
   fileBuffer: Buffer,
   originalFilename: string,
   useCase: UploadUseCase = 'general',
@@ -103,66 +170,79 @@ export async function uploadFileViaFTP(
   const filename = config.generateFilename(identifierName, ext);
   const relativePath = `${config.subDir}/${filename}`;
 
-  const ftpHost = process.env.FTP_HOST?.trim();
-  const ftpUser = process.env.FTP_USER?.trim();
-  const ftpPassword = process.env.FTP_PASSWORD?.trim();
-  const ftpPort = parseInt(process.env.FTP_PORT || '21', 10);
-  const ftpBaseUrl = process.env.FTP_BASE_URL?.trim() || 'https://mitrauk.com/uploads';
-  const ftpRemoteRootDir = process.env.FTP_ROOT_DIR?.trim() || '';
+  // Seamless fallback between SFTP_* and FTP_* environment variables
+  const host = process.env.SFTP_HOST?.trim() || process.env.FTP_HOST?.trim();
+  const username = process.env.SFTP_USER?.trim() || process.env.FTP_USER?.trim();
+  const port = parseInt(process.env.SFTP_PORT || process.env.FTP_PORT || '18765', 10);
+  const password = process.env.SFTP_PASSWORD?.trim() || process.env.FTP_PASSWORD?.trim();
+  const passphrase = process.env.SFTP_PASSPHRASE || process.env.FTP_PASSPHRASE || password || undefined;
+  const baseUrl = (process.env.SFTP_BASE_URL?.trim() || process.env.FTP_BASE_URL?.trim() || 'https://media.mitrauk.com/media').replace(/\/+$/, '');
+  const remoteRootDir = (process.env.SFTP_ROOT_DIR?.trim() || process.env.FTP_ROOT_DIR?.trim() || 'www/media.mitrauk.com/public_html/media').replace(/\/+$/, '');
+  const timeoutMs = parseInt(process.env.SFTP_TIMEOUT || process.env.FTP_TIMEOUT || '60000', 10);
 
-  if (!ftpHost || !ftpUser || !ftpPassword) {
-    return {
-      success: false,
-      url: '',
-      relativePath: '',
-      filename: '',
-      storageType: 'ftp',
-      error: 'FTP credentials (FTP_HOST, FTP_USER, FTP_PASSWORD) are not configured in environment.',
-    };
+  const privateKey = loadPrivateKey();
+
+  if (!host || !username) {
+    return failure(
+      'SFTP config missing: set SFTP_HOST (or FTP_HOST) and SFTP_USER (or FTP_USER) in environment.'
+    );
   }
 
-  const timeoutMs = parseInt(process.env.FTP_TIMEOUT || '60000', 10); // 60s default timeout
-  const client = new ftp.Client(timeoutMs);
-  client.ftp.verbose = process.env.FTP_VERBOSE === 'true';
+  if (!privateKey && !password) {
+    return failure(
+      'SFTP authentication missing: set SFTP_PRIVATE_KEY_BASE64, SFTP_KEY_PATH, or SFTP_PASSWORD.'
+    );
+  }
+
+  const sftp = getSftpClient();
 
   try {
-    const isSecure = process.env.FTP_SECURE === 'true';
-    await client.access({
-      host: ftpHost,
-      user: ftpUser,
-      password: ftpPassword,
-      port: ftpPort,
-      secure: isSecure,
-      secureOptions: isSecure ? { rejectUnauthorized: false } : undefined,
-    });
+    const connectConfig: SftpClient.ConnectOptions = {
+      host,
+      port,
+      username,
+      readyTimeout: timeoutMs,
+    };
 
-    // Target remote directory: e.g. public_html/uploads/leaders/profiles
-    const targetRemoteDir = `${ftpRemoteRootDir}/${config.subDir}`.replace(/\/+/g, '/');
-    await client.ensureDir(targetRemoteDir);
+    if (privateKey) {
+      connectConfig.privateKey = privateKey;
+      if (passphrase) {
+        connectConfig.passphrase = passphrase;
+      }
+    } else if (password) {
+      connectConfig.password = password;
+    }
 
-    const stream = Readable.from(fileBuffer);
-    await client.uploadFrom(stream, filename);
+    await sftp.connect(connectConfig);
 
-    const publicUrl = `${ftpBaseUrl}/${config.subDir}/${filename}`.replace(/([^:]\/)\/+/g, '$1');
+    // Target remote directory: e.g. www/media.mitrauk.com/public_html/media/media/gallery
+    const targetRemoteDir = [remoteRootDir, config.subDir].filter(Boolean).join('/').replace(/\/+/g, '/');
+
+    const dirExists = await sftp.exists(targetRemoteDir);
+    if (!dirExists) {
+      await sftp.mkdir(targetRemoteDir, true); // recursive directory creation
+    }
+
+    await sftp.put(fileBuffer, `${targetRemoteDir}/${filename}`);
+
+    const publicUrl = `${baseUrl}/${config.subDir}/${filename}`.replace(/([^:]\/)\/+/g, '$1');
 
     return {
       success: true,
       url: publicUrl,
       relativePath,
       filename,
-      storageType: 'ftp',
+      storageType: 'sftp',
     };
-  } catch (ftpError: any) {
-    console.error('[FTP UPLOAD ERROR]:', ftpError);
-    return {
-      success: false,
-      url: '',
-      relativePath: '',
-      filename: '',
-      storageType: 'ftp',
-      error: `FTP Upload failed: ${ftpError.message || 'Connection or permission error'}`,
-    };
+  } catch (err: any) {
+    console.error('[SFTP UPLOAD ERROR]:', err);
+    return failure(`SFTP upload failed: ${err?.message || 'Connection or permission error'}`);
   } finally {
-    client.close();
+    await sftp.end().catch(() => {});
   }
 }
+
+/**
+ * Backwards-compatible alias so existing imports of uploadFileViaFTP keep working seamlessly.
+ */
+export const uploadFileViaFTP = uploadFileViaSFTP;

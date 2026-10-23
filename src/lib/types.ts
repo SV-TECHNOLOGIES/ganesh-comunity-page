@@ -212,6 +212,7 @@ export interface TeluguBusiness {
   address?: string | null;
   city: string;
   postcode?: string | null;
+  googleMapsUrl?: string | null;
   status: 'Pending' | 'Approved' | 'Rejected' | string;
   isFeatured: boolean;
   specialOffer?: string | null;

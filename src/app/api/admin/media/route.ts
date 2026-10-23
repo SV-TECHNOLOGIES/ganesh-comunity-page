@@ -89,6 +89,7 @@ export async function POST(request: Request) {
       type = 'IMAGE',
       category = 'Photo',
       url,
+      images,
       coverImage,
       description,
       eventId,
@@ -103,14 +104,24 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!url || !url.trim()) {
+    let imageList: string[] = [];
+    if (Array.isArray(images) && images.length > 0) {
+      imageList = images.map((u: any) => String(u).trim()).filter(Boolean);
+    } else if (url && (url.includes(',') || url.includes('\n'))) {
+      imageList = url.split(/[\n,]+/).map((u: string) => u.trim()).filter(Boolean);
+    } else if (url && url.trim()) {
+      imageList = [url.trim()];
+    }
+
+    const cleanUrl = imageList[0] || (url ? url.trim() : '');
+
+    if (!cleanUrl) {
       return NextResponse.json(
         { success: false, error: 'Media URL or FTP uploaded image is required.' },
         { status: 400 }
       );
     }
 
-    const cleanUrl = url.trim();
     const isYt = isYouTubeUrl(cleanUrl);
     const resolvedType = isYt ? 'VIDEO' : (type.toUpperCase() === 'VIDEO' ? 'VIDEO' : 'IMAGE');
     const resolvedCategory = isYt && (!category || category === 'Photo') ? 'Video' : (category || (resolvedType === 'VIDEO' ? 'Video' : 'Photo'));
@@ -125,6 +136,7 @@ export async function POST(request: Request) {
         type: resolvedType,
         category: resolvedCategory,
         url: cleanUrl,
+        images: imageList,
         coverImage: resolvedCoverImage,
         description: description?.trim() || null,
         eventId: eventId && eventId !== 'none' ? eventId : null,
@@ -164,6 +176,7 @@ export async function PUT(request: Request) {
       type,
       category,
       url,
+      images,
       coverImage,
       description,
       eventId,
@@ -178,7 +191,14 @@ export async function PUT(request: Request) {
       );
     }
 
-    const cleanUrl = url !== undefined ? url.trim() : undefined;
+    let imageList: string[] | undefined = undefined;
+    if (Array.isArray(images)) {
+      imageList = images.map((u: any) => String(u).trim()).filter(Boolean);
+    } else if (url && (url.includes(',') || url.includes('\n'))) {
+      imageList = url.split(/[\n,]+/).map((u: string) => u.trim()).filter(Boolean);
+    }
+
+    const cleanUrl = imageList && imageList.length > 0 ? imageList[0] : (url !== undefined ? url.trim() : undefined);
     const isYt = cleanUrl ? isYouTubeUrl(cleanUrl) : false;
     const resolvedType = cleanUrl && isYt ? 'VIDEO' : (type ? (type.toUpperCase() === 'VIDEO' ? 'VIDEO' : 'IMAGE') : undefined);
     const ytThumb = isYt && cleanUrl ? getYouTubeThumbnailUrl(cleanUrl, 'hq') : null;
@@ -193,6 +213,7 @@ export async function PUT(request: Request) {
         type: resolvedType,
         category: category !== undefined ? category : (isYt ? 'Video' : undefined),
         url: cleanUrl,
+        images: imageList !== undefined ? imageList : undefined,
         coverImage: resolvedCoverImage,
         description: description !== undefined ? (description ? description.trim() : null) : undefined,
         eventId: eventId !== undefined ? (eventId && eventId !== 'none' ? eventId : null) : undefined,

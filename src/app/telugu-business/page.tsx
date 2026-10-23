@@ -76,6 +76,7 @@ export default function TeluguBusinessPage() {
     address: '',
     city: 'London',
     postcode: '',
+    googleMapsUrl: '',
     specialOffer: '',
   });
 
@@ -140,6 +141,7 @@ export default function TeluguBusinessPage() {
           address: '',
           city: 'London',
           postcode: '',
+          googleMapsUrl: '',
           specialOffer: '',
         });
       } else {
@@ -624,6 +626,21 @@ export default function TeluguBusinessPage() {
                   </div>
 
                   <div className="space-y-1 sm:col-span-2">
+                    <label className="text-[11px] font-bold text-[#3D1A00] flex items-center justify-between">
+                      <span>Google Maps Location Link / URL (Optional)</span>
+                      <span className="text-[10px] text-[#E65C00] font-normal">Direct link to Google Maps</span>
+                    </label>
+                    <input
+                      type="url"
+                      name="googleMapsUrl"
+                      placeholder="https://maps.google.com/?q=... or https://maps.app.goo.gl/..."
+                      value={formData.googleMapsUrl}
+                      onChange={handleFormChange}
+                      className="w-full bg-white border border-[#E65C00]/30 rounded-xl px-3.5 py-2 text-xs text-[#3D1A00] focus:outline-none focus:border-[#E65C00]"
+                    />
+                  </div>
+
+                  <div className="space-y-1 sm:col-span-2">
                     <label className="text-[11px] font-bold text-[#3D1A00]">
                       Special Community Offer / Discount (Optional)
                     </label>
@@ -684,11 +701,19 @@ export default function TeluguBusinessPage() {
 
 // ── COMPONENT: BUSINESS CARD ──
 function BusinessCard({ business, isFeatured = false }: { business: TeluguBusiness; isFeatured?: boolean }) {
-  const whatsappUrl = business.whatsapp
-    ? `https://wa.me/${business.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hello ${business.businessName}, I found your business on MITRA UK Telugu Business Directory.`)}`
-    : business.phone
-    ? `https://wa.me/${business.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hello ${business.businessName}, I found your business on MITRA UK Telugu Business Directory.`)}`
+  const targetWebsiteUrl = business.website
+    ? (business.website.startsWith('http') ? business.website : `https://${business.website}`)
     : null;
+
+  const whatsappCleanNumber = (business.whatsapp || business.phone || '').replace(/[^0-9]/g, '');
+  const whatsappUrl = whatsappCleanNumber
+    ? `https://wa.me/${whatsappCleanNumber}?text=${encodeURIComponent(`Hello ${business.businessName}, I found your business on MITRA UK Telugu Business Directory.`)}`
+    : null;
+
+  const mapsQuery = encodeURIComponent(
+    [business.address, business.city, business.postcode, 'United Kingdom'].filter(Boolean).join(', ')
+  );
+  const googleMapsUrl = business.googleMapsUrl || (mapsQuery ? `https://www.google.com/maps/search/?api=1&query=${mapsQuery}` : null);
 
   return (
     <div
@@ -713,27 +738,64 @@ function BusinessCard({ business, isFeatured = false }: { business: TeluguBusine
           )}
         </div>
 
-        {/* Logo / Avatar & Title */}
+        {/* Logo / Avatar & Title (Click to Website) */}
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl overflow-hidden bg-[#FFF8F0] border border-[#E65C00]/20 shrink-0 relative flex items-center justify-center p-1">
-            {business.logoUrl ? (
-              <img
-                src={business.logoUrl}
-                alt={business.businessName}
-                className="w-full h-full object-cover rounded-xl"
-                onError={(e) => {
-                  (e.target as HTMLElement).style.display = 'none';
-                }}
-              />
+          {targetWebsiteUrl ? (
+            <a
+              href={targetWebsiteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-13 h-13 rounded-2xl overflow-hidden bg-[#FFF8F0] border-2 border-[#E65C00]/30 hover:border-[#E65C00] shrink-0 relative flex items-center justify-center p-1 shadow-sm hover:scale-105 transition-all group/logo cursor-pointer"
+              title={`Visit ${business.businessName} Website (Opens in new tab)`}
+            >
+              {business.logoUrl ? (
+                <img
+                  src={business.logoUrl}
+                  alt={business.businessName}
+                  className="w-full h-full object-cover rounded-xl"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = 'none';
+                  }}
+                />
+              ) : (
+                <Building2 className="w-6 h-6 text-[#E65C00]" />
+              )}
+            </a>
+          ) : (
+            <div className="w-13 h-13 rounded-2xl overflow-hidden bg-[#FFF8F0] border border-[#E65C00]/20 shrink-0 relative flex items-center justify-center p-1">
+              {business.logoUrl ? (
+                <img
+                  src={business.logoUrl}
+                  alt={business.businessName}
+                  className="w-full h-full object-cover rounded-xl"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = 'none';
+                  }}
+                />
+              ) : (
+                <Building2 className="w-6 h-6 text-[#E65C00]" />
+              )}
+            </div>
+          )}
+
+          <div className="min-w-0 flex-1">
+            {targetWebsiteUrl ? (
+              <a
+                href={targetWebsiteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-base font-black font-cinzel text-[#3D1A00] leading-snug group-hover:text-[#E65C00] hover:underline transition-colors cursor-pointer"
+                title={`Visit ${business.businessName} Website ↗`}
+              >
+                <span className="truncate">{business.businessName}</span>
+                <ExternalLink className="w-3.5 h-3.5 text-[#E65C00] shrink-0 opacity-70 group-hover:opacity-100" />
+              </a>
             ) : (
-              <Building2 className="w-6 h-6 text-[#E65C00]" />
+              <h3 className="text-base font-black font-cinzel text-[#3D1A00] leading-snug group-hover:text-[#E65C00] transition-colors truncate">
+                {business.businessName}
+              </h3>
             )}
-          </div>
-          <div>
-            <h3 className="text-base font-black font-cinzel text-[#3D1A00] leading-snug group-hover:text-[#E65C00] transition-colors">
-              {business.businessName}
-            </h3>
-            <p className="text-[11px] font-bold text-[#6B3A2A]">
+            <p className="text-[11px] font-bold text-[#6B3A2A] truncate">
               Founder: {business.ownerName}
             </p>
           </div>
@@ -742,7 +804,7 @@ function BusinessCard({ business, isFeatured = false }: { business: TeluguBusine
         {/* Tagline */}
         {business.tagline && (
           <p className="text-xs font-bold text-[#E65C00] italic">
-            "{business.tagline}"
+            &ldquo;{business.tagline}&rdquo;
           </p>
         )}
 
@@ -762,50 +824,99 @@ function BusinessCard({ business, isFeatured = false }: { business: TeluguBusine
         )}
 
         {/* Location & Contact Meta */}
-        <div className="space-y-1.5 pt-2 border-t border-slate-100 text-xs text-[#6B3A2A]">
-          <div className="flex items-center gap-1.5">
-            <MapPin className="w-3.5 h-3.5 text-[#E65C00] shrink-0" />
-            <span className="font-semibold truncate">
-              {business.city}{business.postcode ? `, ${business.postcode}` : ''} {business.address ? `• ${business.address}` : ''}
-            </span>
+        <div className="space-y-2 pt-2.5 border-t border-slate-100 text-xs text-[#6B3A2A]">
+          
+          {/* Phone / Mobile Number */}
+          <div className="flex items-center gap-2">
+            <Phone className="w-3.5 h-3.5 text-[#E65C00] shrink-0" />
+            <div className="flex items-center gap-2 flex-wrap">
+              <a
+                href={`tel:${business.phone}`}
+                className="font-bold text-[#3D1A00] hover:text-[#E65C00] hover:underline transition-colors"
+                title="Click to call mobile"
+              >
+                {business.phone}
+              </a>
+              {business.whatsapp && (
+                <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.2 rounded font-bold">
+                  WhatsApp
+                </span>
+              )}
+            </div>
           </div>
 
-          <div className="flex items-center gap-1.5">
-            <Mail className="w-3.5 h-3.5 text-[#E65C00] shrink-0" />
-            <span className="truncate">{business.email}</span>
+          {/* Google Location */}
+          <div className="flex items-center gap-2">
+            <MapPin className="w-3.5 h-3.5 text-[#E65C00] shrink-0" />
+            {googleMapsUrl ? (
+              <a
+                href={googleMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-slate-700 hover:text-[#E65C00] hover:underline flex items-center gap-1.5 transition-colors group/map truncate"
+                title="Open in Google Maps (Opens in new tab)"
+              >
+                <span className="truncate">
+                  {business.city}{business.postcode ? `, ${business.postcode}` : ''} {business.address ? `• ${business.address}` : ''}
+                </span>
+                <span className="inline-flex items-center gap-0.5 text-[10px] font-black text-[#E65C00] bg-[#FFF0E0] border border-[#E65C00]/30 px-1.5 py-0.5 rounded shrink-0">
+                  <span>Google Map</span>
+                  <ExternalLink className="w-2.5 h-2.5" />
+                </span>
+              </a>
+            ) : (
+              <span className="font-semibold truncate">
+                {business.city}{business.postcode ? `, ${business.postcode}` : ''} {business.address ? `• ${business.address}` : ''}
+              </span>
+            )}
           </div>
+
+          {/* Email */}
+          <div className="flex items-center gap-2">
+            <Mail className="w-3.5 h-3.5 text-[#E65C00] shrink-0" />
+            <a
+              href={`mailto:${business.email}`}
+              className="truncate hover:text-[#E65C00] hover:underline transition-colors"
+            >
+              {business.email}
+            </a>
+          </div>
+
         </div>
 
       </div>
 
       {/* Action CTA Buttons */}
-      <div className="pt-5 mt-4 border-t border-slate-100 grid grid-cols-2 gap-2">
-        {whatsappUrl ? (
+      <div className="pt-4 mt-3 border-t border-slate-100 flex items-center gap-2">
+        <a
+          href={`tel:${business.phone}`}
+          className="flex-1 bg-[#3D1A00] hover:bg-[#E65C00] text-white rounded-xl py-2 px-2.5 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors shadow-sm"
+          title={`Call ${business.phone}`}
+        >
+          <Phone className="w-3.5 h-3.5" />
+          <span>Call</span>
+        </a>
+
+        {whatsappUrl && (
           <a
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="col-span-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-2 px-2.5 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors shadow-sm"
+            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-2 px-2.5 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors shadow-sm"
+            title="Chat on WhatsApp"
           >
             <MessageCircle className="w-3.5 h-3.5" />
             <span>WhatsApp</span>
           </a>
-        ) : (
-          <a
-            href={`tel:${business.phone}`}
-            className="col-span-1 bg-[#3D1A00] hover:bg-[#E65C00] text-white rounded-xl py-2 px-2.5 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors shadow-sm"
-          >
-            <Phone className="w-3.5 h-3.5" />
-            <span>Call</span>
-          </a>
         )}
 
-        {business.website ? (
+        {targetWebsiteUrl ? (
           <a
-            href={business.website.startsWith('http') ? business.website : `https://${business.website}`}
+            href={targetWebsiteUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="col-span-1 border border-[#E65C00]/30 hover:border-[#E65C00] hover:bg-[#FFF0E0] text-[#3D1A00] rounded-xl py-2 px-2.5 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors"
+            className="flex-1 border border-[#E65C00]/30 hover:border-[#E65C00] hover:bg-[#FFF0E0] text-[#3D1A00] rounded-xl py-2 px-2.5 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors"
+            title="Visit official website"
           >
             <Globe className="w-3.5 h-3.5 text-[#E65C00]" />
             <span>Website</span>
@@ -813,7 +924,8 @@ function BusinessCard({ business, isFeatured = false }: { business: TeluguBusine
         ) : (
           <a
             href={`mailto:${business.email}`}
-            className="col-span-1 border border-[#E65C00]/30 hover:border-[#E65C00] hover:bg-[#FFF0E0] text-[#3D1A00] rounded-xl py-2 px-2.5 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors"
+            className="flex-1 border border-[#E65C00]/30 hover:border-[#E65C00] hover:bg-[#FFF0E0] text-[#3D1A00] rounded-xl py-2 px-2.5 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors"
+            title="Send Email"
           >
             <Mail className="w-3.5 h-3.5 text-[#E65C00]" />
             <span>Email</span>

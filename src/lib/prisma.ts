@@ -4,38 +4,41 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+function getFreshPrisma(): PrismaClient {
+  try {
+    const dynamicRequire = eval('require');
+    if (dynamicRequire && dynamicRequire.cache) {
+      Object.keys(dynamicRequire.cache).forEach((key: string) => {
+        if (key.includes('@prisma/client') || key.includes('.prisma')) {
+          delete dynamicRequire.cache[key];
+        }
+      });
+    }
+    const FreshClient = dynamicRequire('@prisma/client').PrismaClient;
+    return new FreshClient({
+      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+    });
+  } catch (e) {
+    return new PrismaClient({
+      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+    });
+  }
+}
+
 function getPrismaClient(): PrismaClient {
   if (globalForPrisma.prisma) {
-    if ('config' in (globalForPrisma.prisma as any)) {
+    const hasImagesField = (globalForPrisma.prisma as any)?._runtimeDataModel?.models?.MediaItem?.fields?.some(
+      (f: any) => f.name === 'images'
+    );
+    if (hasImagesField) {
       return globalForPrisma.prisma;
-    }
-    // Delete stale @prisma/client from require cache
-    try {
-      if (typeof require !== 'undefined' && require.cache) {
-        Object.keys(require.cache).forEach((key) => {
-          if (key.includes('@prisma/client') || key.includes('.prisma')) {
-            delete require.cache[key];
-          }
-        });
-      }
-      const FreshClient = require('@prisma/client').PrismaClient;
-      globalForPrisma.prisma = new FreshClient({
-        log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-      });
-      return globalForPrisma.prisma!;
-    } catch (e) {
-      console.error('Error refreshing Prisma client:', e);
     }
   }
 
-  const client = new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-  });
-
+  const client = getFreshPrisma();
   if (process.env.NODE_ENV !== 'production') {
     globalForPrisma.prisma = client;
   }
-
   return client;
 }
 

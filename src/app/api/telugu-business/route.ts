@@ -79,6 +79,7 @@ export async function POST(request: Request) {
       address,
       city,
       postcode,
+      googleMapsUrl,
       specialOffer,
     } = body;
 
@@ -108,6 +109,7 @@ export async function POST(request: Request) {
         address: address?.trim() || null,
         city: city?.trim() || 'London',
         postcode: postcode?.trim() || null,
+        googleMapsUrl: googleMapsUrl?.trim() || null,
         status: 'Pending', // Pending admin approval
         isFeatured: false,
         specialOffer: specialOffer?.trim() || null,

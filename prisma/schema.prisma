@@ -41,9 +41,10 @@ model Event {
   mapUrl       String?
   customFields Json?   @default("[]")
 
-  rsvps      EventRSVP[]
-  mediaItems MediaItem[]
-  configs    Config[]
+  rsvps        EventRSVP[]
+  mediaItems   MediaItem[]
+  downloadLogs MediaDownloadLog[]
+  configs      Config[]
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
 }
@@ -130,6 +131,7 @@ model Member {
   expiryDate   String?
   notes        String?
   imageUrl     String?
+  downloadLogs MediaDownloadLog[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
@@ -163,6 +165,7 @@ model MediaItem {
   category          String   @default("Photo")
   coverImage        String?
   url               String   @default("")
+  images            String[] @default([])
   description       String?
   eventId           String?
   event             Event?   @relation(fields: [eventId], references: [id], onDelete: Cascade)
@@ -175,10 +178,32 @@ model MediaItem {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @default(now()) @updatedAt
 
+  downloadLogs      MediaDownloadLog[]
+
   @@index([eventId])
   @@index([type])
   @@index([isHomeFeatured])
   @@index([isEventFeatured])
+}
+
+model MediaDownloadLog {
+  id           String     @id @default(cuid())
+  userId       String
+  user         Member     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId      String
+  event        Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  mediaId      String?
+  media        MediaItem? @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+  fileCount    Int        @default(1)
+  downloadType String     @default("SINGLE") // "SINGLE" | "ZIP" | "ALBUM"
+  ip           String?
+  userAgent    String?
+  createdAt    DateTime   @default(now())
+
+  @@index([userId])
+  @@index([eventId])
+  @@index([mediaId])
+  @@index([createdAt])
 }
 
 model BlogPost {
@@ -304,8 +329,9 @@ model TeluguBusiness {
   website      String?
   address      String?
   city         String   @default("London")
-  postcode     String?
-  status       String   @default("Pending") // "Pending", "Approved", "Rejected"
+  postcode      String?
+  googleMapsUrl String?
+  status        String   @default("Pending") // "Pending", "Approved", "Rejected"
   isFeatured   Boolean  @default(false)
   specialOffer String? // e.g. "10% off for MITRA members"
   adminNotes   String?

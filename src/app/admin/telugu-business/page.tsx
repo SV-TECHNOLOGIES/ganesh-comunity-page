@@ -83,6 +83,7 @@ export default function AdminTeluguBusinessPage() {
     address: '',
     city: 'London',
     postcode: '',
+    googleMapsUrl: '',
     status: 'Approved',
     isFeatured: false,
     specialOffer: '',
@@ -253,6 +254,7 @@ export default function AdminTeluguBusinessPage() {
       address: b.address || '',
       city: b.city,
       postcode: b.postcode || '',
+      googleMapsUrl: b.googleMapsUrl || '',
       status: b.status,
       isFeatured: b.isFeatured,
       specialOffer: b.specialOffer || '',
@@ -316,6 +318,7 @@ export default function AdminTeluguBusinessPage() {
           address: '',
           city: 'London',
           postcode: '',
+          googleMapsUrl: '',
           status: 'Approved',
           isFeatured: false,
           specialOffer: '',
@@ -406,6 +409,7 @@ export default function AdminTeluguBusinessPage() {
                 address: '',
                 city: 'London',
                 postcode: '',
+                googleMapsUrl: '',
                 status: 'Approved',
                 isFeatured: false,
                 specialOffer: '',
@@ -968,6 +972,20 @@ export default function AdminTeluguBusinessPage() {
                       type="text"
                       value={formData.address}
                       onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-mitra-gold"
+                    />
+                  </div>
+
+                  <div className="space-y-1 sm:col-span-2">
+                    <label className="text-[11px] font-bold text-slate-300 flex items-center justify-between">
+                      <span>Google Maps Location Link / URL</span>
+                      <span className="text-[10px] text-mitra-gold font-normal">Optional: direct link to Google Maps</span>
+                    </label>
+                    <input
+                      type="url"
+                      value={formData.googleMapsUrl}
+                      onChange={(e) => setFormData({ ...formData, googleMapsUrl: e.target.value })}
+                      placeholder="https://maps.google.com/?q=... or https://maps.app.goo.gl/..."
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-mitra-gold"
                     />
                   </div>

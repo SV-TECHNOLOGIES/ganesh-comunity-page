@@ -14,6 +14,13 @@ const nextConfig = {
   reactStrictMode: true,
   experimental: {
     instrumentationHook: true,
+    serverComponentsExternalPackages: ['ssh2', 'ssh2-sftp-client'],
+  },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals.push('ssh2', 'ssh2-sftp-client');
+    }
+    return config;
   },
   images: {
     domains: ['images.unsplash.com', 'mitra.org.uk', 'img.youtube.com', 'media.mitrauk.com'],

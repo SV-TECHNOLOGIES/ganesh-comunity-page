@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+// Media route with grouped images support
 
 export async function GET(request: Request) {
   try {

@@ -90,6 +90,7 @@ export async function POST(request: Request) {
       address,
       city,
       postcode,
+      googleMapsUrl,
       status,
       isFeatured,
       specialOffer,
@@ -121,6 +122,7 @@ export async function POST(request: Request) {
         address: address?.trim() || null,
         city: city?.trim() || 'London',
         postcode: postcode?.trim() || null,
+        googleMapsUrl: googleMapsUrl?.trim() || null,
         status: status || 'Approved', // Defaults to approved when added by admin
         isFeatured: Boolean(isFeatured),
         specialOffer: specialOffer?.trim() || null,
@@ -179,6 +181,7 @@ export async function PATCH(request: Request) {
     if (rest.address !== undefined) updateData.address = rest.address ? rest.address.trim() : null;
     if (rest.city) updateData.city = rest.city.trim();
     if (rest.postcode !== undefined) updateData.postcode = rest.postcode ? rest.postcode.trim() : null;
+    if (rest.googleMapsUrl !== undefined) updateData.googleMapsUrl = rest.googleMapsUrl ? rest.googleMapsUrl.trim() : null;
     if (rest.specialOffer !== undefined) updateData.specialOffer = rest.specialOffer ? rest.specialOffer.trim() : null;
 
     const updated = await prisma.teluguBusiness.update({
