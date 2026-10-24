@@ -1219,7 +1219,7 @@ function MediaContent() {
                 <ChevronRight className="w-4 h-4" />
               </Link>
               <Link
-                href="/join"
+                href="/membership"
                 className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white text-xs sm:text-sm font-bold transition-all"
               >
                 <span>Register for Free Membership</span>
