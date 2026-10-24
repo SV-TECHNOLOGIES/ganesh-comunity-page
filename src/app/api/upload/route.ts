@@ -65,6 +65,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       url: result.url,
+      thumbnailUrl: result.thumbnailUrl || result.url,
       relativePath: result.relativePath,
       filename: result.filename,
       storageType: result.storageType,

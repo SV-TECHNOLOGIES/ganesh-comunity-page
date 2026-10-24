@@ -78,7 +78,65 @@ export async function POST(request: Request) {
 
     const origin = new URL(request.url).origin;
     const body = await request.json().catch(() => ({}));
-    const { eventId, mediaIds, mediaId } = body;
+    const { eventId, mediaIds, mediaId, photoUrl } = body;
+
+    // Handle single photo download if photoUrl is explicitly provided
+    if (photoUrl && typeof photoUrl === 'string') {
+      const cleanPhotoUrl = photoUrl.includes('/api/media/image-optimize?')
+        ? decodeURIComponent(photoUrl.match(/[?&]url=([^&]+)/)?.[1] || photoUrl)
+        : photoUrl;
+
+      const fileData = await fetchFileBuffer(cleanPhotoUrl, origin);
+      if (!fileData) {
+        return NextResponse.json(
+          { success: false, error: 'Could not fetch image file from storage.' },
+          { status: 502 }
+        );
+      }
+
+      // Log download
+      try {
+        const memberExists = await prisma.member.findUnique({ where: { id: user.id }, select: { id: true } });
+        if (!memberExists) {
+          await prisma.member.create({
+            data: {
+              id: user.id,
+              email: user.email,
+              fullName: user.fullName || user.email.split('@')[0],
+              phone: '0000000000',
+              role: user.role || 'Member',
+              tier: user.tier || 'Member',
+            },
+          });
+        }
+        await prisma.mediaDownloadLog.create({
+          data: {
+            userId: user.id,
+            eventId: eventId || 'evt-general',
+            mediaId: mediaId || null,
+            fileCount: 1,
+            downloadType: 'SINGLE',
+            ip: request.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown',
+            userAgent: request.headers.get('user-agent') || 'unknown',
+          },
+        });
+      } catch (logErr) {
+        console.error('[MEDIA DOWNLOAD] Logging failed:', logErr);
+      }
+
+      const originalFilename = cleanPhotoUrl.split('/').pop()?.split('?')[0] || 'photo.jpg';
+      const mimeType = fileData.ext === '.png' ? 'image/png' : fileData.ext === '.webp' ? 'image/webp' : 'image/jpeg';
+
+      return new NextResponse(new Uint8Array(fileData.buffer), {
+        status: 200,
+        headers: {
+          'Content-Type': mimeType,
+          'Content-Disposition': `attachment; filename="${originalFilename}"`,
+          'Content-Length': fileData.buffer.length.toString(),
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+        },
+      });
+    }
 
     // 2. Resolve media items to download
     let mediaItems: any[] = [];

@@ -64,11 +64,12 @@ interface MediaItem {
 }
 
 import { getYouTubeEmbedUrl, getYouTubeThumbnailUrl, isYouTubeUrl } from '@/lib/youtube';
+import { getOptimizedImageUrl, getOriginalImageUrl } from '@/lib/image-utils';
 
 // Thumbnails rendered inline on album cards; the full set lives in the album grid view
-const CARD_STRIP_LIMIT = 8;
-// Album grid renders this many photos at a time and loads the next batch on scroll
-const ALBUM_PAGE_SIZE = 40;
+const CARD_STRIP_LIMIT = 4;
+// Album grid renders strictly 10 photos per page for fast loading and balanced 2x5 grid
+const ALBUM_PAGE_SIZE = 10;
 
 const isExternalAlbum = (url: string) => {
   if (!url) return false;
@@ -106,10 +107,8 @@ function MediaContent() {
   // Auth & Download state
   const { user, isLoggedIn } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [downloadingZip, setDownloadingZip] = useState(false);
+  const [downloadingPhotoUrl, setDownloadingPhotoUrl] = useState<string | null>(null);
   const [downloadStatusMsg, setDownloadStatusMsg] = useState('');
-  const [selectionMode, setSelectionMode] = useState(false);
-  const [selectedPhotoIds, setSelectedPhotoIds] = useState<string[]>([]);
 
   // Lightbox & Video Player Modal states
   const [activePhotoIndex, setActivePhotoIndex] = useState<number | null>(null);
@@ -189,38 +188,49 @@ function MediaContent() {
     return eventPhotos.find((m) => m.id === activeAlbumIdParam) || null;
   }, [activeAlbumIdParam, eventPhotos]);
 
-  const openAlbumImages = openAlbum
-    ? (openAlbum.images && openAlbum.images.length > 0 ? openAlbum.images : [openAlbum.url])
-    : [];
+  const openAlbumImages = useMemo(() => {
+    if (!openAlbum) return [];
+    return openAlbum.images && openAlbum.images.length > 0 ? openAlbum.images : [openAlbum.url];
+  }, [openAlbum]);
 
-  // Progressive rendering of the album grid: render a page of photos, extend as the sentinel scrolls into view
-  const [albumVisibleCount, setAlbumVisibleCount] = useState(ALBUM_PAGE_SIZE);
-  const albumSentinelRef = useRef<HTMLDivElement>(null);
+  // Album Grid Pagination (Strictly 10 photos per page for fast rendering and balanced 2x5 grid)
+  const initialPage = useMemo(() => {
+    const p = parseInt(searchParams?.get('page') || '1', 10);
+    return isNaN(p) || p < 1 ? 1 : p;
+  }, [searchParams]);
+
+  const [albumPage, setAlbumPage] = useState<number>(initialPage);
+  const albumGridTopRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setAlbumVisibleCount(ALBUM_PAGE_SIZE);
-  }, [activeAlbumIdParam]);
+    const p = parseInt(searchParams?.get('page') || '1', 10);
+    setAlbumPage(isNaN(p) || p < 1 ? 1 : p);
+  }, [searchParams, activeAlbumIdParam]);
 
-  useEffect(() => {
-    const sentinel = albumSentinelRef.current;
-    if (!sentinel || albumVisibleCount >= openAlbumImages.length) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setAlbumVisibleCount((c) => Math.min(c + ALBUM_PAGE_SIZE, openAlbumImages.length));
-        }
-      },
-      { rootMargin: '600px 0px' }
-    );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [albumVisibleCount, openAlbumImages.length]);
+  const totalAlbumPages = Math.max(1, Math.ceil(openAlbumImages.length / ALBUM_PAGE_SIZE));
+  const safeAlbumPage = Math.min(Math.max(albumPage, 1), totalAlbumPages);
+  const pageStartIndex = (safeAlbumPage - 1) * ALBUM_PAGE_SIZE;
+  const pageEndIndex = Math.min(pageStartIndex + ALBUM_PAGE_SIZE, openAlbumImages.length);
 
-  const handleOpenAlbum = (mediaId: string) => {
+  const currentAlbumPageImages = useMemo(() => {
+    return openAlbumImages.slice(pageStartIndex, pageEndIndex);
+  }, [openAlbumImages, pageStartIndex, pageEndIndex]);
+
+  const handlePageChange = (newPage: number) => {
+    const clamped = Math.min(Math.max(newPage, 1), totalAlbumPages);
+    setAlbumPage(clamped);
+    router.push(`/media?event=${selectedEventId}&album=${openAlbum?.id}&page=${clamped}`, { scroll: false });
+    if (albumGridTopRef.current) {
+      albumGridTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handleOpenAlbum = (mediaId: string, page = 1) => {
     setSelectionMode(false);
     setSelectedPhotoIds([]);
-    router.push(`/media?event=${selectedEventId}&album=${mediaId}`);
-    window.scrollTo({ top: 0 });
+    setAlbumPage(page);
+    router.push(`/media?event=${selectedEventId}&album=${mediaId}&page=${page}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCloseAlbum = () => {
@@ -285,28 +295,23 @@ function MediaContent() {
     }
   };
 
-  const handleDownloadZip = async (target: 'ALL' | 'SELECTED') => {
+  const handleDownloadPhoto = async (photoUrl: string, title?: string, mediaId?: string) => {
     if (!isLoggedIn) {
       setShowAuthModal(true);
       return;
     }
 
-    const ids = target === 'SELECTED' ? selectedPhotoIds : undefined;
-    if (target === 'SELECTED' && (!ids || ids.length === 0)) {
-      alert('Please select at least one photo to download.');
-      return;
-    }
-
-    setDownloadingZip(true);
-    setDownloadStatusMsg(target === 'ALL' ? 'Packaging full album into ZIP file...' : `Packaging ${ids?.length} selected photos into ZIP file...`);
+    const rawUrl = getOriginalImageUrl(photoUrl);
+    setDownloadingPhotoUrl(rawUrl);
+    setDownloadStatusMsg(`Downloading "${title || 'photo'}"...`);
 
     try {
       const res = await fetch('/api/media/download', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          eventId: target === 'ALL' ? selectedEventId : undefined,
-          mediaIds: ids,
+          photoUrl: rawUrl,
+          mediaId: mediaId || undefined,
         }),
       });
 
@@ -316,81 +321,46 @@ function MediaContent() {
       }
 
       if (!res.ok) {
-        const errJson = await res.json().catch(() => ({}));
-        throw new Error(errJson.error || 'Failed to download ZIP file');
-      }
-
-      const blob = await res.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = downloadUrl;
-      const cleanEventTitle = (currentEvent?.title || 'Event').replace(/[^a-zA-Z0-9_\-]/g, '_');
-      a.download = `MITRA_${cleanEventTitle}_Photos.zip`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(downloadUrl);
-
-      setDownloadStatusMsg('ZIP archive downloaded successfully!');
-      setTimeout(() => setDownloadStatusMsg(''), 3000);
-    } catch (err: any) {
-      alert(`Download error: ${err.message || 'Please try again.'}`);
-    } finally {
-      setDownloadingZip(false);
-    }
-  };
-
-  const handleDownloadSinglePhoto = async (item: MediaItem) => {
-    if (!isLoggedIn) {
-      setShowAuthModal(true);
-      return;
-    }
-
-    setDownloadingZip(true);
-    setDownloadStatusMsg(`Downloading "${item.title || 'photo'}"...`);
-
-    try {
-      const res = await fetch('/api/media/download', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mediaId: item.id }),
-      });
-
-      if (res.status === 401) {
-        setShowAuthModal(true);
+        // Direct browser download fallback
+        const a = document.createElement('a');
+        a.href = rawUrl;
+        a.target = '_blank';
+        a.download = rawUrl.split('/').pop()?.split('?')[0] || `${(title || 'photo').replace(/[^a-zA-Z0-9_\-]/g, '_')}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setDownloadStatusMsg('Photo downloaded!');
+        setTimeout(() => setDownloadStatusMsg(''), 2500);
         return;
       }
 
-      if (!res.ok) {
-        const errJson = await res.json().catch(() => ({}));
-        throw new Error(errJson.error || 'Failed to download photo');
-      }
-
       const blob = await res.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
+      const downloadBlobUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = downloadUrl;
-      const cleanName = (item.title || 'photo').replace(/[^a-zA-Z0-9_\-]/g, '_');
-      const isZip = blob.type.includes('zip') || (item.images && item.images.length > 1);
-      a.download = isZip ? `${cleanName}_photos.zip` : `${cleanName}.jpg`;
+      a.href = downloadBlobUrl;
+      const filename = rawUrl.split('/').pop()?.split('?')[0] || `${(title || 'photo').replace(/[^a-zA-Z0-9_\-]/g, '_')}.jpg`;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      window.URL.revokeObjectURL(downloadUrl);
+      window.URL.revokeObjectURL(downloadBlobUrl);
 
-      setDownloadStatusMsg(isZip ? 'Group gallery ZIP downloaded!' : 'Photo downloaded!');
+      setDownloadStatusMsg('Photo downloaded!');
       setTimeout(() => setDownloadStatusMsg(''), 2500);
     } catch (err: any) {
-      alert(`Download error: ${err.message || 'Please try again.'}`);
+      // Direct browser fallback
+      const a = document.createElement('a');
+      a.href = rawUrl;
+      a.target = '_blank';
+      a.download = rawUrl.split('/').pop() || 'photo.jpg';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setDownloadStatusMsg('Photo downloaded!');
+      setTimeout(() => setDownloadStatusMsg(''), 2500);
     } finally {
-      setDownloadingZip(false);
+      setDownloadingPhotoUrl(null);
     }
-  };
-
-  const toggleSelectPhoto = (id: string) => {
-    setSelectedPhotoIds((prev) =>
-      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
-    );
   };
 
   return (
@@ -441,79 +411,160 @@ function MediaContent() {
                   </>
                 )}
               </button>
-              <button
-                onClick={() => handleDownloadSinglePhoto(openAlbum)}
-                disabled={downloadingZip}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#E65C00] to-[#FF7A00] hover:brightness-110 text-white text-xs font-black uppercase tracking-wider shadow-md hover:shadow-lg transition-all disabled:opacity-60"
-                title="Download all photos in this album as a ZIP file (Logged-in members)"
-              >
-                {downloadingZip ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Packaging ZIP...</span>
-                  </>
-                ) : (
-                  <>
-                    <Archive className="w-3.5 h-3.5" />
-                    <span>Download Album ({openAlbumImages.length} Photos)</span>
-                  </>
-                )}
-              </button>
             </div>
           </div>
 
-          <div className="space-y-1">
-            <span className="text-xs font-bold text-mitra-gold flex items-center gap-1.5">
-              <ImageIcon className="w-3.5 h-3.5" />
-              <span>{openAlbumImages.length} Photos · {currentEvent.title}</span>
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">{openAlbum.title}</h2>
+          <div ref={albumGridTopRef} className="space-y-2">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <span className="text-xs font-bold text-mitra-gold flex items-center gap-1.5">
+                <ImageIcon className="w-3.5 h-3.5" />
+                <span>{openAlbumImages.length} High-Resolution Photos · 10 per page · {currentEvent.title}</span>
+              </span>
+
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                Page {safeAlbumPage} of {totalAlbumPages}
+              </span>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{openAlbum.title}</h2>
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                Showing photos {pageStartIndex + 1}–{pageEndIndex} of {openAlbumImages.length}
+              </span>
+            </div>
+
             {openAlbum.description && (
-              <p className="text-sm text-slate-600 dark:text-slate-300 max-w-3xl">{openAlbum.description}</p>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-3xl">{openAlbum.description}</p>
             )}
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
-            {openAlbumImages.slice(0, albumVisibleCount).map((imgUrl, idx) => (
+          {/* Top Pagination Controls */}
+          {totalAlbumPages > 1 && (
+            <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-50 dark:bg-slate-900/60 p-2 rounded-2xl border border-slate-200 dark:border-slate-800 max-w-5xl mx-auto">
               <button
-                key={`${imgUrl}-${idx}`}
                 type="button"
-                onClick={() => {
-                  setActivePhotoIndex(eventPhotos.findIndex((p) => p.id === openAlbum.id));
-                  setActiveGroupSubIndex(idx);
-                }}
-                className="group relative aspect-square rounded-xl overflow-hidden bg-slate-200 dark:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:border-mitra-gold/60 focus:outline-none focus:ring-2 focus:ring-mitra-gold"
-                title={`View photo ${idx + 1} of ${openAlbumImages.length}`}
+                disabled={safeAlbumPage <= 1}
+                onClick={() => handlePageChange(safeAlbumPage - 1)}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#E65C00] transition-all"
               >
-                <img
-                  src={imgUrl}
-                  alt={`${openAlbum.title} — photo ${idx + 1}`}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/assets/poster.jpg';
-                  }}
-                />
-                <span className="absolute bottom-1.5 right-1.5 bg-black/70 text-white font-mono text-[9px] px-1.5 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
-                  {idx + 1}
-                </span>
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span>Prev</span>
               </button>
-            ))}
+
+              <div className="flex items-center gap-1 flex-wrap justify-center">
+                {Array.from({ length: totalAlbumPages }).map((_, pIdx) => {
+                  const pNum = pIdx + 1;
+                  const isCurrent = pNum === safeAlbumPage;
+                  return (
+                    <button
+                      key={pNum}
+                      type="button"
+                      onClick={() => handlePageChange(pNum)}
+                      className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-xs font-bold transition-all ${
+                        isCurrent
+                          ? 'bg-gradient-to-r from-[#E65C00] to-[#FF7A00] text-white shadow-md shadow-[#E65C00]/20 scale-105'
+                          : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-[#E65C00]'
+                      }`}
+                      title={`Go to page ${pNum}`}
+                    >
+                      {pNum}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                disabled={safeAlbumPage >= totalAlbumPages}
+                onClick={() => handlePageChange(safeAlbumPage + 1)}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#E65C00] transition-all"
+              >
+                <span>Next</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
+          {/* Reduced Grid Size: Symmetrical 5-column layout (10 photos = exactly 2 rows of 5) with reduced 280px WebP fetch */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 sm:gap-3 max-w-5xl mx-auto w-full">
+            {currentAlbumPageImages.map((imgUrl, idx) => {
+              const globalIdx = pageStartIndex + idx;
+              return (
+                <button
+                  key={`${imgUrl}-${globalIdx}`}
+                  type="button"
+                  onClick={() => {
+                    setActivePhotoIndex(eventPhotos.findIndex((p) => p.id === openAlbum.id));
+                    setActiveGroupSubIndex(globalIdx);
+                  }}
+                  className="group relative aspect-square rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:border-[#E65C00] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#E65C00] transition-all cursor-pointer"
+                  title={`View photo ${globalIdx + 1} of ${openAlbumImages.length}`}
+                >
+                  <img
+                    src={getOptimizedImageUrl(imgUrl, 280, 65)}
+                    alt={`${openAlbum.title} — photo ${globalIdx + 1}`}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/assets/poster.jpg';
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between p-2">
+                    <span className="text-[10px] font-bold text-white">#{globalIdx + 1}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDownloadPhoto(imgUrl, `${openAlbum.title}_photo_${globalIdx + 1}`, openAlbum.id);
+                        }}
+                        className="w-6 h-6 rounded-md bg-black/60 hover:bg-[#E65C00] text-white flex items-center justify-center transition-colors cursor-pointer shadow"
+                        title="Download original photo"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                      </span>
+                      <span className="w-6 h-6 rounded-md bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
+                        <Eye className="w-3.5 h-3.5" />
+                      </span>
+                    </div>
+                  </div>
+                  <span className="absolute bottom-1 right-1 bg-black/60 group-hover:opacity-0 text-white font-mono text-[8px] px-1 py-0.2 rounded transition-opacity">
+                    {globalIdx + 1}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
-          {albumVisibleCount < openAlbumImages.length && (
-            <div ref={albumSentinelRef} className="flex flex-col items-center gap-2 py-6">
-              <span className="text-xs text-slate-500">
-                Showing {albumVisibleCount} of {openAlbumImages.length} photos
+          {/* Bottom Pagination Controls */}
+          {totalAlbumPages > 1 && (
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-200 dark:border-slate-800 max-w-5xl mx-auto">
+              <span className="text-xs text-slate-500 dark:text-slate-400">
+                Page <span className="font-bold text-slate-900 dark:text-white">{safeAlbumPage}</span> of{' '}
+                <span className="font-bold text-slate-900 dark:text-white">{totalAlbumPages}</span> ({openAlbumImages.length} total photos · 10/page)
               </span>
-              <button
-                type="button"
-                onClick={() => setAlbumVisibleCount((c) => Math.min(c + ALBUM_PAGE_SIZE, openAlbumImages.length))}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-mitra-red hover:text-white text-slate-700 dark:text-slate-200 text-xs font-bold transition-all"
-              >
-                <span>Load more photos</span>
-              </button>
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  disabled={safeAlbumPage <= 1}
+                  onClick={() => handlePageChange(safeAlbumPage - 1)}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:border-[#E65C00] transition-all shadow-sm"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  <span>Prev Page</span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={safeAlbumPage >= totalAlbumPages}
+                  onClick={() => handlePageChange(safeAlbumPage + 1)}
+                  className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#E65C00] to-[#FF7A00] text-white text-xs font-black uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110 transition-all shadow-md"
+                >
+                  <span>Next Page</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -548,89 +599,8 @@ function MediaContent() {
                   </>
                 )}
               </button>
-
-              {/* Select Mode Toggle */}
-              {eventPhotos.length > 0 && (
-                <button
-                  onClick={() => {
-                    setSelectionMode(!selectionMode);
-                    if (selectionMode) setSelectedPhotoIds([]);
-                  }}
-                  className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
-                    selectionMode
-                      ? 'bg-amber-500/15 border-amber-500/50 text-amber-500'
-                      : 'border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-mitra-gold'
-                  }`}
-                >
-                  <CheckSquare className="w-3.5 h-3.5" />
-                  <span>{selectionMode ? 'Cancel Selection' : 'Select Photos'}</span>
-                </button>
-              )}
-
-              {/* Download Entire Album ZIP Button */}
-              {eventPhotos.length > 0 && !selectionMode && (
-                <button
-                  onClick={() => handleDownloadZip('ALL')}
-                  disabled={downloadingZip}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#E65C00] to-[#FF7A00] hover:brightness-110 text-white text-xs font-black uppercase tracking-wider shadow-md hover:shadow-lg transition-all"
-                  title="Download all photos in this album as a ZIP file (Logged-in members)"
-                >
-                  {downloadingZip ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      <span>Packaging ZIP...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Archive className="w-3.5 h-3.5" />
-                      <span>Download Album ({eventPhotos.length} Photos ZIP)</span>
-                    </>
-                  )}
-                </button>
-              )}
             </div>
           </div>
-
-          {/* Selection Mode Action Banner */}
-          {selectionMode && (
-            <div className="bg-amber-500/10 border-2 border-amber-500/40 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-white animate-fadeIn">
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-black text-amber-400 uppercase tracking-wider">
-                  {selectedPhotoIds.length} of {eventPhotos.length} Photos Selected
-                </span>
-                <button
-                  onClick={() => {
-                    if (selectedPhotoIds.length === eventPhotos.length) {
-                      setSelectedPhotoIds([]);
-                    } else {
-                      setSelectedPhotoIds(eventPhotos.map((p) => p.id));
-                    }
-                  }}
-                  className="text-xs text-slate-300 hover:text-white underline font-semibold"
-                >
-                  {selectedPhotoIds.length === eventPhotos.length ? 'Deselect All' : 'Select All Photos'}
-                </button>
-              </div>
-
-              <button
-                onClick={() => handleDownloadZip('SELECTED')}
-                disabled={downloadingZip || selectedPhotoIds.length === 0}
-                className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 disabled:opacity-50 text-white text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-lg transition-all"
-              >
-                {downloadingZip ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Zipping Selected...</span>
-                  </>
-                ) : (
-                  <>
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Download Selected ({selectedPhotoIds.length} Photos as ZIP)</span>
-                  </>
-                )}
-              </button>
-            </div>
-          )}
 
 
 
@@ -781,7 +751,7 @@ function MediaContent() {
                   >
                     <div className="relative aspect-[4/3] bg-slate-950 overflow-hidden shrink-0">
                       <img
-                        src={activeCardUrl || item.coverImage || (isExt ? '/assets/poster.jpg' : item.url) || '/assets/poster.jpg'}
+                        src={getOptimizedImageUrl(activeCardUrl || item.coverImage || (isExt ? '/assets/poster.jpg' : item.url), 600, 75)}
                         alt={item.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         onError={(e) => {
@@ -852,43 +822,26 @@ function MediaContent() {
                         </>
                       )}
 
-                      {/* Selection Checkbox OR Quick Download Button */}
+                      {/* Quick Download Button */}
                       <div className="absolute top-3 right-3 z-10">
-                        {selectionMode ? (
-                          <div
+                        {!isExt && (
+                          <button
+                            type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              toggleSelectPhoto(item.id);
+                              handleDownloadPhoto(activeCardUrl || item.coverImage || item.url, item.title, item.id);
                             }}
-                            className="p-1 cursor-pointer"
+                            className="w-8 h-8 rounded-full bg-black/60 hover:bg-[#E65C00] text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 shadow-md hover:scale-110"
+                            title="Download original photo"
                           >
-                            {isSelected ? (
-                              <span className="w-7 h-7 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-lg border border-white/40">
-                                <Check className="w-4 h-4 stroke-[3]" />
-                              </span>
-                            ) : (
-                              <span className="w-7 h-7 rounded-xl bg-black/50 border-2 border-white/70 flex items-center justify-center shadow-lg hover:border-white transition-colors" />
-                            )}
-                          </div>
-                        ) : (
-                          !isExt && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDownloadSinglePhoto(item);
-                              }}
-                              className="w-8 h-8 rounded-full bg-black/60 hover:bg-[#E65C00] text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 shadow-md hover:scale-110"
-                              title={isGroup ? "Download Group ZIP (Members Only)" : "Download Photo (Members Only)"}
-                            >
-                              <Download className="w-4 h-4" />
-                            </button>
-                          )
+                            <Download className="w-4 h-4" />
+                          </button>
                         )}
                       </div>
 
                       <div className="absolute bottom-3 left-3 text-white max-w-[70%]">
                         <span className="text-[10px] text-mitra-gold font-bold block">
-                          {selectionMode ? (isSelected ? '✓ Selected' : 'Click to select') : isExt ? 'Open External Album ↗' : (isGroup ? `Open album · ${itemImages.length} photos` : 'Click to enlarge')}
+                          {isExt ? 'Open External Album ↗' : (isGroup ? `Open album · ${itemImages.length} photos` : 'Click to enlarge')}
                         </span>
                         <h4 className="text-xs font-bold truncate">{item.title}</h4>
                       </div>
@@ -924,7 +877,7 @@ function MediaContent() {
                                 }`}
                                 title={`Switch to photo ${gIdx + 1}`}
                               >
-                                <img src={imgUrl} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                                <img src={getOptimizedImageUrl(imgUrl, 200, 70)} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
                                 <span className={`absolute bottom-0 right-0 text-[8px] font-mono px-1 rounded-tl ${
                                   isCurrent ? 'bg-[#E65C00] text-white font-bold' : 'bg-black/80 text-white'
                                 }`}>
@@ -1081,23 +1034,22 @@ function MediaContent() {
             </div>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => handleDownloadSinglePhoto(currentItem)}
+                onClick={() => handleDownloadPhoto(currentImgUrl, `${currentItem.title || 'photo'}_${currentSubIdx + 1}`, currentItem.id)}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 text-xs font-bold rounded-lg shadow transition-all cursor-pointer"
-                title={isGroup ? "Download All Photos in this Group as ZIP (MITRA Members Only)" : "Download Photo (MITRA Members Only)"}
+                title="Download original full-resolution photo (MITRA Members Only)"
               >
                 <Download className="w-4 h-4" />
-                <span className="hidden sm:inline">
-                  {isGroup ? `Download Group ZIP (${groupUrls.length} Photos)` : 'Download Photo'}
-                </span>
+                <span className="hidden sm:inline">Download Photo</span>
               </button>
               <button
                 onClick={() => {
                   if (currentImgUrl) window.open(currentImgUrl, '_blank');
                 }}
-                className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/10"
-                title="Open original image"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-colors"
+                title="Open original uncompressed full-resolution photo (Opens in new tab)"
               >
-                <Eye className="w-5 h-5" />
+                <Eye className="w-4 h-4" />
+                <span className="hidden sm:inline">Original HD</span>
               </button>
               <button
                 onClick={closeLightbox}
@@ -1126,7 +1078,7 @@ function MediaContent() {
 
             <div className="relative max-w-5xl max-h-[72vh] w-full h-full flex items-center justify-center">
               <img
-                src={currentImgUrl}
+                src={getOptimizedImageUrl(currentImgUrl, 1400, 80)}
                 alt={currentItem.title}
                 className="max-w-full max-h-[72vh] object-contain rounded-2xl shadow-2xl"
               />
@@ -1164,7 +1116,7 @@ function MediaContent() {
                   }`}
                   title={`View photo ${gIdx + 1}`}
                 >
-                  <img src={gUrl} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                  <img src={getOptimizedImageUrl(gUrl, 160, 65)} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
                   <span className="absolute bottom-0 right-0 bg-black/80 text-[8px] text-white px-1 font-mono">
                     {gIdx + 1}
                   </span>
@@ -1291,19 +1243,19 @@ function MediaContent() {
       )}
 
       {/* FLOATING DOWNLOAD STATUS TOAST */}
-      {(downloadingZip || downloadStatusMsg) && (
+      {(downloadingPhotoUrl || downloadStatusMsg) && (
         <div className="fixed bottom-6 right-6 z-50 max-w-sm w-full bg-slate-950/95 border border-amber-500/40 text-white rounded-2xl p-4 shadow-2xl backdrop-blur-md flex items-center gap-3 animate-slideUp">
-          {downloadingZip ? (
+          {downloadingPhotoUrl ? (
             <Loader2 className="w-5 h-5 text-amber-400 animate-spin shrink-0" />
           ) : (
             <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
           )}
           <div className="flex-1 min-w-0">
             <p className="text-xs font-bold text-white truncate">
-              {downloadingZip ? 'Preparing Media Download' : 'Media Download Ready'}
+              {downloadingPhotoUrl ? 'Downloading Original Photo' : 'Download Complete'}
             </p>
             <p className="text-[11px] text-slate-300 truncate">
-              {downloadStatusMsg || 'Packaging files...'}
+              {downloadStatusMsg || 'Downloading high-resolution original...'}
             </p>
           </div>
         </div>

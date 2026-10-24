@@ -32,6 +32,7 @@ import {
   FileText
 } from 'lucide-react';
 import { isYouTubeUrl, getYouTubeThumbnailUrl } from '@/lib/youtube';
+import { getOptimizedImageUrl } from '@/lib/image-utils';
 import { useAdminGlobalEvent } from '../admin-context';
 
 const isExternalAlbum = (url: string) => {
@@ -180,6 +181,36 @@ export default function AdminMediaPage() {
   const [modalVisibleCount, setModalVisibleCount] = useState(MODAL_PAGE_SIZE);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Album pre-caching state & modal preview/delete toggles
+  const [cachingAlbumId, setCachingAlbumId] = useState<string | null>(null);
+  const [cacheToastMsg, setCacheToastMsg] = useState<string>('');
+  const [showModalPreviews, setShowModalPreviews] = useState<boolean>(true);
+  const [enableDeleteMode, setEnableDeleteMode] = useState<boolean>(false);
+
+  const handleCacheAlbum = async (albumId: string, albumTitle: string) => {
+    setCachingAlbumId(albumId);
+    setCacheToastMsg(`Caching & optimizing "${albumTitle}" in the background...`);
+
+    try {
+      const res = await fetch('/api/admin/media/cache-album', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ albumId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setCacheToastMsg(`✓ Successfully cached ${data.data?.cachedCount || 0} images for "${albumTitle}"!`);
+      } else {
+        setCacheToastMsg(`Failed to cache: ${data.error || 'Unknown error'}`);
+      }
+    } catch (err: any) {
+      setCacheToastMsg(`Error: ${err?.message || 'Network error'}`);
+    } finally {
+      setCachingAlbumId(null);
+      setTimeout(() => setCacheToastMsg(''), 5000);
+    }
+  };
+
   const fetchMedia = async () => {
     setLoading(true);
     try {
@@ -236,6 +267,8 @@ export default function AdminMediaPage() {
     setUploadProgressMsg('');
     setUploadFailures([]);
     setModalVisibleCount(MODAL_PAGE_SIZE);
+    setEnableDeleteMode(false);
+    setShowModalPreviews(true);
     setFormData({
       ...initialFormData,
       images: [],
@@ -250,7 +283,9 @@ export default function AdminMediaPage() {
     setUploadProgressMsg('');
     setUploadFailures([]);
     setModalVisibleCount(MODAL_PAGE_SIZE);
+    setEnableDeleteMode(false);
     const itemImages = getItemImages(item);
+    setShowModalPreviews(itemImages.length <= 150);
     setFormData({
       title: item.title,
       type: item.type || 'IMAGE',
@@ -825,7 +860,7 @@ export default function AdminMediaPage() {
                   ) : (
                     <>
                       <img
-                        src={activeImgUrl || (isYouTubeUrl(item.url) ? getYouTubeThumbnailUrl(item.url, 'hq') : null) || '/assets/poster.jpg'}
+                        src={getOptimizedImageUrl(activeImgUrl, 400, 65) || (isYouTubeUrl(item.url) ? getYouTubeThumbnailUrl(item.url, 'hq') : null) || '/assets/poster.jpg'}
                         alt={item.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none"
                         onError={(e) => {
@@ -990,7 +1025,7 @@ export default function AdminMediaPage() {
                             }`}
                             title={`Switch to photo ${gIdx + 1}`}
                           >
-                            <img src={imgUrl} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                            <img src={getOptimizedImageUrl(imgUrl, 160, 60)} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
                             <span className={`absolute bottom-0 right-0 text-[8px] font-mono px-1 rounded-tl ${
                               isCurrent ? 'bg-[#E65C00] text-white font-bold' : 'bg-black/80 text-slate-300'
                             }`}>
@@ -1066,6 +1101,27 @@ export default function AdminMediaPage() {
                       <Edit3 className="w-3.5 h-3.5 text-mitra-gold" />
                       <span>Edit</span>
                     </button>
+                    {isGroup && (
+                      <button
+                        type="button"
+                        onClick={() => handleCacheAlbum(item.id, item.title)}
+                        disabled={cachingAlbumId === item.id}
+                        className="px-2.5 py-2 rounded-xl bg-slate-900 hover:bg-amber-950/40 border border-slate-700 hover:border-amber-600 text-amber-400 transition-colors disabled:opacity-50 flex items-center gap-1 text-xs font-bold"
+                        title="Pre-cache & optimize all photos in this album"
+                      >
+                        {cachingAlbumId === item.id ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span className="hidden sm:inline text-[10px]">Caching...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline text-[10px]">Pre-cache</span>
+                          </>
+                        )}
+                      </button>
+                    )}
                     <button
                       onClick={() => handleDelete(item.id, item.title)}
                       className="p-2 rounded-xl bg-slate-900 hover:bg-rose-950/40 border border-slate-800 hover:border-rose-800 text-slate-400 hover:text-rose-400 transition-colors"
@@ -1418,9 +1474,8 @@ export default function AdminMediaPage() {
                     ) : (
                       <img
                         src={
-                          formData.coverImage ||
+                          getOptimizedImageUrl(formData.coverImage || formData.url, 280, 65) ||
                           (isYouTubeUrl(formData.url) ? getYouTubeThumbnailUrl(formData.url, 'hq') : null) ||
-                          formData.url ||
                           '/assets/poster.jpg'
                         }
                         alt="Preview"
@@ -1543,74 +1598,153 @@ export default function AdminMediaPage() {
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-4 sm:grid-cols-6 gap-2.5 max-h-56 overflow-y-auto p-1 scrollbar-thin scrollbar-thumb-slate-700">
-                        {effectiveImages.slice(0, modalVisibleCount).map((imgUrl, idx) => {
-                          const isCover = formData.coverImage === imgUrl || (!formData.coverImage && idx === 0);
-                          return (
-                            <div
-                              key={idx}
-                              className={`relative aspect-square rounded-xl overflow-hidden border bg-slate-950 group/thumb ${
-                                isCover ? 'border-[#E65C00] ring-2 ring-[#E65C00]/80' : 'border-slate-800 hover:border-slate-600'
-                              }`}
-                            >
-                              <img src={imgUrl} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                      {/* Toggles for Preview and Delete */}
+                      <div className="flex flex-wrap items-center justify-between gap-2 p-2 bg-slate-950/80 rounded-xl border border-slate-800 text-[11px]">
+                        <label className="flex items-center gap-2 cursor-pointer text-slate-300 font-semibold select-none">
+                          <input
+                            type="checkbox"
+                            checked={showModalPreviews}
+                            onChange={(e) => setShowModalPreviews(e.target.checked)}
+                            className="rounded bg-slate-800 border-slate-700 text-[#E65C00] focus:ring-[#E65C00]"
+                          />
+                          <span>Show Image Previews ({effectiveImages.length} Photos)</span>
+                        </label>
 
-                              {/* Photo Number */}
-                              <span className="absolute top-1 left-1 bg-black/80 text-white font-mono text-[8px] px-1 rounded">
-                                #{idx + 1}
-                              </span>
+                        <label className="flex items-center gap-2 cursor-pointer text-rose-300 font-semibold select-none">
+                          <input
+                            type="checkbox"
+                            checked={enableDeleteMode}
+                            onChange={(e) => setEnableDeleteMode(e.target.checked)}
+                            className="rounded bg-slate-800 border-slate-700 text-rose-500 focus:ring-rose-500"
+                          />
+                          <span>Enable Delete Option</span>
+                        </label>
+                      </div>
 
-                              {/* Cover Badge */}
-                              {isCover && (
-                                <span className="absolute bottom-1 left-1 bg-[#E65C00] text-white font-bold text-[8px] px-1 rounded shadow">
-                                  Cover
+                      {!showModalPreviews ? (
+                        <div className="bg-slate-950 rounded-xl border border-slate-800/80 p-2.5 max-h-56 overflow-y-auto space-y-1 font-mono text-[11px] text-slate-300">
+                          {effectiveImages.map((imgUrl, idx) => {
+                            const isCover = formData.coverImage === imgUrl || (!formData.coverImage && idx === 0);
+                            const name = imgUrl.split('/').pop()?.split('?')[0] || `Photo #${idx + 1}`;
+                            return (
+                              <div key={idx} className="flex items-center justify-between gap-2 py-1 px-2 rounded-lg hover:bg-slate-900 border border-transparent hover:border-slate-800">
+                                <div className="flex items-center gap-2 truncate">
+                                  <span className="text-[#E65C00] font-bold">#{idx + 1}</span>
+                                  <span className="truncate text-slate-200">{name}</span>
+                                  {isCover && <span className="bg-[#E65C00] text-white text-[9px] px-1.5 py-0.2 rounded font-bold font-sans">Cover</span>}
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                  {!isCover && (
+                                    <button
+                                      type="button"
+                                      onClick={() => setFormData((prev) => ({ ...prev, coverImage: imgUrl }))}
+                                      className="text-[10px] text-amber-400 hover:text-amber-300 px-1 font-bold font-sans"
+                                    >
+                                      Make Cover
+                                    </button>
+                                  )}
+                                  {enableDeleteMode && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const updated = effectiveImages.filter((_, i) => i !== idx);
+                                        setFormData((prev) => ({
+                                          ...prev,
+                                          images: updated,
+                                          url: updated.join(',\n'),
+                                          coverImage: isCover ? (updated[0] || '') : prev.coverImage,
+                                        }));
+                                      }}
+                                      className="text-rose-400 hover:text-rose-300 p-1 rounded hover:bg-rose-950/40"
+                                      title="Delete photo from album"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-4 sm:grid-cols-6 gap-2.5 max-h-56 overflow-y-auto p-1 scrollbar-thin scrollbar-thumb-slate-700">
+                          {effectiveImages.slice(0, modalVisibleCount).map((imgUrl, idx) => {
+                            const isCover = formData.coverImage === imgUrl || (!formData.coverImage && idx === 0);
+                            return (
+                              <div
+                                key={idx}
+                                className={`relative aspect-square rounded-xl overflow-hidden border bg-slate-950 group/thumb ${
+                                  isCover ? 'border-[#E65C00] ring-2 ring-[#E65C00]/80' : 'border-slate-800 hover:border-slate-600'
+                                }`}
+                              >
+                                <img
+                                  src={getOptimizedImageUrl(imgUrl, 160, 60)}
+                                  alt=""
+                                  loading="lazy"
+                                  decoding="async"
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = '/assets/poster.jpg';
+                                  }}
+                                />
+
+                                {/* Photo Number */}
+                                <span className="absolute top-1 left-1 bg-black/80 text-white font-mono text-[8px] px-1 rounded">
+                                  #{idx + 1}
                                 </span>
-                              )}
 
-                              {/* Hover Actions */}
-                              <div className="absolute inset-0 bg-black/75 opacity-0 group-hover/thumb:opacity-100 flex flex-col items-center justify-center gap-1 transition-opacity p-1">
+                                {/* Cover Badge */}
+                                {isCover && (
+                                  <span className="absolute bottom-1 left-1 bg-[#E65C00] text-white font-bold text-[8px] px-1 rounded shadow">
+                                    Cover
+                                  </span>
+                                )}
+
+                                {/* Set as cover on hover */}
                                 {!isCover && (
                                   <button
                                     type="button"
                                     onClick={() => setFormData((prev) => ({ ...prev, coverImage: imgUrl }))}
-                                    className="text-[9px] bg-[#E65C00] hover:bg-[#FF7A00] text-white px-1.5 py-0.5 rounded font-bold"
+                                    className="absolute bottom-1 left-1 text-[8px] bg-black/80 hover:bg-[#E65C00] text-white px-1 py-0.5 rounded opacity-0 group-hover/thumb:opacity-100 transition-opacity font-bold shadow"
                                     title="Set as Cover"
                                   >
                                     Cover
                                   </button>
                                 )}
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const updated = effectiveImages.filter((_, i) => i !== idx);
-                                    setFormData((prev) => ({
-                                      ...prev,
-                                      images: updated,
-                                      url: updated.join(',\n'),
-                                      coverImage: isCover ? (updated[0] || '') : prev.coverImage,
-                                    }));
-                                  }}
-                                  className="text-[9px] bg-rose-600 hover:bg-rose-700 text-white p-1 rounded font-bold"
-                                  title="Remove photo from group"
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </button>
+
+                                {/* Delete button: Only enabled when enableDeleteMode is true */}
+                                {enableDeleteMode && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const updated = effectiveImages.filter((_, i) => i !== idx);
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        images: updated,
+                                        url: updated.join(',\n'),
+                                        coverImage: isCover ? (updated[0] || '') : prev.coverImage,
+                                      }));
+                                    }}
+                                    className="absolute top-1 right-1 bg-rose-600 hover:bg-rose-700 text-white p-1 rounded shadow transition-all"
+                                    title="Delete photo from album"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </button>
+                                )}
                               </div>
-                            </div>
-                          );
-                        })}
-                        {effectiveImages.length > modalVisibleCount && (
-                          <button
-                            type="button"
-                            onClick={() => setModalVisibleCount((c) => c + MODAL_PAGE_SIZE)}
-                            className="aspect-square rounded-xl border border-dashed border-slate-700 bg-slate-950 text-amber-400 text-[10px] font-black hover:border-[#E65C00] flex flex-col items-center justify-center"
-                            title="Show more photos"
-                          >
-                            <span>+{effectiveImages.length - modalVisibleCount}</span>
-                            <span className="text-slate-400 font-bold">Show more</span>
-                          </button>
-                        )}
-                      </div>
+                            );
+                          })}
+                          {effectiveImages.length > modalVisibleCount && (
+                            <button
+                              type="button"
+                              onClick={() => setModalVisibleCount((c) => c + MODAL_PAGE_SIZE)}
+                              className="col-span-full py-2 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-xl text-center text-xs font-bold text-amber-300 transition-colors"
+                            >
+                              Show more photos ({effectiveImages.length - modalVisibleCount} remaining)...
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })()}
@@ -1759,6 +1893,18 @@ export default function AdminMediaPage() {
             <Check className="w-4 h-4 text-emerald-400" />
           )}
           <span>{reorderNotice}</span>
+        </div>
+      )}
+
+      {/* Floating Cache Progress Notification */}
+      {cacheToastMsg && (
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900/95 border border-amber-500/80 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 text-xs font-bold animate-fadeIn backdrop-blur-md">
+          {cachingAlbumId ? (
+            <Loader2 className="w-4 h-4 text-amber-400 animate-spin" />
+          ) : (
+            <Sparkles className="w-4 h-4 text-amber-400" />
+          )}
+          <span>{cacheToastMsg}</span>
         </div>
       )}
 

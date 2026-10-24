@@ -2,6 +2,7 @@ import type SftpClient from 'ssh2-sftp-client';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import sharp from 'sharp';
 
 function getSftpClient(): SftpClient {
   const SftpConstructor = (eval('require')('ssh2-sftp-client')) as typeof SftpClient;
@@ -91,6 +92,8 @@ function sanitizeSlug(input: string): string {
 export interface UploadResult {
   success: boolean;
   url: string;
+  thumbnailUrl?: string;
+  thumbnailFilename?: string;
   relativePath: string;
   filename: string;
   storageType: 'ftp' | 'sftp';
@@ -223,13 +226,43 @@ export async function uploadFileViaSFTP(
       await sftp.mkdir(targetRemoteDir, true); // recursive directory creation
     }
 
-    await sftp.put(fileBuffer, `${targetRemoteDir}/${filename}`);
+    // Check if uploaded file is an image
+    const isImage = /\.(jpe?g|png|webp|gif|avif)$/i.test(ext);
+    let thumbFilename: string | undefined = undefined;
+    let thumbnailUrl: string | undefined = undefined;
 
+    // 1. Upload original file (full resolution for download)
+    await sftp.put(fileBuffer, `${targetRemoteDir}/${filename}`);
     const publicUrl = `${baseUrl}/${config.subDir}/${filename}`.replace(/([^:]\/)\/+/g, '$1');
+
+    // 2. Generate and upload lightweight WebP thumbnail directly to file storage
+    if (isImage) {
+      try {
+        const baseWithoutExt = filename.replace(/\.[^.]+$/, '');
+        thumbFilename = `${baseWithoutExt}_thumb.webp`;
+
+        const thumbBuffer = await sharp(fileBuffer)
+          .rotate() // preserve EXIF orientation
+          .resize({
+            width: 400,
+            fit: 'inside',
+            withoutEnlargement: true,
+          })
+          .webp({ quality: 75 })
+          .toBuffer();
+
+        await sftp.put(thumbBuffer, `${targetRemoteDir}/${thumbFilename}`);
+        thumbnailUrl = `${baseUrl}/${config.subDir}/${thumbFilename}`.replace(/([^:]\/)\/+/g, '$1');
+      } catch (sharpErr) {
+        console.warn('[SFTP THUMBNAIL WARNING]: Could not generate WebP thumbnail:', sharpErr);
+      }
+    }
 
     return {
       success: true,
       url: publicUrl,
+      thumbnailUrl: thumbnailUrl || publicUrl,
+      thumbnailFilename,
       relativePath,
       filename,
       storageType: 'sftp',
