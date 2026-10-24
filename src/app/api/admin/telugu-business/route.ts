@@ -87,6 +87,7 @@ export async function POST(request: Request) {
       phone,
       whatsapp,
       website,
+      instagram,
       address,
       city,
       postcode,
@@ -119,6 +120,7 @@ export async function POST(request: Request) {
         phone: phone.trim(),
         whatsapp: cleanWhatsapp || null,
         website: website?.trim() || null,
+        instagram: instagram?.trim() || null,
         address: address?.trim() || null,
         city: city?.trim() || 'London',
         postcode: postcode?.trim() || null,
@@ -178,6 +180,7 @@ export async function PATCH(request: Request) {
     if (rest.phone) updateData.phone = rest.phone.trim();
     if (rest.whatsapp !== undefined) updateData.whatsapp = rest.whatsapp ? rest.whatsapp.replace(/[^0-9]/g, '') : null;
     if (rest.website !== undefined) updateData.website = rest.website ? rest.website.trim() : null;
+    if (rest.instagram !== undefined) updateData.instagram = rest.instagram ? rest.instagram.trim() : null;
     if (rest.address !== undefined) updateData.address = rest.address ? rest.address.trim() : null;
     if (rest.city) updateData.city = rest.city.trim();
     if (rest.postcode !== undefined) updateData.postcode = rest.postcode ? rest.postcode.trim() : null;

@@ -28,7 +28,8 @@ import {
   Sparkles,
   Upload,
   Image as ImageIcon,
-  Loader2
+  Loader2,
+  Instagram
 } from 'lucide-react';
 import { TeluguBusiness } from '@/lib/types';
 
@@ -80,6 +81,7 @@ export default function AdminTeluguBusinessPage() {
     phone: '',
     whatsapp: '',
     website: '',
+    instagram: '',
     address: '',
     city: 'London',
     postcode: '',
@@ -251,6 +253,7 @@ export default function AdminTeluguBusinessPage() {
       phone: b.phone,
       whatsapp: b.whatsapp || '',
       website: b.website || '',
+      instagram: b.instagram || '',
       address: b.address || '',
       city: b.city,
       postcode: b.postcode || '',
@@ -315,6 +318,7 @@ export default function AdminTeluguBusinessPage() {
           phone: '',
           whatsapp: '',
           website: '',
+          instagram: '',
           address: '',
           city: 'London',
           postcode: '',
@@ -406,6 +410,7 @@ export default function AdminTeluguBusinessPage() {
                 phone: '',
                 whatsapp: '',
                 website: '',
+                instagram: '',
                 address: '',
                 city: 'London',
                 postcode: '',
@@ -613,108 +618,144 @@ export default function AdminTeluguBusinessPage() {
               >
                 
                 {/* Left Info Column */}
-                <div className="space-y-2.5 flex-1">
+                <div className="flex items-start gap-4 flex-1 w-full">
                   
-                  {/* Category, Status & Featured Badges */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-slate-900 border border-slate-800 text-mitra-gold">
-                      {business.category}
-                    </span>
-
-                    <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${
-                      business.status === 'Approved'
-                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                        : business.status === 'Pending'
-                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse'
-                        : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                    }`}>
-                      {business.status}
-                    </span>
-
-                    {business.isFeatured && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                        <Star className="w-3 h-3 fill-current" />
-                        <span>Featured</span>
-                      </span>
-                    )}
-
-                    {business.city && (
-                      <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                        <MapPin className="w-3 h-3 text-slate-500" />
-                        <span>{business.city}</span>
-                      </span>
+                  {/* Business Logo Thumbnail - STRICT UNIFORM SIZE */}
+                  <div 
+                    className="w-14 h-14 min-w-[56px] min-h-[56px] max-w-[56px] max-h-[56px] rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden shrink-0 flex items-center justify-center p-1.5 shadow-sm"
+                    style={{ width: '56px', height: '56px', minWidth: '56px', minHeight: '56px' }}
+                  >
+                    {business.logoUrl ? (
+                      <img
+                        src={business.logoUrl}
+                        alt={business.businessName}
+                        className="w-full h-full object-contain rounded-xl max-w-full max-h-full"
+                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                        onError={(e) => {
+                          (e.target as HTMLElement).style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <Building2 className="w-6 h-6 text-mitra-gold/60" />
                     )}
                   </div>
 
-                  {/* Business Title & Owner */}
-                  <div>
-                    <h3 className="text-lg font-black text-white leading-snug flex items-center gap-2">
-                      <span>{business.businessName}</span>
-                      {business.website && (
-                        <a
-                          href={business.website.startsWith('http') ? business.website : `https://${business.website}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-slate-400 hover:text-mitra-gold"
-                        >
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
+                  <div className="space-y-2.5 flex-1 min-w-0">
+                    {/* Category, Status & Featured Badges */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-slate-900 border border-slate-800 text-mitra-gold">
+                        {business.category}
+                      </span>
+
+                      <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${
+                        business.status === 'Approved'
+                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                          : business.status === 'Pending'
+                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse'
+                          : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                      }`}>
+                        {business.status}
+                      </span>
+
+                      {business.isFeatured && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                          <Star className="w-3 h-3 fill-current" />
+                          <span>Featured</span>
+                        </span>
                       )}
-                    </h3>
-                    <p className="text-xs text-slate-400 font-medium">
-                      Founder / Owner: <span className="text-white font-bold">{business.ownerName}</span>
+
+                      {business.city && (
+                        <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                          <MapPin className="w-3 h-3 text-slate-500" />
+                          <span>{business.city}</span>
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Business Title & Owner */}
+                    <div>
+                      <h3 className="text-lg font-black text-white leading-snug flex items-center gap-2">
+                        <span>{business.businessName}</span>
+                        {business.website && (
+                          <a
+                            href={business.website.startsWith('http') ? business.website : `https://${business.website}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-slate-400 hover:text-mitra-gold"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        )}
+                      </h3>
+                      <p className="text-xs text-slate-400 font-medium">
+                        Founder / Owner: <span className="text-white font-bold">{business.ownerName}</span>
+                      </p>
+                    </div>
+
+                    {/* Tagline & Description */}
+                    {business.tagline && (
+                      <p className="text-xs text-mitra-gold font-semibold italic">
+                        "{business.tagline}"
+                      </p>
+                    )}
+                    <p className="text-xs text-slate-400 line-clamp-2 max-w-3xl">
+                      {business.description}
                     </p>
-                  </div>
 
-                  {/* Tagline & Description */}
-                  {business.tagline && (
-                    <p className="text-xs text-mitra-gold font-semibold italic">
-                      "{business.tagline}"
-                    </p>
-                  )}
-                  <p className="text-xs text-slate-400 line-clamp-2 max-w-3xl">
-                    {business.description}
-                  </p>
-
-                  {/* Special Offer */}
-                  {business.specialOffer && (
-                    <div className="inline-flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-2.5 py-1 rounded-lg">
-                      <Tag className="w-3.5 h-3.5" />
-                      <span><strong>Offer:</strong> {business.specialOffer}</span>
-                    </div>
-                  )}
-
-                  {/* Contact Info Row */}
-                  <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400 pt-1">
-                    <div className="flex items-center gap-1">
-                      <Mail className="w-3.5 h-3.5 text-slate-500" />
-                      <a href={`mailto:${business.email}`} className="hover:underline">{business.email}</a>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Phone className="w-3.5 h-3.5 text-slate-500" />
-                      <a href={`tel:${business.phone}`} className="hover:underline">{business.phone}</a>
-                    </div>
-                    {business.whatsapp && (
-                      <div className="flex items-center gap-1 text-emerald-400">
-                        <MessageCircle className="w-3.5 h-3.5" />
-                        <a 
-                          href={`https://wa.me/${business.whatsapp.replace(/[^0-9]/g, '')}`} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="hover:underline"
-                        >
-                          WhatsApp Chat
-                        </a>
+                    {/* Special Offer */}
+                    {business.specialOffer && (
+                      <div className="inline-flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-2.5 py-1 rounded-lg">
+                        <Tag className="w-3.5 h-3.5" />
+                        <span><strong>Offer:</strong> {business.specialOffer}</span>
                       </div>
                     )}
-                  </div>
 
-                  {business.adminNotes && (
-                    <div className="text-[11px] text-slate-500 bg-slate-900/60 p-2 rounded-lg border border-slate-800">
-                      <strong>Admin Notes:</strong> {business.adminNotes}
+                    {/* Contact Info Row */}
+                    <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400 pt-1">
+                      <div className="flex items-center gap-1">
+                        <Mail className="w-3.5 h-3.5 text-slate-500" />
+                        <a href={`mailto:${business.email}`} className="hover:underline">{business.email}</a>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Phone className="w-3.5 h-3.5 text-slate-500" />
+                        <a href={`tel:${business.phone}`} className="hover:underline">{business.phone}</a>
+                      </div>
+                      {business.whatsapp && (
+                        <div className="flex items-center gap-1 text-emerald-400">
+                          <MessageCircle className="w-3.5 h-3.5" />
+                          <a 
+                            href={`https://wa.me/${business.whatsapp.replace(/[^0-9]/g, '')}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="hover:underline"
+                          >
+                            WhatsApp Chat
+                          </a>
+                        </div>
+                      )}
+                      {business.instagram && (
+                        <div className="flex items-center gap-1 text-pink-400">
+                          <Instagram className="w-3.5 h-3.5 shrink-0" />
+                          <a 
+                            href={business.instagram.startsWith('http') ? business.instagram : `https://instagram.com/${business.instagram.replace(/^@/, '')}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="hover:underline flex items-center gap-1"
+                          >
+                            <span>{business.instagram.startsWith('@') ? business.instagram : `@${business.instagram.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '').replace(/\/$/, '')}`}</span>
+                            <ExternalLink className="w-2.5 h-2.5" />
+                          </a>
+                        </div>
+                      )}
                     </div>
-                  )}
 
+                    {business.adminNotes && (
+                      <div className="text-[11px] text-slate-500 bg-slate-900/60 p-2 rounded-lg border border-slate-800">
+                        <strong>Admin Notes:</strong> {business.adminNotes}
+                      </div>
+                    )}
+
+                  </div>
                 </div>
 
                 {/* Right Action Buttons */}
@@ -940,6 +981,20 @@ export default function AdminTeluguBusinessPage() {
                   </div>
 
                   <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-300 flex items-center justify-between">
+                      <span>Instagram Page / Handle</span>
+                      <span className="text-[10px] text-pink-400 font-normal">e.g. @handle or link</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.instagram}
+                      onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+                      placeholder="@mybusiness or https://instagram.com/mybusiness"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-mitra-gold"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
                     <label className="text-[11px] font-bold text-slate-300">
                       City <span className="text-rose-500">*</span>
                     </label>
@@ -1020,13 +1075,17 @@ export default function AdminTeluguBusinessPage() {
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-2.5 items-start sm:items-center">
-                      {/* Logo Preview Thumbnail */}
-                      <div className="relative w-10 h-10 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center shrink-0 overflow-hidden">
+                      {/* Logo Preview Thumbnail - Strict 40x40 Uniform Size */}
+                      <div 
+                        className="relative w-10 h-10 min-w-[40px] min-h-[40px] max-w-[40px] max-h-[40px] rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center shrink-0 overflow-hidden shadow-sm"
+                        style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px' }}
+                      >
                         {formData.logoUrl ? (
                           <img
                             src={formData.logoUrl}
                             alt="Logo Preview"
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain max-w-full max-h-full"
+                            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                             onError={(e) => {
                               (e.target as HTMLElement).style.display = 'none';
                             }}

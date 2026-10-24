@@ -209,6 +209,7 @@ export interface TeluguBusiness {
   phone: string;
   whatsapp?: string | null;
   website?: string | null;
+  instagram?: string | null;
   address?: string | null;
   city: string;
   postcode?: string | null;

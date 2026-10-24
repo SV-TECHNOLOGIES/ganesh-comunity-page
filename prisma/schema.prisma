@@ -327,6 +327,7 @@ model TeluguBusiness {
   phone        String
   whatsapp     String?
   website      String?
+  instagram    String?
   address      String?
   city         String   @default("London")
   postcode      String?

@@ -25,7 +25,11 @@ import {
   Award,
   Users,
   Clock,
-  Send
+  Send,
+  Instagram,
+  Upload,
+  Loader2,
+  Image as ImageIcon
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { TeluguBusiness } from '@/lib/types';
@@ -73,12 +77,54 @@ export default function TeluguBusinessPage() {
     phone: '',
     whatsapp: '',
     website: '',
+    instagram: '',
     address: '',
     city: 'London',
     postcode: '',
     googleMapsUrl: '',
     specialOffer: '',
   });
+
+  // Logo Upload State
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingLogo(true);
+    setUploadError(null);
+
+    try {
+      const uploadData = new FormData();
+      uploadData.append('file', file);
+      uploadData.append('useCase', 'general');
+      const safeId = (formData.businessName || 'biz')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      uploadData.append('identifier', `telugu-biz-${safeId || 'logo'}`);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: uploadData,
+      });
+
+      const data = await res.json();
+      if (data.success && data.url) {
+        setFormData((prev) => ({ ...prev, logoUrl: data.url }));
+      } else {
+        setUploadError(data.error || 'Failed to upload image. Please try again.');
+      }
+    } catch (err) {
+      console.error('Logo upload error:', err);
+      setUploadError('Network error uploading logo image.');
+    } finally {
+      setUploadingLogo(false);
+      e.target.value = '';
+    }
+  };
 
   const fetchBusinesses = async () => {
     setLoading(true);
@@ -138,6 +184,7 @@ export default function TeluguBusinessPage() {
           phone: '',
           whatsapp: '',
           website: '',
+          instagram: '',
           address: '',
           city: 'London',
           postcode: '',
@@ -583,6 +630,21 @@ export default function TeluguBusinessPage() {
                   </div>
 
                   <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-[#3D1A00] flex items-center justify-between">
+                      <span>Instagram Page / Handle (Optional)</span>
+                      <span className="text-[10px] text-pink-600 font-normal">e.g. @mybusiness</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="instagram"
+                      placeholder="@mybusiness or https://instagram.com/mybusiness"
+                      value={formData.instagram}
+                      onChange={handleFormChange}
+                      className="w-full bg-white border border-[#E65C00]/30 rounded-xl px-3.5 py-2 text-xs text-[#3D1A00] focus:outline-none focus:border-[#E65C00]"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
                     <label className="text-[11px] font-bold text-[#3D1A00]">
                       City / Region <span className="text-rose-500">*</span>
                     </label>
@@ -654,18 +716,90 @@ export default function TeluguBusinessPage() {
                     />
                   </div>
 
-                  <div className="space-y-1 sm:col-span-2">
-                    <label className="text-[11px] font-bold text-[#3D1A00]">
-                      Logo Image URL (Optional)
-                    </label>
-                    <input
-                      type="url"
-                      name="logoUrl"
-                      placeholder="https://.../logo.png"
-                      value={formData.logoUrl}
-                      onChange={handleFormChange}
-                      className="w-full bg-white border border-[#E65C00]/30 rounded-xl px-3.5 py-2 text-xs text-[#3D1A00] focus:outline-none focus:border-[#E65C00]"
-                    />
+                  {/* Logo Image URL & Upload Option */}
+                  <div className="space-y-2 sm:col-span-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] font-bold text-[#3D1A00]">
+                        Logo Image (Upload file or paste image URL)
+                      </label>
+                      {formData.logoUrl && (
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, logoUrl: '' })}
+                          className="text-[10px] text-rose-500 hover:text-rose-700 font-bold transition-colors"
+                        >
+                          Remove Logo
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-2.5 items-start sm:items-center">
+                      {/* Logo Preview Thumbnail - Fixed 40x40 */}
+                      <div 
+                        className="w-10 h-10 min-w-[40px] min-h-[40px] max-w-[40px] max-h-[40px] rounded-xl bg-[#FFF8F0] border border-[#E65C00]/30 flex items-center justify-center shrink-0 overflow-hidden shadow-sm"
+                        style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px' }}
+                      >
+                        {formData.logoUrl ? (
+                          <img
+                            src={formData.logoUrl}
+                            alt="Logo Preview"
+                            className="w-full h-full object-contain max-w-full max-h-full"
+                            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                            onError={(e) => {
+                              (e.target as HTMLElement).style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <ImageIcon className="w-4 h-4 text-[#E65C00]/60" />
+                        )}
+                      </div>
+
+                      {/* Logo URL Input */}
+                      <input
+                        type="url"
+                        name="logoUrl"
+                        value={formData.logoUrl}
+                        onChange={(e) => {
+                          handleFormChange(e);
+                          if (uploadError) setUploadError(null);
+                        }}
+                        placeholder="https://.../logo.png or upload image"
+                        className="flex-1 w-full bg-white border border-[#E65C00]/30 rounded-xl px-3.5 py-2 text-xs text-[#3D1A00] placeholder-[#6B3A2A]/40 focus:outline-none focus:border-[#E65C00]"
+                      />
+
+                      {/* Upload Button */}
+                      <label
+                        htmlFor="public-biz-logo-upload"
+                        className={`shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+                          uploadingLogo
+                            ? 'bg-amber-100 text-amber-700 border-amber-300 cursor-not-allowed'
+                            : 'bg-[#FFF0E0] hover:bg-[#FFE0C2] text-[#E65C00] border-[#E65C00]/40 shadow-sm'
+                        }`}
+                      >
+                        {uploadingLogo ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-[#E65C00]" />
+                            <span>Uploading...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-3.5 h-3.5 text-[#E65C00]" />
+                            <span>Upload Logo</span>
+                          </>
+                        )}
+                        <input
+                          id="public-biz-logo-upload"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleLogoUpload}
+                          disabled={uploadingLogo}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                    {uploadError && (
+                      <p className="text-[11px] text-rose-600 font-semibold">{uploadError}</p>
+                    )}
                   </div>
 
                 </div>
@@ -705,6 +839,15 @@ function BusinessCard({ business, isFeatured = false }: { business: TeluguBusine
     ? (business.website.startsWith('http') ? business.website : `https://${business.website}`)
     : null;
 
+  const instagramClean = (business.instagram || '').trim();
+  const instagramUrl = instagramClean
+    ? (instagramClean.startsWith('http://') || instagramClean.startsWith('https://')
+        ? instagramClean
+        : instagramClean.startsWith('@')
+        ? `https://instagram.com/${instagramClean.slice(1)}`
+        : `https://instagram.com/${instagramClean}`)
+    : null;
+
   const whatsappCleanNumber = (business.whatsapp || business.phone || '').replace(/[^0-9]/g, '');
   const whatsappUrl = whatsappCleanNumber
     ? `https://wa.me/${whatsappCleanNumber}?text=${encodeURIComponent(`Hello ${business.businessName}, I found your business on MITRA UK Telugu Business Directory.`)}`
@@ -738,42 +881,48 @@ function BusinessCard({ business, isFeatured = false }: { business: TeluguBusine
           )}
         </div>
 
-        {/* Logo / Avatar & Title (Click to Website) */}
+        {/* Logo / Avatar & Title (STRICT UNIFORM SIZE FOR ALL BUSINESSES) */}
         <div className="flex items-center gap-3">
           {targetWebsiteUrl ? (
             <a
               href={targetWebsiteUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-13 h-13 rounded-2xl overflow-hidden bg-[#FFF8F0] border-2 border-[#E65C00]/30 hover:border-[#E65C00] shrink-0 relative flex items-center justify-center p-1 shadow-sm hover:scale-105 transition-all group/logo cursor-pointer"
+              className="w-16 h-16 min-w-[64px] min-h-[64px] max-w-[64px] max-h-[64px] rounded-2xl overflow-hidden bg-white border-2 border-[#E65C00]/30 hover:border-[#E65C00] shrink-0 relative flex items-center justify-center p-1.5 shadow-sm hover:scale-105 transition-all group/logo cursor-pointer"
+              style={{ width: '64px', height: '64px', minWidth: '64px', minHeight: '64px', maxWidth: '64px', maxHeight: '64px' }}
               title={`Visit ${business.businessName} Website (Opens in new tab)`}
             >
               {business.logoUrl ? (
                 <img
                   src={business.logoUrl}
                   alt={business.businessName}
-                  className="w-full h-full object-cover rounded-xl"
+                  className="w-full h-full object-contain rounded-xl max-w-full max-h-full"
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                   onError={(e) => {
                     (e.target as HTMLElement).style.display = 'none';
                   }}
                 />
               ) : (
-                <Building2 className="w-6 h-6 text-[#E65C00]" />
+                <Building2 className="w-7 h-7 text-[#E65C00]" />
               )}
             </a>
           ) : (
-            <div className="w-13 h-13 rounded-2xl overflow-hidden bg-[#FFF8F0] border border-[#E65C00]/20 shrink-0 relative flex items-center justify-center p-1">
+            <div 
+              className="w-16 h-16 min-w-[64px] min-h-[64px] max-w-[64px] max-h-[64px] rounded-2xl overflow-hidden bg-white border border-[#E65C00]/20 shrink-0 relative flex items-center justify-center p-1.5 shadow-sm"
+              style={{ width: '64px', height: '64px', minWidth: '64px', minHeight: '64px', maxWidth: '64px', maxHeight: '64px' }}
+            >
               {business.logoUrl ? (
                 <img
                   src={business.logoUrl}
                   alt={business.businessName}
-                  className="w-full h-full object-cover rounded-xl"
+                  className="w-full h-full object-contain rounded-xl max-w-full max-h-full"
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                   onError={(e) => {
                     (e.target as HTMLElement).style.display = 'none';
                   }}
                 />
               ) : (
-                <Building2 className="w-6 h-6 text-[#E65C00]" />
+                <Building2 className="w-7 h-7 text-[#E65C00]" />
               )}
             </div>
           )}
@@ -826,17 +975,13 @@ function BusinessCard({ business, isFeatured = false }: { business: TeluguBusine
         {/* Location & Contact Meta */}
         <div className="space-y-2 pt-2.5 border-t border-slate-100 text-xs text-[#6B3A2A]">
           
-          {/* Phone / Mobile Number */}
+          {/* Phone / Mobile Number (Display only, call option removed) */}
           <div className="flex items-center gap-2">
             <Phone className="w-3.5 h-3.5 text-[#E65C00] shrink-0" />
             <div className="flex items-center gap-2 flex-wrap">
-              <a
-                href={`tel:${business.phone}`}
-                className="font-bold text-[#3D1A00] hover:text-[#E65C00] hover:underline transition-colors"
-                title="Click to call mobile"
-              >
+              <span className="font-bold text-[#3D1A00]">
                 {business.phone}
-              </a>
+              </span>
               {business.whatsapp && (
                 <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.2 rounded font-bold">
                   WhatsApp
@@ -844,6 +989,30 @@ function BusinessCard({ business, isFeatured = false }: { business: TeluguBusine
               )}
             </div>
           </div>
+
+          {/* Instagram Handle Link */}
+          {instagramUrl && (
+            <div className="flex items-center gap-2">
+              <Instagram className="w-3.5 h-3.5 text-pink-600 shrink-0" />
+              <a
+                href={instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-slate-700 hover:text-pink-600 hover:underline flex items-center gap-1.5 transition-colors group/insta truncate"
+                title="View Instagram Profile (Opens in new tab)"
+              >
+                <span className="truncate">
+                  {business.instagram?.startsWith('http')
+                    ? business.instagram.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '@').replace(/\/$/, '')
+                    : (business.instagram?.startsWith('@') ? business.instagram : `@${business.instagram}`)}
+                </span>
+                <span className="inline-flex items-center gap-0.5 text-[9px] font-black text-pink-600 bg-pink-50 border border-pink-200 px-1.5 py-0.2 rounded shrink-0">
+                  <span>Instagram</span>
+                  <ExternalLink className="w-2.5 h-2.5" />
+                </span>
+              </a>
+            </div>
+          )}
 
           {/* Google Location */}
           <div className="flex items-center gap-2">
@@ -886,48 +1055,62 @@ function BusinessCard({ business, isFeatured = false }: { business: TeluguBusine
 
       </div>
 
-      {/* Action CTA Buttons */}
-      <div className="pt-4 mt-3 border-t border-slate-100 flex items-center gap-2">
-        <a
-          href={`tel:${business.phone}`}
-          className="flex-1 bg-[#3D1A00] hover:bg-[#E65C00] text-white rounded-xl py-2 px-2.5 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors shadow-sm"
-          title={`Call ${business.phone}`}
-        >
-          <Phone className="w-3.5 h-3.5" />
-          <span>Call</span>
-        </a>
+      {/* Action CTA Buttons (Call option removed, Instagram button added) */}
+      <div className="pt-4 mt-3 border-t border-slate-100 flex items-center gap-2 flex-wrap">
+        
+        {/* Instagram CTA Button */}
+        {instagramUrl && (
+          <a
+            href={instagramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="instagram-button flex-1 min-w-[90px] rounded-xl py-2 px-2.5 text-[11px] font-bold flex items-center justify-center gap-1.5 shadow-sm group/insta cursor-pointer transition-all"
+            style={{
+              background: 'linear-gradient(135deg, #833AB4 0%, #FD1D1D 50%, #F77737 100%)',
+              color: '#FFFFFF',
+              boxShadow: '0 4px 14px rgba(253, 29, 29, 0.35)',
+              border: '1px solid rgba(255, 255, 255, 0.25)'
+            }}
+            title={`Follow ${business.businessName} on Instagram`}
+          >
+            <Instagram className="w-3.5 h-3.5 shrink-0" style={{ color: '#FFFFFF', stroke: '#FFFFFF' }} />
+            <span className="font-bold text-white" style={{ color: '#FFFFFF' }}>Instagram</span>
+          </a>
+        )}
 
+        {/* WhatsApp CTA Button */}
         {whatsappUrl && (
           <a
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-2 px-2.5 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors shadow-sm"
+            className="flex-1 min-w-[90px] bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-2 px-2.5 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors shadow-sm"
             title="Chat on WhatsApp"
           >
-            <MessageCircle className="w-3.5 h-3.5" />
+            <MessageCircle className="w-3.5 h-3.5 shrink-0" />
             <span>WhatsApp</span>
           </a>
         )}
 
+        {/* Website or Email CTA Button */}
         {targetWebsiteUrl ? (
           <a
             href={targetWebsiteUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 border border-[#E65C00]/30 hover:border-[#E65C00] hover:bg-[#FFF0E0] text-[#3D1A00] rounded-xl py-2 px-2.5 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors"
+            className="flex-1 min-w-[90px] border border-[#E65C00]/30 hover:border-[#E65C00] hover:bg-[#FFF0E0] text-[#3D1A00] rounded-xl py-2 px-2.5 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors"
             title="Visit official website"
           >
-            <Globe className="w-3.5 h-3.5 text-[#E65C00]" />
+            <Globe className="w-3.5 h-3.5 text-[#E65C00] shrink-0" />
             <span>Website</span>
           </a>
         ) : (
           <a
             href={`mailto:${business.email}`}
-            className="flex-1 border border-[#E65C00]/30 hover:border-[#E65C00] hover:bg-[#FFF0E0] text-[#3D1A00] rounded-xl py-2 px-2.5 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors"
+            className="flex-1 min-w-[90px] border border-[#E65C00]/30 hover:border-[#E65C00] hover:bg-[#FFF0E0] text-[#3D1A00] rounded-xl py-2 px-2.5 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors"
             title="Send Email"
           >
-            <Mail className="w-3.5 h-3.5 text-[#E65C00]" />
+            <Mail className="w-3.5 h-3.5 text-[#E65C00] shrink-0" />
             <span>Email</span>
           </a>
         )}
