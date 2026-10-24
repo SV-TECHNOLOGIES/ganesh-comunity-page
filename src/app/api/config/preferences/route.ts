@@ -32,6 +32,10 @@ export async function GET(req: NextRequest) {
         success: true,
         activeHomeEventId: data.activeHomeEventId,
         preferences: data.preferences,
+      }, {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        },
       });
     }
 

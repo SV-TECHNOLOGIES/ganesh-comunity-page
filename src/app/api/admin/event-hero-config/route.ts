@@ -57,6 +57,10 @@ export async function GET(req: Request) {
     return NextResponse.json({
       success: true,
       data: storageData,
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      },
     });
   } catch (err) {
     console.error('Failed to load event hero config from DB:', err);

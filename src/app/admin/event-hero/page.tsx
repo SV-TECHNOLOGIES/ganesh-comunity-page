@@ -39,7 +39,7 @@ import {
   Upload,
 } from 'lucide-react';
 import EventHero from '@/components/EventHero';
-import { useAdminGlobalEvent, useAdminSidebar } from '@/app/admin/admin-context';
+import { useAdminSidebar } from '@/app/admin/admin-context';
 import { EventTemplateConfig, EventHeroConfig, HeroType, EventHeroStorageConfig } from '@/types/event-template';
 
 interface EventItemOption {
@@ -169,7 +169,7 @@ export default function EventHeroAdminPage() {
 
   const [storageData, setStorageData] = useState<EventHeroStorageConfig | null>(null);
   const [availableEvents, setAvailableEvents] = useState<EventItemOption[]>([]);
-  const { globalEventId: selectedEventId, setGlobalEventId: setSelectedEventId } = useAdminGlobalEvent();
+  const [selectedEventId, setSelectedEventId] = useState<string>('default-home');
 
   // Form state for current selected event
   const [currentConfig, setCurrentConfig] = useState<EventTemplateConfig | null>(null);

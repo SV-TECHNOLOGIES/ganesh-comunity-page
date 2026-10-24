@@ -59,13 +59,6 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
   const setGlobalEventId = (id: string) => {
     setGlobalEventIdState(id);
-    if (id !== 'all') {
-      fetch('/api/config/preferences', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'setActiveHomeEvent', activeHomeEventId: id }),
-      }).catch(console.error);
-    }
   };
 
   const toggleSidebar = () => setSidebarOpen((prev) => !prev);
