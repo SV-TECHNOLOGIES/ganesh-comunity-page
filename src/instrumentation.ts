@@ -14,6 +14,10 @@ export async function register() {
       const { startPendingPaymentsWorker } = await import('@/lib/pending-payments-cleanup');
       startPendingPaymentsWorker();
 
+      // 3. Start Background Album Pre-Cache Worker (pre-caches album images from media-backup.json)
+      const { startAlbumPreCacheWorker } = await import('@/lib/album-cache-worker');
+      startAlbumPreCacheWorker();
+
       console.log('[INSTRUMENTATION] Background workers & Request Analytics registered successfully.');
     } catch (err) {
       console.error('[INSTRUMENTATION] Failed initializing server hooks:', err);

@@ -112,7 +112,7 @@ export async function GET(request: NextRequest) {
   try {
     if (fs.existsSync(cacheFilePath)) {
       const cached = await fs.promises.readFile(cacheFilePath);
-      return new NextResponse(toSafeResponseBytes(cached), {
+      return new NextResponse(toSafeResponseBytes(cached) as any, {
         status: 200,
         headers: {
           'Content-Type': 'image/webp',
@@ -168,7 +168,7 @@ export async function GET(request: NextRequest) {
       console.warn('[IMAGE OPTIMIZE] Cache write error:', err);
     });
 
-    return new NextResponse(toSafeResponseBytes(optimizedBuffer), {
+    return new NextResponse(toSafeResponseBytes(optimizedBuffer) as any, {
       status: 200,
       headers: {
         'Content-Type': 'image/webp',

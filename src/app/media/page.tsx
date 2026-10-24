@@ -226,8 +226,6 @@ function MediaContent() {
   };
 
   const handleOpenAlbum = (mediaId: string, page = 1) => {
-    setSelectionMode(false);
-    setSelectedPhotoIds([]);
     setAlbumPage(page);
     router.push(`/media?event=${selectedEventId}&album=${mediaId}&page=${page}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -722,7 +720,6 @@ function MediaContent() {
                 // IMAGE CARD
                 const isExt = isExternalAlbum(item.url);
                 const photoIndex = eventPhotos.findIndex((p) => p.id === item.id);
-                const isSelected = selectedPhotoIds.includes(item.id);
                 const itemImages = (item.images && item.images.length > 0) ? item.images : [item.url];
                 const isGroup = itemImages.length > 1;
                 const activeCardIdx = (publicCardActiveIndex[item.id] || 0) % itemImages.length;
@@ -732,9 +729,7 @@ function MediaContent() {
                   <div
                     key={item.id}
                     onClick={() => {
-                      if (selectionMode) {
-                        toggleSelectPhoto(item.id);
-                      } else if (isExt) {
+                      if (isExt) {
                         window.open(item.url, '_blank');
                       } else if (isGroup) {
                         handleOpenAlbum(item.id);
@@ -743,11 +738,7 @@ function MediaContent() {
                         setActiveGroupSubIndex(activeCardIdx);
                       }
                     }}
-                    className={`group cursor-pointer bg-white dark:bg-slate-900 border rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all flex flex-col relative ${
-                      selectionMode && isSelected
-                        ? 'border-emerald-500 ring-2 ring-emerald-500/50 scale-[0.98]'
-                        : 'border-slate-200 dark:border-slate-800 hover:border-mitra-gold/50'
-                    }`}
+                    className="group cursor-pointer bg-white dark:bg-slate-900 border rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all flex flex-col relative border-slate-200 dark:border-slate-800 hover:border-mitra-gold/50"
                   >
                     <div className="relative aspect-[4/3] bg-slate-950 overflow-hidden shrink-0">
                       <img
@@ -783,7 +774,7 @@ function MediaContent() {
                       </div>
 
                       {/* Floating Prev/Next arrows on preview for grouped photos */}
-                      {isGroup && !selectionMode && (
+                      {isGroup && (
                         <>
                           <button
                             type="button"

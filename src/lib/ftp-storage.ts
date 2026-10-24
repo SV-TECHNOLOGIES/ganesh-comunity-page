@@ -262,7 +262,7 @@ export async function uploadFileViaSFTP(
       success: true,
       url: publicUrl,
       thumbnailUrl: thumbnailUrl || publicUrl,
-      thumbnailFilename,
+      thumbnailFilename: thumbFilename,
       relativePath,
       filename,
       storageType: 'sftp',
