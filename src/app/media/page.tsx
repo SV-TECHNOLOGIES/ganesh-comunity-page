@@ -65,6 +65,7 @@ interface MediaItem {
 
 import { getYouTubeEmbedUrl, getYouTubeThumbnailUrl, isYouTubeUrl } from '@/lib/youtube';
 import { getOptimizedImageUrl, getOriginalImageUrl } from '@/lib/image-utils';
+import { url } from 'inspector';
 
 // Thumbnails rendered inline on album cards; the full set lives in the album grid view
 const CARD_STRIP_LIMIT = 4;
@@ -720,7 +721,7 @@ function MediaContent() {
                 // IMAGE CARD
                 const isExt = isExternalAlbum(item.url);
                 const photoIndex = eventPhotos.findIndex((p) => p.id === item.id);
-                const itemImages = (item.images && item.images.length > 0) ? item.images : [item.url];
+                const itemImages = (item.images && item.images.length > 0) ? [item.coverImage,...item.images] : [item.url];
                 const isGroup = itemImages.length > 1;
                 const activeCardIdx = (publicCardActiveIndex[item.id] || 0) % itemImages.length;
                 const activeCardUrl = itemImages[activeCardIdx] || item.coverImage || item.url;
@@ -851,7 +852,9 @@ function MediaContent() {
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700">
-                          {itemImages.slice(0, CARD_STRIP_LIMIT).map((imgUrl, gIdx) => {
+                          {itemImages.slice(0, CARD_STRIP_LIMIT)
+                          
+                          .map((imgUrl, gIdx) => {
                             const isCurrent = activeCardIdx === gIdx;
                             return (
                               <button
