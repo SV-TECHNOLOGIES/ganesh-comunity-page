@@ -270,3 +270,102 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
+
+export async function PATCH(request: Request) {
+  try {
+    const body = await request.json();
+    const { id, appendImages } = body;
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: 'Media item ID is required for patch.' },
+        { status: 400 }
+      );
+    }
+
+    if (!Array.isArray(appendImages) || appendImages.length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'appendImages array is required.' },
+        { status: 400 }
+      );
+    }
+
+    const cleanUrls = appendImages
+      .map((u: any) => String(u).trim())
+      .filter((u) => Boolean(u));
+
+    if (cleanUrls.length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'No valid URLs provided to append.' },
+        { status: 400 }
+      );
+    }
+
+    // Safely update with transaction to prevent race conditions
+    const updated = await prisma.$transaction(async (tx) => {
+      const current = await tx.mediaItem.findUnique({
+        where: { id },
+        include: {
+          event: {
+            select: {
+              id: true,
+              title: true,
+              date: true,
+              venue: true,
+            },
+          },
+        },
+      });
+
+      if (!current) {
+        throw new Error('Media item not found');
+      }
+
+      const currentImages = Array.isArray(current.images) && current.images.length > 0
+        ? current.images
+        : (current.url ? current.url.split(/[\n,]+/).map((u) => u.trim()).filter(Boolean) : []);
+
+      // Filter out duplicates
+      const newToAdd = cleanUrls.filter((u) => !currentImages.includes(u));
+      const mergedImages = [...currentImages, ...newToAdd];
+
+      const updatedUrl = current.url && current.url.trim().length > 0
+        ? current.url
+        : (mergedImages[0] || '');
+
+      const updatedCover = current.coverImage && current.coverImage.trim().length > 0
+        ? current.coverImage
+        : (mergedImages[0] || null);
+
+      return tx.mediaItem.update({
+        where: { id },
+        data: {
+          images: mergedImages,
+          url: updatedUrl,
+          coverImage: updatedCover,
+        },
+        include: {
+          event: {
+            select: {
+              id: true,
+              title: true,
+              date: true,
+              venue: true,
+            },
+          },
+        },
+      });
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: updated,
+      message: `Successfully appended ${cleanUrls.length} image(s) to media item.`,
+    });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to append images to media item';
+    console.error('[API ADMIN MEDIA PATCH ERROR]:', error);
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  }
+}
+

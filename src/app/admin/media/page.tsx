@@ -169,6 +169,7 @@ export default function AdminMediaPage() {
   // Modal & Edit State
   const [modalOpen, setModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MediaItem | null>(null);
+  const editingItemRef = useRef<MediaItem | null>(null);
   const [formData, setFormData] = useState<MediaFormData>(initialFormData);
   const [submitting, setSubmitting] = useState(false);
 
@@ -263,6 +264,7 @@ export default function AdminMediaPage() {
 
   const openCreateModal = (defaultEventId?: string) => {
     setEditingItem(null);
+    editingItemRef.current = null;
     setUploadSuccessMsg('');
     setUploadProgressMsg('');
     setUploadFailures([]);
@@ -279,6 +281,7 @@ export default function AdminMediaPage() {
 
   const openEditModal = (item: MediaItem) => {
     setEditingItem(item);
+    editingItemRef.current = item;
     setUploadSuccessMsg('');
     setUploadProgressMsg('');
     setUploadFailures([]);
@@ -327,7 +330,8 @@ export default function AdminMediaPage() {
   };
 
   // Uploads files with a small concurrency pool so large batches (300+ photos) finish quickly.
-  // Each URL is appended to the album as soon as it lands, so a partial failure never loses completed uploads.
+  // For existing media items, each successfully uploaded URL is directly auto-saved to the database
+  // in real-time so there is zero risk of data loss even if the modal is closed or unsubmitted.
   const uploadFiles = async (files: File[]) => {
     if (!files.length) return;
 
@@ -335,22 +339,31 @@ export default function AdminMediaPage() {
     setUploadSuccessMsg('');
     setUploadFailures([]);
     setUploadProgress({ done: 0, failed: 0, total: files.length });
-    setUploadProgressMsg(`Uploading 0 of ${files.length}...`);
 
     const identifier = formData.title || 'media_asset';
-    // Keep upload order stable: slot results by index, then append in order at the end
+    const isEditingExisting = Boolean(editingItemRef.current?.id);
+    const existingItemId = editingItemRef.current?.id;
+
+    setUploadProgressMsg(
+      isEditingExisting
+        ? `Uploading & auto-saving 0 of ${files.length} to DB...`
+        : `Uploading 0 of ${files.length}...`
+    );
+
+    // Keep upload order stable: slot results by index
     const results: (string | null)[] = new Array(files.length).fill(null);
     const failures: { file: File; error: string }[] = [];
     let done = 0;
     let nextIndex = 0;
 
-    const appendUrls = (urls: string[]) => {
-      if (!urls.length) return;
+    // Immediately display newly uploaded image in the modal preview grid
+    const appendSingleUrl = (newUrl: string) => {
       setFormData((prev) => {
         const existingImages = prev.images && prev.images.length > 0
           ? prev.images
-          : (prev.url ? prev.url.split(/[\n,]+/).map(u => u.trim()).filter(Boolean) : []);
-        const combined = [...existingImages, ...urls.filter((u) => !existingImages.includes(u))];
+          : (prev.url ? prev.url.split(/[\n,]+/).map((u) => u.trim()).filter(Boolean) : []);
+        if (existingImages.includes(newUrl)) return prev;
+        const combined = [...existingImages, newUrl];
         return {
           ...prev,
           images: combined,
@@ -360,32 +373,90 @@ export default function AdminMediaPage() {
       });
     };
 
+    // Sequential queue for DB writes to prevent race conditions during concurrent uploads
+    let dbSyncPromise = Promise.resolve();
+    let dbSyncError: string | null = null;
+
+    const queueDbSync = (urlToSync: string) => {
+      if (!existingItemId) return;
+      dbSyncPromise = dbSyncPromise
+        .catch(() => {})
+        .then(async () => {
+          try {
+            const res = await fetch('/api/admin/media', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: existingItemId,
+                appendImages: [urlToSync],
+              }),
+            });
+            const data = await res.json();
+            if (data.success && data.data) {
+              editingItemRef.current = data.data;
+              setEditingItem(data.data);
+              setMediaItems((prev) => prev.map((m) => (m.id === existingItemId ? data.data : m)));
+            } else {
+              dbSyncError = data.error || 'Failed to update database';
+            }
+          } catch (err: any) {
+            dbSyncError = err?.message || 'Database network error';
+            console.error('Error auto-syncing uploaded image to DB:', err);
+          }
+        });
+    };
+
     const worker = async () => {
       while (nextIndex < files.length) {
         const i = nextIndex++;
         const file = files[i];
         try {
-          results[i] = await uploadSingleFile(file, identifier);
+          const url = await uploadSingleFile(file, identifier);
+          results[i] = url;
+          appendSingleUrl(url);
+          if (isEditingExisting) {
+            queueDbSync(url);
+          }
         } catch (err: any) {
           failures.push({ file, error: err?.message || 'Upload failed' });
         }
         done++;
         setUploadProgress({ done, failed: failures.length, total: files.length });
-        setUploadProgressMsg(`Uploading ${done} of ${files.length}${failures.length ? ` (${failures.length} failed)` : ''}...`);
+        const savingTag = isEditingExisting ? ' & auto-saving to DB' : '';
+        setUploadProgressMsg(
+          `Uploading${savingTag} ${done} of ${files.length}${failures.length ? ` (${failures.length} failed)` : ''}...`
+        );
       }
     };
 
     await Promise.all(Array.from({ length: Math.min(UPLOAD_CONCURRENCY, files.length) }, worker));
 
-    const uploadedUrls = results.filter((u): u is string => Boolean(u));
-    appendUrls(uploadedUrls);
+    // Wait for all DB write requests in queue to finish
+    if (isEditingExisting) {
+      await dbSyncPromise;
+      fetchMedia();
+    }
 
+    const uploadedUrls = results.filter((u): u is string => Boolean(u));
     setUploadFailures(failures);
     setUploadProgressMsg('');
+
     if (uploadedUrls.length > 0) {
-      setUploadSuccessMsg(
-        `Uploaded ${uploadedUrls.length} of ${files.length} file(s)${failures.length ? ` — ${failures.length} failed, retry below` : ''}.`
-      );
+      if (isEditingExisting) {
+        if (dbSyncError) {
+          setUploadSuccessMsg(
+            `Uploaded ${uploadedUrls.length} photo(s). DB auto-sync notice: ${dbSyncError}. Click "Update Media Item" to ensure all changes are saved.`
+          );
+        } else {
+          setUploadSuccessMsg(
+            `Uploaded and directly saved ${uploadedUrls.length} of ${files.length} photo(s) to the database${failures.length ? ` (${failures.length} failed, retry below)` : ''}.`
+          );
+        }
+      } else {
+        setUploadSuccessMsg(
+          `Uploaded ${uploadedUrls.length} of ${files.length} file(s)${failures.length ? ` — ${failures.length} failed, retry below` : ''}. Click "Save Media Item" to create.`
+        );
+      }
     } else {
       setUploadSuccessMsg('');
     }
@@ -1523,7 +1594,7 @@ export default function AdminMediaPage() {
                       ) : (
                         <>
                           <Upload className="w-3.5 h-3.5" />
-                          <span>Upload File(s) from Device (FTP)</span>
+                          <span>Upload File's from Device</span>
                         </>
                       )}
                     </label>
@@ -1567,7 +1638,12 @@ export default function AdminMediaPage() {
                       </div>
                     )}
                     <p className="text-[10px] text-slate-400">
-                      Select multiple photos (hundreds at once is fine) to batch upload into one album. Files store under <code className="text-mitra-gold">media/gallery/</code>
+                      Select multiple photos (hundreds at once is fine) to batch upload into one album.
+                      {editingItem && (
+                        <span className="block text-emerald-400/90 font-semibold mt-0.5">
+                          Direct DB auto-save active: uploaded photos are directly updated in the database without data loss.
+                        </span>
+                      )}
                     </p>
                   </div>
                 </div>

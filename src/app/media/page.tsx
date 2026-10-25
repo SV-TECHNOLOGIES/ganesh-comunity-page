@@ -65,7 +65,6 @@ interface MediaItem {
 
 import { getYouTubeEmbedUrl, getYouTubeThumbnailUrl, isYouTubeUrl } from '@/lib/youtube';
 import { getOptimizedImageUrl, getOriginalImageUrl } from '@/lib/image-utils';
-import { url } from 'inspector';
 
 // Thumbnails rendered inline on album cards; the full set lives in the album grid view
 const CARD_STRIP_LIMIT = 4;
