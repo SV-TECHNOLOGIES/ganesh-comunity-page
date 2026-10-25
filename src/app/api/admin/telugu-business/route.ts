@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 // Admin GET: fetches businesses (with optional status filter, search, and category)
 export async function GET(request: Request) {
@@ -64,10 +65,22 @@ export async function GET(request: Request) {
         approved: approvedCount,
         rejected: rejectedCount,
       },
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+      },
     });
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Admin fetch failed';
-    return NextResponse.json({ success: false, error: errorMsg, data: [], counts: { total: 0, pending: 0, approved: 0, rejected: 0 } }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: errorMsg, data: [], counts: { total: 0, pending: 0, approved: 0, rejected: 0 } },
+      {
+        status: 500,
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        },
+      }
+    );
   }
 }
 
@@ -187,6 +200,7 @@ export async function PATCH(request: Request) {
     if (rest.googleMapsUrl !== undefined) updateData.googleMapsUrl = rest.googleMapsUrl ? rest.googleMapsUrl.trim() : null;
     if (rest.specialOffer !== undefined) updateData.specialOffer = rest.specialOffer ? rest.specialOffer.trim() : null;
 
+    console.log("updateData", updateData)
     const updated = await prisma.teluguBusiness.update({
       where: { id },
       data: updateData,

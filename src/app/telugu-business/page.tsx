@@ -260,7 +260,7 @@ export default function TeluguBusinessPage() {
               className="gold-button px-7 py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-2.5 shadow-xl hover:scale-105 transition-transform"
             >
               <PlusCircle className="w-4 h-4 text-white" />
-              <span>Register Your Business (Free)</span>
+              <span>Register Your Business </span>
             </button>
 
             <a
