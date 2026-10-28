@@ -19,7 +19,11 @@ export async function GET(request: Request) {
     const events = await prisma.event.findMany({
       orderBy: { date: 'asc' },
     });
-    return NextResponse.json({ success: true, source: 'prisma', data: events });
+    return NextResponse.json({ success: true, source: 'prisma', data: events }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+      },
+    });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Database error fetching events';
     console.error('[API EVENTS GET ERROR]:', error);
