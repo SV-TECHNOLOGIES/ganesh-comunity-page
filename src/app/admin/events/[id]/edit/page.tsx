@@ -587,18 +587,23 @@ export default function EditEventPage() {
 
               {/* Banner Image Card */}
               <div className="bg-slate-950 p-6 rounded-3xl border border-slate-800 space-y-4">
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2 border-b border-slate-800 pb-3">
-                  <ImageIcon className="w-4 h-4 text-mitra-gold" />
-                  <span>Event Poster / Banner</span>
-                </h3>
+                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                  <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    <ImageIcon className="w-4 h-4 text-mitra-gold" />
+                    <span>Event Poster / Banner</span>
+                  </h3>
+                  <span className="text-[10px] font-mono bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full">
+                    745 &times; 1024 px
+                  </span>
+                </div>
 
                 <div className="space-y-3">
-                  <div className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 relative group">
+                  <div className="aspect-[745/1024] w-full max-w-[260px] mx-auto rounded-2xl overflow-hidden bg-[#1A0A00] border border-slate-800 relative group">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={formData.bannerUrl || '/assets/poster.jpg'}
                       alt="Banner Preview"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-contain group-hover:scale-[1.02] transition-transform duration-300"
                     />
                   </div>
 

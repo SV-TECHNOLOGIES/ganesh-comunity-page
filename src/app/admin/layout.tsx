@@ -2,7 +2,7 @@
 
 import { useState, useEffect, createContext, useContext } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Role } from '@/lib/types';
 import AuthGuard from '@/components/AuthGuard';
 import { useAuth } from '@/lib/auth-context';
@@ -27,6 +27,8 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   ClipboardList,
+  RefreshCw,
+  Check,
 } from 'lucide-react';
 import { 
   AdminSidebarContext, 
@@ -38,12 +40,37 @@ import {
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, logout } = useAuth();
   const [currentRole, setCurrentRole] = useState<Role>('Super Admin');
   const [loggingOut, setLoggingOut] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [clearingCache, setClearingCache] = useState(false);
+  const [cacheCleared, setCacheCleared] = useState(false);
   
   const [globalEventId, setGlobalEventIdState] = useState<string>('all');
+
+  const handleClearCache = async () => {
+    if (clearingCache) return;
+    setClearingCache(true);
+    setCacheCleared(false);
+    try {
+      const res = await fetch('/api/admin/clear-cache', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        setCacheCleared(true);
+        router.refresh();
+        setTimeout(() => setCacheCleared(false), 3000);
+      } else {
+        alert(data.error || 'Failed to clear cache');
+      }
+    } catch (err) {
+      console.error('Clear cache error:', err);
+      alert('Network error clearing cache');
+    } finally {
+      setClearingCache(false);
+    }
+  };
 
   // Load from DB on mount
   useEffect(() => {
@@ -224,17 +251,52 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
         {/* Main Content Area */}
         <main className="flex-1 p-4 sm:p-8 overflow-y-auto relative min-w-0 bg-[#FFF8F0]">
-          {!sidebarOpen && (
-            <button
-              type="button"
-              onClick={() => setSidebarOpen(true)}
-              className="fixed top-4 left-4 z-40 p-2.5 rounded-xl bg-white/95 border border-[#E65C00]/30 text-[#E65C00] hover:bg-[#FFF0E0] shadow-lg backdrop-blur-md flex items-center gap-2 text-xs font-bold transition-all hover:scale-105"
-              title="Open Sidebar"
-            >
-              <PanelLeftOpen className="w-4 h-4" />
-              <span className="hidden sm:inline">Open Sidebar</span>
-            </button>
-          )}
+          {/* Admin Panel Top Header Bar */}
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 bg-[#FFFDFB] border border-[#E65C00]/20 rounded-2xl px-4 py-3 shadow-sm">
+            <div className="flex items-center gap-3">
+              {!sidebarOpen && (
+                <button
+                  type="button"
+                  onClick={() => setSidebarOpen(true)}
+                  className="p-2 rounded-xl bg-[#FFF0E0] border border-[#E65C00]/30 text-[#E65C00] hover:bg-[#E65C00] hover:text-white flex items-center gap-1.5 text-xs font-bold transition-all"
+                  title="Open Sidebar"
+                >
+                  <PanelLeftOpen className="w-4 h-4" />
+                  <span className="hidden sm:inline">Menu</span>
+                </button>
+              )}
+              <div className="flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-[#E65C00]" />
+                <span className="text-xs sm:text-sm font-black font-cinzel text-[#3D1A00] uppercase tracking-wider">
+                  MITRA UK Admin Panel
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={handleClearCache}
+                disabled={clearingCache}
+                title="Revalidate all APIs and clear application cache"
+                className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 border transition-all shadow-sm ${
+                  cacheCleared
+                    ? 'bg-emerald-600 text-white border-emerald-600'
+                    : 'bg-[#FFF0E0] hover:bg-[#E65C00] text-[#E65C00] hover:text-white border-[#E65C00]/40'
+                } disabled:opacity-60`}
+              >
+                {clearingCache ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : cacheCleared ? (
+                  <Check className="w-3.5 h-3.5" />
+                ) : (
+                  <RefreshCw className="w-3.5 h-3.5" />
+                )}
+                <span>{clearingCache ? 'Clearing Cache...' : cacheCleared ? 'Cache Cleared!' : 'Clear Cache'}</span>
+              </button>
+            </div>
+          </div>
+
           {children}
         </main>
 

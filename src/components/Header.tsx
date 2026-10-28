@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { 
   ChevronDown, 
   ShieldAlert, 
@@ -17,7 +17,9 @@ import {
   Award,
   Sparkles,
   Building2,
-  Image as ImageIcon
+  Image as ImageIcon,
+  RefreshCw,
+  Check
 } from 'lucide-react';
 import { SITE_CONFIG } from '@/config/site-config';
 import { useAuth } from '@/lib/auth-context';
@@ -43,8 +45,35 @@ export default function Header({ previewMode = false }: HeaderProps = {}) {
   const [aboutDropdown, setAboutDropdown] = useState(false);
   const [communityDropdown, setCommunityDropdown] = useState(false);
   const [userDropdown, setUserDropdown] = useState(false);
+  const [clearingCache, setClearingCache] = useState(false);
+  const [cacheCleared, setCacheCleared] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
   const { user, isLoggedIn, logout } = useAuth();
+
+  const isAdminHeader = pathname.startsWith('/admin');
+
+  const handleClearCache = async () => {
+    if (clearingCache) return;
+    setClearingCache(true);
+    setCacheCleared(false);
+    try {
+      const res = await fetch('/api/admin/clear-cache', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        setCacheCleared(true);
+        router.refresh();
+        setTimeout(() => setCacheCleared(false), 3000);
+      } else {
+        alert(data.error || 'Failed to clear cache');
+      }
+    } catch (err) {
+      console.error('Clear cache error:', err);
+      alert('Network error clearing cache');
+    } finally {
+      setClearingCache(false);
+    }
+  };
 
   const isCurrent = (path: string) => pathname === path;
   const isAboutActive = pathname.startsWith('/about') || pathname === '/history' || pathname === '/leadership';
@@ -252,6 +281,30 @@ export default function Header({ previewMode = false }: HeaderProps = {}) {
           {/* Action CTAs */}
           <div className="hidden lg:flex items-center space-x-3 shrink-0">
             
+            {/* Clear Cache Button — Only visible on Admin Header */}
+            {isAdminHeader && (
+              <button
+                type="button"
+                onClick={handleClearCache}
+                disabled={clearingCache}
+                title="Revalidate all APIs and clear application cache"
+                className={`px-3.5 py-2 rounded-full text-xs font-black flex items-center gap-1.5 border transition-all shadow-sm shrink-0 ${
+                  cacheCleared
+                    ? 'bg-emerald-600 text-white border-emerald-600'
+                    : 'bg-[#FFF0E0] hover:bg-[#E65C00] text-[#E65C00] hover:text-white border-[#E65C00]/40'
+                } disabled:opacity-60`}
+              >
+                {clearingCache ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : cacheCleared ? (
+                  <Check className="w-3.5 h-3.5" />
+                ) : (
+                  <RefreshCw className="w-3.5 h-3.5" />
+                )}
+                <span>{clearingCache ? 'Clearing...' : cacheCleared ? 'Cache Cleared!' : 'Clear Cache'}</span>
+              </button>
+            )}
+
             {/* Auth Pill */}
             {NAV_CONFIG.SHOW_LOGIN && (
               isLoggedIn ? (

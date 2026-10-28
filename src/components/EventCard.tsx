@@ -39,36 +39,48 @@ export default function EventCard({ event, onRSVP }: { event: EventItem; onRSVP?
     <>
       <div className="bg-white rounded-3xl overflow-hidden border border-[#E65C00]/20 shadow-md hover:shadow-[0_12px_40px_rgba(230,92,0,0.15)] hover:-translate-y-1 transition-all duration-300 flex flex-col group">
         
-        {/* Banner & Category Pill at Top */}
-        <div className="relative h-56 w-full overflow-hidden bg-[#FFF0E0]">
+        {/* Full Event Poster (745:1024 Portrait Poster Ratio) */}
+        <Link
+          href={`/events/${event.id}`}
+          className="relative aspect-[745/1024] w-full overflow-hidden bg-[#1A0A00] block"
+        >
+          {/* Ambient blurred backdrop so any slight ratio variation blends seamlessly */}
+          <Image
+            src={event.bannerUrl}
+            alt=""
+            fill
+            aria-hidden="true"
+            className="object-cover blur-xl opacity-40 scale-110 pointer-events-none"
+          />
           <Image
             src={event.bannerUrl}
             alt={event.title}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
-            style={{ objectPosition: 'center 22%' }}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-contain group-hover:scale-[1.02] transition-transform duration-500 z-10"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-white via-white/5 to-transparent" />
-          
-          <div className="absolute top-3 left-3 flex gap-2">
-            <span className="bg-[#FFF0E0] text-[#E65C00] font-black text-[10px] uppercase px-3 py-1 rounded-full border border-[#E65C00]/30 shadow">
-              {event.category}
-            </span>
-            {event.featured && (
-              <span className="bg-[#E65C00] text-white font-black text-[10px] uppercase px-2.5 py-1 rounded-full shadow">
-                FEATURED
-              </span>
-            )}
-          </div>
-
-          <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur text-[#E65C00] font-black text-xs px-3 py-1 rounded-full border border-[#E65C00]/30 shadow-sm">
-            {event.ticketPrice === 0 ? 'FREE ADMISSION' : `£${event.ticketPrice}`}
-          </div>
-        </div>
+        </Link>
 
         {/* Details */}
         <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-          <div>
+          <div className="space-y-2.5">
+            {/* Category, Featured & Price Pills */}
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="bg-[#FFF0E0] text-[#E65C00] font-black text-[10px] uppercase px-3 py-1 rounded-full border border-[#E65C00]/30 shadow-sm">
+                  {event.category}
+                </span>
+                {event.featured && (
+                  <span className="bg-[#E65C00] text-white font-black text-[10px] uppercase px-2.5 py-1 rounded-full shadow-sm">
+                    FEATURED
+                  </span>
+                )}
+              </div>
+              <span className="bg-[#FFF8F0] text-[#E65C00] font-black text-xs px-3 py-1 rounded-full border border-[#E65C00]/30 shadow-sm">
+                {event.ticketPrice === 0 ? 'FREE ADMISSION' : `£${event.ticketPrice}`}
+              </span>
+            </div>
+
             <h3 className="text-lg font-bold text-[#3D1A00] group-hover:text-[#E65C00] transition-colors line-clamp-2 font-cinzel">
               <Link href={`/events/${event.id}`}>
                 {event.title}

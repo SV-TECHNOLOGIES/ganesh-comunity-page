@@ -86,7 +86,21 @@ export default function Footer() {
 
         {/* Copyright & 3D Model Attribution Bar */}
         <div className="pt-8 border-t border-[#E65C00]/20 flex flex-col md:flex-row items-center justify-between text-[11px] text-[#FFD4A0] gap-4">
-          <p>© 2026 MITRA UK &amp; Mana Indian Telugu Roots Abroad (MITRA). All Rights Reserved.</p>
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-center md:text-left">
+            <p>© 2026 MITRA UK &amp; Mana Indian Telugu Roots Abroad (MITRA). All Rights Reserved.</p>
+            <span className="hidden sm:inline text-[#E65C00]/50">|</span>
+            <p>
+              Developed by{' '}
+              <a
+                href="https://svrtechgroups.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-white text-[#FF9A3C] font-bold transition-colors"
+              >
+                SVR Tech Groups
+              </a>
+            </p>
+          </div>
           <p className="text-[11px] text-[#FFD4A0]/80 text-center md:text-right">
             3D Model: &ldquo;<a href="https://sketchfab.com/3d-models/lord-ganesh-65ba76d672b6429abe999afcb4e5f6ac" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#FF9A3C] font-semibold">Lord Ganesh</a>&rdquo; by <a href="https://sketchfab.com/SandeshBhat" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#FF9A3C] font-semibold">Sandesh S Bhat</a>, licensed under <a href="http://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#FF9A3C] font-semibold">CC BY 4.0</a>
           </p>

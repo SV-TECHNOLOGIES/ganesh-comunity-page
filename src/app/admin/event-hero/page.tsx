@@ -1134,13 +1134,19 @@ export default function EventHeroAdminPage() {
               )}
 
               {currentConfig.hero.heroType === 'image' && (
-                <div className="pt-3 border-t border-slate-800/80 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[11px] font-bold text-slate-400 block">
-                      Hero Banner Image URL
+                <div className="pt-3 border-t border-slate-800/80 space-y-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <label className="text-[11px] font-bold text-slate-300 block">
+                      Hero Banner / Event Poster URL
                     </label>
-                    <span className="text-[10px] text-amber-400 font-medium">Hero Image &amp; Card</span>
+                    <span className="text-[10px] bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full font-mono font-bold">
+                      745 &times; 1024 px (745:1024 Ratio)
+                    </span>
                   </div>
+
+                  <p className="text-[10px] text-slate-400 leading-relaxed">
+                    Designed for vertical event posters (<span className="text-amber-300 font-semibold">745 &times; 1024 px</span> portrait ratio). The full poster is displayed uncropped across the hero and event cards.
+                  </p>
 
                   <input
                     type="text"
@@ -1158,7 +1164,7 @@ export default function EventHeroAdminPage() {
                       ) : (
                         <Upload className="w-3.5 h-3.5" />
                       )}
-                      <span>{uploadingBanner ? 'Uploading Image...' : 'Upload Image'}</span>
+                      <span>{uploadingBanner ? 'Uploading Poster...' : 'Upload Poster (745×1024)'}</span>
                       <input
                         type="file"
                         accept="image/*"
@@ -1179,21 +1185,26 @@ export default function EventHeroAdminPage() {
                     </button>
                   </div>
 
-                  {/* Thumbnail preview */}
+                  {/* Full 745:1024 Poster Preview */}
                   {currentConfig.hero.bannerImageUrl && (
-                    <div className="mt-2 p-2 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center gap-3">
-                      <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-slate-950 shrink-0 border border-slate-700">
+                    <div className="mt-2 p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center gap-3.5">
+                      <div className="relative w-20 aspect-[745/1024] rounded-lg overflow-hidden bg-[#1A0A00] shrink-0 border border-amber-500/40 shadow-md">
                         <img
                           src={currentConfig.hero.bannerImageUrl}
                           alt="Banner Preview"
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-contain"
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = '/assets/poster.jpg';
                           }}
                         />
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <span className="text-[10px] text-slate-400 font-medium block truncate">Current Image:</span>
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider block">
+                          Full Poster Preview (745:1024)
+                        </span>
+                        <span className="text-[10px] text-slate-400 block">
+                          Resolution target: <strong className="text-slate-200">745 &times; 1024 px</strong>
+                        </span>
                         <span className="text-[10px] text-amber-300 font-mono block truncate">
                           {currentConfig.hero.bannerImageUrl}
                         </span>
@@ -1719,6 +1730,22 @@ export default function EventHeroAdminPage() {
                       onChange={(e) => updateMediaTeaser('subtitle', e.target.value)}
                       placeholder="Experience the official event teaser video reel and high-resolution event artwork from our media assets."
                       className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[10px] font-bold text-slate-400 block">
+                        Event Poster Image URL (745 &times; 1024 px)
+                      </label>
+                      <span className="text-[9px] text-amber-400 font-mono">745:1024 Ratio</span>
+                    </div>
+                    <input
+                      type="text"
+                      value={currentConfig.mediaTeaser?.posterUrl ?? currentConfig.hero.bannerImageUrl ?? '/assets/poster.jpg'}
+                      onChange={(e) => updateMediaTeaser('posterUrl', e.target.value)}
+                      placeholder="/assets/poster.jpg or https://..."
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
                     />
                   </div>
                 </div>

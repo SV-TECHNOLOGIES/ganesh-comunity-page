@@ -219,18 +219,21 @@ export function AddEventForm({ onSuccess, onCancel, setActionNotice }: AddEventF
           />
         </div>
         <div>
-          <label className="block text-slate-300 font-bold mb-1">Banner Settings</label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-slate-300 font-bold">Event Poster (745 &times; 1024 px)</label>
+            <span className="text-[10px] font-mono text-amber-400">745:1024 Ratio</span>
+          </div>
           <div className="space-y-2">
             <input
               type="text"
               value={bannerUrl}
               onChange={(e) => setBannerUrl(e.target.value)}
-              placeholder="Banner Image URL"
+              placeholder="Poster Image URL"
               className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white"
             />
             <label className="cursor-pointer inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white font-bold py-1.5 px-3 rounded-lg border border-slate-700 transition-colors">
               <Upload className="w-3.5 h-3.5" />
-              <span>{uploadingBanner ? 'Uploading...' : 'Upload New Banner'}</span>
+              <span>{uploadingBanner ? 'Uploading...' : 'Upload Poster (745×1024)'}</span>
               <input
                 type="file"
                 accept="image/*"
@@ -240,8 +243,8 @@ export function AddEventForm({ onSuccess, onCancel, setActionNotice }: AddEventF
               />
             </label>
             {bannerUrl && (
-              <div className="mt-2 h-20 w-32 rounded-lg overflow-hidden border border-slate-800 relative group">
-                <img src={bannerUrl} alt="Preview" className="w-full h-full object-cover" />
+              <div className="mt-2 w-24 aspect-[745/1024] rounded-lg overflow-hidden border border-slate-800 bg-[#1A0A00] relative group">
+                <img src={bannerUrl} alt="Preview" className="w-full h-full object-contain" />
               </div>
             )}
           </div>

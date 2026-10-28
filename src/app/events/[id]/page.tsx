@@ -274,30 +274,67 @@ END:VCALENDAR`;
         <span>Back to Events Calendar</span>
       </Link>
 
-      {/* Hero Banner */}
-      <div className="relative h-80 sm:h-96 rounded-3xl overflow-hidden shadow-2xl border-4 border-mitra-gold/30">
-        <Image src={event.bannerUrl} alt={event.title} fill className="object-cover" priority />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-        <div className="absolute top-4 left-4 flex flex-wrap gap-2">
-          <span className="bg-mitra-red text-white text-xs font-bold px-3 py-1 rounded-full uppercase shadow">
-            {event.category}
-          </span>
-          <span className="bg-mitra-gold text-mitra-navy text-xs font-black px-3 py-1 rounded-full uppercase shadow">
-            {event.ticketPrice === 0 ? 'FREE EVENT' : `Adult £${event.ticketPrice}`}
-          </span>
-          {event.childTicketPrice !== undefined && event.childTicketPrice !== null && (
-            <span className="bg-amber-100 text-amber-900 text-xs font-black px-3 py-1 rounded-full uppercase shadow border border-amber-300">
-              Child {event.childTicketPrice === 0 ? 'FREE' : `£${event.childTicketPrice}`}
-            </span>
-          )}
-        </div>
-        <div className="absolute bottom-6 left-6 right-6 text-white space-y-2">
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
-            {event.title}
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-300">
-            Hosted by MITRA UK
-          </p>
+      {/* Hero Banner with Full 745:1024 Event Poster */}
+      <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-mitra-gold/30 bg-[#1A0A00] p-6 sm:p-8">
+        {/* Ambient blurred poster backdrop */}
+        <Image
+          src={event.bannerUrl}
+          alt=""
+          fill
+          aria-hidden="true"
+          className="object-cover blur-2xl opacity-35 scale-110 pointer-events-none"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-black/75 via-black/50 to-black/80 pointer-events-none" />
+
+        <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+          {/* Left: Event Title & Badges */}
+          <div className="md:col-span-7 text-white space-y-4">
+            <div className="flex flex-wrap gap-2">
+              <span className="bg-mitra-red text-white text-xs font-bold px-3 py-1 rounded-full uppercase shadow">
+                {event.category}
+              </span>
+              <span className="bg-mitra-gold text-mitra-navy text-xs font-black px-3 py-1 rounded-full uppercase shadow">
+                {event.ticketPrice === 0 ? 'FREE EVENT' : `Adult £${event.ticketPrice}`}
+              </span>
+              {event.childTicketPrice !== undefined && event.childTicketPrice !== null && (
+                <span className="bg-amber-100 text-amber-900 text-xs font-black px-3 py-1 rounded-full uppercase shadow border border-amber-300">
+                  Child {event.childTicketPrice === 0 ? 'FREE' : `£${event.childTicketPrice}`}
+                </span>
+              )}
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-cinzel">
+                {event.title}
+              </h1>
+              <p className="text-xs sm:text-sm text-amber-200/90 font-semibold">
+                Hosted by MITRA UK
+              </p>
+            </div>
+            <div className="space-y-1.5 text-xs sm:text-sm text-slate-200 pt-2">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-mitra-gold shrink-0" />
+                <span>{event.date} &bull; {event.time}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-mitra-gold shrink-0" />
+                <span>{event.venue}{event.address ? `, ${event.address}` : ''}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Full Event Poster in 745:1024 Ratio */}
+          <div className="md:col-span-5">
+            <div className="relative aspect-[745/1024] w-full max-w-[340px] mx-auto rounded-2xl overflow-hidden shadow-2xl border-2 border-mitra-gold/40 bg-[#1A0A00]">
+              <Image
+                src={event.bannerUrl}
+                alt={event.title}
+                fill
+                sizes="(max-width: 768px) 90vw, 340px"
+                className="object-contain"
+                priority
+              />
+            </div>
+          </div>
         </div>
       </div>
 

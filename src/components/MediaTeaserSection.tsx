@@ -181,26 +181,34 @@ export default function MediaTeaserSection({
                 onClick={() => setLightboxItem(item)}
                 className="temple-card rounded-2xl overflow-hidden border border-[#E65C00]/20 cursor-pointer group hover:border-[#E65C00]/70 transition-all relative hover:shadow-[0_12px_30px_rgba(230,92,0,0.15)] hover:-translate-y-1 bg-white"
               >
-                <div className="relative h-60 w-full overflow-hidden bg-[#FFF0E0]">
+                <div className="relative aspect-[745/1024] w-full overflow-hidden bg-[#1A0A00]">
                   <img
                     src={item.src}
-                    alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute inset-0 w-full h-full object-cover blur-xl opacity-40 scale-110 pointer-events-none"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = '/assets/poster.jpg';
                     }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#3D1A00]/50 via-transparent to-transparent opacity-80" />
+                  <img
+                    src={item.src}
+                    alt={item.title}
+                    className="relative z-10 w-full h-full object-contain group-hover:scale-[1.02] transition-transform duration-500"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/assets/poster.jpg';
+                    }}
+                  />
 
                   {/* Badge */}
-                  <span className="absolute top-3 left-3 bg-[#E65C00] text-white text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full shadow-md flex items-center gap-1">
+                  <span className="absolute top-3 left-3 z-20 bg-[#E65C00] text-white text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full shadow-md flex items-center gap-1">
                     {item.type === 'VIDEO' && <Film className="w-3 h-3 shrink-0" />}
                     <span>{item.category}</span>
                   </span>
 
                   {/* Video Play Button Overlay */}
                   {item.type === 'VIDEO' && (
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
                       <div className="w-12 h-12 rounded-full bg-[#E65C00] text-white flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:bg-[#FF7A00] transition-all">
                         <Play className="w-5 h-5 fill-white ml-0.5" />
                       </div>

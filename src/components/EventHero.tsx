@@ -860,7 +860,7 @@ export default function EventHero({
   );
 
   /* ═══════════════════════════════════════════════════════════════════════
-     IMAGE HERO VARIANTS
+     IMAGE HERO VARIANTS (745:1024 Full Poster Resolution Ratio)
      ═══════════════════════════════════════════════════════════════════════ */
 
   // Image Variant 1: Modern 2-Column Split Stage
@@ -894,23 +894,23 @@ export default function EventHero({
         </div>
 
         <div className="lg:col-span-5">
-          <div className="relative group max-w-md mx-auto lg:max-w-none">
+          <div className="relative group max-w-[380px] sm:max-w-[420px] mx-auto">
             <div
               className="absolute -inset-3 rounded-3xl opacity-35 blur-2xl transition-all group-hover:opacity-50"
               style={{ backgroundColor: cfg.primaryColor || '#E65C00' }}
             />
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-white/80 aspect-[4/3] sm:aspect-[16/11] bg-white">
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl border-2 border-white/80 aspect-[745/1024] bg-[#1A0A00]">
+              <img
+                src={cfg.bannerImageUrl || '/assets/poster.jpg'}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 w-full h-full object-cover blur-xl opacity-40 scale-110 pointer-events-none"
+              />
               <img
                 src={cfg.bannerImageUrl || '/assets/poster.jpg'}
                 alt={cfg.title}
-                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                className="relative z-10 w-full h-full object-contain group-hover:scale-[1.02] transition-transform duration-700"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#3D1A00]/70 via-transparent to-transparent pointer-events-none" />
-              <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end pointer-events-none">
-                <span className="bg-white/95 backdrop-blur-sm text-[#3D1A00] text-[11px] font-black px-3 py-1.5 rounded-full uppercase tracking-wider shadow-md">
-                  {cfg.subtitle || cfg.title}
-                </span>
-              </div>
             </div>
           </div>
         </div>
@@ -918,15 +918,15 @@ export default function EventHero({
     </div>
   );
 
-  // Image Variant 2: Cinematic Fullscreen Full-Bleed Banner
+  // Image Variant 2: Cinematic Fullscreen Full-Bleed Banner + Full 745:1024 Poster
   const renderImageFullscreen = () => (
     <div className="relative z-10 w-full min-h-[85vh] flex items-center justify-center overflow-hidden">
-      {/* Full-bleed background image with dark cinematic vignette */}
+      {/* Full-bleed blurred background image with dark cinematic vignette */}
       <div
-        className="absolute inset-0 bg-cover bg-center filter brightness-95 scale-105 transition-transform duration-1000"
+        className="absolute inset-0 bg-cover bg-center filter blur-xl brightness-75 scale-110 transition-transform duration-1000"
         style={{ backgroundImage: `url('${cfg.bannerImageUrl || '/assets/poster.jpg'}')` }}
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/80" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/65 to-black/80" />
       <div
         className="absolute inset-0 opacity-20 pointer-events-none"
         style={{
@@ -934,39 +934,53 @@ export default function EventHero({
         }}
       />
 
-      <div className="relative z-20 max-w-4xl mx-auto px-4 text-center space-y-6 py-16 text-white">
-        <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md border border-white/30 px-4 py-1.5 rounded-full shadow-lg">
-          <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
-          <span className="text-xs font-extrabold uppercase tracking-wider text-amber-300">
-            {cfg.presenterBadge}
-          </span>
-        </div>
+      <div className="relative z-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <div className="lg:col-span-7 text-center lg:text-left space-y-6 text-white">
+            <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md border border-white/30 px-4 py-1.5 rounded-full shadow-lg">
+              <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
+              <span className="text-xs font-extrabold uppercase tracking-wider text-amber-300">
+                {cfg.presenterBadge}
+              </span>
+            </div>
 
-        <div className="space-y-3">
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black font-cinzel tracking-wider uppercase gold-foil-text drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)]">
-            {cfg.title}
-          </h1>
-          <h2 className="text-lg sm:text-2xl font-bold tracking-widest text-slate-200 uppercase font-cinzel">
-            {cfg.subtitle}
-          </h2>
-        </div>
+            <div className="space-y-3">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black font-cinzel tracking-wider uppercase gold-foil-text drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)]">
+                {cfg.title}
+              </h1>
+              <h2 className="text-lg sm:text-2xl font-bold tracking-widest text-slate-200 uppercase font-cinzel">
+                {cfg.subtitle}
+              </h2>
+            </div>
 
-        {cfg.tagline && (
-          <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto leading-relaxed">
-            {cfg.tagline}
-          </p>
-        )}
+            {cfg.tagline && (
+              <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                {cfg.tagline}
+              </p>
+            )}
 
-        <div className="pt-2">
-          {renderCtas('center')}
+            <div className="pt-2 flex justify-center lg:justify-start">
+              {renderCtas('start')}
+            </div>
+          </div>
+
+          <div className="lg:col-span-5">
+            <div className="relative max-w-[360px] sm:max-w-[400px] mx-auto aspect-[745/1024] rounded-3xl overflow-hidden shadow-2xl border-2 border-white/30 bg-[#1A0A00]">
+              <img
+                src={cfg.bannerImageUrl || '/assets/poster.jpg'}
+                alt={cfg.title}
+                className="w-full h-full object-contain"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 
-  // Image Variant 3: Elevated Floating 3D Showcase Card
+  // Image Variant 3: Elevated Floating 3D Showcase Card (745:1024 Poster)
   const renderImageCardShowcase = () => (
-    <div className="relative z-20 max-w-5xl mx-auto px-4 py-12 w-full my-auto">
+    <div className="relative z-20 max-w-6xl mx-auto px-4 py-12 w-full my-auto">
       <div className="text-center space-y-3 mb-8">
         <div className="inline-flex items-center gap-2 bg-white/90 border border-[#E65C00]/30 px-4 py-1.5 rounded-full shadow-sm">
           <Sparkles className="w-4 h-4 text-[#E65C00]" />
@@ -974,43 +988,57 @@ export default function EventHero({
             {cfg.presenterBadge}
           </span>
         </div>
-        <h1 className="text-3xl sm:text-5xl font-black font-cinzel gold-foil-text tracking-wider uppercase">
-          {cfg.title}
-        </h1>
       </div>
 
       {/* Floating 3D Showcase Card */}
-      <div className="temple-card rounded-3xl overflow-hidden shadow-2xl border-2 border-white/80 bg-white dark:bg-slate-900 group hover:scale-[1.01] transition-transform duration-500">
-        <div className="relative aspect-[21/9] sm:aspect-[21/8] w-full overflow-hidden">
-          <img
-            src={cfg.bannerImageUrl || '/assets/poster.jpg'}
-            alt={cfg.title}
-            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-          <div className="absolute bottom-4 left-6 right-6 flex flex-wrap justify-between items-end gap-2 text-white">
-            <span className="text-lg sm:text-2xl font-black uppercase font-cinzel text-white drop-shadow">
-              {cfg.subtitle}
-            </span>
-            <span className="bg-amber-500 text-slate-950 font-black text-[10px] px-3 py-1 rounded-full uppercase tracking-wider shadow">
-              Official Showcase
-            </span>
+      <div className="temple-card rounded-3xl overflow-hidden shadow-2xl border-2 border-white/80 bg-white dark:bg-slate-900 group hover:scale-[1.005] transition-transform duration-500">
+        <div className="grid grid-cols-1 md:grid-cols-12 items-center">
+          {/* Left: Full 745:1024 Poster */}
+          <div className="md:col-span-5 relative aspect-[745/1024] w-full overflow-hidden bg-[#1A0A00]">
+            <img
+              src={cfg.bannerImageUrl || '/assets/poster.jpg'}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 w-full h-full object-cover blur-xl opacity-40 scale-110 pointer-events-none"
+            />
+            <img
+              src={cfg.bannerImageUrl || '/assets/poster.jpg'}
+              alt={cfg.title}
+              className="relative z-10 w-full h-full object-contain group-hover:scale-[1.02] transition-transform duration-700"
+            />
           </div>
-        </div>
 
-        <div className="p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 bg-white dark:bg-slate-900">
-          <p className="text-xs sm:text-sm text-[#6B3A2A] dark:text-slate-300 max-w-lg leading-relaxed text-center sm:text-left font-medium">
-            {cfg.tagline || 'Experience vibrant cultural celebrations, music, and community spirit across the UK diaspora.'}
-          </p>
-          <div className="shrink-0">
-            {renderCtas('start')}
+          {/* Right: Card Details & CTAs */}
+          <div className="md:col-span-7 p-6 sm:p-10 space-y-6 text-left bg-white dark:bg-slate-900">
+            <div className="inline-flex items-center gap-2">
+              <span className="bg-amber-500 text-slate-950 font-black text-[10px] px-3 py-1 rounded-full uppercase tracking-wider shadow">
+                Official Showcase
+              </span>
+            </div>
+
+            <div className="space-y-2">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-cinzel gold-foil-text tracking-wider uppercase leading-tight">
+                {cfg.title}
+              </h1>
+              <h2 className="text-base sm:text-xl font-bold uppercase font-cinzel text-[#3D1A00] dark:text-white">
+                {cfg.subtitle}
+              </h2>
+            </div>
+
+            <p className="text-xs sm:text-sm text-[#6B3A2A] dark:text-slate-300 leading-relaxed font-medium">
+              {cfg.tagline || 'Experience vibrant cultural celebrations, music, and community spirit across the UK diaspora.'}
+            </p>
+
+            <div className="pt-2">
+              {renderCtas('start')}
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 
-  // Image Variant 4: Modern Editorial Magazine Header
+  // Image Variant 4: Modern Editorial Magazine Header (745:1024 Poster)
   const renderImageEditorial = () => (
     <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full my-auto">
       <div className="border-b-2 border-[#E65C00]/20 pb-4 mb-8 flex flex-wrap justify-between items-center gap-3">
@@ -1023,7 +1051,7 @@ export default function EventHero({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-        <div className="lg:col-span-6 space-y-6 text-left">
+        <div className="lg:col-span-7 space-y-6 text-left">
           <h1 className="text-4xl sm:text-6xl font-black font-cinzel text-[#3D1A00] tracking-tight leading-none uppercase">
             {cfg.title}
           </h1>
@@ -1044,16 +1072,19 @@ export default function EventHero({
           {renderCtas('start')}
         </div>
 
-        <div className="lg:col-span-6">
-          <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white aspect-[4/3] bg-white group">
+        <div className="lg:col-span-5">
+          <div className="relative max-w-[380px] sm:max-w-[420px] mx-auto rounded-2xl overflow-hidden shadow-2xl border-4 border-white aspect-[745/1024] bg-[#1A0A00] group">
+            <img
+              src={cfg.bannerImageUrl || '/assets/poster.jpg'}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 w-full h-full object-cover blur-xl opacity-40 scale-110 pointer-events-none"
+            />
             <img
               src={cfg.bannerImageUrl || '/assets/poster.jpg'}
               alt={cfg.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              className="relative z-10 w-full h-full object-contain group-hover:scale-[1.02] transition-transform duration-500"
             />
-            <div className="absolute top-4 right-4 bg-white/90 text-[#3D1A00] text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider shadow">
-              Featured Event
-            </div>
           </div>
         </div>
       </div>
