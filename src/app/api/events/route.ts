@@ -13,7 +13,11 @@ export async function GET(request: Request) {
       const event = await prisma.event.findUnique({
         where: { id },
       });
-      return NextResponse.json({ success: true, source: 'prisma', data: event });
+      return NextResponse.json({ success: true, source: 'prisma', data: event }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+      },
+    });
     }
 
     const events = await prisma.event.findMany({
