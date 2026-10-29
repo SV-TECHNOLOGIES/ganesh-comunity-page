@@ -16,6 +16,23 @@ export default function EventCard({ event, onRSVP }: { event: EventItem; onRSVP?
   const [count, setCount] = useState(event.rsvpCount);
   const [copied, setCopied] = useState(false);
 
+  const displayPrice = (() => {
+    if (Array.isArray(event.ticketTiers) && event.ticketTiers.length > 0) {
+      const active = event.ticketTiers.filter((t) => t.isActive !== false && t.allowDirectBooking !== false);
+      const prices = active.map((t) => Number(t.price));
+      const minPrice = Math.min(...prices);
+      const maxPrice = Math.max(...prices);
+      if (maxPrice === 0) return 'FREE ADMISSION';
+      if (minPrice === 0) {
+        const paidMin = prices.filter((p) => p > 0);
+        return paidMin.length > 0 ? `From £${Math.min(...paidMin)}` : 'FREE ADMISSION';
+      }
+      if (minPrice === maxPrice) return `£${minPrice}`;
+      return `From £${minPrice}`;
+    }
+    return event.ticketPrice === 0 ? 'FREE ADMISSION' : `£${event.ticketPrice}`;
+  })();
+
   const handleShare = (e: React.MouseEvent) => {
     e.preventDefault();
     if (typeof window !== 'undefined') {
@@ -77,7 +94,7 @@ export default function EventCard({ event, onRSVP }: { event: EventItem; onRSVP?
                 )}
               </div>
               <span className="bg-[#FFF8F0] text-[#E65C00] font-black text-xs px-3 py-1 rounded-full border border-[#E65C00]/30 shadow-sm">
-                {event.ticketPrice === 0 ? 'FREE ADMISSION' : `£${event.ticketPrice}`}
+                {displayPrice}
               </span>
             </div>
 

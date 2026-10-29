@@ -79,6 +79,8 @@ export default async function TicketPage({ params }: PageProps) {
             bannerUrl: true,
           },
         },
+        ticketTier: true,
+        bundle: true,
       },
     });
   } catch (err) {
@@ -126,6 +128,9 @@ export default async function TicketPage({ params }: PageProps) {
           attendeeEmail: rsvp.attendeeEmail,
           attendeePhone: rsvp.attendeePhone || '',
           travellingFrom: rsvp.travellingFrom || '',
+          ticketTier: rsvp.ticketTier ? { name: rsvp.ticketTier.name, price: Number(rsvp.ticketTier.price) } : undefined,
+          bundle: rsvp.bundle ? { name: rsvp.bundle.name, bundlePrice: Number(rsvp.bundle.bundlePrice) } : undefined,
+          tierSelections: Array.isArray(rsvp.tierSelections) ? (rsvp.tierSelections as any[]) : undefined,
           ticketsCount: tickets,
           adultsCount: rsvp.adultsCount || 0,
           childrenCount: rsvp.childrenCount || 0,

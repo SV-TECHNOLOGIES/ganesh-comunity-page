@@ -28,7 +28,7 @@ import {
 } from '@stripe/react-stripe-js';
 import confetti from 'canvas-confetti';
 
-import { CustomFieldDefinition } from '@/lib/types';
+import { CustomFieldDefinition, TicketTier, Bundle, TierSelectionItem } from '@/lib/types';
 import { DEFAULT_GANESH_SCHEDULE } from '@/lib/event-schedule';
 
 interface EventRSVPModalProps {
@@ -49,6 +49,8 @@ interface EventRSVPModalProps {
     adultCapacity?: number;
     childCapacity?: number;
     customFields?: CustomFieldDefinition[];
+    ticketTiers?: TicketTier[];
+    bundles?: Bundle[];
   };
   onClose: () => void;
   onSuccess?: () => void;
@@ -262,11 +264,171 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
     setSelectedDates(upcoming.length > 0 ? [upcoming[0]] : [eventDates[0]]);
   }, [eventDates]);
 
-  const [adultsCount, setAdultsCount] = useState<number>(1);
-  const [childrenCount, setChildrenCount] = useState<number>(0);
+  // ── Dynamic Ticket Tiers & Bundles ──────────────────────────────────────
+  const activeTiers: TicketTier[] = useMemo(() => {
+    if (Array.isArray(event.ticketTiers) && event.ticketTiers.length > 0) {
+      return event.ticketTiers.filter((t) => t.isActive !== false && t.allowDirectBooking !== false);
+    }
+    const adultPrice = Number(event.ticketPrice) || 0;
+    const childPrice = Number(event.childTicketPrice) || 0;
+    const fallback: TicketTier[] = [
+      {
+        id: `fallback-adult-${event.id}`,
+        eventId: event.id,
+        name: adultPrice === 0 ? 'General Admission' : 'Standard Adult Ticket',
+        description: 'Adult pass (above 5 years)',
+        price: adultPrice,
+        currency: 'GBP',
+        capacity: event.adultCapacity,
+        bookedCount: 0,
+        isActive: true,
+        allowDirectBooking: true,
+      },
+    ];
+    if (childPrice > 0 || (adultPrice > 0 && event.childTicketPrice !== undefined)) {
+      fallback.push({
+        id: `fallback-child-${event.id}`,
+        eventId: event.id,
+        name: childPrice === 0 ? 'Child Pass (Free)' : 'Child Ticket',
+        description: 'Child pass (below 5 years)',
+        price: childPrice,
+        currency: 'GBP',
+        capacity: event.childCapacity,
+        bookedCount: 0,
+        isActive: true,
+        allowDirectBooking: true,
+      });
+    }
+    return fallback;
+  }, [event.ticketTiers, event.ticketPrice, event.childTicketPrice, event.adultCapacity, event.childCapacity, event.id]);
+
+  const activeBundles: Bundle[] = useMemo(() => {
+    if (Array.isArray(event.bundles) && event.bundles.length > 0) {
+      return event.bundles.filter((b) => b.isActive !== false);
+    }
+    return [];
+  }, [event.bundles]);
+
+  const [tierCounts, setTierCounts] = useState<Record<string, number>>(() => {
+    const initial: Record<string, number> = {};
+    if (activeTiers.length > 0) {
+      initial[activeTiers[0].id] = 1;
+    }
+    return initial;
+  });
+
+  const [bundleCounts, setBundleCounts] = useState<Record<string, number>>({});
+
+  // Ensure first tier is pre-selected if nothing selected
+  useEffect(() => {
+    if (activeTiers.length > 0) {
+      setTierCounts((prev) => {
+        const hasSelection = Object.values(prev).some((v) => v > 0);
+        if (!hasSelection && activeTiers[0]) {
+          return { [activeTiers[0].id]: 1 };
+        }
+        return prev;
+      });
+    }
+  }, [activeTiers]);
+
   const [addSupportPayment, setAddSupportPayment] = useState<boolean>(false);
   const [supportAmount, setSupportAmount] = useState<number>(10);
   const [customResponses, setCustomResponses] = useState<Record<string, any>>({});
+
+  // Compute aggregated selections, passes, and prices
+  const { totalTickets, adultsCount, childrenCount, ticketsSubtotal, tierSelections } = useMemo(() => {
+    let tCount = 0;
+    let aCount = 0;
+    let cCount = 0;
+    let subtotal = 0;
+    const selections: TierSelectionItem[] = [];
+
+    activeTiers.forEach((tier) => {
+      const qty = tierCounts[tier.id] || 0;
+      if (qty > 0) {
+        const uPrice = Number(tier.price) || 0;
+        const bFee = Number(tier.bookingFee) || 0;
+        const lineTotal = qty * (uPrice + bFee);
+        subtotal += lineTotal;
+        tCount += qty;
+        if (/child|kid/i.test(tier.name)) {
+          cCount += qty;
+        } else {
+          aCount += qty;
+        }
+        selections.push({
+          type: 'tier',
+          id: tier.id,
+          tierId: tier.id,
+          name: tier.name,
+          quantity: qty,
+          unitPrice: uPrice,
+          bookingFee: bFee,
+          subtotal: lineTotal,
+        });
+      }
+    });
+
+    activeBundles.forEach((bundle) => {
+      const qty = bundleCounts[bundle.id] || 0;
+      if (qty > 0) {
+        const bPrice = Number(bundle.bundlePrice) || 0;
+        const bFee = Number(bundle.bookingFee) || 0;
+        const lineTotal = qty * (bPrice + bFee);
+        subtotal += lineTotal;
+
+        let bPasses = 0;
+        if (Array.isArray(bundle.items) && bundle.items.length > 0) {
+          bundle.items.forEach((bi) => {
+            const count = (Number(bi.quantity) || 1) * qty;
+            bPasses += count;
+            if (/child|kid/i.test(bi.ticketTier?.name || '')) {
+              cCount += count;
+            } else {
+              aCount += count;
+            }
+          });
+        } else {
+          const adultMatch = (bundle.name || '').match(/(\d+)\s*adult/i);
+          const childMatch = (bundle.name || '').match(/(\d+)\s*(?:child|kid)/i);
+          const bAdults = (adultMatch ? parseInt(adultMatch[1], 10) : 2) * qty;
+          const bChildren = (childMatch ? parseInt(childMatch[1], 10) : 2) * qty;
+          aCount += bAdults;
+          cCount += bChildren;
+          bPasses += (bAdults + bChildren);
+        }
+        tCount += bPasses;
+
+        selections.push({
+          type: 'bundle',
+          id: bundle.id,
+          bundleId: bundle.id,
+          name: bundle.name,
+          quantity: qty,
+          unitPrice: bPrice,
+          bookingFee: bFee,
+          subtotal: lineTotal,
+          items: bundle.items?.map((bi) => ({
+            ticketTierId: bi.ticketTierId,
+            name: bi.ticketTier?.name,
+            quantity: bi.quantity,
+          })),
+        });
+      }
+    });
+
+    return {
+      totalTickets: tCount,
+      adultsCount: aCount,
+      childrenCount: cCount,
+      ticketsSubtotal: subtotal,
+      tierSelections: selections,
+    };
+  }, [activeTiers, activeBundles, tierCounts, bundleCounts]);
+
+  const supportTotal = addSupportPayment ? Number(supportAmount) || 0 : 0;
+  const totalAmount = ticketsSubtotal + supportTotal;
 
   // Guest capture state
   const [guestName, setGuestName] = useState('');
@@ -350,14 +512,6 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
     }
   };
 
-  const adultPrice = Number(event.ticketPrice) || 0;
-  const childPrice = Number(event.childTicketPrice) || 0;
-  const adultTotal = adultsCount * adultPrice;
-  const childTotal = childrenCount * childPrice;
-  const supportTotal = addSupportPayment ? Number(supportAmount) || 0 : 0;
-  const totalAmount = adultTotal + childTotal + supportTotal;
-  const totalTickets = adultsCount + childrenCount;
-
   const isCapacityFull = Boolean(
     event.enforceCapacityLimit &&
     event.capacity &&
@@ -385,6 +539,8 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
   const executeRsvpCreation = async (paymentIntentId?: string, paymentStatusOverride?: string) => {
     const validDates = selectedDates.filter((d) => !isFestivalDatePast(d));
     const datesToSend = validDates.length > 0 ? validDates : selectedDates;
+    const primaryTier = tierSelections.find((s) => s.type === 'tier' && !s.id.startsWith('fallback'));
+    const primaryBundle = tierSelections.find((s) => s.type === 'bundle');
 
     const res = await fetch('/api/events/rsvp', {
       method: 'POST',
@@ -404,6 +560,9 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
         paymentStatus: paymentStatusOverride || (totalAmount > 0 ? 'Pending' : 'Completed'),
         paymentIntentId,
         customResponses,
+        ticketTierId: primaryTier?.id || null,
+        bundleId: primaryBundle?.id || null,
+        tierSelections,
       }),
     });
 
@@ -433,7 +592,7 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
     }
 
     if (totalTickets <= 0) {
-      setFormError('Please select at least 1 pass (Adult or Child).');
+      setFormError('Please select at least 1 ticket pass.');
       return;
     }
 
@@ -457,6 +616,9 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
 
     setSubmitting(true);
     try {
+      const primaryTier = tierSelections.find((s) => s.type === 'tier' && !s.id.startsWith('fallback'));
+      const primaryBundle = tierSelections.find((s) => s.type === 'bundle');
+
       if (totalAmount > 0) {
         // Create pending RSVP first
         const rsvpRes = await fetch('/api/events/rsvp', {
@@ -476,6 +638,9 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
             supportAmount: supportTotal,
             paymentStatus: 'Pending',
             customResponses,
+            ticketTierId: primaryTier?.id || null,
+            bundleId: primaryBundle?.id || null,
+            tierSelections,
           }),
         });
 
@@ -486,6 +651,8 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
           return;
         }
 
+        const itemsSummary = tierSelections.map((s) => `${s.quantity}x ${s.name}`).join(', ');
+
         // Paid registration or voluntary event support contribution: Create Stripe Payment Session
         const res = await fetch('/api/payments/create-session', {
           method: 'POST',
@@ -495,15 +662,17 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
             customerName: attendeeName || 'Devotee Supporter',
             customerEmail: attendeeEmail,
             customerPhone: attendeePhone,
-            description: `RSVP Pass for ${event.title} (${adultsCount} Adult(s), ${childrenCount} Child(ren))${supportTotal > 0 ? ` + £${supportTotal} Voluntary Event Support` : ''}`,
+            description: `RSVP Pass for ${event.title} (${itemsSummary})${supportTotal > 0 ? ` + £${supportTotal} Voluntary Event Support` : ''}`,
             paymentMethod: 'Stripe Card',
             eventId: event.id,
             eventName: event.title,
             donationType: 'event_rsvp',
             rsvpId: rsvpData.data.rsvpId,
+            ticketTierId: primaryTier?.id || undefined,
+            bundleId: primaryBundle?.id || undefined,
+            tierSelections,
           }),
         });
-        console.log(res);
 
         const sessionData = await res.json();
         if (!sessionData.success || !sessionData.clientSecret) {
@@ -512,7 +681,6 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
         }
 
         setClientSecret(sessionData.clientSecret);
-        console.log(`Setup Client Secret : ${sessionData.clientSecret}`);
         setStep('payment');
       } else {
         // Free registration: Create RSVP record immediately
@@ -769,78 +937,173 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
                 )}
               </div>
 
-              {/* Pass Quantities (Adults vs Children) */}
-              <div className="bg-[#FFF8F0] p-4 rounded-2xl border border-[#E65C00]/25 space-y-3">
-                <span className="font-bold text-[#6B3A2A] block text-xs border-b border-[#E65C00]/15 pb-1.5">
-                  Select Number of Passes
-                </span>
+              {/* Dynamic Ticket Tiers & Bundle Packages */}
+              <div className="bg-[#FFF8F0] p-4 rounded-2xl border border-[#E65C00]/25 space-y-4">
+                <div className="flex items-center justify-between border-b border-[#E65C00]/15 pb-2">
+                  <span className="font-bold text-[#6B3A2A] text-xs">
+                    Select Passes & Quantities
+                  </span>
+                  <span className="text-[11px] text-[#E65C00] font-bold">
+                    {totalTickets} pass{totalTickets === 1 ? '' : 'es'} selected
+                  </span>
+                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {/* Adult Tickets */}
-                  <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-[#E65C00]/20">
-                    <div>
-                      <span className="font-bold text-[#3D1A00] block text-xs">
-                        Adult Passes <span className="text-[11px] text-amber-800 font-extrabold">(Above 5 years)</span>
-                      </span>
-                      <span className="text-[11px] text-[#6B3A2A]">
-                        {adultPrice === 0 ? 'Free Entry' : `£${adultPrice.toFixed(2)} / pass`}
-                        {event.adultCapacity && event.adultCapacity > 0 ? ` • Max: ${event.adultCapacity}` : ''}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setAdultsCount((prev) => Math.max(0, prev - 1))}
-                        className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-[#3D1A00] font-bold text-sm flex items-center justify-center transition-colors"
-                      >
-                        -
-                      </button>
-                      <span className="w-6 text-center font-bold text-sm text-[#3D1A00]">{adultsCount}</span>
-                      <button
-                        type="button"
-                        onClick={() => setAdultsCount((prev) => Math.min(20, prev + 1))}
-                        className="w-7 h-7 rounded-lg bg-[#E65C00] hover:bg-[#FF7A00] text-white font-bold text-sm flex items-center justify-center transition-colors shadow-sm"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Child Tickets */}
-                  <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-[#E65C00]/20">
-                    <div>
-                      <span className="font-bold text-[#3D1A00] block text-xs">
-                        Children Passes <span className="text-[11px] text-emerald-800 font-extrabold">(Below 5 years)</span>
-                      </span>
-                      <span className="text-[11px] text-[#6B3A2A]">
-                        {childPrice === 0 ? 'Free Entry' : `£${childPrice.toFixed(2)} / pass`}
-                        {event.childCapacity && event.childCapacity > 0 ? ` • Max: ${event.childCapacity}` : ''}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setChildrenCount((prev) => Math.max(0, prev - 1))}
-                        className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-[#3D1A00] font-bold text-sm flex items-center justify-center transition-colors"
-                      >
-                        -
-                      </button>
-                      <span className="w-6 text-center font-bold text-sm text-[#3D1A00]">{childrenCount}</span>
-                      <button
-                        type="button"
-                        onClick={() => setChildrenCount((prev) => Math.min(20, prev + 1))}
-                        className="w-7 h-7 rounded-lg bg-[#E65C00] hover:bg-[#FF7A00] text-white font-bold text-sm flex items-center justify-center transition-colors shadow-sm"
-                      >
-                        +
-                      </button>
-                    </div>
+                {/* Individual Ticket Tiers */}
+                <div className="space-y-2">
+                  <span className="text-[11px] font-bold text-[#6B3A2A]/80 uppercase tracking-wider block">
+                    Ticket Passes
+                  </span>
+                  <div className="space-y-2">
+                    {activeTiers.map((tier) => {
+                      const count = tierCounts[tier.id] || 0;
+                      const tierPrice = Number(tier.price) || 0;
+                      return (
+                        <div
+                          key={tier.id}
+                          className="flex items-center justify-between bg-white p-3.5 rounded-2xl border border-[#E65C00]/20 hover:border-[#E65C00]/40 transition-colors shadow-sm"
+                        >
+                          <div className="pr-3 flex-1 min-w-0">
+                            <span className="font-bold text-[#3D1A00] block text-xs sm:text-sm leading-tight">
+                              {tier.name}
+                            </span>
+                            <span className="text-[11px] font-bold text-[#E65C00] block mt-0.5">
+                              {tierPrice === 0 ? 'Free Entry' : `£${tierPrice.toFixed(2)}`}
+                              {tier.bookingFee && Number(tier.bookingFee) > 0 ? (
+                                <span className="text-slate-500 font-normal"> + £{Number(tier.bookingFee).toFixed(2)} booking fee</span>
+                              ) : null}
+                              {tier.capacity && tier.capacity > 0 ? (
+                                <span className="text-slate-400 font-normal"> • Max: {tier.capacity}</span>
+                              ) : null}
+                            </span>
+                            {tier.description && (
+                              <span className="text-[10px] sm:text-[11px] text-slate-500 block leading-tight mt-0.5">
+                                {tier.description}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setTierCounts((prev) => ({
+                                  ...prev,
+                                  [tier.id]: Math.max(0, (prev[tier.id] || 0) - 1),
+                                }))
+                              }
+                              className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-[#3D1A00] font-bold text-sm flex items-center justify-center transition-colors border border-slate-200/60"
+                            >
+                              -
+                            </button>
+                            <span className="w-6 text-center font-bold text-sm text-[#3D1A00]">{count}</span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setTierCounts((prev) => ({
+                                  ...prev,
+                                  [tier.id]: Math.min(20, (prev[tier.id] || 0) + 1),
+                                }))
+                              }
+                              className="w-8 h-8 rounded-lg bg-[#E65C00] hover:bg-[#FF7A00] text-white font-bold text-sm flex items-center justify-center transition-colors shadow-sm"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
+
+                {/* Bundles / Package Deals (e.g. Family Pass) */}
+                {activeBundles.length > 0 && (
+                  <div className="space-y-2 pt-2 border-t border-[#E65C00]/15">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] font-bold text-[#6B3A2A]/80 uppercase tracking-wider block">
+                        Special Packages &amp; Bundles
+                      </span>
+                      <span className="bg-amber-100 text-amber-900 text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase">
+                        Save More
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      {activeBundles.map((bundle) => {
+                        const count = bundleCounts[bundle.id] || 0;
+                        const bPrice = Number(bundle.bundlePrice) || 0;
+                        return (
+                          <div
+                            key={bundle.id}
+                            className="flex items-center justify-between bg-white p-3.5 rounded-2xl border border-[#E65C00]/20 hover:border-[#E65C00]/40 transition-colors shadow-sm"
+                          >
+                            <div className="pr-3 flex-1 min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-bold text-[#3D1A00] text-xs sm:text-sm leading-tight">
+                                  {bundle.name}
+                                </span>
+                              </div>
+                              <span className="text-[11px] font-bold text-[#E65C00] block mt-0.5">
+                                £{bPrice.toFixed(2)}
+                                {bundle.bookingFee && Number(bundle.bookingFee) > 0 ? (
+                                  <span className="text-slate-500 font-normal"> + £{Number(bundle.bookingFee).toFixed(2)} booking fee</span>
+                                ) : null}
+                              </span>
+                              {bundle.description && (
+                                <span className="text-[10px] sm:text-[11px] text-slate-500 block leading-tight mt-0.5">
+                                  {bundle.description}
+                                </span>
+                              )}
+                              {Array.isArray(bundle.items) && bundle.items.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {bundle.items.map((bi, i) => (
+                                    <span
+                                      key={i}
+                                      className="text-[9px] bg-amber-50 border border-amber-200 text-amber-950 px-1.5 py-0.5 rounded font-semibold"
+                                    >
+                                      {bi.quantity}x {bi.ticketTier?.name || 'Pass'}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setBundleCounts((prev) => ({
+                                    ...prev,
+                                    [bundle.id]: Math.max(0, (prev[bundle.id] || 0) - 1),
+                                  }))
+                                }
+                                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-[#3D1A00] font-bold text-sm flex items-center justify-center transition-colors border border-slate-200/60"
+                              >
+                                -
+                              </button>
+                              <span className="w-6 text-center font-bold text-sm text-[#3D1A00]">{count}</span>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setBundleCounts((prev) => ({
+                                    ...prev,
+                                    [bundle.id]: Math.min(10, (prev[bundle.id] || 0) + 1),
+                                  }))
+                                }
+                                className="w-8 h-8 rounded-lg bg-[#E65C00] hover:bg-[#FF7A00] text-white font-bold text-sm flex items-center justify-center transition-colors shadow-sm"
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
                 {/* Total Price Breakdown */}
                 <div className="flex justify-between items-center pt-2 text-xs border-t border-[#E65C00]/15">
                   <span className="text-[#6B3A2A]">
-                    Total: <strong>{totalTickets}</strong> pass{totalTickets === 1 ? '' : 'es'} ({adultsCount} Adults, {childrenCount} Children)
+                    Total: <strong>{totalTickets}</strong> pass{totalTickets === 1 ? '' : 'es'}
+                    {adultsCount > 0 || childrenCount > 0 ? ` (${adultsCount} Adult${adultsCount === 1 ? '' : 's'}${childrenCount > 0 ? `, ${childrenCount} Child${childrenCount === 1 ? '' : 'ren'}` : ''})` : ''}
                   </span>
                   <div className="text-right">
                     <span className="text-sm font-black text-[#E65C00]">

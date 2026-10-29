@@ -22,6 +22,28 @@ export function AddEventForm({ onSuccess, onCancel, setActionNotice }: AddEventF
   const [capacity, setCapacity] = useState(5000);
   const [ticketPrice, setTicketPrice] = useState(0);
   const [childTicketPrice, setChildTicketPrice] = useState(0);
+
+  // Dynamic Ticket Tiers and Bundles
+  const [ticketTiers, setTicketTiers] = useState<Array<{
+    name: string;
+    price: number;
+    bookingFee?: number;
+    capacity?: number;
+    description?: string;
+    allowDirectBooking?: boolean;
+  }>>([
+    { name: 'Standard Adult Ticket', price: 0, bookingFee: 0, description: 'Standard Adult Pass', allowDirectBooking: true },
+    { name: 'Child Ticket', price: 0, bookingFee: 0, description: 'Child Pass (Below 5 years)', allowDirectBooking: true },
+  ]);
+
+  const [bundles, setBundles] = useState<Array<{
+    name: string;
+    bundlePrice: number;
+    bookingFee?: number;
+    description?: string;
+    items: Array<{ ticketTierIndex: number; quantity: number }>;
+  }>>([]);
+
   const [enableRsvp, setEnableRsvp] = useState(true);
   const [enableSupportPayment, setEnableSupportPayment] = useState(true);
   const [enablePooja, setEnablePooja] = useState(true);
@@ -90,7 +112,10 @@ export function AddEventForm({ onSuccess, onCancel, setActionNotice }: AddEventF
     }
 
     try {
-      const payload: Partial<EventItem> = {
+      const syncAdultPrice = ticketTiers[0]?.price ?? ticketPrice;
+      const syncChildPrice = ticketTiers[1]?.price ?? childTicketPrice;
+
+      const payload: any = {
         title,
         category,
         date,
@@ -100,8 +125,8 @@ export function AddEventForm({ onSuccess, onCancel, setActionNotice }: AddEventF
         description,
         bannerUrl,
         capacity,
-        ticketPrice,
-        childTicketPrice,
+        ticketPrice: syncAdultPrice,
+        childTicketPrice: syncChildPrice,
         status: 'Upcoming',
         enableRsvp,
         enableSupportPayment,
@@ -113,6 +138,26 @@ export function AddEventForm({ onSuccess, onCancel, setActionNotice }: AddEventF
         customFields: customFields.length > 0 ? (customFields as any) : undefined,
         availableDates: availableDates.length > 0 ? (availableDates as any) : undefined,
         eventSchedule: eventSchedule.length > 0 ? (eventSchedule as any) : undefined,
+        ticketTiers: ticketTiers.map((t) => ({
+          name: t.name.trim() || 'General Pass',
+          price: Number(t.price) || 0,
+          bookingFee: Number(t.bookingFee) || 0,
+          description: t.description?.trim() || null,
+          capacity: t.capacity ? Number(t.capacity) : null,
+          isActive: true,
+          allowDirectBooking: t.allowDirectBooking !== false,
+        })),
+        bundles: bundles.map((b) => ({
+          name: b.name.trim() || 'Bundle Pass',
+          bundlePrice: Number(b.bundlePrice) || 0,
+          bookingFee: Number(b.bookingFee) || 0,
+          description: b.description?.trim() || null,
+          isActive: true,
+          items: b.items.map((bi) => ({
+            ticketTierIndex: bi.ticketTierIndex,
+            quantity: Number(bi.quantity) || 1,
+          })),
+        })),
       };
 
       const res = await fetch('/api/admin/events', {
@@ -251,69 +296,327 @@ export function AddEventForm({ onSuccess, onCancel, setActionNotice }: AddEventF
         </div>
       </div>
 
-      <div className="bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
-        <h3 className="font-bold text-white mb-3 text-sm">Tickets & Capacity Limits</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-4">
+      <div className="bg-slate-900/50 p-4 rounded-2xl border border-slate-800 space-y-5">
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold text-white text-sm">Tickets, Tiers & Bundles</h3>
+          <span className="text-[11px] text-amber-400 font-semibold bg-amber-400/10 px-2.5 py-0.5 rounded-full border border-amber-400/20">
+            Dynamic Pricing Engine
+          </span>
+        </div>
+
+        {/* ── 1. Dynamic Ticket Tiers ── */}
+        <div className="space-y-3 bg-slate-950/60 p-3.5 rounded-xl border border-slate-800/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-xs font-bold text-slate-300 block">Ticket Tiers</span>
+              <span className="text-[11px] text-slate-500">Configure distinct passes (e.g. Adult £12, Child £0, VIP £25)</span>
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                setTicketTiers([
+                  ...ticketTiers,
+                  { name: `Tier ${ticketTiers.length + 1}`, price: 0, bookingFee: 0, description: '', allowDirectBooking: true },
+                ])
+              }
+              className="text-xs bg-amber-500/15 text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 hover:bg-amber-500/25 transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" /> Add Tier
+            </button>
+          </div>
+
+          <div className="space-y-2">
+            {ticketTiers.map((tier, idx) => (
+              <div
+                key={idx}
+                className="grid grid-cols-1 sm:grid-cols-12 gap-2 bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 items-center text-xs"
+              >
+                <div className="sm:col-span-3">
+                  <label className="text-[10px] text-slate-400 block mb-0.5 font-bold">Tier Name</label>
+                  <input
+                    type="text"
+                    value={tier.name}
+                    placeholder="e.g. Standard Adult Ticket"
+                    onChange={(e) => {
+                      const next = [...ticketTiers];
+                      next[idx].name = e.target.value;
+                      setTicketTiers(next);
+                      if (idx === 0) setTicketPrice(parseFloat(e.target.value) || ticketPrice);
+                    }}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-white"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="text-[10px] text-slate-400 block mb-0.5 font-bold">Price (£)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min={0}
+                    value={tier.price}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value) || 0;
+                      const next = [...ticketTiers];
+                      next[idx].price = val;
+                      setTicketTiers(next);
+                      if (idx === 0) setTicketPrice(val);
+                      if (idx === 1) setChildTicketPrice(val);
+                    }}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-white font-mono"
+                  />
+                </div>
+                <div className="sm:col-span-1">
+                  <label className="text-[10px] text-slate-400 block mb-0.5 font-bold">Fee (£)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min={0}
+                    value={tier.bookingFee ?? 0}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value) || 0;
+                      const next = [...ticketTiers];
+                      next[idx].bookingFee = val;
+                      setTicketTiers(next);
+                    }}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-white font-mono text-[11px]"
+                    placeholder="0.00"
+                  />
+                </div>
+                <div className="sm:col-span-1">
+                  <label className="text-[10px] text-slate-400 block mb-0.5 font-bold">Limit</label>
+                  <input
+                    type="number"
+                    min={0}
+                    placeholder="∞"
+                    value={tier.capacity ?? ''}
+                    onChange={(e) => {
+                      const next = [...ticketTiers];
+                      next[idx].capacity = e.target.value ? parseInt(e.target.value, 10) : undefined;
+                      setTicketTiers(next);
+                    }}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-white"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="text-[10px] text-slate-400 block mb-0.5 font-bold">Booking Access</label>
+                  <select
+                    value={tier.allowDirectBooking !== false ? 'public' : 'bundle_only'}
+                    onChange={(e) => {
+                      const next = [...ticketTiers];
+                      next[idx].allowDirectBooking = e.target.value === 'public';
+                      setTicketTiers(next);
+                    }}
+                    className={`w-full border rounded-lg p-1.5 text-[11px] font-semibold ${
+                      tier.allowDirectBooking !== false
+                        ? 'bg-slate-950 border-emerald-700/60 text-emerald-400'
+                        : 'bg-amber-950/40 border-amber-600/70 text-amber-300'
+                    }`}
+                  >
+                    <option value="public" className="bg-slate-900 text-white">Public (Direct)</option>
+                    <option value="bundle_only" className="bg-slate-900 text-amber-300">Bundle Only (Hidden)</option>
+                  </select>
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="text-[10px] text-slate-400 block mb-0.5 font-bold">Description</label>
+                  <input
+                    type="text"
+                    value={tier.description || ''}
+                    placeholder="e.g. Above 5 years"
+                    onChange={(e) => {
+                      const next = [...ticketTiers];
+                      next[idx].description = e.target.value;
+                      setTicketTiers(next);
+                    }}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-white text-[11px]"
+                  />
+                </div>
+                <div className="sm:col-span-1 flex justify-end">
+                  {ticketTiers.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => setTicketTiers(ticketTiers.filter((_, i) => i !== idx))}
+                      className="p-1.5 text-slate-500 hover:text-rose-400 transition-colors"
+                      title="Remove tier"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── 2. Dynamic Bundles / Packages ── */}
+        <div className="space-y-3 bg-slate-950/60 p-3.5 rounded-xl border border-slate-800/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-xs font-bold text-amber-300 block">Ticket Bundles & Packages</span>
+              <span className="text-[11px] text-slate-500">Package deals (e.g. Family Ticket £32 for 2 Adults + 2 Children)</span>
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                setBundles([
+                  ...bundles,
+                  {
+                    name: 'Family Ticket (2 Adults + 2 Children)',
+                    bundlePrice: 32,
+                    bookingFee: 3.0,
+                    description: 'Covers 2 Adults + 2 Kids under 12',
+                    items: [
+                      { ticketTierIndex: 0, quantity: 2 },
+                      { ticketTierIndex: 1, quantity: 2 },
+                    ],
+                  },
+                ])
+              }
+              className="text-xs bg-amber-500/15 text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 hover:bg-amber-500/25 transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" /> Add Bundle Deal
+            </button>
+          </div>
+
+          {bundles.length === 0 ? (
+            <p className="text-[11px] text-slate-500 italic py-1">
+              No bundles added yet. Click &quot;Add Bundle Deal&quot; to configure combination passes like Family Combos.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {bundles.map((bundle, bIdx) => (
+                <div
+                  key={bIdx}
+                  className="bg-slate-900/80 p-3 rounded-xl border border-amber-900/30 space-y-2.5 text-xs"
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+                    <div className="sm:col-span-4">
+                      <label className="text-[10px] text-slate-400 block mb-0.5 font-bold">Bundle Name</label>
+                      <input
+                        type="text"
+                        value={bundle.name}
+                        placeholder="e.g. Family Ticket (2 Adults + 2 Children)"
+                        onChange={(e) => {
+                          const next = [...bundles];
+                          next[bIdx].name = e.target.value;
+                          setBundles(next);
+                        }}
+                        className="w-full bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-white"
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="text-[10px] text-slate-400 block mb-0.5 font-bold">Price (£)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min={0}
+                        value={bundle.bundlePrice}
+                        onChange={(e) => {
+                          const next = [...bundles];
+                          next[bIdx].bundlePrice = parseFloat(e.target.value) || 0;
+                          setBundles(next);
+                        }}
+                        className="w-full bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-white font-mono"
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="text-[10px] text-slate-400 block mb-0.5 font-bold">Fee (£)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min={0}
+                        value={bundle.bookingFee ?? 0}
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value) || 0;
+                          const next = [...bundles];
+                          next[bIdx].bookingFee = val;
+                          setBundles(next);
+                        }}
+                        className="w-full bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-white font-mono text-[11px]"
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div className="sm:col-span-3">
+                      <label className="text-[10px] text-slate-400 block mb-0.5 font-bold">Description</label>
+                      <input
+                        type="text"
+                        value={bundle.description || ''}
+                        placeholder="e.g. 2 Adults and 2 Children"
+                        onChange={(e) => {
+                          const next = [...bundles];
+                          next[bIdx].description = e.target.value;
+                          setBundles(next);
+                        }}
+                        className="w-full bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-white text-[11px]"
+                      />
+                    </div>
+                    <div className="sm:col-span-1 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setBundles(bundles.filter((_, i) => i !== bIdx))}
+                        className="p-1.5 text-slate-500 hover:text-rose-400 transition-colors"
+                        title="Remove bundle"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Bundle Item Allocations */}
+                  <div className="bg-slate-950/70 p-2 rounded-lg border border-slate-800/60 flex flex-wrap items-center gap-3">
+                    <span className="text-[11px] text-slate-400 font-semibold">Included Tiers:</span>
+                    {ticketTiers.map((t, tIdx) => {
+                      const itemMatch = bundle.items.find((it) => it.ticketTierIndex === tIdx);
+                      const currentQty = itemMatch ? itemMatch.quantity : 0;
+                      return (
+                        <div key={tIdx} className="flex items-center gap-1.5 bg-slate-900 px-2 py-1 rounded border border-slate-800">
+                          <span className="text-[11px] text-slate-300">{t.name}:</span>
+                          <input
+                            type="number"
+                            min={0}
+                            value={currentQty}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value, 10) || 0;
+                              const next = [...bundles];
+                              const filtered = next[bIdx].items.filter((it) => it.ticketTierIndex !== tIdx);
+                              if (val > 0) {
+                                filtered.push({ ticketTierIndex: tIdx, quantity: val });
+                              }
+                              next[bIdx].items = filtered;
+                              setBundles(next);
+                            }}
+                            className="w-12 bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-white text-center font-bold"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* ── 3. Total Venue Capacity & Overrides ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-800/80">
           <div>
-            <label className="block text-slate-400 font-bold mb-1">Total Venue Capacity</label>
+            <label className="block text-slate-400 font-bold mb-1 text-xs">Total Overall Venue Capacity</label>
             <input
               type="number"
               value={capacity}
               onChange={(e) => setCapacity(parseInt(e.target.value) || 0)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-white"
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-white text-xs"
             />
           </div>
-          <div>
-            <label className="block text-slate-400 font-bold mb-1">Adult Ticket Price (£)</label>
-            <input
-              type="number"
-              value={ticketPrice}
-              onChange={(e) => setTicketPrice(parseFloat(e.target.value) || 0)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-white"
-            />
+          <div className="flex items-center pt-5">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={enforceCapacityLimit}
+                onChange={(e) => setEnforceCapacityLimit(e.target.checked)}
+                className="w-4 h-4 rounded accent-mitra-gold"
+              />
+              <span className="text-slate-300 font-bold text-xs">Enforce strict capacity limit?</span>
+            </label>
           </div>
-          <div>
-            <label className="block text-slate-400 font-bold mb-1">Child Ticket Price (£)</label>
-            <input
-              type="number"
-              value={childTicketPrice}
-              onChange={(e) => setChildTicketPrice(parseFloat(e.target.value) || 0)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-white"
-            />
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-6 mb-4">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={enforceCapacityLimit}
-              onChange={(e) => setEnforceCapacityLimit(e.target.checked)}
-              className="w-4 h-4 rounded accent-mitra-gold"
-            />
-            <span className="text-slate-300 font-bold">Enforce strict limits?</span>
-          </label>
-          {enforceCapacityLimit && (
-            <>
-              <div className="flex items-center gap-2">
-                <span className="text-slate-400">Adult Max:</span>
-                <input
-                  type="number"
-                  value={adultCapacity}
-                  onChange={(e) => setAdultCapacity(parseInt(e.target.value) || 0)}
-                  className="w-20 bg-slate-950 border border-slate-800 rounded p-1 text-center"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-slate-400">Child Max:</span>
-                <input
-                  type="number"
-                  value={childCapacity}
-                  onChange={(e) => setChildCapacity(parseInt(e.target.value) || 0)}
-                  className="w-20 bg-slate-950 border border-slate-800 rounded p-1 text-center"
-                />
-              </div>
-            </>
-          )}
         </div>
         <div className="flex flex-wrap gap-4 pt-3 border-t border-slate-800/50">
           <label className="flex items-center gap-2 cursor-pointer">

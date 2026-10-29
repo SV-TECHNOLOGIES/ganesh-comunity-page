@@ -115,7 +115,7 @@ export default function CustomFieldBuilder({ fields, onChange }: CustomFieldBuil
         <button
           type="button"
           onClick={() => addPreset('diet')}
-          className="text-[10px] font-semibold text-amber-300 hover:text-amber-200 bg-amber-950/40 hover:bg-amber-950/70 border border-amber-800/40 px-2 py-0.5 rounded-md transition-colors"
+          className="text-[10px] font-semibold text-amber-300 hover:text-amber-200 bg-amber-950 hover:bg-amber-950/70 border border-amber-800/40 px-2 py-0.5 rounded-md transition-colors"
         >
           + Dietary Preference
         </button>

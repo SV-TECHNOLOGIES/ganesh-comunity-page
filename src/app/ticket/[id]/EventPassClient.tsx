@@ -34,6 +34,9 @@ export interface EventPassData {
   attendeeEmail: string;
   attendeePhone?: string;
   travellingFrom?: string;
+  ticketTier?: { name: string; price: number };
+  bundle?: { name: string; bundlePrice: number };
+  tierSelections?: any[];
   ticketsCount: number;
   adultsCount?: number;
   childrenCount?: number;
@@ -267,10 +270,20 @@ export default function EventPassClient({ rsvp, qrDataUrl, ticketUrl }: EventPas
                       <Users className="w-4 h-4 text-[#E65C00]" />
                       <span>{rsvp.ticketsCount} Ticket{rsvp.ticketsCount > 1 ? 's' : ''}</span>
                     </p>
-                    <p className="text-[10px] text-[#6B3A2A] mt-0.5">
-                      {rsvp.adultsCount || 0} Adult{rsvp.adultsCount !== 1 ? 's' : ''}
-                      {rsvp.childrenCount ? `, ${rsvp.childrenCount} Child${rsvp.childrenCount !== 1 ? 'ren' : ''}` : ''}
-                    </p>
+                    {rsvp.bundle?.name ? (
+                      <span className="inline-block mt-0.5 text-[10px] bg-amber-100 text-amber-950 font-bold px-2 py-0.5 rounded-full border border-amber-300">
+                        {rsvp.bundle.name}
+                      </span>
+                    ) : rsvp.ticketTier?.name ? (
+                      <span className="inline-block mt-0.5 text-[10px] bg-[#FFF0E0] text-[#E65C00] font-bold px-2 py-0.5 rounded-full border border-[#E65C00]/25">
+                        {rsvp.ticketTier.name}
+                      </span>
+                    ) : (
+                      <p className="text-[10px] text-[#6B3A2A] mt-0.5">
+                        {rsvp.adultsCount || 0} Adult{rsvp.adultsCount !== 1 ? 's' : ''}
+                        {rsvp.childrenCount ? `, ${rsvp.childrenCount} Child${rsvp.childrenCount !== 1 ? 'ren' : ''}` : ''}
+                      </p>
+                    )}
                   </div>
 
                   <div>

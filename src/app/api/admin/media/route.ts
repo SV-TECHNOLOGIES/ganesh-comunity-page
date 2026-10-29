@@ -69,10 +69,6 @@ export async function GET(request: Request) {
           totalEventsCovered: distinctEventIds.size,
         },
       },
-    }, {
-      headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-      },
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Failed to fetch admin media';

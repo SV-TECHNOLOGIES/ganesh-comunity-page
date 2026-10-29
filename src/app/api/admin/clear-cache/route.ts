@@ -84,11 +84,6 @@ export async function POST(req: Request) {
         message: 'Cache cleared and all APIs & pages revalidated successfully.',
         revalidatedCount: PATHS_TO_REVALIDATE.length,
         timestamp: new Date().toISOString(),
-      },
-      {
-        headers: {
-          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
-        },
       }
     );
   } catch (err: any) {

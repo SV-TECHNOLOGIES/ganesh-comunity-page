@@ -88,10 +88,6 @@ export async function GET() {
         events,
         standaloneMedia,
       },
-    }, {
-      headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-      },
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Failed to fetch featured media';

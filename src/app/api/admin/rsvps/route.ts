@@ -142,36 +142,30 @@ export async function GET(request: Request) {
 
     // 4. Query paginated records with event details
     let rsvps;
+    const rsvpInclude = {
+      event: {
+        select: {
+          id: true,
+          title: true,
+          date: true,
+          venue: true,
+          customFields: true,
+        },
+      },
+      ticketTier: true,
+      bundle: true,
+    };
+
     if (exportAll || limit === 0) {
       rsvps = await prisma.eventRSVP.findMany({
         where: tableWhere,
-        include: {
-          event: {
-            select: {
-              id: true,
-              title: true,
-              date: true,
-              venue: true,
-              customFields: true,
-            },
-          },
-        },
+        include: rsvpInclude,
         orderBy: { createdAt: 'desc' },
       });
     } else {
       rsvps = await prisma.eventRSVP.findMany({
         where: tableWhere,
-        include: {
-          event: {
-            select: {
-              id: true,
-              title: true,
-              date: true,
-              venue: true,
-              customFields: true,
-            },
-          },
-        },
+        include: rsvpInclude,
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { createdAt: 'desc' },
@@ -225,6 +219,8 @@ export async function GET(request: Request) {
       const payment = r.paymentIntentId ? paymentMap.get(r.paymentIntentId) : null;
       return {
         ...r,
+        ticketTier: r.ticketTier ? { ...r.ticketTier, price: Number(r.ticketTier.price) } : null,
+        bundle: r.bundle ? { ...r.bundle, bundlePrice: Number(r.bundle.bundlePrice) } : null,
         isMember: memberEmailSet.has(email),
         memberId: memberEmailSet.has(email) ? memberMap.get(email)?.id : null,
         paymentId: payment ? payment.id : null,
@@ -253,13 +249,6 @@ export async function GET(request: Request) {
           totalChildren,
         },
         dayAnalytics,
-      },
-      {
-        headers: {
-          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
-          Pragma: 'no-cache',
-          Expires: '0',
-        },
       }
     );
   } catch (err: unknown) {

@@ -9,6 +9,61 @@ export interface CustomFieldDefinition {
   options?: string[]; // for select type
 }
 
+export interface TicketTier {
+  id: string;
+  eventId: string;
+  name: string;
+  description?: string | null;
+  price: number;
+  bookingFee?: number | null;
+  currency?: string;
+  capacity?: number | null;
+  bookedCount?: number;
+  isActive?: boolean;
+  allowDirectBooking?: boolean;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+}
+
+export interface BundleItem {
+  id: string;
+  bundleId: string;
+  ticketTierId: string;
+  ticketTier?: TicketTier;
+  quantity: number;
+}
+
+export interface Bundle {
+  id: string;
+  eventId: string;
+  name: string;
+  description?: string | null;
+  bundlePrice: number;
+  bookingFee?: number | null;
+  currency?: string;
+  validFrom?: string | Date | null;
+  validUntil?: string | Date | null;
+  capacity?: number | null;
+  bookedCount?: number;
+  isActive?: boolean;
+  items?: BundleItem[];
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+}
+
+export interface TierSelectionItem {
+  type: 'tier' | 'bundle';
+  id: string; // ticketTierId or bundleId
+  name: string;
+  quantity: number;
+  unitPrice: number;
+  bookingFee?: number;
+  subtotal: number;
+  tierId?: string; // for tier
+  bundleId?: string; // for bundle
+  items?: { ticketTierId: string; name?: string; quantity: number }[];
+}
+
 export interface EventItem {
   id: string;
   title: string;
@@ -22,8 +77,8 @@ export interface EventItem {
   status: 'Upcoming' | 'Past' | string;
   capacity: number;
   rsvpCount: number;
-  ticketPrice: number; // 0 for free (adults)
-  childTicketPrice?: number; // 0 for free (children)
+  ticketPrice: number; // 0 for free (adults) [Deprecated, use ticketTiers]
+  childTicketPrice?: number; // 0 for free (children) [Deprecated, use ticketTiers]
   featured?: boolean;
   enableRsvp?: boolean;
   enableSupportPayment?: boolean;
@@ -35,6 +90,8 @@ export interface EventItem {
   eventSchedule?: EventScheduleDay[];
   mapUrl?: string;
   customFields?: CustomFieldDefinition[];
+  ticketTiers?: TicketTier[];
+  bundles?: Bundle[];
 }
 
 export interface EventScheduleDay {

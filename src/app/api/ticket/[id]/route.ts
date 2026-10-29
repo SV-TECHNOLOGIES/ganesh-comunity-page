@@ -103,6 +103,8 @@ export async function GET(
             bannerUrl: true,
           },
         },
+        ticketTier: true,
+        bundle: true,
       },
     });
 
@@ -142,6 +144,9 @@ export async function GET(
         attendeeEmail: rsvp.attendeeEmail,
         attendeePhone: rsvp.attendeePhone,
         travellingFrom: rsvp.travellingFrom,
+        ticketTier: rsvp.ticketTier,
+        bundle: rsvp.bundle,
+        tierSelections: rsvp.tierSelections,
         ticketsCount: tickets,
         adultsCount: rsvp.adultsCount,
         childrenCount: rsvp.childrenCount,

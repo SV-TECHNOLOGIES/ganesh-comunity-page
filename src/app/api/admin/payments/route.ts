@@ -127,15 +127,22 @@ export async function GET(request: Request) {
     }
 
     // 2. Query Paginated Records
+    const paymentInclude = {
+      ticketTier: true,
+      bundle: true,
+    };
+
     let payments;
     if (exportAll || limit === 0) {
       payments = await prisma.payment.findMany({
         where,
+        include: paymentInclude,
         orderBy: { createdAt: 'desc' },
       });
     } else {
       payments = await prisma.payment.findMany({
         where,
+        include: paymentInclude,
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { createdAt: 'desc' },
@@ -186,13 +193,6 @@ export async function GET(request: Request) {
           date: e.date,
           category: e.category,
         })),
-      },
-      {
-        headers: {
-          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
-          Pragma: 'no-cache',
-          Expires: '0',
-        },
       }
     );
   } catch (error: unknown) {

@@ -60,6 +60,11 @@ interface RSVPRecord {
   totalAmount?: number;
   supportAmount?: number;
   paymentStatus?: string;
+  ticketTierId?: string | null;
+  bundleId?: string | null;
+  ticketTier?: { id: string; name: string; price: number } | null;
+  bundle?: { id: string; name: string; bundlePrice: number } | null;
+  tierSelections?: any;
   customResponses?: Record<string, any>;
   createdAt: string;
   isMember?: boolean;
@@ -558,7 +563,7 @@ export default function AdminEventsPage() {
       const json = await res.json();
       const exportList: RSVPRecord[] = json.success && Array.isArray(json.data) ? json.data : rsvps;
 
-      let csvContent = 'RSVP ID,Event Title,Attendee Name,Email Address,Phone Number,Travelling From,Adults,Children,Total Passes,Selected Dates,Option Fields,Member Account,Registered At\n';
+      let csvContent = 'RSVP ID,Event Title,Attendee Name,Email Address,Phone Number,Travelling From,Adults,Children,Total Passes,Pass Breakdown,Payment Amount,Payment Status,Selected Dates,Option Fields,Member Account,Registered At\n';
 
       exportList.forEach((r) => {
         const datesStr = (r.selectedDates || []).join(' | ').replace(/"/g, '""');
@@ -566,6 +571,19 @@ export default function AdminEventsPage() {
         const originStr = (r.travellingFrom || '').replace(/"/g, '""');
         const isMem = r.isMember ? 'Yes (Member)' : 'No (Guest)';
         const createdStr = new Date(r.createdAt).toLocaleString('en-GB');
+
+        const breakdownStr = (
+          Array.isArray(r.tierSelections) && r.tierSelections.length > 0
+            ? r.tierSelections
+                .map((s: any) => `${s.quantity}x ${s.name}${s.subtotal !== undefined ? ` (£${Number(s.subtotal).toFixed(2)})` : ''}`)
+                .join(' + ')
+            : [r.bundle?.name ? `Bundle: ${r.bundle.name}` : null, r.ticketTier?.name ? `Tier: ${r.ticketTier.name}` : null]
+                .filter(Boolean)
+                .join(' + ') || `${r.adultsCount || 0} Adult(s), ${r.childrenCount || 0} Child(ren)`
+        ).replace(/"/g, '""');
+
+        const paymentAmt = r.totalAmount !== undefined ? `£${Number(r.totalAmount).toFixed(2)}` : '£0.00';
+        const paymentStatus = r.paymentStatus || 'Free';
 
         const optionsStr = r.customResponses && Object.keys(r.customResponses).length > 0
           ? Object.entries(r.customResponses).map(([k, v]) => {
@@ -577,7 +595,7 @@ export default function AdminEventsPage() {
             }).join(' | ').replace(/"/g, '""')
           : 'None';
 
-        csvContent += `"${r.id}","${eventName}","${r.attendeeName}","${r.attendeeEmail}","${r.attendeePhone}","${originStr}",${r.adultsCount || 1},${r.childrenCount || 0},${r.ticketsCount || 1},"${datesStr}","${optionsStr}","${isMem}","${createdStr}"\n`;
+        csvContent += `"${r.id}","${eventName}","${r.attendeeName}","${r.attendeeEmail}","${r.attendeePhone}","${originStr}",${r.adultsCount || 1},${r.childrenCount || 0},${r.ticketsCount || 1},"${breakdownStr}","${paymentAmt}","${paymentStatus}","${datesStr}","${optionsStr}","${isMem}","${createdStr}"\n`;
       });
 
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -602,7 +620,7 @@ export default function AdminEventsPage() {
       const json = await res.json();
       const eventRsvps: RSVPRecord[] = json.success && Array.isArray(json.data) ? json.data : [];
 
-      let csvContent = 'RSVP ID,Event Title,Attendee Name,Email Address,Phone Number,Travelling From,Adults,Children,Total Passes,Selected Dates,Option Fields,Member Account,Registered At\n';
+      let csvContent = 'RSVP ID,Event Title,Attendee Name,Email Address,Phone Number,Travelling From,Adults,Children,Total Passes,Pass Breakdown,Payment Amount,Payment Status,Selected Dates,Option Fields,Member Account,Registered At\n';
 
       if (eventRsvps.length > 0) {
         eventRsvps.forEach((r) => {
@@ -610,6 +628,19 @@ export default function AdminEventsPage() {
           const originStr = (r.travellingFrom || '').replace(/"/g, '""');
           const isMem = r.isMember ? 'Yes (Member)' : 'No (Guest)';
           const createdStr = new Date(r.createdAt).toLocaleString('en-GB');
+
+          const breakdownStr = (
+            Array.isArray(r.tierSelections) && r.tierSelections.length > 0
+              ? r.tierSelections
+                  .map((s: any) => `${s.quantity}x ${s.name}${s.subtotal !== undefined ? ` (£${Number(s.subtotal).toFixed(2)})` : ''}`)
+                  .join(' + ')
+              : [r.bundle?.name ? `Bundle: ${r.bundle.name}` : null, r.ticketTier?.name ? `Tier: ${r.ticketTier.name}` : null]
+                  .filter(Boolean)
+                  .join(' + ') || `${r.adultsCount || 0} Adult(s), ${r.childrenCount || 0} Child(ren)`
+          ).replace(/"/g, '""');
+
+          const paymentAmt = r.totalAmount !== undefined ? `£${Number(r.totalAmount).toFixed(2)}` : '£0.00';
+          const paymentStatus = r.paymentStatus || 'Free';
 
           const optionsStr = r.customResponses && Object.keys(r.customResponses).length > 0
             ? Object.entries(r.customResponses).map(([k, v]) => {
@@ -620,10 +651,10 @@ export default function AdminEventsPage() {
               }).join(' | ').replace(/"/g, '""')
             : 'None';
 
-          csvContent += `"${r.id}","${event.title}","${r.attendeeName}","${r.attendeeEmail}","${r.attendeePhone}","${originStr}",${r.adultsCount || 1},${r.childrenCount || 0},${r.ticketsCount || 1},"${datesStr}","${optionsStr}","${isMem}","${createdStr}"\n`;
+          csvContent += `"${r.id}","${event.title}","${r.attendeeName}","${r.attendeeEmail}","${r.attendeePhone}","${originStr}",${r.adultsCount || 1},${r.childrenCount || 0},${r.ticketsCount || 1},"${breakdownStr}","${paymentAmt}","${paymentStatus}","${datesStr}","${optionsStr}","${isMem}","${createdStr}"\n`;
         });
       } else {
-        csvContent += `"${event.id}","${event.title}","Summary Record","","","",,,${event.rsvpCount},"${event.date}","None","",""\n`;
+        csvContent += `"${event.id}","${event.title}","Summary Record","","","",,,${event.rsvpCount},"General Admission","£0.00","Free","${event.date}","None","",""\n`;
       }
 
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -1159,7 +1190,7 @@ export default function AdminEventsPage() {
             {/* Action Buttons: Bulk Convert to Members & Export CSV */}
             <div className="flex items-center gap-2.5">
               {/* Trigger: Convert All to Member Logins & Send OTP */}
-              <button
+              {/* <button
                 onClick={handleConvertAllToMembers}
                 disabled={convertingAll || pagination.total === 0}
                 className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:opacity-50 text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md transition-all whitespace-nowrap"
@@ -1167,7 +1198,7 @@ export default function AdminEventsPage() {
               >
                 <KeyRound className={`w-3.5 h-3.5 text-white ${convertingAll ? 'animate-spin' : ''}`} />
                 <span>{convertingAll ? 'Processing...' : 'Create Member Accounts'}</span>
-              </button>
+              </button> */}
 
               <button
                 onClick={exportAllRSVPsCSV}
@@ -1286,13 +1317,52 @@ export default function AdminEventsPage() {
                       </td>
 
                       {/* Pass Breakdown */}
-                      <td className="p-4 space-y-0.5">
+                      <td className="p-4 space-y-1">
                         <div className="font-bold text-emerald-400 font-mono text-sm">
                           {rsvp.ticketsCount || (rsvp.adultsCount + rsvp.childrenCount)} Total Pass(es)
                         </div>
+
+                        {/* Detailed line items from tierSelections if present */}
+                        {Array.isArray(rsvp.tierSelections) && rsvp.tierSelections.length > 0 ? (
+                          <div className="flex flex-col gap-1 py-0.5">
+                            {rsvp.tierSelections.map((sel: any, sIdx: number) => (
+                              <div
+                                key={sIdx}
+                                className={`text-[10px] font-bold px-2 py-0.5 rounded-md w-fit flex items-center gap-1.5 ${
+                                  sel.type === 'bundle'
+                                    ? 'text-amber-300 bg-amber-500/30 border border-amber-800/80'
+                                    : 'text-sky-600 bg-sky-400/30 border border-sky-800/80'
+                                }`}
+                              >
+                                <span className="font-black bg-white/10 px-1 rounded">{sel.quantity}x</span>
+                                <span>{sel.name}</span>
+                                {sel.subtotal !== undefined && (
+                                  <span className="opacity-80 font-mono text-[9px]">
+                                    (£{Number(sel.subtotal).toFixed(2)})
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-1 py-0.5">
+                            {rsvp.bundle?.name && (
+                              <div className="text-[10px] text-amber-300 font-extrabold bg-amber-950/60 border border-amber-800/80 px-2 py-0.5 rounded-md w-fit">
+                                Bundle: {rsvp.bundle.name}
+                              </div>
+                            )}
+                            {rsvp.ticketTier?.name && (
+                              <div className="text-[10px] text-sky-300 font-semibold bg-sky-950/60 border border-sky-800/60 px-2 py-0.5 rounded-md w-fit">
+                                Tier: {rsvp.ticketTier.name}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
                         <div className="text-[10px] text-slate-400">
-                          {rsvp.adultsCount || 1} Adult(s) · {rsvp.childrenCount || 0} Child(ren)
+                          {rsvp.adultsCount || 0} Adult(s) · {rsvp.childrenCount || 0} Child(ren)
                         </div>
+
                         {rsvp.supportAmount ? (
                           <div className="text-[10px] text-amber-300 font-bold">
                             + £{rsvp.supportAmount} Event Support
@@ -1411,7 +1481,7 @@ export default function AdminEventsPage() {
                         )}
 
                         {/* Send Login / OTP Trigger Button */}
-                        <button
+                        {/* <button
                           onClick={() => handleConvertToMember(rsvp.id, rsvp.attendeeName)}
                           disabled={convertingId === rsvp.id}
                           className="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 px-2.5 py-1.5 rounded-lg text-[11px] font-bold inline-flex items-center gap-1 transition-all shadow-sm"
@@ -1421,16 +1491,16 @@ export default function AdminEventsPage() {
                           <span className="hidden sm:inline">
                             {convertingId === rsvp.id ? 'Sending...' : rsvp.isMember ? 'Send OTP' : 'Create Account'}
                           </span>
-                        </button>
+                        </button> */}
 
                         {/* Delete Registration */}
-                        <button
+                        {/* <button
                           onClick={() => handleDeleteRSVP(rsvp.id)}
                           title="Delete Registration"
                           className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors border border-transparent hover:border-rose-200"
                         >
                           <Trash2 className="w-4 h-4" />
-                        </button>
+                        </button> */}
                       </td>
 
                     </tr>

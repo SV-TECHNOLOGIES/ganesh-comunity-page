@@ -293,13 +293,41 @@ END:VCALENDAR`;
               <span className="bg-mitra-red text-white text-xs font-bold px-3 py-1 rounded-full uppercase shadow">
                 {event.category}
               </span>
-              <span className="bg-mitra-gold text-mitra-navy text-xs font-black px-3 py-1 rounded-full uppercase shadow">
-                {event.ticketPrice === 0 ? 'FREE EVENT' : `Adult £${event.ticketPrice}`}
-              </span>
-              {event.childTicketPrice !== undefined && event.childTicketPrice !== null && (
-                <span className="bg-amber-100 text-amber-900 text-xs font-black px-3 py-1 rounded-full uppercase shadow border border-amber-300">
-                  Child {event.childTicketPrice === 0 ? 'FREE' : `£${event.childTicketPrice}`}
-                </span>
+              {Array.isArray(event.ticketTiers) && event.ticketTiers.length > 0 ? (
+                <>
+                  {event.ticketTiers
+                    .filter((tier) => tier.isActive !== false && tier.allowDirectBooking !== false)
+                    .map((tier) => (
+                      <span
+                        key={tier.id}
+                        className="bg-mitra-gold text-mitra-navy text-xs font-black px-3 py-1 rounded-full uppercase shadow"
+                      >
+                        {tier.name} {Number(tier.price) === 0 ? 'FREE' : `£${Number(tier.price)}`}
+                      </span>
+                    ))}
+                  {Array.isArray(event.bundles) &&
+                    event.bundles
+                      .filter((bundle) => bundle.isActive !== false)
+                      .map((bundle) => (
+                        <span
+                          key={bundle.id}
+                          className="bg-amber-100 text-amber-950 text-xs font-black px-3 py-1 rounded-full uppercase shadow border border-amber-300"
+                        >
+                          {bundle.name}: £{Number(bundle.bundlePrice)}
+                        </span>
+                      ))}
+                </>
+              ) : (
+                <>
+                  <span className="bg-mitra-gold text-mitra-navy text-xs font-black px-3 py-1 rounded-full uppercase shadow">
+                    {event.ticketPrice === 0 ? 'FREE EVENT' : `Adult £${event.ticketPrice}`}
+                  </span>
+                  {event.childTicketPrice !== undefined && event.childTicketPrice !== null && (
+                    <span className="bg-amber-100 text-amber-900 text-xs font-black px-3 py-1 rounded-full uppercase shadow border border-amber-300">
+                      Child {event.childTicketPrice === 0 ? 'FREE' : `£${event.childTicketPrice}`}
+                    </span>
+                  )}
+                </>
               )}
             </div>
             <div className="space-y-2">
@@ -419,19 +447,53 @@ END:VCALENDAR`;
           <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border-2 border-mitra-gold/50 shadow-xl space-y-5 sticky top-28">
             <div className="border-b border-slate-100 dark:border-slate-800 pb-3">
               <span className="text-[10px] font-bold text-mitra-red uppercase tracking-wider block">Admission / Pricing</span>
-              <div className="mt-1 space-y-1">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-500">Adult Ticket:</span>
-                  <span className="font-extrabold text-slate-900 dark:text-white">
-                    {event.ticketPrice === 0 ? 'Free' : `£${event.ticketPrice}`}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-500">Child Ticket:</span>
-                  <span className="font-extrabold text-slate-900 dark:text-white">
-                    {(event.childTicketPrice ?? event.ticketPrice) === 0 ? 'Free' : `£${event.childTicketPrice ?? event.ticketPrice}`}
-                  </span>
-                </div>
+              <div className="mt-2 space-y-1.5">
+                {Array.isArray(event.ticketTiers) && event.ticketTiers.length > 0 ? (
+                  <>
+                    {event.ticketTiers
+                      .filter((tier) => tier.isActive !== false && tier.allowDirectBooking !== false)
+                      .map((tier) => (
+                        <div key={tier.id} className="flex items-center justify-between text-xs">
+                          <span className="text-slate-600 dark:text-slate-400 font-medium">{tier.name}:</span>
+                          <span className="font-extrabold text-slate-900 dark:text-white">
+                            {Number(tier.price) === 0 ? 'Free' : `£${Number(tier.price).toFixed(2)}`}
+                            {tier.bookingFee && Number(tier.bookingFee) > 0 ? (
+                              <span className="text-[10px] text-slate-400 font-normal"> + £{Number(tier.bookingFee).toFixed(2)} fee</span>
+                            ) : null}
+                          </span>
+                        </div>
+                      ))}
+                    {Array.isArray(event.bundles) &&
+                      event.bundles
+                        .filter((bundle) => bundle.isActive !== false)
+                        .map((bundle) => (
+                          <div key={bundle.id} className="flex items-center justify-between text-xs pt-1 border-t border-slate-100 dark:border-slate-800">
+                            <span className="text-amber-800 dark:text-amber-300 font-semibold">{bundle.name}:</span>
+                            <span className="font-extrabold text-amber-700 dark:text-amber-400">
+                              £{Number(bundle.bundlePrice).toFixed(2)}
+                              {bundle.bookingFee && Number(bundle.bookingFee) > 0 ? (
+                                <span className="text-[10px] text-amber-600/80 font-normal"> + £{Number(bundle.bookingFee).toFixed(2)} fee</span>
+                              ) : null}
+                            </span>
+                          </div>
+                        ))}
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-500">Adult Ticket:</span>
+                      <span className="font-extrabold text-slate-900 dark:text-white">
+                        {event.ticketPrice === 0 ? 'Free' : `£${event.ticketPrice}`}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-500">Child Ticket:</span>
+                      <span className="font-extrabold text-slate-900 dark:text-white">
+                        {(event.childTicketPrice ?? event.ticketPrice) === 0 ? 'Free' : `£${event.childTicketPrice ?? event.ticketPrice}`}
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 

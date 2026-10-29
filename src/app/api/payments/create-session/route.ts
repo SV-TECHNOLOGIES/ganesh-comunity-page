@@ -40,7 +40,7 @@ async function getOrCreateStripeClient(): Promise<Stripe | null> {
   if (!cachedStripeInstance || cachedStripeKey !== stripeSecretKey) {
     cachedStripeKey = stripeSecretKey;
     cachedStripeInstance = new Stripe(stripeSecretKey, {
-      apiVersion: '2026-08-26.dahlia',
+      apiVersion: '2026-08-26.dahlia' as any,
     });
   }
 
@@ -83,7 +83,26 @@ export async function POST(request: Request) {
     specialWishes,
     primaryDevoteeName,
     rsvpId,
+    ticketTierId,
+    bundleId,
+    tierSelections,
   } = body;
+
+  let resolvedTicketTierId = ticketTierId ? String(ticketTierId).trim() : null;
+  let resolvedBundleId = bundleId ? String(bundleId).trim() : null;
+
+  if (rsvpId && (!resolvedTicketTierId && !resolvedBundleId)) {
+    try {
+      const linkedRsvp = await prisma.eventRSVP.findUnique({
+        where: { id: String(rsvpId) },
+        select: { ticketTierId: true, bundleId: true },
+      });
+      if (linkedRsvp) {
+        if (linkedRsvp.ticketTierId) resolvedTicketTierId = linkedRsvp.ticketTierId;
+        if (linkedRsvp.bundleId) resolvedBundleId = linkedRsvp.bundleId;
+      }
+    } catch {}
+  }
 
   const normalEmail = customerEmail ? String(customerEmail).toLowerCase().trim() : '';
   const safeCustomer = customerName ? String(customerName).trim() : 'Unknown';
@@ -220,6 +239,8 @@ export async function POST(request: Request) {
         primaryDevoteeName: primaryDevoteeName || safeCustomer,
         source: 'mitra-website',
         rsvpId: rsvpId || '',
+        ticketTierId: resolvedTicketTierId || '',
+        bundleId: resolvedBundleId || '',
       },
       receipt_email: normalEmail,
     });
@@ -241,6 +262,10 @@ export async function POST(request: Request) {
           eventId: eventId || null,
           eventName: safeEvent,
           donationType: safeType,
+          ticketTierId: resolvedTicketTierId,
+          bundleId: resolvedBundleId,
+          tierSelections: Array.isArray(tierSelections) ? tierSelections : [],
+          rsvpId: rsvpId ? String(rsvpId).trim() : null,
           poojaCategory: poojaCategory ? String(poojaCategory).trim() : null,
           poojaDate: poojaDate || null,
           poojaDay: poojaDay || null,

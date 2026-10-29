@@ -38,6 +38,9 @@ export async function POST(request: Request) {
       paymentIntentId,
       customResponses = {},
       memberId: explicitMemberId,
+      ticketTierId: explicitTicketTierId,
+      bundleId: explicitBundleId,
+      tierSelections: rawTierSelections,
     } = await request.json();
 
     if (!eventId || !attendeeName || !attendeeEmail) {
@@ -47,12 +50,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const totalTickets = Number(ticketsCount) || 0;
     const normalEmail = attendeeEmail.toLowerCase().trim();
     const safeName = attendeeName.trim();
     const safePhone = attendeePhone ? attendeePhone.trim() : "";
-    const adults = Number(adultsCount) || 0;
-    const children = Number(childrenCount) || 0;
     const rawDates: string[] = Array.isArray(selectedDates)
       ? selectedDates
       : [];
@@ -62,6 +62,10 @@ export async function POST(request: Request) {
     // ── 1. Fetch Event and Validate Dates ─────────────────────────────────
     let eventRecord = await prisma.event.findUnique({
       where: { id: eventId },
+      include: {
+        ticketTiers: true,
+        bundles: { include: { items: { include: { ticketTier: true } } } },
+      },
     });
 
     if (!!paymentIntentId) {
@@ -70,8 +74,6 @@ export async function POST(request: Request) {
           paymentIntentId: paymentIntentId,
         },
       });
-
-      
     }
 
     if (!eventRecord) {
@@ -87,6 +89,10 @@ export async function POST(request: Request) {
             },
           ],
         },
+        include: {
+          ticketTiers: true,
+          bundles: { include: { items: { include: { ticketTier: true } } } },
+        },
       });
     }
 
@@ -96,6 +102,121 @@ export async function POST(request: Request) {
         { status: 404 },
       );
     }
+
+    // ── 1.1 Process Dynamic Ticket Tiers, Bundles, and Backward Compatibility ──
+    let finalTierSelections: any[] = [];
+    let finalTicketTierId: string | null = explicitTicketTierId || null;
+    let finalBundleId: string | null = explicitBundleId || null;
+
+    let computedTickets = Number(ticketsCount) || 0;
+    let computedAdults = Number(adultsCount) || 0;
+    let computedChildren = Number(childrenCount) || 0;
+    let computedAmount = Number(totalAmount) || 0;
+
+    if (Array.isArray(rawTierSelections) && rawTierSelections.length > 0) {
+      finalTierSelections = rawTierSelections;
+
+      let sumTickets = 0;
+      let sumAdults = 0;
+      let sumChildren = 0;
+      let sumSubtotal = 0;
+
+      for (const sel of rawTierSelections) {
+        const qty = Number(sel.quantity) || 0;
+        const unit = Number(sel.unitPrice) || 0;
+        const sub = sel.subtotal !== undefined ? Number(sel.subtotal) : qty * unit;
+        sumSubtotal += sub;
+
+        if (sel.type === 'bundle') {
+          if (!finalBundleId && sel.id && !sel.id.startsWith('fallback')) {
+            finalBundleId = sel.id;
+          }
+          // Unpack bundle items if present
+          if (Array.isArray(sel.items) && sel.items.length > 0) {
+            for (const bi of sel.items) {
+              const count = (Number(bi.quantity) || 1) * qty;
+              sumTickets += count;
+              if (/child|kid/i.test(bi.name || '')) {
+                sumChildren += count;
+              } else {
+                sumAdults += count;
+              }
+            }
+          } else {
+            // Deduce from name e.g. "2 Adults + 2 Kids" or default 2
+            const adultMatch = (sel.name || '').match(/(\d+)\s*adult/i);
+            const childMatch = (sel.name || '').match(/(\d+)\s*(?:child|kid)/i);
+            const aCount = (adultMatch ? parseInt(adultMatch[1], 10) : 2) * qty;
+            const cCount = (childMatch ? parseInt(childMatch[1], 10) : 2) * qty;
+            sumAdults += aCount;
+            sumChildren += cCount;
+            sumTickets += (aCount + cCount);
+          }
+        } else {
+          // Tier
+          if (sel.id) {
+            const matchedTier = eventRecord.ticketTiers?.find((t: any) => t.id === sel.id);
+            if (matchedTier && matchedTier.allowDirectBooking === false) {
+              return NextResponse.json(
+                {
+                  success: false,
+                  error: `"${matchedTier.name}" cannot be booked directly. It is only available as part of a package deal (e.g. Family Ticket).`,
+                },
+                { status: 400 }
+              );
+            }
+          }
+          if (!finalTicketTierId && sel.id && !sel.id.startsWith('fallback')) {
+            finalTicketTierId = sel.id;
+          }
+          sumTickets += qty;
+          if (/child|kid/i.test(sel.name || '')) {
+            sumChildren += qty;
+          } else {
+            sumAdults += qty;
+          }
+        }
+      }
+
+      if (computedTickets === 0) computedTickets = sumTickets;
+      if (computedAdults === 0 && computedChildren === 0) {
+        computedAdults = sumAdults;
+        computedChildren = sumChildren;
+      }
+      if (computedAmount === 0 && sumSubtotal > 0) {
+        computedAmount = sumSubtotal;
+      }
+    } else {
+      // Synthesize fallback tier selections for legacy API callers
+      const legacyAdultPrice = Number(eventRecord.ticketPrice) || 0;
+      const legacyChildPrice = Number(eventRecord.childTicketPrice) || 0;
+
+      if (computedAdults > 0) {
+        finalTierSelections.push({
+          type: 'tier',
+          id: eventRecord.ticketTiers?.[0]?.id || 'legacy-adult',
+          name: eventRecord.ticketTiers?.[0]?.name || 'Adult Pass',
+          quantity: computedAdults,
+          unitPrice: legacyAdultPrice,
+          subtotal: computedAdults * legacyAdultPrice,
+        });
+        if (eventRecord.ticketTiers?.[0]?.id) finalTicketTierId = eventRecord.ticketTiers[0].id;
+      }
+      if (computedChildren > 0) {
+        finalTierSelections.push({
+          type: 'tier',
+          id: eventRecord.ticketTiers?.[1]?.id || 'legacy-child',
+          name: eventRecord.ticketTiers?.[1]?.name || 'Child Pass',
+          quantity: computedChildren,
+          unitPrice: legacyChildPrice,
+          subtotal: computedChildren * legacyChildPrice,
+        });
+      }
+    }
+
+    const totalTickets = computedTickets > 0 ? computedTickets : (computedAdults + computedChildren);
+    const adults = computedAdults;
+    const children = computedChildren;
 
     // Filter past dates if it's the Ganesh festival specific dates
     const now = new Date();
@@ -230,10 +351,9 @@ export async function POST(request: Request) {
           };
         }
 
-        // Create RSVP record
+        // Create RSVP record with dynamic TicketTier and Bundle mappings
         let updatedRsvp: any;
-        if(!existingRSVP){
-
+        if (!existingRSVP) {
           const createdRsvp = await tx.eventRSVP.create({
             data: {
               eventId: currentEvent.id,
@@ -241,6 +361,9 @@ export async function POST(request: Request) {
               attendeeEmail: normalEmail,
               attendeePhone: safePhone,
               travellingFrom: travelOrigin,
+              ticketTierId: finalTicketTierId,
+              bundleId: finalBundleId,
+              tierSelections: finalTierSelections,
               ticketsCount: totalTickets,
               adultsCount: adults,
               childrenCount: children,
@@ -255,13 +378,14 @@ export async function POST(request: Request) {
           });
 
           updatedRsvp = createdRsvp;
-          
-        }else {
-          // update 
-
+        } else {
+          // update
           updatedRsvp = await tx.eventRSVP.update({
             where: { id: existingRSVP.id },
             data: {
+              ticketTierId: finalTicketTierId,
+              bundleId: finalBundleId,
+              tierSelections: finalTierSelections,
               ticketsCount: totalTickets,
               adultsCount: adults,
               childrenCount: children,
@@ -275,9 +399,9 @@ export async function POST(request: Request) {
             },
           });
           existingRSVP = updatedRsvp;
-          
         }
-        // Atomically increment RSVP count on event if completed / free
+
+        // Atomically increment RSVP count and booked count on tiers/bundles if completed
         if (finalPaymentStatus !== "Pending") {
           const updateData: any = { rsvpCount: { increment: totalTickets } };
           if (shouldTriggerAlert) {
@@ -288,6 +412,28 @@ export async function POST(request: Request) {
             where: { id: currentEvent.id },
             data: updateData,
           });
+
+          // Increment booked counts on individual ticket tiers and bundles
+          for (const sel of finalTierSelections) {
+            const qty = Number(sel.quantity) || 0;
+            if (qty <= 0) continue;
+
+            if (sel.type === "tier" && sel.id && !sel.id.startsWith("fallback") && !sel.id.startsWith("legacy")) {
+              try {
+                await tx.ticketTier.update({
+                  where: { id: sel.id },
+                  data: { bookedCount: { increment: qty } },
+                });
+              } catch {}
+            } else if (sel.type === "bundle" && sel.id && !sel.id.startsWith("fallback")) {
+              try {
+                await tx.bundle.update({
+                  where: { id: sel.id },
+                  data: { bookedCount: { increment: qty } },
+                });
+              } catch {}
+            }
+          }
         }
 
         return {
@@ -442,6 +588,9 @@ export async function POST(request: Request) {
         attendeeEmail: rsvp.attendeeEmail,
         attendeePhone: rsvp.attendeePhone,
         travellingFrom: rsvp.travellingFrom,
+        ticketTierId: rsvp.ticketTierId,
+        bundleId: rsvp.bundleId,
+        tierSelections: rsvp.tierSelections,
         ticketsCount: rsvp.ticketsCount,
         adultsCount: rsvp.adultsCount,
         childrenCount: rsvp.childrenCount,

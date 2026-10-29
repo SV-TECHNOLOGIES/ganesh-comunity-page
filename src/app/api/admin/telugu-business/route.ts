@@ -65,10 +65,6 @@ export async function GET(request: Request) {
         approved: approvedCount,
         rejected: rejectedCount,
       },
-    }, {
-      headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-      },
     });
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Admin fetch failed';
@@ -76,9 +72,6 @@ export async function GET(request: Request) {
       { success: false, error: errorMsg, data: [], counts: { total: 0, pending: 0, approved: 0, rejected: 0 } },
       {
         status: 500,
-        headers: {
-          'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-        },
       }
     );
   }

@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import MultiDateSelector from '@/components/admin/MultiDateSelector';
 import CustomFieldBuilder from '@/components/admin/CustomFieldBuilder';
-import { CustomFieldDefinition, EventItem, EventScheduleDay } from '@/lib/types';
+import { CustomFieldDefinition, EventItem, EventScheduleDay, TicketTier, Bundle } from '@/lib/types';
 import { isYouTubeUrl, getYouTubeThumbnailUrl } from '@/lib/youtube';
 
 export default function EditEventPage() {
@@ -64,6 +64,10 @@ export default function EditEventPage() {
     availableDates: [] as string[],
     eventSchedule: [] as EventScheduleDay[],
   });
+
+  // Dynamic Ticket Tiers and Bundles
+  const [ticketTiers, setTicketTiers] = useState<TicketTier[]>([]);
+  const [bundles, setBundles] = useState<Bundle[]>([]);
 
   const [uploadingBanner, setUploadingBanner] = useState(false);
 
@@ -125,6 +129,41 @@ export default function EditEventPage() {
           availableDates: parsedDates,
           eventSchedule: parsedSchedule,
         });
+
+        // Hydrate Ticket Tiers (or synthesize default fallback tiers for legacy events)
+        if (Array.isArray(evt.ticketTiers) && evt.ticketTiers.length > 0) {
+          setTicketTiers(evt.ticketTiers);
+        } else {
+          setTicketTiers([
+            {
+              id: '',
+              eventId: evt.id,
+              name: evt.ticketPrice === 0 ? 'General Admission' : 'Standard Adult Ticket',
+              price: evt.ticketPrice || 0,
+              description: 'Standard Adult Pass',
+              currency: 'GBP',
+              capacity: evt.adultCapacity,
+              bookedCount: 0,
+              isActive: true,
+            },
+            ...(evt.childTicketPrice !== undefined ? [{
+              id: '',
+              eventId: evt.id,
+              name: 'Child Ticket',
+              price: evt.childTicketPrice || 0,
+              description: 'Child Pass (Below 5 years)',
+              currency: 'GBP',
+              capacity: evt.childCapacity,
+              bookedCount: 0,
+              isActive: true,
+            }] : []),
+          ]);
+        }
+
+        // Hydrate Bundles
+        if (Array.isArray(evt.bundles)) {
+          setBundles(evt.bundles);
+        }
       } else {
         alert(json.error || 'Event not found');
         router.push('/admin/events');
@@ -279,12 +318,39 @@ export default function EditEventPage() {
 
     setSaving(true);
     try {
+      const syncAdultPrice = ticketTiers[0]?.price ?? formData.ticketPrice;
+      const syncChildPrice = ticketTiers[1]?.price ?? formData.childTicketPrice;
+
       const res = await fetch('/api/admin/events', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: eventId,
           ...formData,
+          ticketPrice: syncAdultPrice,
+          childTicketPrice: syncChildPrice,
+          ticketTiers: ticketTiers.map((t) => ({
+            id: t.id ? t.id : undefined,
+            name: t.name.trim() || 'General Pass',
+            price: Number(t.price) || 0,
+            bookingFee: Number(t.bookingFee) || 0,
+            capacity: t.capacity ? Number(t.capacity) : null,
+            description: t.description?.trim() || null,
+            isActive: t.isActive !== false,
+            allowDirectBooking: t.allowDirectBooking !== false,
+          })),
+          bundles: bundles.map((b) => ({
+            id: b.id ? b.id : undefined,
+            name: b.name.trim() || 'Bundle Pass',
+            bundlePrice: Number(b.bundlePrice) || 0,
+            bookingFee: Number(b.bookingFee) || 0,
+            description: b.description?.trim() || null,
+            isActive: b.isActive !== false,
+            items: (b.items || []).map((bi) => ({
+              ticketTierId: bi.ticketTierId,
+              quantity: Number(bi.quantity) || 1,
+            })),
+          })),
         }),
       });
       const json = await res.json();
@@ -560,6 +626,336 @@ export default function EditEventPage() {
                 </div>
               </div>
 
+              {/* Dynamic Ticket Tiers & Bundles */}
+              <div className="bg-slate-950 p-6 rounded-3xl border border-slate-800 space-y-5 shadow-sm">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                  <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    <Users className="w-4 h-4 text-mitra-gold" />
+                    <span>Dynamic Ticket Tiers &amp; Bundles</span>
+                  </h3>
+                  <span className="text-[10px] text-amber-400 font-bold bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/20">
+                    Active
+                  </span>
+                </div>
+
+                {/* ── 1. Dynamic Ticket Tiers ── */}
+                <div className="space-y-3 bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold text-slate-200 block">Ticket Tiers</span>
+                      <span className="text-[11px] text-slate-500">Configure passes (e.g. Standard Adult £12, Child £0, VIP £25)</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setTicketTiers([
+                          ...ticketTiers,
+                          {
+                            id: '',
+                            eventId,
+                            name: `Tier ${ticketTiers.length + 1}`,
+                            price: 0,
+                            bookingFee: 0,
+                            currency: 'GBP',
+                            description: '',
+                            capacity: null,
+                            bookedCount: 0,
+                            isActive: true,
+                            allowDirectBooking: true,
+                          },
+                        ])
+                      }
+                      className="text-xs bg-amber-500/15 text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 hover:bg-amber-500/25 transition-colors"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Add Tier
+                    </button>
+                  </div>
+
+                  <div className="space-y-2">
+                    {ticketTiers.map((tier, idx) => (
+                      <div
+                        key={idx}
+                        className="grid grid-cols-1 sm:grid-cols-12 gap-2 bg-slate-950/80 p-2.5 rounded-xl border border-slate-800 items-center text-xs"
+                      >
+                        <div className="sm:col-span-3">
+                          <label className="text-[10px] text-slate-400 block mb-0.5 font-bold">Tier Name</label>
+                          <input
+                            type="text"
+                            value={tier.name}
+                            placeholder="e.g. Standard Adult Ticket"
+                            onChange={(e) => {
+                              const next = [...ticketTiers];
+                              next[idx].name = e.target.value;
+                              setTicketTiers(next);
+                            }}
+                            className="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-white"
+                          />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <label className="text-[10px] text-slate-400 block mb-0.5 font-bold">Price (£)</label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min={0}
+                            value={tier.price}
+                            onChange={(e) => {
+                              const val = parseFloat(e.target.value) || 0;
+                              const next = [...ticketTiers];
+                              next[idx].price = val;
+                              setTicketTiers(next);
+                            }}
+                            className="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-white font-mono"
+                          />
+                        </div>
+                        <div className="sm:col-span-1">
+                          <label className="text-[10px] text-slate-400 block mb-0.5 font-bold">Fee (£)</label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min={0}
+                            value={tier.bookingFee ?? 0}
+                            onChange={(e) => {
+                              const val = parseFloat(e.target.value) || 0;
+                              const next = [...ticketTiers];
+                              next[idx].bookingFee = val;
+                              setTicketTiers(next);
+                            }}
+                            className="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-white font-mono text-[11px]"
+                            placeholder="0.00"
+                          />
+                        </div>
+                        <div className="sm:col-span-1">
+                          <label className="text-[10px] text-slate-400 block mb-0.5 font-bold">Limit</label>
+                          <input
+                            type="number"
+                            min={0}
+                            placeholder="∞"
+                            value={tier.capacity ?? ''}
+                            onChange={(e) => {
+                              const next = [...ticketTiers];
+                              next[idx].capacity = e.target.value ? parseInt(e.target.value, 10) : undefined;
+                              setTicketTiers(next);
+                            }}
+                            className="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-white"
+                          />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <label className="text-[10px] text-slate-400 block mb-0.5 font-bold">Booking Access</label>
+                          <select
+                            value={tier.allowDirectBooking !== false ? 'public' : 'bundle_only'}
+                            onChange={(e) => {
+                              const next = [...ticketTiers];
+                              next[idx].allowDirectBooking = e.target.value === 'public';
+                              setTicketTiers(next);
+                            }}
+                            className={`w-full border rounded-lg p-1.5 text-[11px] font-semibold ${
+                              tier.allowDirectBooking !== false
+                                ? 'bg-slate-900 border-emerald-700/60 text-emerald-400'
+                                : 'bg-amber-950/40 border-amber-600/70 text-amber-300'
+                            }`}
+                          >
+                            <option value="public" className="bg-slate-900 text-white">Public (Direct)</option>
+                            <option value="bundle_only" className="bg-slate-900 text-amber-300">Bundle Only (Hidden)</option>
+                          </select>
+                        </div>
+                        <div className="sm:col-span-2">
+                          <label className="text-[10px] text-slate-400 block mb-0.5 font-bold">Description</label>
+                          <input
+                            type="text"
+                            value={tier.description || ''}
+                            placeholder="e.g. Above 5 years"
+                            onChange={(e) => {
+                              const next = [...ticketTiers];
+                              next[idx].description = e.target.value;
+                              setTicketTiers(next);
+                            }}
+                            className="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-white text-[11px]"
+                          />
+                        </div>
+                        <div className="sm:col-span-1 flex justify-end">
+                          {ticketTiers.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => setTicketTiers(ticketTiers.filter((_, i) => i !== idx))}
+                              className="p-1.5 text-slate-500 hover:text-rose-400 transition-colors"
+                              title="Remove tier"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ── 2. Dynamic Bundles / Packages ── */}
+                <div className="space-y-3 bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold text-amber-300 block">Ticket Bundles &amp; Packages</span>
+                      <span className="text-[11px] text-slate-500">Package deals (e.g. Family Ticket £32 for 2 Adults + 2 Children)</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setBundles([
+                          ...bundles,
+                          {
+                            id: '',
+                            eventId,
+                            name: 'Family Ticket (2 Adults + 2 Children)',
+                            bundlePrice: 32,
+                            bookingFee: 3.0,
+                            currency: 'GBP',
+                            description: 'Covers 2 Adults + 2 Kids under 12',
+                            bookedCount: 0,
+                            isActive: true,
+                            items: [
+                              { id: '', bundleId: '', ticketTierId: ticketTiers[0]?.id || '', quantity: 2 },
+                              ...(ticketTiers.length > 1
+                                ? [{ id: '', bundleId: '', ticketTierId: ticketTiers[1].id || '', quantity: 2 }]
+                                : []),
+                            ],
+                          },
+                        ])
+                      }
+                      className="text-xs bg-amber-500/15 text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 hover:bg-amber-500/25 transition-colors"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Add Bundle Deal
+                    </button>
+                  </div>
+
+                  {bundles.length === 0 ? (
+                    <p className="text-[11px] text-slate-500 italic py-1">
+                      No bundles added yet. Click &quot;Add Bundle Deal&quot; to configure package passes.
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {bundles.map((bundle, bIdx) => (
+                        <div
+                          key={bIdx}
+                          className="bg-slate-950/80 p-3 rounded-xl border border-amber-900/30 space-y-2.5 text-xs"
+                        >
+                          <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+                            <div className="sm:col-span-4">
+                              <label className="text-[10px] text-slate-400 block mb-0.5 font-bold">Bundle Name</label>
+                              <input
+                                type="text"
+                                value={bundle.name}
+                                placeholder="e.g. Family Ticket (2 Adults + 2 Children)"
+                                onChange={(e) => {
+                                  const next = [...bundles];
+                                  next[bIdx].name = e.target.value;
+                                  setBundles(next);
+                                }}
+                                className="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-white"
+                              />
+                            </div>
+                            <div className="sm:col-span-2">
+                              <label className="text-[10px] text-slate-400 block mb-0.5 font-bold">Price (£)</label>
+                              <input
+                                type="number"
+                                step="0.01"
+                                min={0}
+                                value={bundle.bundlePrice}
+                                onChange={(e) => {
+                                  const next = [...bundles];
+                                  next[bIdx].bundlePrice = parseFloat(e.target.value) || 0;
+                                  setBundles(next);
+                                }}
+                                className="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-white font-mono"
+                              />
+                            </div>
+                            <div className="sm:col-span-2">
+                              <label className="text-[10px] text-slate-400 block mb-0.5 font-bold">Fee (£)</label>
+                              <input
+                                type="number"
+                                step="0.01"
+                                min={0}
+                                value={bundle.bookingFee ?? 0}
+                                onChange={(e) => {
+                                  const val = parseFloat(e.target.value) || 0;
+                                  const next = [...bundles];
+                                  next[bIdx].bookingFee = val;
+                                  setBundles(next);
+                                }}
+                                className="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-white font-mono text-[11px]"
+                                placeholder="0.00"
+                              />
+                            </div>
+                            <div className="sm:col-span-3">
+                              <label className="text-[10px] text-slate-400 block mb-0.5 font-bold">Description</label>
+                              <input
+                                type="text"
+                                value={bundle.description || ''}
+                                placeholder="e.g. 2 Adults and 2 Children"
+                                onChange={(e) => {
+                                  const next = [...bundles];
+                                  next[bIdx].description = e.target.value;
+                                  setBundles(next);
+                                }}
+                                className="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-white text-[11px]"
+                              />
+                            </div>
+                            <div className="sm:col-span-1 flex justify-end">
+                              <button
+                                type="button"
+                                onClick={() => setBundles(bundles.filter((_, i) => i !== bIdx))}
+                                className="p-1.5 text-slate-500 hover:text-rose-400 transition-colors"
+                                title="Remove bundle"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Bundle Item Allocations */}
+                          <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-800/60 flex flex-wrap items-center gap-3">
+                            <span className="text-[11px] text-slate-400 font-semibold">Included Tiers:</span>
+                            {ticketTiers.map((t, tIdx) => {
+                              const itemMatch = bundle.items?.find(
+                                (it) => it.ticketTierId === t.id || (it as any).ticketTierIndex === tIdx
+                              );
+                              const currentQty = itemMatch ? itemMatch.quantity : 0;
+                              return (
+                                <div key={tIdx} className="flex items-center gap-1.5 bg-slate-950 px-2 py-1 rounded border border-slate-800">
+                                  <span className="text-[11px] text-slate-300">{t.name}:</span>
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    value={currentQty}
+                                    onChange={(e) => {
+                                      const val = parseInt(e.target.value, 10) || 0;
+                                      const next = [...bundles];
+                                      const existingItems = next[bIdx].items || [];
+                                      const filtered = existingItems.filter(
+                                        (it) => it.ticketTierId !== t.id && (it as any).ticketTierIndex !== tIdx
+                                      );
+                                      if (val > 0) {
+                                        filtered.push({
+                                          id: '',
+                                          bundleId: bundle.id || '',
+                                          ticketTierId: t.id,
+                                          quantity: val,
+                                        });
+                                      }
+                                      next[bIdx].items = filtered;
+                                      setBundles(next);
+                                    }}
+                                    className="w-12 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-white text-center font-bold"
+                                  />
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {/* Card 2: Unified Dates & Festival Schedule Selector */}
               <div className="space-y-2">
                 <MultiDateSelector
@@ -692,54 +1088,23 @@ export default function EditEventPage() {
                 </div>
               </div>
 
-              {/* Ticketing & Capacity Limits */}
+              {/* Venue & Capacity Controls */}
               <div className="bg-slate-950 p-6 rounded-3xl border border-slate-800 space-y-4">
                 <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2 border-b border-slate-800 pb-3">
-                  <Users className="w-4 h-4 text-mitra-gold" />
-                  <span>Capacity &amp; Pricing</span>
+                  <MapPin className="w-4 h-4 text-mitra-gold" />
+                  <span>Venue &amp; Capacity</span>
                 </h3>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-[11px] font-bold text-slate-400 block mb-1">Total Capacity</label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={formData.capacity}
-                      onChange={(e) => setFormData({ ...formData, capacity: parseInt(e.target.value, 10) || 0 })}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[11px] font-bold text-slate-400 block mb-1">Adult Price (£)</label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={formData.ticketPrice}
-                      onChange={(e) => setFormData({ ...formData, ticketPrice: parseInt(e.target.value, 10) || 0 })}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[11px] font-bold text-slate-400 block mb-1">Adult Max Limit</label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={formData.adultCapacity}
-                      onChange={(e) => setFormData({ ...formData, adultCapacity: parseInt(e.target.value, 10) || 0 })}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[11px] font-bold text-slate-400 block mb-1">Child Price (£)</label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={formData.childTicketPrice}
-                      onChange={(e) => setFormData({ ...formData, childTicketPrice: parseInt(e.target.value, 10) || 0 })}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
-                    />
-                  </div>
+                {/* Total Venue Capacity */}
+                <div>
+                  <label className="text-[11px] font-bold text-slate-400 block mb-1">Total Overall Venue Capacity</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={formData.capacity}
+                    onChange={(e) => setFormData({ ...formData, capacity: parseInt(e.target.value, 10) || 0 })}
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+                  />
                 </div>
 
                 <div>

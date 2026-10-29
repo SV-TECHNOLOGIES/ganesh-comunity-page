@@ -5,9 +5,9 @@ import { NextResponse } from 'next/server';
  * Extracted here so every route handler doesn't repeat them inline.
  */
 export const noCacheHeaders = {
-  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
-  Pragma: 'no-cache',
-  Expires: '0',
+  // 'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+  // Pragma: 'no-cache',
+  // Expires: '0',
 } as const;
 
 /**

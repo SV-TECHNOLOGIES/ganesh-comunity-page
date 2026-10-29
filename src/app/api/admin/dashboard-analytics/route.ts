@@ -510,13 +510,6 @@ export async function GET(request: Request) {
         recentRSVPs: recentRSVPs.slice(0, 8),
         recentMembers: recentMembers.slice(0, 8),
         liveFeed: liveFeed.slice(0, 20),
-      },
-      {
-        headers: {
-          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
-          Pragma: 'no-cache',
-          Expires: '0',
-        },
       }
     );
   } catch (error: unknown) {

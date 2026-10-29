@@ -106,7 +106,7 @@ export default function EventScheduleBuilder({
           <button
             type="button"
             onClick={handleLoadGaneshPreset}
-            className="text-[11px] font-bold text-amber-300 hover:text-amber-200 bg-amber-950/40 hover:bg-amber-950/70 border border-amber-800/40 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors"
+            className="text-[11px] font-bold text-amber-300 hover:text-amber-200 bg-amber-950 hover:bg-amber-950/70 border border-amber-800/40 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors"
             title="Load 8-Day Ganesh Mahotsav Schedule (13 Sep - 20 Sep)"
           >
             <Sparkles className="w-3 h-3 text-amber-400" />

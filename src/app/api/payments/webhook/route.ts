@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Stripe not configured' }, { status: 503 });
   }
 
-  const stripe = new Stripe(stripeSecretKey, { apiVersion: '2026-08-26.dahlia' });
+  const stripe = new Stripe(stripeSecretKey, { apiVersion: '2026-08-26.dahlia' as any });
 
   // Read the raw body for signature verification
   const rawBody = await req.text();
@@ -95,6 +95,9 @@ export async function POST(req: NextRequest) {
           resolvedMemberId = String(meta.memberId).trim();
         }
 
+        const metaTicketTierId = meta.ticketTierId ? String(meta.ticketTierId).trim() : null;
+        const metaBundleId = meta.bundleId ? String(meta.bundleId).trim() : null;
+
         // Try to update existing pending record, or create a new one
         try {
           const existing = await prisma.payment.findFirst({
@@ -107,6 +110,8 @@ export async function POST(req: NextRequest) {
               data: {
                 status: 'Completed',
                 ...(resolvedMemberId ? { memberId: resolvedMemberId } : {}),
+                ...(metaTicketTierId ? { ticketTierId: metaTicketTierId } : {}),
+                ...(metaBundleId ? { bundleId: metaBundleId } : {}),
               },
             });
             await logger.paymentSuccess('payments/webhook', `Payment succeeded: £${existing.amount} (${existing.customerName} <${existing.customerEmail}>)`, {
@@ -136,6 +141,9 @@ export async function POST(req: NextRequest) {
                 eventId: meta.eventId || null,
                 eventName: meta.eventName || null,
                 donationType: meta.donationType ? String(meta.donationType).toLowerCase().trim() : null,
+                ticketTierId: metaTicketTierId,
+                bundleId: metaBundleId,
+                rsvpId: meta.rsvpId ? String(meta.rsvpId) : null,
                 poojaCategory: meta.poojaCategory ? String(meta.poojaCategory).trim() : null,
                 poojaDate: meta.poojaDate || null,
                 poojaDay: meta.poojaDay || null,
@@ -173,12 +181,34 @@ export async function POST(req: NextRequest) {
               if (rsvp.paymentStatus === 'Pending') {
                 await prisma.eventRSVP.update({
                   where: { id: rsvp.id },
-                  data: { paymentStatus: 'Completed' }
+                  data: {
+                    paymentStatus: 'Completed',
+                    ...(metaTicketTierId && !rsvp.ticketTierId ? { ticketTierId: metaTicketTierId } : {}),
+                    ...(metaBundleId && !rsvp.bundleId ? { bundleId: metaBundleId } : {}),
+                  }
                 });
                 await prisma.event.update({
                   where: { id: rsvp.eventId },
                   data: { rsvpCount: { increment: rsvp.ticketsCount } }
                 });
+
+                // Increment booked count on TicketTier or Bundle if linked
+                if (rsvp.ticketTierId || metaTicketTierId) {
+                  try {
+                    await prisma.ticketTier.update({
+                      where: { id: rsvp.ticketTierId || metaTicketTierId! },
+                      data: { bookedCount: { increment: rsvp.ticketsCount } },
+                    });
+                  } catch {}
+                }
+                if (rsvp.bundleId || metaBundleId) {
+                  try {
+                    await prisma.bundle.update({
+                      where: { id: rsvp.bundleId || metaBundleId! },
+                      data: { bookedCount: { increment: 1 } },
+                    });
+                  } catch {}
+                }
               }
             } else {
               // will u have enougth info to create an RSVP create the RSVP 

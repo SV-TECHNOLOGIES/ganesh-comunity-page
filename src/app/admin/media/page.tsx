@@ -1177,7 +1177,7 @@ export default function AdminMediaPage() {
                         type="button"
                         onClick={() => handleCacheAlbum(item.id, item.title)}
                         disabled={cachingAlbumId === item.id}
-                        className="px-2.5 py-2 rounded-xl bg-slate-900 hover:bg-amber-950/40 border border-slate-700 hover:border-amber-600 text-amber-400 transition-colors disabled:opacity-50 flex items-center gap-1 text-xs font-bold"
+                        className="px-2.5 py-2 rounded-xl bg-slate-900 hover:bg-amber-950 border border-slate-700 hover:border-amber-600 text-amber-400 transition-colors disabled:opacity-50 flex items-center gap-1 text-xs font-bold"
                         title="Pre-cache & optimize all photos in this album"
                       >
                         {cachingAlbumId === item.id ? (
