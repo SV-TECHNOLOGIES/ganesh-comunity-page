@@ -23,13 +23,20 @@ async function verifyJwtToken(token: string): Promise<TokenPayload | null> {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-pathname', pathname);
+
   const isAdminApiRoute = pathname.startsWith('/api/admin');
   const isAdminUiRoute = pathname === '/admin' || pathname.startsWith('/admin/');
   const isMemberRoute =
     pathname === '/membership/portal' || pathname.startsWith('/membership/portal/');
 
   if (!isAdminApiRoute && !isAdminUiRoute && !isMemberRoute) {
-    return NextResponse.next();
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
   }
 
   // Check auth token from cookie or Authorization header
@@ -88,18 +95,18 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
-    return NextResponse.next();
+    return NextResponse.next({
+      request: { headers: requestHeaders },
+    });
   }
 
-  return NextResponse.next();
+  return NextResponse.next({
+    request: { headers: requestHeaders },
+  });
 }
 
 export const config = {
   matcher: [
-    '/admin',
-    '/admin/:path*',
-    '/api/admin/:path*',
-    '/membership/portal',
-    '/membership/portal/:path*',
+    '/((?!_next/static|_next/image|favicon.ico|assets/).*)',
   ],
 };

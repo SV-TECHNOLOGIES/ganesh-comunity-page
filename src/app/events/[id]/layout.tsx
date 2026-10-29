@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import { headers } from 'next/headers';
+import { getPreferencesForEvent } from '@/lib/config-preferences';
 
 interface Props {
   params: { id: string };
@@ -14,6 +15,7 @@ export async function generateMetadata(
   const eventId = resolvedParams?.id;
 
   let event = null;
+  let heroBannerUrl: string | undefined;
   try {
     event = await prisma.event.findUnique({
       where: { id: eventId },
@@ -30,6 +32,18 @@ export async function generateMetadata(
           ],
         },
       });
+    }
+
+    if (event) {
+      try {
+        const prefData = await getPreferencesForEvent(event.id);
+        const configuredBanner = prefData?.templateConfig?.hero?.bannerImageUrl;
+        if (configuredBanner && configuredBanner !== '/assets/poster.jpg') {
+          heroBannerUrl = configuredBanner;
+        }
+      } catch {
+        // Ignore preference lookup error
+      }
     }
   } catch (e) {
     console.error('[METADATA EVENT LOOKUP ERROR]:', e);
@@ -83,7 +97,11 @@ export async function generateMetadata(
   }
 
   // Ensure absolute URL for WhatsApp & social platforms
-  let posterUrl = event.bannerUrl || defaultLogoUrl;
+  const resolvedBanner =
+    event.bannerUrl && event.bannerUrl !== '/assets/poster.jpg'
+      ? event.bannerUrl
+      : heroBannerUrl || event.bannerUrl || defaultLogoUrl;
+  let posterUrl = resolvedBanner;
   if (!posterUrl.startsWith('http://') && !posterUrl.startsWith('https://')) {
     const cleanPath = posterUrl.startsWith('/') ? posterUrl : `/${posterUrl}`;
     posterUrl = `${baseUrl.replace(/\/$/, '')}${cleanPath}`;

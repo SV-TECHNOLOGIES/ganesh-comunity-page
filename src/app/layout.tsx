@@ -1,15 +1,32 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import './globals.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import AnalyticsTracker from '@/components/AnalyticsTracker';
-import { constructMetadata, generateOrganizationJsonLd } from '@/lib/seo-config';
+import { constructMetadata, generateOrganizationJsonLd, isWebsiteOnlySeoRoute } from '@/lib/seo-config';
 import { AuthProvider } from '@/lib/auth-context';
 import { getFeaturedEventForMetadata } from '@/lib/seo-server';
 
 export const revalidate = 10;
 
 export async function generateMetadata(): Promise<Metadata> {
+  let pathname = '/';
+  try {
+    const headersList = headers();
+    pathname = headersList.get('x-pathname') || '/';
+  } catch {
+    pathname = '/';
+  }
+
+  // Always return MITRA UK website metadata for routes in WEBSITE_ONLY_SEO_ROUTES (or any non-home route)
+  if (isWebsiteOnlySeoRoute(pathname) || (pathname !== '/' && pathname !== '')) {
+    return constructMetadata({
+      canonical: pathname,
+    });
+  }
+
+  // On homepage ('/'), only load event metadata when an active event is featured on home
   const currentEvent = await getFeaturedEventForMetadata();
 
   if (currentEvent && currentEvent.bannerUrl) {

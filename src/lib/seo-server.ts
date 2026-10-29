@@ -1,43 +1,44 @@
 import { prisma } from './prisma';
+import { getPreferencesForEvent } from './config-preferences';
 
 /**
- * Server-only utility to fetch the currently active or upcoming featured event
- * for dynamic OpenGraph / Twitter metadata.
+ * Server-only utility to fetch the currently active home event
+ * for dynamic OpenGraph / Twitter metadata on the homepage (/).
+ * Returns the event ONLY when an active event is featured on home;
+ * otherwise returns null so standard MITRA website metadata is used.
  */
 export async function getFeaturedEventForMetadata() {
   try {
-    // 1. Check activeHomeEventId from Config table
     const activePref = await prisma.config.findFirst({
       where: { preference: 'home.activeHomeEventId' },
     });
 
-    if (activePref?.value) {
-      const event = await prisma.event.findUnique({
-        where: { id: activePref.value },
-      });
-      if (event && event.status !== 'Completed' && event.status !== 'Cancelled') {
-        return event;
-      }
+    const activeId = activePref?.value?.trim();
+    if (!activeId || activeId === 'default-home' || activeId === 'none') {
+      return null;
     }
 
-    // 2. Next featured upcoming event
-    const featuredUpcoming = await prisma.event.findFirst({
-      where: {
-        featured: true,
-        status: { in: ['Upcoming', 'upcoming', 'Active', 'active'] },
-      },
-      orderBy: { date: 'asc' },
+    const event = await prisma.event.findUnique({
+      where: { id: activeId },
     });
-    if (featuredUpcoming) return featuredUpcoming;
 
-    // 3. Fallback to any upcoming event
-    const upcoming = await prisma.event.findFirst({
-      where: {
-        status: { in: ['Upcoming', 'upcoming', 'Active', 'active'] },
-      },
-      orderBy: { date: 'asc' },
-    });
-    if (upcoming) return upcoming;
+    if (
+      event &&
+      event.status !== 'Completed' &&
+      event.status !== 'Past' &&
+      event.status !== 'Cancelled'
+    ) {
+      try {
+        const prefData = await getPreferencesForEvent(event.id);
+        const heroBanner = prefData?.templateConfig?.hero?.bannerImageUrl;
+        if (heroBanner && heroBanner !== '/assets/poster.jpg') {
+          return { ...event, bannerUrl: heroBanner };
+        }
+      } catch {
+        // Ignore preference lookup error and use event.bannerUrl
+      }
+      return event;
+    }
   } catch (error) {
     console.error('[SEO SERVER LOOKUP ERROR]:', error);
   }

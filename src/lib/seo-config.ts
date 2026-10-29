@@ -4,6 +4,36 @@ import siteData from '@/data/site-metadata.json';
 
 export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.mitrauk.com';
 
+/**
+ * Routes that must NEVER load event-related SEO / WhatsApp OpenGraph posters.
+ * These routes always return standard MITRA UK website details and logo.
+ * You can add more routes to this list at any time.
+ */
+export const WEBSITE_ONLY_SEO_ROUTES: string[] = [
+  '/about',
+  '/leadership',
+  '/sponsors',
+  '/telugu-business',
+  '/contact',
+  // Add more routes here as needed:
+  '/membership',
+  '/charity',
+  '/donate',
+  '/media',
+  '/history',
+  '/chairman-message',
+  '/news',
+];
+
+export function isWebsiteOnlySeoRoute(pathname: string): boolean {
+  if (!pathname) return false;
+  const clean = pathname.split('?')[0].replace(/\/+$/, '') || '/';
+  return WEBSITE_ONLY_SEO_ROUTES.some((route) => {
+    const normalizedRoute = route.replace(/\/+$/, '') || '/';
+    return clean === normalizedRoute || clean.startsWith(`${normalizedRoute}/`);
+  });
+}
+
 export function constructMetadata({
   title = siteData.title,
   description = siteData.description,
