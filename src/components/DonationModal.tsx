@@ -123,65 +123,70 @@ function CheckoutForm({
   };
 
   return (
-    <form onSubmit={handleConfirm} className="space-y-5">
-      {/* Back button */}
-      <button
-        type="button"
-        onClick={onBack}
-        disabled={processing}
-        className="flex items-center gap-1.5 text-xs text-[#C9B79C] hover:text-[#F4C542] transition-colors"
-      >
-        <ArrowLeft className="w-3.5 h-3.5" />
-        <span>Change details</span>
-      </button>
+    <form onSubmit={handleConfirm} className="flex flex-col h-full overflow-hidden">
+      {/* Pinned Header */}
+      <div className="p-5 sm:p-6 pb-3 border-b border-[#E65C00]/20 shrink-0 bg-[#FFF8F0] space-y-3">
+        <button
+          type="button"
+          onClick={onBack}
+          disabled={processing}
+          className="flex items-center gap-1.5 text-xs text-[#6B3A2A] hover:text-[#E65C00] transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Change details</span>
+        </button>
 
-      {/* Amount summary */}
-      <div className="bg-[#160B08] border border-[#D4AF37]/40 rounded-2xl p-4 flex items-center justify-between">
-        <div className="space-y-0.5">
-          <span className="block text-xs font-bold text-[#F4C542]">Total Payment</span>
-          <span className="block text-[11px] text-[#C9B79C] truncate max-w-[200px]">{cause}</span>
+        <div className="bg-[#FFF0E0] border border-[#E65C00]/30 rounded-2xl p-3.5 flex items-center justify-between">
+          <div className="space-y-0.5 max-w-[200px]">
+            <span className="block text-xs font-bold text-[#E65C00]">Total Payment</span>
+            <span className="block text-[11px] text-[#6B3A2A] truncate">{cause}</span>
+          </div>
+          <span className="text-2xl font-black font-cinzel text-[#E65C00]">£{amount}.00</span>
         </div>
-        <span className="text-2xl font-black font-cinzel text-[#F4C542]">£{amount}.00</span>
       </div>
 
-      {/* Stripe Payment Element */}
-      <PaymentElement
-        options={{
-          layout: 'tabs',
-          paymentMethodOrder: ['card', 'apple_pay', 'google_pay'],
-        }}
-      />
+      {/* Scrollable Body */}
+      <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
+        <PaymentElement
+          options={{
+            layout: 'tabs',
+            paymentMethodOrder: ['card', 'apple_pay', 'google_pay'],
+          }}
+        />
 
-      {/* Error message */}
-      {paymentError && (
-        <div className="bg-red-950/80 border border-red-500/50 text-red-200 text-xs p-3 rounded-xl flex items-start gap-2">
-          <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-          <span>{paymentError}</span>
-        </div>
-      )}
-
-      <div className="text-[11px] text-[#C9B79C] flex items-center justify-center gap-1.5">
-        <Lock className="w-3.5 h-3.5 text-emerald-400" />
-        <span>PCI-DSS Encrypted · Powered by Stripe</span>
-      </div>
-
-      <button
-        type="submit"
-        disabled={!stripe || !elements || processing}
-        className="gold-button w-full py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
-      >
-        {processing ? (
-          <>
-            <Loader2 className="w-4 h-4 text-[#0D0705] animate-spin" />
-            <span>Processing Payment...</span>
-          </>
-        ) : (
-          <>
-            <Heart className="w-4 h-4 fill-current text-[#0D0705]" />
-            <span>Pay £{amount}.00 Securely</span>
-          </>
+        {paymentError && (
+          <div className="bg-red-50 border border-red-300 text-red-700 text-xs p-3 rounded-xl flex items-start gap-2 font-semibold">
+            <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+            <span>{paymentError}</span>
+          </div>
         )}
-      </button>
+      </div>
+
+      {/* Pinned Footer */}
+      <div className="p-4 sm:p-5 border-t border-[#E65C00]/15 shrink-0 bg-[#FFF8F0] space-y-2">
+        <div className="text-[11px] text-[#6B3A2A] flex items-center justify-center gap-1.5 font-semibold">
+          <Lock className="w-3.5 h-3.5 text-emerald-600" />
+          <span>PCI-DSS Encrypted · Powered by Stripe</span>
+        </div>
+
+        <button
+          type="submit"
+          disabled={!stripe || !elements || processing}
+          className="gold-button w-full py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+        >
+          {processing ? (
+            <>
+              <Loader2 className="w-4 h-4 text-white animate-spin" />
+              <span>Processing Payment...</span>
+            </>
+          ) : (
+            <>
+              <Heart className="w-4 h-4 fill-current text-white" />
+              <span>Pay £{amount}.00 Securely</span>
+            </>
+          )}
+        </button>
+      </div>
     </form>
   );
 }
@@ -410,185 +415,200 @@ export default function DonationModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="temple-card rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-xl border border-[#E65C00]/30 relative max-h-[90vh] overflow-y-auto"
-           style={{ background: '#FFF8F0' }}>
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-hidden">
+      <div
+        className="temple-card rounded-3xl max-w-lg w-full shadow-2xl border border-[#E65C00]/30 relative max-h-[90vh] flex flex-col overflow-hidden bg-[#FFF8F0]"
+      >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-[#6B3A2A] hover:text-[#E65C00] p-1 transition-colors"
+          className="absolute top-4 right-4 text-[#6B3A2A] hover:text-[#E65C00] p-1.5 rounded-full hover:bg-[#FFF0E0] transition-colors z-30"
+          aria-label="Close dialog"
         >
-          <X className="w-6 h-6" />
+          <X className="w-5 h-5" />
         </button>
 
         {/* ── SUCCESS ───────────────────────────────────────────────────── */}
         {step === 'success' && receipt ? (
-          <div className="text-center py-4 space-y-4">
-            <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-sm">
-              <CheckCircle2 className="w-10 h-10" />
+          <div className="flex flex-col h-full overflow-hidden">
+            <div className="flex-1 overflow-y-auto p-5 sm:p-6 text-center py-4 space-y-4">
+              <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-sm">
+                <CheckCircle2 className="w-10 h-10" />
+              </div>
+              <h2 className="text-2xl font-black text-[#3D1A00] font-cinzel">
+                Thank You For Your Generosity!
+              </h2>
+              <p className="text-xs text-[#6B3A2A]">
+                Your contribution directly empowers the Telugu community across the United Kingdom.
+              </p>
+
+              <div className="bg-[#FFF0E0] p-5 rounded-2xl border border-[#E65C00]/25 text-left space-y-2 text-xs">
+                <div className="flex justify-between border-b border-[#E65C00]/15 pb-2">
+                  <span className="text-[#6B3A2A]">Official Receipt No:</span>
+                  <span className="font-mono font-bold text-[#E65C00]">{receipt.receiptNo}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#6B3A2A]">Donor Name:</span>
+                  <span className="font-semibold text-[#3D1A00]">{receipt.donorName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#6B3A2A]">Amount:</span>
+                  <span className="font-black text-base text-emerald-600">£{receipt.amount}.00 GBP</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#6B3A2A]">Selected Cause:</span>
+                  <span className="font-semibold text-[#3D1A00] text-right max-w-[200px]">{receipt.cause}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#6B3A2A]">Transaction Date:</span>
+                  <span className="text-[#3D1A00]">{receipt.date}</span>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-[#6B3A2A]">
+                A Stripe receipt has been emailed to <strong className="text-[#E65C00]">{receipt.donorEmail}</strong>
+              </p>
             </div>
-            <h2 className="text-2xl font-black text-[#3D1A00] font-cinzel">
-              Thank You For Your Generosity!
-            </h2>
-            <p className="text-xs text-[#6B3A2A]">
-              Your contribution directly empowers the Telugu community across the United Kingdom.
-            </p>
 
-            <div className="bg-[#FFF0E0] p-5 rounded-2xl border border-[#E65C00]/25 text-left space-y-2 text-xs">
-              <div className="flex justify-between border-b border-[#E65C00]/15 pb-2">
-                <span className="text-[#6B3A2A]">Official Receipt No:</span>
-                <span className="font-mono font-bold text-[#E65C00]">{receipt.receiptNo}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#6B3A2A]">Donor Name:</span>
-                <span className="font-semibold text-[#3D1A00]">{receipt.donorName}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#6B3A2A]">Amount:</span>
-                <span className="font-black text-base text-emerald-600">£{receipt.amount}.00 GBP</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#6B3A2A]">Selected Cause:</span>
-                <span className="font-semibold text-[#3D1A00] text-right max-w-[200px]">{receipt.cause}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#6B3A2A]">Transaction Date:</span>
-                <span className="text-[#3D1A00]">{receipt.date}</span>
-              </div>
+            <div className="p-4 sm:p-5 border-t border-[#E65C00]/15 shrink-0 bg-[#FFF8F0]">
+              <button
+                onClick={() => { setReceipt(null); setStep('details'); onClose(); }}
+                className="w-full bg-[#E65C00] hover:bg-[#FF7A00] text-white font-bold py-3 rounded-xl text-sm transition-all shadow cursor-pointer"
+              >
+                Done / Return to Portal
+              </button>
             </div>
-
-            <p className="text-[11px] text-[#6B3A2A]">
-              A Stripe receipt has been emailed to <strong className="text-[#E65C00]">{receipt.donorEmail}</strong>
-            </p>
-
-            <button
-              onClick={() => { setReceipt(null); setStep('details'); onClose(); }}
-              className="w-full bg-[#E65C00] hover:bg-[#FF7A00] text-white font-bold py-3 rounded-xl text-sm transition-all shadow"
-            >
-              Done / Return to Portal
-            </button>
           </div>
 
         /* ── GUEST DETAILS (not logged in) ─────────────────────────────── */
         ) : step === 'guest-details' ? (
-          <form onSubmit={handleGuestSubmit} className="space-y-5">
+          <form onSubmit={handleGuestSubmit} className="flex flex-col h-full overflow-hidden">
             {/* Header */}
-            <div className="flex items-center gap-3 border-b border-[#E65C00]/25 pb-3">
-              <div className="p-3 bg-[#FFF0E0] text-[#E65C00] rounded-2xl shadow-sm border border-[#E65C00]/30">
-                <Heart className="w-6 h-6 fill-current" />
+            <div className="p-5 sm:p-6 pb-3.5 border-b border-[#E65C00]/25 pr-12 shrink-0 bg-[#FFF8F0]">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-[#FFF0E0] text-[#E65C00] rounded-2xl shadow-sm border border-[#E65C00]/30">
+                  <Heart className="w-5 h-5 fill-current" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black font-cinzel gold-foil-text">MAKE A BOOKING</h2>
+                  <p className="text-xs text-[#6B3A2A]">Quick details — no account needed</p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl font-black font-cinzel gold-foil-text">MAKE A BOOKING</h2>
-                <p className="text-xs text-[#6B3A2A]">Quick details — no account needed</p>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-xs">
+              {/* Info banner */}
+              <div className="bg-[#FFF0E0] border border-[#E65C00]/25 rounded-xl p-3 flex items-start gap-2.5">
+                <Sparkles className="w-4 h-4 text-[#E65C00] shrink-0 mt-0.5" />
+                <p className="text-[11px] text-[#6B3A2A] leading-relaxed">
+                  Enter your details below. We'll create your free MITRA account instantly and email your login credentials — then take you straight to payment.
+                </p>
               </div>
-            </div>
 
-            {/* Info banner */}
-            <div className="bg-[#FFF0E0] border border-[#E65C00]/25 rounded-xl p-3 flex items-start gap-2.5">
-              <Sparkles className="w-4 h-4 text-[#E65C00] shrink-0 mt-0.5" />
-              <p className="text-[11px] text-[#6B3A2A] leading-relaxed">
-                Enter your details below. We'll create your free MITRA account instantly and email your login credentials — then take you straight to payment.
-              </p>
-            </div>
-
-            {/* Name */}
-            <div>
-              <label className="flex items-center gap-1.5 text-xs font-bold text-[#6B3A2A] mb-1.5">
-                <User className="w-3.5 h-3.5 text-[#E65C00]" />
-                <span>Full Name *</span>
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Radhika &amp; Family"
-                value={guestName}
-                onChange={(e) => setGuestName(e.target.value)}
-                className="w-full bg-white border border-[#E65C00]/30 rounded-xl p-2.5 text-xs text-[#3D1A00] focus:border-[#E65C00] focus:outline-none placeholder:text-[#6B3A2A]/40"
-              />
-            </div>
-
-            {/* Email + Phone */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Name */}
               <div>
                 <label className="flex items-center gap-1.5 text-xs font-bold text-[#6B3A2A] mb-1.5">
-                  <Mail className="w-3.5 h-3.5 text-[#E65C00]" />
-                  <span>Email Address *</span>
+                  <User className="w-3.5 h-3.5 text-[#E65C00]" />
+                  <span>Full Name *</span>
                 </label>
                 <input
-                  type="email"
+                  type="text"
                   required
-                  placeholder="devotee@example.com"
-                  value={guestEmail}
-                  onChange={(e) => setGuestEmail(e.target.value)}
+                  placeholder="e.g. Radhika &amp; Family"
+                  value={guestName}
+                  onChange={(e) => setGuestName(e.target.value)}
                   className="w-full bg-white border border-[#E65C00]/30 rounded-xl p-2.5 text-xs text-[#3D1A00] focus:border-[#E65C00] focus:outline-none placeholder:text-[#6B3A2A]/40"
                 />
               </div>
-              <div>
-                <label className="flex items-center gap-1.5 text-xs font-bold text-[#6B3A2A] mb-1.5">
-                  <Phone className="w-3.5 h-3.5 text-[#E65C00]" />
-                  <span>Phone / WhatsApp *</span>
-                </label>
-                <input
-                  type="tel"
-                  required
-                  placeholder="+44 7000 000000"
-                  value={guestPhone}
-                  onChange={(e) => setGuestPhone(e.target.value)}
-                  className="w-full bg-white border border-[#E65C00]/30 rounded-xl p-2.5 text-xs text-[#3D1A00] focus:border-[#E65C00] focus:outline-none placeholder:text-[#6B3A2A]/40"
-                />
+
+              {/* Email + Phone */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="flex items-center gap-1.5 text-xs font-bold text-[#6B3A2A] mb-1.5">
+                    <Mail className="w-3.5 h-3.5 text-[#E65C00]" />
+                    <span>Email Address *</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="devotee@example.com"
+                    value={guestEmail}
+                    onChange={(e) => setGuestEmail(e.target.value)}
+                    className="w-full bg-white border border-[#E65C00]/30 rounded-xl p-2.5 text-xs text-[#3D1A00] focus:border-[#E65C00] focus:outline-none placeholder:text-[#6B3A2A]/40"
+                  />
+                </div>
+                <div>
+                  <label className="flex items-center gap-1.5 text-xs font-bold text-[#6B3A2A] mb-1.5">
+                    <Phone className="w-3.5 h-3.5 text-[#E65C00]" />
+                    <span>Phone / WhatsApp *</span>
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    placeholder="+44 7000 000000"
+                    value={guestPhone}
+                    onChange={(e) => setGuestPhone(e.target.value)}
+                    className="w-full bg-white border border-[#E65C00]/30 rounded-xl p-2.5 text-xs text-[#3D1A00] focus:border-[#E65C00] focus:outline-none placeholder:text-[#6B3A2A]/40"
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Guest error */}
-            {guestError && (
-              <div className="bg-red-50 border border-red-300 text-red-700 text-xs p-3 rounded-xl flex items-start gap-2 font-semibold">
-                <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-                <span>{guestError}</span>
-              </div>
-            )}
-
-            <div className="text-[11px] text-[#6B3A2A] flex items-center justify-center gap-1.5">
-              <Lock className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Your details are kept private · PCI-DSS Encrypted</span>
-            </div>
-
-            <button
-              type="submit"
-              disabled={guestSubmitting}
-              className="gold-button w-full py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {guestSubmitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 text-white animate-spin" />
-                  <span>Setting up your account...</span>
-                </>
-              ) : (
-                <>
-                  <Heart className="w-4 h-4 fill-current text-white" />
-                  <span>Continue to Booking →</span>
-                </>
+              {/* Guest error */}
+              {guestError && (
+                <div className="bg-red-50 border border-red-300 text-red-700 text-xs p-3 rounded-xl flex items-start gap-2 font-semibold">
+                  <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                  <span>{guestError}</span>
+                </div>
               )}
-            </button>
+            </div>
+
+            <div className="p-4 sm:p-5 border-t border-[#E65C00]/15 shrink-0 bg-[#FFF8F0] space-y-2">
+              <div className="text-[11px] text-[#6B3A2A] flex items-center justify-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Your details are kept private · PCI-DSS Encrypted</span>
+              </div>
+
+              <button
+                type="submit"
+                disabled={guestSubmitting}
+                className="gold-button w-full py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+              >
+                {guestSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 text-white animate-spin" />
+                    <span>Setting up your account...</span>
+                  </>
+                ) : (
+                  <>
+                    <Heart className="w-4 h-4 fill-current text-white" />
+                    <span>Continue to Booking →</span>
+                  </>
+                )}
+              </button>
+            </div>
           </form>
 
         /* ── STEP 1: DETAILS FORM ──────────────────────────────────────── */
         ) : step === 'details' ? (
-          <form onSubmit={handleDetailsSubmit} className="space-y-5">
+          <form onSubmit={handleDetailsSubmit} className="flex flex-col h-full overflow-hidden">
             {/* Header */}
-            <div className="flex items-center gap-3 border-b border-[#E65C00]/25 pb-3">
-              <div className="p-3 bg-[#FFF0E0] text-[#E65C00] rounded-2xl shadow-sm border border-[#E65C00]/30">
-                <Heart className="w-6 h-6 fill-current" />
-              </div>
-              <div>
-                <h2 className="text-xl font-black font-cinzel gold-foil-text">
-                  MAKE A BOOKING
-                </h2>
-                <p className="text-xs text-[#6B3A2A]">
-                  MITRA UK &amp; Mahotsav Seva Contributions
-                </p>
+            <div className="p-5 sm:p-6 pb-3.5 border-b border-[#E65C00]/25 pr-12 shrink-0 bg-[#FFF8F0]">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-[#FFF0E0] text-[#E65C00] rounded-2xl shadow-sm border border-[#E65C00]/30">
+                  <Heart className="w-5 h-5 fill-current text-[#E65C00]" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black font-cinzel gold-foil-text">
+                    MAKE A BOOKING
+                  </h2>
+                  <p className="text-xs text-[#6B3A2A]">
+                    MITRA UK &amp; Mahotsav Seva Contributions
+                  </p>
+                </div>
               </div>
             </div>
 
-            {/* Category Selection */}
+            <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-xs">
+              {/* Category Selection */}
             <div>
               <label className="block text-xs font-bold text-[#E65C00] uppercase tracking-wider mb-2">
                 Event category
@@ -689,32 +709,37 @@ export default function DonationModal({
               </div>
             )}
 
-            <div className="text-[11px] text-[#6B3A2A] flex items-center justify-center gap-1.5">
-              <Lock className="w-3.5 h-3.5 text-emerald-600" />
-              <span>PCI-DSS Encrypted · Powered by Stripe</span>
             </div>
 
-            <button
-              type="submit"
-              disabled={submitting || !getFinalAmount() || getFinalAmount() <= 0}
-              className="gold-button w-full py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 text-white animate-spin" />
-                  <span>Preparing Secure Payment...</span>
-                </>
-              ) : getFinalAmount() && getFinalAmount() > 0 ? (
-                <>
-                  <Heart className="w-4 h-4 fill-current text-white" />
-                  <span>
-                    Proceed to Pay £{getFinalAmount()}.00
-                  </span>
-                </>
-              ) : (
-                <span>Please enter amount</span>
-              )}
-            </button>
+            {/* Pinned Footer */}
+            <div className="p-4 sm:p-5 border-t border-[#E65C00]/15 shrink-0 bg-[#FFF8F0] space-y-2">
+              <div className="text-[11px] text-[#6B3A2A] flex items-center justify-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-emerald-600" />
+                <span>PCI-DSS Encrypted · Powered by Stripe</span>
+              </div>
+
+              <button
+                type="submit"
+                disabled={submitting || !getFinalAmount() || getFinalAmount() <= 0}
+                className="gold-button w-full py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 text-white animate-spin" />
+                    <span>Preparing Secure Payment...</span>
+                  </>
+                ) : getFinalAmount() && getFinalAmount() > 0 ? (
+                  <>
+                    <Heart className="w-4 h-4 fill-current text-white" />
+                    <span>
+                      Proceed to Pay £{getFinalAmount()}.00
+                    </span>
+                  </>
+                ) : (
+                  <span>Please enter amount</span>
+                )}
+              </button>
+            </div>
           </form>
 
         /* ── STEP 2: STRIPE PAYMENT ELEMENT ────────────────────────────── */

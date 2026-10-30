@@ -1579,7 +1579,7 @@ export default function AdminEventsPage() {
       {/* ── EDIT EVENT & EVENT FEATURED MEDIA MODAL ── */}
       {editingEvent && (
         <div 
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-hidden"
           onClick={closeEditModal}
         >
           <div 

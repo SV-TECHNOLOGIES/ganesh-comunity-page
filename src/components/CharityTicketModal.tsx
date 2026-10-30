@@ -53,59 +53,71 @@ export default function CharityTicketModal({ isOpen, onClose }: { isOpen: boolea
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-mitra-gold/40 relative max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full shadow-2xl border border-mitra-gold/40 relative max-h-[90vh] flex flex-col overflow-hidden">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-white p-1"
+          className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-white p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors z-30"
+          aria-label="Close dialog"
         >
           <X className="w-6 h-6" />
         </button>
 
         {createdCase ? (
-          <div className="text-center py-6 space-y-4">
-            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-md">
-              <CheckCircle2 className="w-10 h-10" />
+          <div className="flex flex-col h-full overflow-hidden">
+            <div className="flex-1 overflow-y-auto p-6 sm:p-8 text-center py-6 space-y-4">
+              <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-md">
+                <CheckCircle2 className="w-10 h-10" />
+              </div>
+              <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">
+                Help Request Submitted
+              </h2>
+              <p className="text-sm text-slate-600 dark:text-slate-300">
+                Your ticket has been logged into the MITRA Charity Case Queue. A committee welfare officer will reach out confidentially.
+              </p>
+              <div className="bg-mitra-navy/5 dark:bg-slate-800 p-4 rounded-2xl border border-mitra-gold/30">
+                <span className="text-xs font-semibold text-slate-500 uppercase block mb-1">Your Ticket Reference Number</span>
+                <span className="text-2xl font-black text-mitra-red dark:text-mitra-gold tracking-widest">{createdCase.id}</span>
+              </div>
+              <div className="text-xs text-slate-500 flex items-center justify-center gap-1">
+                <Lock className="w-3.5 h-3.5" />
+                <span>Confidentiality Protocol Active</span>
+              </div>
             </div>
-            <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">
-              Help Request Submitted
-            </h2>
-            <p className="text-sm text-slate-600 dark:text-slate-300">
-              Your ticket has been logged into the MITRA Charity Case Queue. A committee welfare officer will reach out confidentially.
-            </p>
-            <div className="bg-mitra-navy/5 dark:bg-slate-800 p-4 rounded-2xl border border-mitra-gold/30">
-              <span className="text-xs font-semibold text-slate-500 uppercase block mb-1">Your Ticket Reference Number</span>
-              <span className="text-2xl font-black text-mitra-red dark:text-mitra-gold tracking-widest">{createdCase.id}</span>
+
+            <div className="p-4 sm:p-5 border-t border-slate-100 dark:border-slate-800 shrink-0 bg-white dark:bg-slate-900">
+              <button
+                onClick={() => {
+                  setCreatedCase(null);
+                  onClose();
+                }}
+                className="w-full bg-mitra-red hover:bg-mitra-red-dark text-white font-bold py-3 rounded-xl text-sm shadow transition-all cursor-pointer"
+              >
+                Close Window
+              </button>
             </div>
-            <div className="text-xs text-slate-500 flex items-center justify-center gap-1">
-              <Lock className="w-3.5 h-3.5" />
-              <span>Confidentiality Protocol Active</span>
-            </div>
-            <button
-              onClick={() => {
-                setCreatedCase(null);
-                onClose();
-              }}
-              className="mt-4 bg-mitra-red hover:bg-mitra-red-dark text-white font-bold px-8 py-3 rounded-xl text-sm shadow transition-all"
-            >
-              Close Window
-            </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div className="p-2.5 bg-mitra-red/10 text-mitra-red rounded-2xl">
-                <ShieldAlert className="w-6 h-6" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                  Request for Help / Welfare Support
-                </h2>
-                <p className="text-xs text-slate-500">
-                  Confidential support provided by MITRA Committee Welfare Officers.
-                </p>
+          <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
+            {/* Pinned Header */}
+            <div className="p-5 sm:p-6 pb-3.5 border-b border-slate-100 dark:border-slate-800 pr-12 shrink-0 bg-white dark:bg-slate-900">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-mitra-red/10 text-mitra-red rounded-2xl">
+                  <ShieldAlert className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                    Request for Help / Welfare Support
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    Confidential support provided by MITRA Committee Welfare Officers.
+                  </p>
+                </div>
               </div>
             </div>
+
+            {/* Scrollable Form Body */}
+            <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-xs">
 
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
@@ -193,15 +205,19 @@ export default function CharityTicketModal({ isOpen, onClose }: { isOpen: boolea
                 Strictly Confidential (Restricted to Welfare Committee Lead only)
               </label>
             </div>
+          </div>
 
+          {/* Pinned Footer */}
+          <div className="p-4 sm:p-5 border-t border-slate-100 dark:border-slate-800 shrink-0 bg-white dark:bg-slate-900">
             <button
               type="submit"
-              className="w-full bg-mitra-red hover:bg-mitra-red-dark text-white font-bold py-3 rounded-xl text-sm shadow-md transition-all flex items-center justify-center gap-2 mt-4"
+              className="w-full bg-mitra-red hover:bg-mitra-red-dark text-white font-bold py-3 rounded-xl text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <Sparkles className="w-4 h-4 text-mitra-gold" />
               <span>Submit Help Ticket</span>
             </button>
-          </form>
+          </div>
+        </form>
         )}
       </div>
     </div>

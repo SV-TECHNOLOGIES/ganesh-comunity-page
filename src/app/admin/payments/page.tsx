@@ -1039,30 +1039,34 @@ export default function AdminPaymentsPage() {
       </div>
 
       {/* Detail View Modal for Full Devotee & Sankalpam Info */}
+      {/* Detail View Modal for Full Devotee & Sankalpam Info */}
       {selectedPaymentDetail && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-          <div className="temple-card max-w-lg w-full p-6 sm:p-8 rounded-3xl border-2 border-[#E65C00]/40 relative space-y-6 shadow-2xl bg-[#FFF8F0] my-8 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-hidden">
+          <div className="temple-card max-w-lg w-full rounded-3xl border-2 border-[#E65C00]/40 relative shadow-2xl bg-[#FFF8F0] max-h-[90vh] flex flex-col overflow-hidden">
             {/* Close */}
             <button
               onClick={() => setSelectedPaymentDetail(null)}
-              className="absolute top-5 right-5 text-[#6B3A2A] hover:text-[#E65C00] p-1.5 rounded-full hover:bg-[#FFF0E0] transition-colors"
+              className="absolute top-4 right-4 text-[#6B3A2A] hover:text-[#E65C00] p-1.5 rounded-full hover:bg-[#FFF0E0] transition-colors z-30"
+              aria-label="Close dialog"
             >
               <X className="w-5 h-5" />
             </button>
 
-            {/* Header */}
-            <div className="border-b border-[#E65C00]/20 pb-4 space-y-1">
+            {/* Pinned Header */}
+            <div className="border-b border-[#E65C00]/20 p-5 sm:p-6 pb-4 space-y-1 shrink-0 bg-[#FFF8F0] pr-12">
               <span className="inline-block bg-[#FFF0E0] text-[#E65C00] border border-[#E65C00]/30 font-black px-3 py-1 rounded-full text-[10px] uppercase tracking-wider">
                 {selectedPaymentDetail.donationType || 'Pooja / Seva'}
               </span>
               <h3 className="text-xl font-black font-cinzel text-[#3D1A00]">
-                Payment &amp; Devotee Sankalpam
+                Payment & Devotee Sankalpam
               </h3>
               <p className="text-xs text-[#6B3A2A]">
                 Transaction Ref: <strong className="font-mono text-[#E65C00]">{selectedPaymentDetail.id}</strong>
               </p>
             </div>
 
+            {/* Scrollable Body */}
+            <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-xs">
             {/* Detailed Key-Values */}
             <div className="bg-white p-5 rounded-2xl border border-[#E65C00]/20 space-y-3 text-xs">
               <div className="flex justify-between border-b border-[#E65C00]/10 pb-2">
@@ -1172,6 +1176,10 @@ export default function AdminPaymentsPage() {
               </div>
             </div>
 
+            </div>
+
+            {/* Pinned Footer */}
+            <div className="p-4 sm:p-5 border-t border-[#E65C00]/15 shrink-0 bg-[#FFF8F0] space-y-2">
             {!selectedPaymentDetail.hasRsvp && selectedPaymentDetail.eventId && (
               <button
                 onClick={() => handleCreateRsvp(selectedPaymentDetail)}
@@ -1189,6 +1197,7 @@ export default function AdminPaymentsPage() {
             >
               Close Details
             </button>
+            </div>
           </div>
         </div>
       )}

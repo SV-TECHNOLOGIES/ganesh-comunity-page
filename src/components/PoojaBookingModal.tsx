@@ -328,61 +328,67 @@ function CheckoutForm({
   };
 
   return (
-    <form onSubmit={handleConfirm} className="space-y-5">
-      <button
-        type="button"
-        onClick={onBack}
-        disabled={processing}
-        className="flex items-center gap-1.5 text-xs text-[#6B3A2A] hover:text-[#E65C00] transition-colors"
-      >
-        <ArrowLeft className="w-3.5 h-3.5" />
-        <span>Change booking details</span>
-      </button>
+    <form onSubmit={handleConfirm} className="flex flex-col h-full overflow-hidden">
+      <div className="p-5 sm:p-6 pb-3 border-b border-[#E65C00]/25 shrink-0 bg-[#FFF8F0] space-y-3">
+        <button
+          type="button"
+          onClick={onBack}
+          disabled={processing}
+          className="flex items-center gap-1.5 text-xs text-[#6B3A2A] hover:text-[#E65C00] transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Change booking details</span>
+        </button>
 
-      <div className="bg-[#FFF0E0] border border-[#E65C00]/25 rounded-2xl p-4 flex items-center justify-between">
-        <div className="space-y-0.5 max-w-[220px]">
-          <span className="block text-xs font-bold text-[#E65C00]">Pooja Seva Booking</span>
-          <span className="block text-[11px] text-[#6B3A2A] truncate">{cause}</span>
+        <div className="bg-[#FFF0E0] border border-[#E65C00]/25 rounded-2xl p-3.5 flex items-center justify-between">
+          <div className="space-y-0.5 max-w-[220px]">
+            <span className="block text-xs font-bold text-[#E65C00]">Pooja Seva Booking</span>
+            <span className="block text-[11px] text-[#6B3A2A] truncate">{cause}</span>
+          </div>
+          <span className="text-2xl font-black font-cinzel text-[#E65C00]">£{amount}.00</span>
         </div>
-        <span className="text-2xl font-black font-cinzel text-[#E65C00]">£{amount}.00</span>
       </div>
 
-      <PaymentElement
-        options={{
-          layout: 'tabs',
-          paymentMethodOrder: ['card', 'apple_pay', 'google_pay'],
-        }}
-      />
+      <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
+        <PaymentElement
+          options={{
+            layout: 'tabs',
+            paymentMethodOrder: ['card', 'apple_pay', 'google_pay'],
+          }}
+        />
 
-      {paymentError && (
-        <div className="bg-red-50 border border-red-300 text-red-700 text-xs p-3 rounded-xl flex items-start gap-2 font-semibold">
-          <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-          <span>{paymentError}</span>
-        </div>
-      )}
-
-      <div className="text-[11px] text-[#6B3A2A] flex items-center justify-center gap-1.5 font-semibold">
-        <Lock className="w-3.5 h-3.5 text-emerald-600" />
-        <span>PCI-DSS Encrypted · Powered by Stripe</span>
-      </div>
-
-      <button
-        type="submit"
-        disabled={!stripe || !elements || processing}
-        className="gold-button w-full py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
-      >
-        {processing ? (
-          <>
-            <Loader2 className="w-4 h-4 text-white animate-spin" />
-            <span>Confirming Sacred Booking...</span>
-          </>
-        ) : (
-          <>
-            <Flame className="w-4 h-4 fill-current text-white" />
-            <span>Complete Pooja Seva (£{amount}.00)</span>
-          </>
+        {paymentError && (
+          <div className="bg-red-50 border border-red-300 text-red-700 text-xs p-3 rounded-xl flex items-start gap-2 font-semibold">
+            <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+            <span>{paymentError}</span>
+          </div>
         )}
-      </button>
+      </div>
+
+      <div className="p-4 sm:p-5 border-t border-[#E65C00]/15 shrink-0 bg-[#FFF8F0] space-y-2">
+        <div className="text-[11px] text-[#6B3A2A] flex items-center justify-center gap-1.5 font-semibold">
+          <Lock className="w-3.5 h-3.5 text-emerald-600" />
+          <span>PCI-DSS Encrypted · Powered by Stripe</span>
+        </div>
+
+        <button
+          type="submit"
+          disabled={!stripe || !elements || processing}
+          className="gold-button w-full py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+        >
+          {processing ? (
+            <>
+              <Loader2 className="w-4 h-4 text-white animate-spin" />
+              <span>Confirming Sacred Booking...</span>
+            </>
+          ) : (
+            <>
+              <Flame className="w-4 h-4 fill-current text-white" />
+              <span>Complete Pooja Seva (£{amount}.00)</span>
+            </>
+          )}
+        </button>
+      </div>
     </form>
   );
 }
@@ -785,212 +791,217 @@ export default function PoojaBookingModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-hidden">
       <div
-        className="temple-card rounded-3xl max-w-xl w-full p-5 sm:p-7 shadow-xl border-2 border-[#E65C00]/30 relative max-h-[92vh] overflow-y-auto"
-        style={{ background: '#FFF8F0' }}
+        className="temple-card rounded-3xl max-w-xl w-full shadow-2xl border-2 border-[#E65C00]/30 relative max-h-[90vh] flex flex-col overflow-hidden bg-[#FFF8F0]"
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-[#6B3A2A] hover:text-[#E65C00] p-1.5 rounded-full hover:bg-white/5 transition-colors z-10"
+          className="absolute top-4 right-4 text-[#6B3A2A] hover:text-[#E65C00] p-1.5 rounded-full hover:bg-[#FFF0E0] transition-colors z-30"
+          aria-label="Close dialog"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* ── SUCCESS ───────────────────────────────────────────────────── */}
         {step === 'success' && receipt ? (
-          <div className="text-center py-4 space-y-4">
-            <div className="w-16 h-16 bg-emerald-50 text-emerald-600 border border-emerald-500/50 rounded-full flex items-center justify-center mx-auto shadow-sm">
-              <CheckCircle2 className="w-10 h-10" />
-            </div>
-            <h2 className="text-2xl font-black text-[#3D1A00] font-cinzel">
-              Pooja Seva Confirmed!
-            </h2>
-            <p className="text-xs text-[#6B3A2A]">
-              May Lord Ganesha shower your family with health, wealth, and obstacles removal.
-            </p>
+          <div className="flex flex-col h-full overflow-hidden">
+            <div className="flex-1 overflow-y-auto p-5 sm:p-6 text-center py-4 space-y-4">
+              <div className="w-16 h-16 bg-emerald-50 text-emerald-600 border border-emerald-500/50 rounded-full flex items-center justify-center mx-auto shadow-sm">
+                <CheckCircle2 className="w-10 h-10" />
+              </div>
+              <h2 className="text-2xl font-black text-[#3D1A00] font-cinzel">
+                Pooja Seva Confirmed!
+              </h2>
+              <p className="text-xs text-[#6B3A2A]">
+                May Lord Ganesha shower your family with health, wealth, and obstacles removal.
+              </p>
 
-            <div className="bg-[#FFF0E0] p-5 rounded-2xl border border-[#E65C00]/25 text-left space-y-2.5 text-xs">
-              <div className="flex justify-between border-b border-[#E65C00]/15 pb-2">
-                <span className="text-[#6B3A2A]">Pooja Booking Receipt:</span>
-                <span className="font-mono font-bold text-[#E65C00]">{receipt.receiptNo}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#6B3A2A]">Seva Category:</span>
-                <span className="font-black text-[#E65C00] bg-white px-2 py-0.5 rounded-md border border-[#E65C00]/20">
-                  {selectedCategory.name}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#6B3A2A]">Timing / Day:</span>
-                <span className="font-bold text-[#3D1A00]">
-                  {isArchana ? 'All 7 Days (14th – 20th Sep)' : `${selectedDateObj.date} (${selectedDateObj.day})`}
-                </span>
-              </div>
-              {!isArchana && (
-                <div className="flex justify-between">
-                  <span className="text-[#6B3A2A]">Ritual Deity:</span>
-                  <span className="font-semibold text-[#3D1A00]">{selectedDateObj.title}</span>
+              <div className="bg-[#FFF0E0] p-5 rounded-2xl border border-[#E65C00]/25 text-left space-y-2.5 text-xs">
+                <div className="flex justify-between border-b border-[#E65C00]/15 pb-2">
+                  <span className="text-[#6B3A2A]">Pooja Booking Receipt:</span>
+                  <span className="font-mono font-bold text-[#E65C00]">{receipt.receiptNo}</span>
                 </div>
-              )}
-              <div className="flex justify-between">
-                <span className="text-[#6B3A2A]">Devotee / Yajamani:</span>
-                <span className="font-semibold text-[#3D1A00]">{receipt.donorName}</span>
-              </div>
-              {gotram && (
                 <div className="flex justify-between">
-                  <span className="text-[#6B3A2A]">Gotram:</span>
-                  <span className="font-semibold text-[#3D1A00]">{gotram}</span>
+                  <span className="text-[#6B3A2A]">Seva Category:</span>
+                  <span className="font-black text-[#E65C00] bg-white px-2 py-0.5 rounded-md border border-[#E65C00]/20">
+                    {selectedCategory.name}
+                  </span>
                 </div>
-              )}
-              <div className="flex justify-between border-t border-[#E65C00]/15 pt-2">
-                <span className="text-[#6B3A2A]">Total Seva Paid:</span>
-                <span className="font-black text-base text-emerald-600">£{receipt.amount}.00 GBP</span>
+                <div className="flex justify-between">
+                  <span className="text-[#6B3A2A]">Timing / Day:</span>
+                  <span className="font-bold text-[#3D1A00]">
+                    {isArchana ? 'All 7 Days (14th – 20th Sep)' : `${selectedDateObj.date} (${selectedDateObj.day})`}
+                  </span>
+                </div>
+                {!isArchana && (
+                  <div className="flex justify-between">
+                    <span className="text-[#6B3A2A]">Ritual Deity:</span>
+                    <span className="font-semibold text-[#3D1A00]">{selectedDateObj.title}</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-[#6B3A2A]">Devotee / Yajamani:</span>
+                  <span className="font-semibold text-[#3D1A00]">{receipt.donorName}</span>
+                </div>
+                {gotram && (
+                  <div className="flex justify-between">
+                    <span className="text-[#6B3A2A]">Gotram:</span>
+                    <span className="font-semibold text-[#3D1A00]">{gotram}</span>
+                  </div>
+                )}
+                <div className="flex justify-between border-t border-[#E65C00]/15 pt-2">
+                  <span className="text-[#6B3A2A]">Total Seva Paid:</span>
+                  <span className="font-black text-base text-emerald-600">£{receipt.amount}.00 GBP</span>
+                </div>
               </div>
+
+              <p className="text-[11px] text-[#6B3A2A]">
+                A confirmation email with virtual Darshan details has been sent to{' '}
+                <strong className="text-[#E65C00]">{receipt.donorEmail}</strong>
+              </p>
             </div>
 
-            <p className="text-[11px] text-[#6B3A2A]">
-              A confirmation email with virtual Darshan details has been sent to{' '}
-              <strong className="text-[#E65C00]">{receipt.donorEmail}</strong>
-            </p>
-
-            <button
-              onClick={() => { setReceipt(null); setStep('details'); onClose(); }}
-              className="w-full bg-[#E65C00] hover:bg-[#FF7A00] text-white font-bold py-3 rounded-xl text-sm transition-all"
-            >
-              Done / Return to Portal
-            </button>
+            <div className="p-4 sm:p-5 border-t border-[#E65C00]/15 shrink-0 bg-[#FFF8F0]">
+              <button
+                onClick={() => { setReceipt(null); setStep('details'); onClose(); }}
+                className="w-full bg-[#E65C00] hover:bg-[#FF7A00] text-white font-bold py-3 rounded-xl text-sm transition-all cursor-pointer"
+              >
+                Done / Return to Portal
+              </button>
+            </div>
           </div>
 
         /* ── GUEST DETAILS (not logged in) ─────────────────────────────── */
         ) : step === 'guest-details' ? (
-          <form onSubmit={handleGuestSubmit} className="space-y-5">
+          <form onSubmit={handleGuestSubmit} className="flex flex-col h-full overflow-hidden">
             {/* Header */}
-            <div className="flex items-center gap-3 border-b border-[#E65C00]/25 pb-3">
-              <div className="p-3 bg-[#FFF0E0] text-[#E65C00] rounded-2xl shadow-sm border border-[#E65C00]/30">
-                <Flame className="w-6 h-6 fill-current text-[#E65C00]" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-lg sm:text-xl font-black font-cinzel gold-foil-text">SACRED POOJA &amp; ARCHANA</h2>
-                  {/* <span className="bg-[#E65C00] text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase">£{selectedCategory.amount} SEVA</span> */}
+            <div className="p-5 sm:p-6 pb-3.5 border-b border-[#E65C00]/25 pr-12 shrink-0 bg-[#FFF8F0]">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-[#FFF0E0] text-[#E65C00] rounded-2xl shadow-sm border border-[#E65C00]/30">
+                  <Flame className="w-5 h-5 fill-current text-[#E65C00]" />
                 </div>
-                <p className="text-xs text-[#6B3A2A]">Quick details — no account needed</p>
+                <div>
+                  <h2 className="text-lg sm:text-xl font-black font-cinzel gold-foil-text">SACRED POOJA &amp; ARCHANA</h2>
+                  <p className="text-xs text-[#6B3A2A]">Quick details — no account needed</p>
+                </div>
               </div>
             </div>
 
-            {/* Info banner */}
-            <div className="bg-[#FFF0E0] border border-[#E65C00]/25 rounded-xl p-3 flex items-start gap-2.5">
-              <Sparkles className="w-4 h-4 text-[#E65C00] shrink-0 mt-0.5" />
-              <p className="text-[11px] text-[#6B3A2A] leading-relaxed">
-                Enter your details below. We'll create your free MITRA account instantly and email your login credentials — then take you straight to your Pooja booking.
-              </p>
-            </div>
+            <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-xs">
+              {/* Info banner */}
+              <div className="bg-[#FFF0E0] border border-[#E65C00]/25 rounded-xl p-3 flex items-start gap-2.5">
+                <Sparkles className="w-4 h-4 text-[#E65C00] shrink-0 mt-0.5" />
+                <p className="text-[11px] text-[#6B3A2A] leading-relaxed">
+                  Enter your details below. We'll create your free MITRA account instantly and email your login credentials — then take you straight to your Pooja booking.
+                </p>
+              </div>
 
-            {/* Name */}
-            <div>
-              <label className="flex items-center gap-1.5 text-xs font-bold text-[#6B3A2A] mb-1.5">
-                <User className="w-3.5 h-3.5 text-[#E65C00]" />
-                <span>Full Name / Yajamani Name *</span>
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Suresh Kumar"
-                value={guestName}
-                onChange={(e) => setGuestName(e.target.value)}
-                className="w-full bg-white border border-[#E65C00]/30 rounded-xl p-2.5 text-xs text-[#3D1A00] focus:border-[#E65C00] focus:outline-none placeholder:text-[#6B3A2A]/40"
-              />
-            </div>
-
-            {/* Email + Phone */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Name */}
               <div>
                 <label className="flex items-center gap-1.5 text-xs font-bold text-[#6B3A2A] mb-1.5">
-                  <Mail className="w-3.5 h-3.5 text-[#E65C00]" />
-                  <span>Email Address *</span>
+                  <User className="w-3.5 h-3.5 text-[#E65C00]" />
+                  <span>Full Name / Yajamani Name *</span>
                 </label>
                 <input
-                  type="email"
+                  type="text"
                   required
-                  placeholder="devotee@example.com"
-                  value={guestEmail}
-                  onChange={(e) => setGuestEmail(e.target.value)}
+                  placeholder="e.g. Suresh Kumar"
+                  value={guestName}
+                  onChange={(e) => setGuestName(e.target.value)}
                   className="w-full bg-white border border-[#E65C00]/30 rounded-xl p-2.5 text-xs text-[#3D1A00] focus:border-[#E65C00] focus:outline-none placeholder:text-[#6B3A2A]/40"
                 />
               </div>
-              <div>
-                <label className="flex items-center gap-1.5 text-xs font-bold text-[#6B3A2A] mb-1.5">
-                  <Phone className="w-3.5 h-3.5 text-[#E65C00]" />
-                  <span>Phone / WhatsApp *</span>
-                </label>
-                <input
-                  type="tel"
-                  required
-                  placeholder="+44 7000 000000"
-                  value={guestPhone}
-                  onChange={(e) => setGuestPhone(e.target.value)}
-                  className="w-full bg-white border border-[#E65C00]/30 rounded-xl p-2.5 text-xs text-[#3D1A00] focus:border-[#E65C00] focus:outline-none placeholder:text-[#6B3A2A]/40"
-                />
+
+              {/* Email + Phone */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="flex items-center gap-1.5 text-xs font-bold text-[#6B3A2A] mb-1.5">
+                    <Mail className="w-3.5 h-3.5 text-[#E65C00]" />
+                    <span>Email Address *</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="devotee@example.com"
+                    value={guestEmail}
+                    onChange={(e) => setGuestEmail(e.target.value)}
+                    className="w-full bg-white border border-[#E65C00]/30 rounded-xl p-2.5 text-xs text-[#3D1A00] focus:border-[#E65C00] focus:outline-none placeholder:text-[#6B3A2A]/40"
+                  />
+                </div>
+                <div>
+                  <label className="flex items-center gap-1.5 text-xs font-bold text-[#6B3A2A] mb-1.5">
+                    <Phone className="w-3.5 h-3.5 text-[#E65C00]" />
+                    <span>Phone / WhatsApp *</span>
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    placeholder="+44 7000 000000"
+                    value={guestPhone}
+                    onChange={(e) => setGuestPhone(e.target.value)}
+                    className="w-full bg-white border border-[#E65C00]/30 rounded-xl p-2.5 text-xs text-[#3D1A00] focus:border-[#E65C00] focus:outline-none placeholder:text-[#6B3A2A]/40"
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Guest error */}
-            {guestError && (
-              <div className="bg-red-50 border border-red-300 text-red-700 text-xs p-3 rounded-xl flex items-start gap-2 font-semibold">
-                <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-                <span>{guestError}</span>
-              </div>
-            )}
-
-            <div className="text-[11px] text-[#6B3A2A] flex items-center justify-center gap-1.5">
-              <Lock className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Your details are kept private · PCI-DSS Encrypted</span>
-            </div>
-
-            <button
-              type="submit"
-              disabled={guestSubmitting}
-              className="gold-button w-full py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {guestSubmitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 text-white animate-spin" />
-                  <span>Setting up your account...</span>
-                </>
-              ) : (
-                <>
-                  <Flame className="w-4 h-4 fill-current text-white" />
-                  <span>Continue to Pooja Booking →</span>
-                </>
+              {/* Guest error */}
+              {guestError && (
+                <div className="bg-red-50 border border-red-300 text-red-700 text-xs p-3 rounded-xl flex items-start gap-2 font-semibold">
+                  <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                  <span>{guestError}</span>
+                </div>
               )}
-            </button>
+            </div>
+
+            <div className="p-4 sm:p-5 border-t border-[#E65C00]/15 shrink-0 bg-[#FFF8F0] space-y-2">
+              <div className="text-[11px] text-[#6B3A2A] flex items-center justify-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Your details are kept private · PCI-DSS Encrypted</span>
+              </div>
+
+              <button
+                type="submit"
+                disabled={guestSubmitting}
+                className="gold-button w-full py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+              >
+                {guestSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 text-white animate-spin" />
+                    <span>Setting up your account...</span>
+                  </>
+                ) : (
+                  <>
+                    <Flame className="w-4 h-4 fill-current text-white" />
+                    <span>Continue to Pooja Booking →</span>
+                  </>
+                )}
+              </button>
+            </div>
           </form>
 
         /* ── STEP 1: POOJA DETAILS FORM ─────────────────────────────────── */
         ) : step === 'details' ? (
-          <form onSubmit={handleDetailsSubmit} className="space-y-4 sm:space-y-5">
+          <form onSubmit={handleDetailsSubmit} className="flex flex-col h-full overflow-hidden">
             {/* Header */}
-            <div className="flex items-center gap-3 border-b border-[#E65C00]/25 pb-3">
-              <div className="p-3 bg-[#FFF0E0] text-[#E65C00] rounded-2xl shadow-sm border border-[#E65C00]/30">
-                <Flame className="w-6 h-6 fill-current text-[#E65C00]" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
+            <div className="p-5 sm:p-6 pb-3.5 border-b border-[#E65C00]/25 pr-12 shrink-0 bg-[#FFF8F0]">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-[#FFF0E0] text-[#E65C00] rounded-2xl shadow-sm border border-[#E65C00]/30">
+                  <Flame className="w-5 h-5 fill-current text-[#E65C00]" />
+                </div>
+                <div>
                   <h2 className="text-lg sm:text-xl font-black font-cinzel text-[#3D1A00]">
                     SACRED POOJA &amp; ARCHANA
                   </h2>
-                  {/* <span className="bg-[#E65C00] text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase">
-                    £{selectedCategory.amount} SEVA
-                  </span> */}
+                  <p className="text-xs text-[#6B3A2A]">
+                    London Ganesh Mahotsav 2026 · Slough Langley
+                  </p>
                 </div>
-                <p className="text-xs text-[#6B3A2A]">
-                  London Ganesh Mahotsav 2026 · Slough Langley
-                </p>
               </div>
             </div>
 
-            {/* 1. Category Selection */}
+            <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 sm:space-y-5 text-xs">
+              {/* 1. Category Selection */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <label className="block text-xs font-bold text-[#E65C00] uppercase tracking-wider flex items-center gap-1.5 font-cinzel">
@@ -1303,31 +1314,36 @@ export default function PoojaBookingModal({
               </div>
             )}
 
-            <div className="text-[11px] text-[#6B3A2A] flex items-center justify-center gap-1.5">
-              <Lock className="w-3.5 h-3.5 text-emerald-600" />
-              <span>PCI-DSS Encrypted · Powered by Stripe</span>
             </div>
 
-            <button
-              type="submit"
-              disabled={submitting}
-              className="gold-button w-full py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 text-white animate-spin" />
-                  <span>Preparing Secure Payment...</span>
-                </>
-              ) : (
-                <>
-                  <Flame className="w-4 h-4 fill-current text-white" />
-                  <span>
-                    Proceed to Pay £{selectedCategory.amount} for {selectedCategory.name}
-                    {!isArchana ? ` (${selectedDateObj.date})` : ''}
-                  </span>
-                </>
-              )}
-            </button>
+            {/* Pinned Footer */}
+            <div className="p-4 sm:p-5 border-t border-[#E65C00]/15 shrink-0 bg-[#FFF8F0] space-y-2">
+              <div className="text-[11px] text-[#6B3A2A] flex items-center justify-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-emerald-600" />
+                <span>PCI-DSS Encrypted · Powered by Stripe</span>
+              </div>
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="gold-button w-full py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 text-white animate-spin" />
+                    <span>Preparing Secure Payment...</span>
+                  </>
+                ) : (
+                  <>
+                    <Flame className="w-4 h-4 fill-current text-white" />
+                    <span>
+                      Proceed to Pay £{selectedCategory.amount} for {selectedCategory.name}
+                      {!isArchana ? ` (${selectedDateObj.date})` : ''}
+                    </span>
+                  </>
+                )}
+              </button>
+            </div>
           </form>
 
         /* ── STEP 2: STRIPE PAYMENT ELEMENT ────────────────────────────── */

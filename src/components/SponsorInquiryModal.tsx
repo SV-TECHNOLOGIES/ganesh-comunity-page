@@ -66,21 +66,22 @@ export default function SponsorInquiryModal({ isOpen, onClose }: SponsorInquiryM
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-      <div className="temple-card max-w-lg w-full p-6 sm:p-8 rounded-3xl border-2 border-[#E65C00]/40 relative space-y-6 shadow-2xl my-8 max-h-[90vh] overflow-y-auto bg-[#FFF8F0]">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-hidden">
+      <div className="temple-card max-w-lg w-full rounded-3xl border-2 border-[#E65C00]/40 relative shadow-2xl max-h-[90vh] flex flex-col overflow-hidden bg-[#FFF8F0]">
         
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-[#6B3A2A] hover:text-[#E65C00] p-2 rounded-full hover:bg-[#FFF0E0] transition-colors"
+          className="absolute top-4 right-4 text-[#6B3A2A] hover:text-[#E65C00] p-1.5 rounded-full hover:bg-[#FFF0E0] transition-colors z-30"
+          aria-label="Close dialog"
         >
           <X className="w-5 h-5" />
         </button>
 
         {!submitted ? (
-          <>
-            {/* Header */}
-            <div className="space-y-2 border-b border-[#E65C00]/25 pb-4 pr-8">
+          <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
+            {/* Pinned Header */}
+            <div className="p-5 sm:p-6 pb-3.5 border-b border-[#E65C00]/25 pr-12 shrink-0 bg-[#FFF8F0] space-y-1.5">
               <div className="inline-flex items-center gap-1.5 bg-[#FFF0E0] text-[#E65C00] px-3 py-1 rounded-full text-[10px] font-black uppercase border border-[#E65C00]/30 shadow-sm">
                 <Award className="w-3.5 h-3.5" />
                 <span>SPONSORSHIP &amp; PARTNERSHIP INQUIRY</span>
@@ -93,8 +94,8 @@ export default function SponsorInquiryModal({ isOpen, onClose }: SponsorInquiryM
               </p>
             </div>
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+            {/* Scrollable Form Body */}
+            <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-xs">
               
               {/* Company / Sponsor Name */}
               <div>
@@ -207,48 +208,56 @@ export default function SponsorInquiryModal({ isOpen, onClose }: SponsorInquiryM
                 </div>
               )}
 
+            </div>
+
+            {/* Pinned Footer */}
+            <div className="p-4 sm:p-5 border-t border-[#E65C00]/15 shrink-0 bg-[#FFF8F0]">
               <button
                 type="submit"
                 disabled={submitting}
-                className="gold-button w-full py-3.5 rounded-full font-black uppercase tracking-wider text-xs flex items-center justify-center gap-2"
+                className="gold-button w-full py-3.5 rounded-full font-black uppercase tracking-wider text-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
               >
                 <Send className="w-4 h-4 text-white" />
                 <span>{submitting ? 'Sending Sponsor Inquiry...' : 'Submit Sponsorship Inquiry via Email'}</span>
               </button>
-            </form>
-          </>
+            </div>
+          </form>
         ) : (
           /* Confirmation Screen */
-          <div className="text-center space-y-6 py-4">
-            <div className="w-16 h-16 rounded-full bg-[#FFF0E0] border-2 border-[#E65C00]/40 flex items-center justify-center mx-auto text-[#E65C00] shadow-sm">
-              <CheckCircle2 className="w-10 h-10" />
+          <div className="flex flex-col h-full overflow-hidden">
+            <div className="flex-1 overflow-y-auto p-6 sm:p-8 text-center space-y-6">
+              <div className="w-16 h-16 rounded-full bg-[#FFF0E0] border-2 border-[#E65C00]/40 flex items-center justify-center mx-auto text-[#E65C00] shadow-sm">
+                <CheckCircle2 className="w-10 h-10" />
+              </div>
+
+              <div className="space-y-2">
+                <span className="text-xs font-black font-cinzel text-[#E65C00] tracking-widest uppercase block">
+                  INQUIRY EMAIL SENT!
+                </span>
+                <h3 className="text-xl font-black text-[#3D1A00] font-cinzel">
+                  Thank You, {contactName}!
+                </h3>
+                <p className="text-xs text-[#6B3A2A] leading-relaxed max-w-sm mx-auto">
+                  Your sponsorship interest for <strong>{tier}</strong> has been emailed to the MITRA UK Executive Committee. A confirmation copy has been sent to <strong>{email}</strong>.
+                </p>
+              </div>
+
+              <div className="bg-[#FFF0E0] p-4 rounded-2xl border border-[#E65C00]/25 text-left text-xs space-y-1">
+                <p className="text-[#3D1A00] font-bold">What happens next?</p>
+                <p className="text-[#6B3A2A]">
+                  Our Sponsorship Lead will review your proposal and get in touch within 24 hours with our complete festival sponsorship package &amp; deliverables.
+                </p>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <span className="text-xs font-black font-cinzel text-[#E65C00] tracking-widest uppercase block">
-                INQUIRY EMAIL SENT!
-              </span>
-              <h3 className="text-xl font-black text-[#3D1A00] font-cinzel">
-                Thank You, {contactName}!
-              </h3>
-              <p className="text-xs text-[#6B3A2A] leading-relaxed max-w-sm mx-auto">
-                Your sponsorship interest for <strong>{tier}</strong> has been emailed to the MITRA UK Executive Committee. A confirmation copy has been sent to <strong>{email}</strong>.
-              </p>
+            <div className="p-4 sm:p-5 border-t border-[#E65C00]/15 shrink-0 bg-[#FFF8F0]">
+              <button
+                onClick={handleReset}
+                className="gold-button w-full py-3 rounded-full font-black uppercase tracking-wider text-xs cursor-pointer"
+              >
+                Done &amp; Close
+              </button>
             </div>
-
-            <div className="bg-[#FFF0E0] p-4 rounded-2xl border border-[#E65C00]/25 text-left text-xs space-y-1">
-              <p className="text-[#3D1A00] font-bold">What happens next?</p>
-              <p className="text-[#6B3A2A]">
-                Our Sponsorship Lead will review your proposal and get in touch within 24 hours with our complete festival sponsorship package &amp; deliverables.
-              </p>
-            </div>
-
-            <button
-              onClick={handleReset}
-              className="gold-button w-full py-3 rounded-full font-black uppercase tracking-wider text-xs"
-            >
-              Done &amp; Close
-            </button>
           </div>
         )}
 

@@ -646,10 +646,11 @@ export default function AdminSponsorsPage() {
       </div>
 
       {/* Add / Edit Sponsor Modal with Live Preview */}
+      {/* Add / Edit Sponsor Modal with Live Preview */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-          <div className="temple-card bg-white max-w-2xl w-full p-6 sm:p-8 rounded-3xl border-2 border-[#E65C00]/30 relative space-y-6 shadow-2xl my-8">
-            <div className="flex items-center justify-between border-b border-[#E65C00]/20 pb-4">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-hidden">
+          <div className="temple-card bg-white max-w-2xl w-full rounded-3xl border-2 border-[#E65C00]/30 relative shadow-2xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between border-b border-[#E65C00]/20 p-5 sm:p-6 pb-4 shrink-0 bg-white">
               <div>
                 <h3 className="text-xl font-black font-cinzel text-[#3D1A00]">
                   {editingId ? 'EDIT SPONSOR & ACCENT' : 'ADD NEW SPONSOR'}
@@ -660,13 +661,14 @@ export default function AdminSponsorsPage() {
               </div>
               <button
                 onClick={() => setModalOpen(false)}
-                className="text-sm font-black text-[#6B3A2A] hover:text-[#3D1A00] p-1.5"
+                className="text-sm font-black text-[#6B3A2A] hover:text-[#3D1A00] p-1.5 rounded-full hover:bg-[#FFF0E0] transition-colors"
               >
                 ✕
               </button>
             </div>
 
-            {/* LIVE PREVIEW SECTION */}
+            <form onSubmit={handleSubmitSponsor} className="flex flex-col flex-1 overflow-hidden">
+              <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 text-xs">
             <div className="space-y-2 bg-[#FFF8F0] p-4 rounded-2xl border border-[#E65C00]/20">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-black uppercase text-[#E65C00] flex items-center gap-1.5">
@@ -719,8 +721,6 @@ export default function AdminSponsorsPage() {
               </div>
             </div>
 
-            {/* Form Fields */}
-            <form onSubmit={handleSubmitSponsor} className="space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[#6B3A2A] font-bold mb-1">
@@ -907,7 +907,10 @@ export default function AdminSponsorsPage() {
                 </div>
               </div>
 
-              {/* Modal Actions */}
+              </div>
+
+              {/* Modal Actions (Pinned Footer) */}
+              <div className="flex justify-end gap-3 p-4 sm:p-5 border-t border-[#E65C00]/20 shrink-0 bg-white">
               <div className="flex justify-end gap-3 pt-4 border-t border-[#E65C00]/20">
                 <button
                   type="button"
@@ -922,6 +925,7 @@ export default function AdminSponsorsPage() {
                 >
                   {editingId ? 'Update Sponsor' : 'Add Sponsor'}
                 </button>
+              </div>
               </div>
             </form>
           </div>

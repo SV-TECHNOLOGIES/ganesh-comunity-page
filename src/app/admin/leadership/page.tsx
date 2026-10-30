@@ -262,17 +262,20 @@ export default function AdminLeadershipPage() {
       )}
 
       {/* Add / Edit Modal */}
+      {/* Add / Edit Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-slate-950 max-w-lg w-full p-6 sm:p-8 rounded-3xl border-2 border-mitra-gold relative space-y-6 my-8 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-hidden">
+          <div className="bg-slate-950 max-w-lg w-full rounded-3xl border-2 border-mitra-gold relative shadow-2xl max-h-[90vh] flex flex-col overflow-hidden">
             <button
               onClick={() => setModalOpen(false)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-full"
+              className="absolute top-4 right-4 text-slate-400 hover:text-white p-1.5 rounded-full hover:bg-slate-800 transition-colors z-30"
+              aria-label="Close dialog"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <div className="border-b border-slate-800 pb-3 space-y-1">
+            {/* Pinned Header */}
+            <div className="p-5 sm:p-6 pb-3.5 border-b border-slate-800 pr-12 shrink-0 bg-slate-950 space-y-1">
               <h3 className="text-lg font-black text-mitra-gold">
                 {editingMember ? 'Edit Leadership Member' : 'Add New Committee Member'}
               </h3>
@@ -281,7 +284,9 @@ export default function AdminLeadershipPage() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+            <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+              {/* Scrollable Form Body */}
+              <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-xs">
               <div>
                 <label className="block text-slate-300 font-bold mb-1">Full Name *</label>
                 <input
@@ -451,12 +456,17 @@ export default function AdminLeadershipPage() {
                 </div>
               </div>
 
-              <button
-                type="submit"
-                className="w-full bg-mitra-red hover:bg-mitra-red-dark text-white font-black uppercase tracking-wider py-3.5 rounded-xl transition-colors shadow-lg mt-2"
-              >
-                {editingMember ? 'Save Changes' : 'Create Leadership Member'}
-              </button>
+              </div>
+
+              {/* Pinned Footer */}
+              <div className="p-4 sm:p-5 border-t border-slate-800 shrink-0 bg-slate-950">
+                <button
+                  type="submit"
+                  className="w-full bg-mitra-red hover:bg-mitra-red-dark text-white font-black uppercase tracking-wider py-3.5 rounded-xl transition-colors shadow-lg cursor-pointer"
+                >
+                  {editingMember ? 'Save Changes' : 'Create Leadership Member'}
+                </button>
+              </div>
             </form>
           </div>
         </div>

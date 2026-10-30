@@ -706,135 +706,142 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-      <div className="temple-card max-w-xl w-full p-6 sm:p-8 rounded-3xl border-2 border-[#E65C00]/40 relative space-y-6 shadow-xl my-8 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-hidden">
+      <div className="temple-card max-w-xl w-full rounded-3xl border-2 border-[#E65C00]/40 relative shadow-2xl my-auto max-h-[90vh] flex flex-col overflow-hidden bg-[#FFF8F0]">
         
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-[#6B3A2A] hover:text-[#E65C00] p-2 rounded-full hover:bg-[#FFF0E0] transition-colors"
+          className="absolute top-4 right-4 text-[#6B3A2A] hover:text-[#E65C00] p-2 rounded-full hover:bg-[#FFF0E0] transition-colors z-30"
+          aria-label="Close dialog"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* ── GUEST DETAILS (not logged in) ─────────────────────────────── */}
         {step === 'guest-details' && (
-          <form onSubmit={handleGuestSubmit} className="space-y-5">
+          <form onSubmit={handleGuestSubmit} className="flex flex-col h-full overflow-hidden">
             {/* Header */}
-            <div className="flex items-center gap-3 border-b border-[#E65C00]/25 pb-3 pr-8">
-              <div className="p-3 bg-[#FFF0E0] text-[#E65C00] rounded-2xl shadow-sm border border-[#E65C00]/30">
-                <Ticket className="w-6 h-6 fill-current text-[#E65C00]" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-lg sm:text-xl font-black font-cinzel text-[#3D1A00]">EVENT RSVP PASS</h2>
+            <div className="p-5 sm:p-6 pb-3.5 border-b border-[#E65C00]/25 pr-12 shrink-0 bg-[#FFF8F0]">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-[#FFF0E0] text-[#E65C00] rounded-2xl shadow-sm border border-[#E65C00]/30">
+                  <Ticket className="w-5 h-5 fill-current text-[#E65C00]" />
                 </div>
-                <p className="text-xs text-[#6B3A2A]">Quick details — no account needed</p>
+                <div>
+                  <h2 className="text-lg sm:text-xl font-black font-cinzel text-[#3D1A00]">EVENT RSVP PASS</h2>
+                  <p className="text-xs text-[#6B3A2A]">Quick details — no account needed</p>
+                </div>
               </div>
             </div>
 
-            {/* Info banner */}
-            <div className="bg-[#FFF0E0] border border-[#E65C00]/25 rounded-xl p-3 flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 text-[#E65C00] shrink-0 mt-0.5" />
-              <p className="text-[11px] text-[#6B3A2A] leading-relaxed">
-                Enter your details below. We'll create your free MITRA account instantly and email your login credentials — then take you straight to your RSVP booking.
-              </p>
-            </div>
+            {/* Scrollable Form Body */}
+            <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-xs">
+              {/* Info banner */}
+              <div className="bg-[#FFF0E0] border border-[#E65C00]/25 rounded-xl p-3 flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-[#E65C00] shrink-0 mt-0.5" />
+                <p className="text-[11px] text-[#6B3A2A] leading-relaxed">
+                  Enter your details below. We'll create your free MITRA account instantly and email your login credentials — then take you straight to your RSVP booking.
+                </p>
+              </div>
 
-            {/* Name */}
-            <div>
-              <label className="flex items-center gap-1.5 text-xs font-bold text-[#6B3A2A] mb-1.5">
-                <User className="w-3.5 h-3.5 text-[#E65C00]" />
-                <span>Full Name *</span>
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Radhika Sharma"
-                value={guestName}
-                onChange={(e) => setGuestName(e.target.value)}
-                className="w-full bg-white border border-[#E65C00]/30 rounded-xl p-2.5 text-xs text-[#3D1A00] focus:border-[#E65C00] focus:outline-none placeholder:text-[#6B3A2A]/40"
-              />
-            </div>
-
-            {/* Email + Phone */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Name */}
               <div>
                 <label className="flex items-center gap-1.5 text-xs font-bold text-[#6B3A2A] mb-1.5">
-                  <Mail className="w-3.5 h-3.5 text-[#E65C00]" />
-                  <span>Email Address *</span>
+                  <User className="w-3.5 h-3.5 text-[#E65C00]" />
+                  <span>Full Name *</span>
                 </label>
                 <input
-                  type="email"
+                  type="text"
                   required
-                  placeholder="devotee@example.com"
-                  value={guestEmail}
-                  onChange={(e) => setGuestEmail(e.target.value)}
+                  placeholder="e.g. Radhika Sharma"
+                  value={guestName}
+                  onChange={(e) => setGuestName(e.target.value)}
                   className="w-full bg-white border border-[#E65C00]/30 rounded-xl p-2.5 text-xs text-[#3D1A00] focus:border-[#E65C00] focus:outline-none placeholder:text-[#6B3A2A]/40"
                 />
               </div>
-              <div>
-                <label className="flex items-center gap-1.5 text-xs font-bold text-[#6B3A2A] mb-1.5">
-                  <Phone className="w-3.5 h-3.5 text-[#E65C00]" />
-                  <span>Phone / WhatsApp *</span>
-                </label>
-                <input
-                  type="tel"
-                  required
-                  placeholder="+44 7000 000000"
-                  value={guestPhone}
-                  onChange={(e) => setGuestPhone(e.target.value)}
-                  className="w-full bg-white border border-[#E65C00]/30 rounded-xl p-2.5 text-xs text-[#3D1A00] focus:border-[#E65C00] focus:outline-none placeholder:text-[#6B3A2A]/40"
-                />
+
+              {/* Email + Phone */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="flex items-center gap-1.5 text-xs font-bold text-[#6B3A2A] mb-1.5">
+                    <Mail className="w-3.5 h-3.5 text-[#E65C00]" />
+                    <span>Email Address *</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="devotee@example.com"
+                    value={guestEmail}
+                    onChange={(e) => setGuestEmail(e.target.value)}
+                    className="w-full bg-white border border-[#E65C00]/30 rounded-xl p-2.5 text-xs text-[#3D1A00] focus:border-[#E65C00] focus:outline-none placeholder:text-[#6B3A2A]/40"
+                  />
+                </div>
+                <div>
+                  <label className="flex items-center gap-1.5 text-xs font-bold text-[#6B3A2A] mb-1.5">
+                    <Phone className="w-3.5 h-3.5 text-[#E65C00]" />
+                    <span>Phone / WhatsApp *</span>
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    placeholder="+44 7000 000000"
+                    value={guestPhone}
+                    onChange={(e) => setGuestPhone(e.target.value)}
+                    className="w-full bg-white border border-[#E65C00]/30 rounded-xl p-2.5 text-xs text-[#3D1A00] focus:border-[#E65C00] focus:outline-none placeholder:text-[#6B3A2A]/40"
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Guest error */}
-            {guestError && (
-              <div className="bg-red-50 border border-red-300 text-red-700 text-xs p-3 rounded-xl flex items-start gap-2 font-semibold">
-                <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-                <span>{guestError}</span>
-              </div>
-            )}
-
-            <div className="text-[11px] text-[#6B3A2A] flex items-center justify-center gap-1.5">
-              <Lock className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Your details are kept private · PCI-DSS Encrypted</span>
-            </div>
-
-            <button
-              type="submit"
-              disabled={guestSubmitting}
-              className="gold-button w-full py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {guestSubmitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 text-white animate-spin" />
-                  <span>Setting up your account...</span>
-                </>
-              ) : (
-                <>
-                  <Ticket className="w-4 h-4 fill-current text-white" />
-                  <span>Continue to RSVP Booking →</span>
-                </>
+              {/* Guest error */}
+              {guestError && (
+                <div className="bg-red-50 border border-red-300 text-red-700 text-xs p-3 rounded-xl flex items-start gap-2 font-semibold">
+                  <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                  <span>{guestError}</span>
+                </div>
               )}
-            </button>
+
+              <div className="text-[11px] text-[#6B3A2A] flex items-center justify-center gap-1.5 pt-1">
+                <Lock className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Your details are kept private · PCI-DSS Encrypted</span>
+              </div>
+            </div>
+
+            {/* Pinned Action Footer */}
+            <div className="p-4 sm:p-5 border-t border-[#E65C00]/15 shrink-0 bg-[#FFF8F0]">
+              <button
+                type="submit"
+                disabled={guestSubmitting}
+                className="gold-button w-full py-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {guestSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 text-white animate-spin" />
+                    <span>Setting up your account...</span>
+                  </>
+                ) : (
+                  <>
+                    <Ticket className="w-4 h-4 fill-current text-white" />
+                    <span>Continue to RSVP Booking →</span>
+                  </>
+                )}
+              </button>
+            </div>
           </form>
         )}
 
         {/* ── STEP 1: DETAILS & SELECTION ─────────────────────────────────── */}
         {step === 'details' && (
-          <>
-            {/* Modal Header */}
-            <div className="space-y-2 border-b border-[#E65C00]/25 pb-4 pr-8">
-              <div className="inline-flex items-center gap-1.5 bg-[#FFF0E0] text-[#E65C00] px-3 py-1 rounded-full text-[10px] font-black uppercase border border-[#E65C00]/30 shadow-sm">
-                <Ticket className="w-3.5 h-3.5" />
+          <div className="flex flex-col h-full overflow-hidden">
+            {/* Modal Header (pinned at top) */}
+            <div className="p-5 sm:p-6 pb-3.5 border-b border-[#E65C00]/25 pr-12 shrink-0 bg-[#FFF8F0]">
+              <div className="inline-flex items-center gap-1.5 bg-[#FFF0E0] text-[#E65C00] px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase border border-[#E65C00]/30 shadow-sm mb-1">
+                <Ticket className="w-3 h-3" />
                 <span>{totalAmount > 0 ? 'EVENT ENTRY PASS BOOKING' : 'CONFIRM YOUR FREE ENTRY PASS'}</span>
               </div>
-              <h3 className="text-xl font-black text-[#3D1A00] font-cinzel leading-tight">
+              <h3 className="text-lg sm:text-xl font-black text-[#3D1A00] font-cinzel leading-tight line-clamp-1">
                 {event.title}
               </h3>
-              <div className="text-xs text-[#6B3A2A] flex flex-wrap items-center gap-3">
+              <div className="text-[11px] text-[#6B3A2A] flex flex-wrap items-center gap-3 mt-1">
                 <span className="flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5 text-[#E65C00]" />
                   <span>{event.date || '13 to 19 September 2026'}</span>
@@ -845,33 +852,33 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
                 </span>
                 <span className="flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5 text-[#E65C00]" />
-                  <span>{event.venue || 'E Block, SLOUGH & LANGLEY COLLEGE'}</span>
+                  <span className="truncate max-w-[200px]">{event.venue || 'E Block, SLOUGH & LANGLEY COLLEGE'}</span>
                 </span>
               </div>
             </div>
 
-            {/* Capacity Limit Alert */}
-            {isCapacityFull && (
-              <div className="bg-rose-50 border-2 border-rose-300 text-rose-800 p-4 rounded-2xl text-xs font-bold flex items-center gap-2.5">
-                <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
-                <div>
-                  <span className="block font-black">Capacity Limit Reached</span>
-                  <span className="font-normal text-[11px]">
-                    This event has reached its maximum capacity of {event.capacity} attendees. Online registrations are now closed.
-                  </span>
-                </div>
-              </div>
-            )}
+            {/* RSVP Form with internal scrolling */}
+            <form onSubmit={handleDetailsSubmit} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+              <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-xs">
+                {/* Capacity Limit Alert */}
+                {isCapacityFull && (
+                  <div className="bg-rose-50 border-2 border-rose-300 text-rose-800 p-3 rounded-2xl text-xs font-bold flex items-center gap-2.5">
+                    <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+                    <div>
+                      <span className="block font-black">Capacity Limit Reached</span>
+                      <span className="font-normal text-[11px]">
+                        This event has reached its maximum capacity of {event.capacity} attendees. Online registrations are now closed.
+                      </span>
+                    </div>
+                  </div>
+                )}
 
-            {formError && (
-              <div className="bg-rose-50 border border-rose-300 text-rose-800 p-3 rounded-xl text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-                <span>{formError}</span>
-              </div>
-            )}
-
-            {/* RSVP Form */}
-            <form onSubmit={handleDetailsSubmit} className="space-y-4 text-xs">
+                {formError && (
+                  <div className="bg-rose-50 border border-rose-300 text-rose-800 p-3 rounded-xl text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                    <span>{formError}</span>
+                  </div>
+                )}
               
               {/* Select Dynamic Dates (Configured from Admin Panel) */}
               <div className="space-y-2">
@@ -1298,12 +1305,14 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
                 </div>
               </div>
 
-              {/* Submit CTA */}
-              <div className="pt-3">
+              </div>
+
+              {/* Submit CTA (pinned at bottom of form) */}
+              <div className="p-4 sm:p-5 pt-3 border-t border-[#E65C00]/15 shrink-0 bg-[#FFF8F0] space-y-1.5">
                 <button
                   type="submit"
                   disabled={submitting || isCapacityFull || totalTickets < 1}
-                  className="gold-button w-full py-3.5 rounded-full font-black uppercase tracking-wider text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="gold-button w-full py-3.5 rounded-full font-black uppercase tracking-wider text-xs flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {submitting ? (
                     <>
@@ -1322,20 +1331,20 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
                     </>
                   )}
                 </button>
-              </div>
 
-              <div className="text-[11px] text-[#6B3A2A] text-center flex items-center justify-center gap-1.5 pt-1">
-                <Lock className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Instant Confirmation &amp; Digital QR Pass issued via Email</span>
+                <div className="text-[10px] text-[#6B3A2A] text-center flex items-center justify-center gap-1.5">
+                  <Lock className="w-3 h-3 text-emerald-600" />
+                  <span>Instant Confirmation &amp; Digital QR Pass issued via Email</span>
+                </div>
               </div>
             </form>
-          </>
+          </div>
         )}
 
         {/* ── STEP 2: STRIPE PAYMENT ELEMENT (Following DonationModal) ─────── */}
         {step === 'payment' && clientSecret && stripePromise ? (
-          <div className="space-y-4">
-            <div className="border-b border-[#E65C00]/20 pb-3">
+          <div className="flex flex-col h-full overflow-hidden">
+            <div className="p-5 sm:p-6 pb-3.5 border-b border-[#E65C00]/20 pr-12 shrink-0 bg-[#FFF8F0]">
               <h3 className="text-lg font-black text-[#3D1A00] font-cinzel">
                 Complete RSVP Payment
               </h3>
@@ -1344,123 +1353,134 @@ export default function EventRSVPModal({ event, onClose, onSuccess }: EventRSVPM
               </p>
             </div>
 
-            <Elements
-              stripe={stripePromise}
-              options={{
-                clientSecret,
-                appearance: stripeAppearance,
-              }}
-            >
-              <CheckoutForm
-                clientSecret={clientSecret}
-                amount={totalAmount}
-                donorName={attendeeName || 'Devotee Supporter'}
-                donorEmail={attendeeEmail}
-                donorPhone={attendeePhone}
-                cause={`RSVP Passes for ${event.title}`}
-                onSuccess={(piId) => executeRsvpCreation(piId)}
-                onBack={() => {
-                  setStep('details');
-                  setClientSecret(null);
+            <div className="flex-1 overflow-y-auto p-5 sm:p-6">
+              <Elements
+                stripe={stripePromise}
+                options={{
+                  clientSecret,
+                  appearance: stripeAppearance,
                 }}
-              />
-            </Elements>
+              >
+                <CheckoutForm
+                  clientSecret={clientSecret}
+                  amount={totalAmount}
+                  donorName={attendeeName || 'Devotee Supporter'}
+                  donorEmail={attendeeEmail}
+                  donorPhone={attendeePhone}
+                  cause={`RSVP Passes for ${event.title}`}
+                  onSuccess={(piId) => executeRsvpCreation(piId)}
+                  onBack={() => {
+                    setStep('details');
+                    setClientSecret(null);
+                  }}
+                />
+              </Elements>
+            </div>
           </div>
         ) : step === 'payment' && (!stripePromise || !clientSecret) ? (
-          <div className="text-center py-8 space-y-4">
-            <AlertCircle className="w-12 h-12 text-amber-500 mx-auto" />
-            <h3 className="text-lg font-black text-[#E65C00]">Stripe Not Configured</h3>
-            <p className="text-xs text-[#6B3A2A]">
-              Please add your Stripe API keys in{' '}
-              <strong className="text-[#E65C00]">Admin → Payments → Stripe Account Config</strong>, then restart the server.
-            </p>
-            <button
-              onClick={() => setStep('details')}
-              className="text-xs text-[#6B3A2A] hover:text-[#E65C00] underline"
-            >
-              Go Back
-            </button>
+          <div className="flex flex-col h-full overflow-hidden">
+            <div className="p-5 sm:p-6 pb-3.5 border-b border-[#E65C00]/20 pr-12 shrink-0 bg-[#FFF8F0]">
+              <h3 className="text-lg font-black text-[#E65C00]">Stripe Not Configured</h3>
+            </div>
+            <div className="flex-1 overflow-y-auto p-5 sm:p-6 text-center py-8 space-y-4">
+              <AlertCircle className="w-12 h-12 text-amber-500 mx-auto" />
+              <h3 className="text-lg font-black text-[#E65C00]">Stripe Not Configured</h3>
+              <p className="text-xs text-[#6B3A2A]">
+                Please add your Stripe API keys in{' '}
+                <strong className="text-[#E65C00]">Admin → Payments → Stripe Account Config</strong>, then restart the server.
+              </p>
+              <button
+                onClick={() => setStep('details')}
+                className="text-xs text-[#6B3A2A] hover:text-[#E65C00] underline"
+              >
+                Go Back
+              </button>
+            </div>
           </div>
         ) : null}
 
         {/* ── STEP 3: CONFIRMATION & DIGITAL PASS ──────────────────────────── */}
         {step === 'confirmed' && (
-          <div className="text-center space-y-6 py-4">
-            <div className="w-16 h-16 rounded-full bg-[#FFF0E0] border-2 border-[#E65C00]/40 flex items-center justify-center mx-auto text-[#E65C00] shadow-sm">
-              <CheckCircle className="w-10 h-10" />
-            </div>
+          <div className="flex flex-col h-full overflow-hidden">
+            <div className="flex-1 overflow-y-auto p-5 sm:p-6 text-center space-y-5">
+              <div className="w-16 h-16 rounded-full bg-[#FFF0E0] border-2 border-[#E65C00]/40 flex items-center justify-center mx-auto text-[#E65C00] shadow-sm">
+                <CheckCircle className="w-10 h-10" />
+              </div>
 
-            <div className="space-y-1">
-              <span className="text-xs font-black font-cinzel text-[#E65C00] tracking-widest uppercase block">
-                RSVP CONFIRMED!
-              </span>
-              <h3 className="text-xl font-black text-[#3D1A00] font-cinzel">
-                {event.title}
-              </h3>
-              <p className="text-xs text-[#6B3A2A]">
-                Your entry pass has been registered and sent to <strong className="text-[#3D1A00]">{attendeeEmail}</strong>.
-              </p>
-            </div>
-
-            {/* Auto Login & Password Notice */}
-            <div className="bg-emerald-50 border border-emerald-500/30 p-3.5 rounded-2xl text-xs text-emerald-800 text-left flex items-start gap-2.5">
-              <Key className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-              <div className="space-y-0.5">
-                <strong className="block text-emerald-900 font-bold">
-                  {wasNewUser ? '🎉 Account Created & Logged In!' : '✓ Logged in as MITRA Member'}
-                </strong>
-                <p className="text-[11px] text-emerald-700">
-                  {wasNewUser
-                    ? `Your MITRA Member Account has been activated and your temporary login password has been emailed to ${attendeeEmail}. You are now logged in.`
-                    : `You are logged in with your MITRA account (${attendeeEmail}). You can view your pass anytime in your member portal.`}
+              <div className="space-y-1">
+                <span className="text-xs font-black font-cinzel text-[#E65C00] tracking-widest uppercase block">
+                  RSVP CONFIRMED!
+                </span>
+                <h3 className="text-xl font-black text-[#3D1A00] font-cinzel">
+                  {event.title}
+                </h3>
+                <p className="text-xs text-[#6B3A2A]">
+                  Your entry pass has been registered and sent to <strong className="text-[#3D1A00]">{attendeeEmail}</strong>.
                 </p>
               </div>
-            </div>
 
-            {/* Digital Pass Stub */}
-            <div className="bg-[#FFF0E0] p-5 rounded-2xl border-2 border-dashed border-[#E65C00]/30 text-left space-y-3 font-mono text-xs">
-              <div className="flex justify-between border-b border-[#E65C00]/15 pb-2">
-                <span className="text-[#6B3A2A]">Pass Reference:</span>
-                <span className="font-bold text-[#E65C00]">{ticketDetails?.rsvpId || 'MITRA-PASS-108'}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#6B3A2A]">Attendee Name:</span>
-                <span className="font-bold text-[#3D1A00]">{attendeeName}</span>
-              </div>
-              {travellingFrom && (
-                <div className="flex justify-between">
-                  <span className="text-[#6B3A2A]">Travelling From:</span>
-                  <span className="font-bold text-[#E65C00]">{travellingFrom}</span>
+              {/* Auto Login & Password Notice */}
+              <div className="bg-emerald-50 border border-emerald-500/30 p-3.5 rounded-2xl text-xs text-emerald-800 text-left flex items-start gap-2.5">
+                <Key className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <strong className="block text-emerald-900 font-bold">
+                    {wasNewUser ? '🎉 Account Created & Logged In!' : '✓ Logged in as MITRA Member'}
+                  </strong>
+                  <p className="text-[11px] text-emerald-700">
+                    {wasNewUser
+                      ? `Your MITRA Member Account has been activated and your temporary login password has been emailed to ${attendeeEmail}. You are now logged in.`
+                      : `You are logged in with your MITRA account (${attendeeEmail}). You can view your pass anytime in your member portal.`}
+                  </p>
                 </div>
-              )}
-              <div className="flex justify-between">
-                <span className="text-[#6B3A2A]">Pass Breakdown:</span>
-                <span className="font-bold text-[#E65C00]">
-                  {adultsCount} Adult(s), {childrenCount} Child(ren) ({totalTickets} Total)
-                </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-[#6B3A2A]">Amount Paid:</span>
-                <span className="font-bold text-[#3D1A00]">
-                  {totalAmount > 0 ? `£${totalAmount.toFixed(2)} (Completed)` : '£0.00 (Free Pass)'}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#6B3A2A]">Dates:</span>
-                <span className="text-right text-[#3D1A00] font-semibold">{selectedDates.join(', ')}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#6B3A2A]">Venue &amp; Address:</span>
-                <span className="text-right text-[#3D1A00]">{event.venue}</span>
+
+              {/* Digital Pass Stub */}
+              <div className="bg-[#FFF0E0] p-5 rounded-2xl border-2 border-dashed border-[#E65C00]/30 text-left space-y-3 font-mono text-xs">
+                <div className="flex justify-between border-b border-[#E65C00]/15 pb-2">
+                  <span className="text-[#6B3A2A]">Pass Reference:</span>
+                  <span className="font-bold text-[#E65C00]">{ticketDetails?.rsvpId || 'MITRA-PASS-108'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#6B3A2A]">Attendee Name:</span>
+                  <span className="font-bold text-[#3D1A00]">{attendeeName}</span>
+                </div>
+                {travellingFrom && (
+                  <div className="flex justify-between">
+                    <span className="text-[#6B3A2A]">Travelling From:</span>
+                    <span className="font-bold text-[#E65C00]">{travellingFrom}</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-[#6B3A2A]">Pass Breakdown:</span>
+                  <span className="font-bold text-[#E65C00]">
+                    {adultsCount} Adult(s), {childrenCount} Child(ren) ({totalTickets} Total)
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#6B3A2A]">Amount Paid:</span>
+                  <span className="font-bold text-[#3D1A00]">
+                    {totalAmount > 0 ? `£${totalAmount.toFixed(2)} (Completed)` : '£0.00 (Free Pass)'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#6B3A2A]">Dates:</span>
+                  <span className="text-right text-[#3D1A00] font-semibold">{selectedDates.join(', ')}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#6B3A2A]">Venue &amp; Address:</span>
+                  <span className="text-right text-[#3D1A00]">{event.venue}</span>
+                </div>
               </div>
             </div>
 
-            <button
-              onClick={onClose}
-              className="gold-button w-full py-3 rounded-full font-black uppercase tracking-wider text-xs"
-            >
-              Done &amp; Return to Events
-            </button>
+            <div className="p-4 sm:p-5 border-t border-[#E65C00]/15 shrink-0 bg-[#FFF8F0]">
+              <button
+                onClick={onClose}
+                className="gold-button w-full py-3 rounded-full font-black uppercase tracking-wider text-xs cursor-pointer"
+              >
+                Done &amp; Return to Events
+              </button>
+            </div>
           </div>
         )}
 

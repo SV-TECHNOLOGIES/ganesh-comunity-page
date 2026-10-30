@@ -300,19 +300,20 @@ export default function NotifyMembersModal({
     .replace(/\{\{\s*memberId\s*\}\}/gi, sampleDevotee.id);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-3xl w-full p-5 sm:p-7 shadow-2xl relative max-h-[94vh] overflow-y-auto text-slate-100">
+    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-hidden">
+      <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-3xl w-full shadow-2xl relative max-h-[92vh] flex flex-col overflow-hidden text-slate-100">
         
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-slate-400 hover:text-white p-1.5 rounded-full hover:bg-slate-800 transition-colors z-10"
+          className="absolute top-4 right-4 text-slate-400 hover:text-white p-1.5 rounded-full hover:bg-slate-800 transition-colors z-30"
+          aria-label="Close dialog"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header */}
-        <div className="flex items-center gap-3 border-b border-slate-800 pb-4 mb-5">
+        <div className="flex items-center gap-3 border-b border-slate-800 p-5 sm:p-6 pb-4 shrink-0 bg-slate-900 pr-12">
           <div className="p-3 bg-mitra-gold/10 border border-mitra-gold/30 text-mitra-gold rounded-2xl">
             <Mail className="w-6 h-6" />
           </div>
@@ -330,10 +331,9 @@ export default function NotifyMembersModal({
             </p>
           </div>
         </div>
-
         {/* Success Screen */}
         {successStats ? (
-          <div className="text-center py-6 space-y-4">
+          <div className="text-center p-6 sm:p-8 py-8 space-y-4 flex-1 overflow-y-auto">
             <div className="w-16 h-16 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-full flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-10 h-10" />
             </div>
@@ -366,8 +366,8 @@ export default function NotifyMembersModal({
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSendBroadcast} className="space-y-4">
-            
+          <form onSubmit={handleSendBroadcast} className="flex flex-col flex-1 overflow-hidden">
+            <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
             {/* Template Selector Bar */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -779,7 +779,10 @@ export default function NotifyMembersModal({
             )}
 
             {/* Actions */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-800">
+            </div>
+
+            {/* Actions (Pinned Footer) */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 sm:p-5 border-t border-slate-800 shrink-0 bg-slate-900">
               <div className="text-[11px] text-slate-400 flex items-center gap-1.5">
                 <Users className="w-3.5 h-3.5 text-mitra-gold" />
                 <span>Sending to all matching members in database</span>
