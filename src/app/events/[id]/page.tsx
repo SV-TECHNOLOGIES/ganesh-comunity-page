@@ -546,7 +546,7 @@ END:VCALENDAR`;
                   }`}
                 >
                   <Ticket className="w-4 h-4" />
-                  <span>{isCapacityFull ? 'Capacity Full' : 'Register / RSVP Now'}</span>
+                  <span>{isCapacityFull ? 'Capacity Full' : 'Buy now'}</span>
                 </button>
               ) : (
                 <div className="p-2.5 bg-slate-100 dark:bg-slate-800/60 rounded-xl text-center text-slate-500 text-xs font-medium">

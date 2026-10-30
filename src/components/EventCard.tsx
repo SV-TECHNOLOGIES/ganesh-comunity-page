@@ -148,7 +148,7 @@ export default function EventCard({ event, onRSVP }: { event: EventItem; onRSVP?
                     className="gold-button flex-1 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow"
                   >
                     <Ticket className="w-4 h-4 text-white" />
-                    <span>Register / RSVP Now</span>
+                    <span>Buy now</span>
                   </button>
                 )
               )}

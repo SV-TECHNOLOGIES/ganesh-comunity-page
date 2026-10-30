@@ -1853,7 +1853,7 @@ export default function AdminEventsPage() {
                             className="w-4 h-4 rounded text-mitra-gold focus:ring-mitra-gold bg-slate-900 border-slate-700"
                           />
                           <div>
-                            <span className="text-xs font-bold text-white block">Enable "Register / RSVP Now"</span>
+                            <span className="text-xs font-bold text-white block">Enable "Buy now"</span>
                             <span className="text-[10px] text-slate-400">Allow devotees to register for passes</span>
                           </div>
                         </label>

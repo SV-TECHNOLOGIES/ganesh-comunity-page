@@ -532,7 +532,7 @@ export default function EventDetailsSection({
                 className="gold-button px-6 py-3 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-md hover:scale-105 transition-all"
               >
                 <Ticket className="w-4 h-4 text-white" />
-                <span>Register / RSVP Now</span>
+                <span>Buy now</span>
               </button>
             )}
 

@@ -96,7 +96,7 @@ export default function GaneshEvent2026Page() {
                 className="gold-button px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md"
               >
                 <Ticket className="w-3.5 h-3.5 text-white" />
-                <span>Register / RSVP Now</span>
+                <span>Buy now</span>
               </button>
             )}
             {isPoojaEnabled && (
